@@ -1,0 +1,200 @@
+// Real addon scenario and real native coop lifecycle/payment. Only engine AI,
+// geometry, publication and event delivery are fixtures, not game validation.
+private _findBefore = ALS_fnc_findPlayer;
+private _siteBefore = ALSPMC_fnc_questSite;
+private _acceptBefore = ALS_fnc_coopAccept;
+private _tickBefore = ALS_fnc_coopTick;
+private _endBefore = ALS_fnc_coopEnd;
+ALS_fnc_findPlayer = {
+    private _uid = _this select 0;
+    (TEST_players select {([_x] call ALS_fnc_uid) == _uid}) param [0, objNull]
+};
+// Exercise the actual bounded randomized search with a fixture flat landscape.
+ALS_fnc_flatSpot = {if (TEST_noSite) then {[]} else {_this select 0}};
+TEST_noSite = false;
+TEST_spatialOccupied = false;
+call TEST_fnc_reset;
+["p1","alspmc_pmc"] call ALS_fnc_licGrant;
+[player,"h_100_100"] call ALSPMC_fnc_buyBase;
+player setPos [10000,10000,0];
+private _points = [];
+for "_i" from 1 to 8 do {_points pushBack ([player] call ALSPMC_fnc_questSite)};
+[(_points findIf {count _x != 3 || {player distance2D _x < 600} || {player distance2D _x > 6000}}) < 0, "random target search stays on the configured 600-6000 m ring"] call TEST_fnc_assert;
+[count (_points arrayIntersect _points) > 1, "repeat search samples different target positions"] call TEST_fnc_assert;
+// From the actual base the old 2 km outer ring could never satisfy exclusion.
+player setPos [100,100,0];
+for "_i" from 1 to 8 do {
+    private _at = [player] call ALSPMC_fnc_questSite;
+    [count _at == 3 && {[100,100,0] distance2D _at >= 2100}, "field mission sampled from base leaves 2 km plus spawn margin"] call TEST_fnc_assert;
+};
+player setPos [10000,10000,0];
+TEST_noSite = true;
+[[player] call ALSPMC_fnc_questSite isEqualTo [], "no valid land returns no site, without a fallback at origin"] call TEST_fnc_assert;
+TEST_noSite = false;
+TEST_spatialOccupied = true;
+[[player] call ALSPMC_fnc_questSite isEqualTo [], "occupied target sites are rejected"] call TEST_fnc_assert;
+TEST_spatialOccupied = false;
+player setPos [100,100,0];
+ALSPMC_fnc_questSite = {if (TEST_noSite) then {[]} else {[1000,100,0]}};
+TEST_fnc_questReset = {
+    call TEST_fnc_reset;
+    player setVariable ["ALS_uid", "p1"];
+    player setVariable ["ALS_coopJob", nil];
+    player setVariable ["ALS_sideNav", []];
+    TEST_noSite = false;
+    ["p1", "alspmc_pmc"] call ALS_fnc_licGrant;
+    [player, "h_100_100"] call ALSPMC_fnc_buyBase;
+    ["money_p1", [0,0]] call ALS_fnc_dbSet;
+    call ALSPMC_fnc_questInit;
+};
+private _handlerCount = count TEST_missionHandlers;
+call TEST_fnc_reset;
+call ALSPMC_fnc_questInit;
+[!([player,"questStart","eliminate",900] call ALSPMC_fnc_phoneDo), "unlicensed player cannot start a PMC contract"] call TEST_fnc_assert;
+["p1","alspmc_pmc"] call ALS_fnc_licGrant;
+[!([player,"questStart","eliminate",901] call ALSPMC_fnc_phoneDo), "licence without an owned PMC base cannot start a contract"] call TEST_fnc_assert;
+_handlerCount = count TEST_missionHandlers;
+call TEST_fnc_questReset;
+[ALSPMC_questsReady && {ALSPMC_ready}, "fresh optional quest journal initializes without disabling the base"] call TEST_fnc_assert;
+call ALSPMC_fnc_questInit;
+[count TEST_missionHandlers == _handlerCount + 1, "quest init adds just one kill listener and is idempotent"] call TEST_fnc_assert;
+[ALS_fnc_coopAccept isEqualTo _acceptBefore && {ALS_fnc_coopTick isEqualTo _tickBefore} && {ALSPMC_nativeCoopEnd isEqualTo TEST_nativeCoopEnd}, "accept/tick remain original and end retains its native delegate"] call TEST_fnc_assert;
+[([player] call ALSPMC_fnc_questState) get "canStart", "licensed founder with a base can take a solo contract"] call TEST_fnc_assert;
+[!([player,"questStart","unknown",1000] call ALSPMC_fnc_phoneDo), "unknown contract is rejected"] call TEST_fnc_assert;
+[!([player,"questStart","eliminate",0] call ALSPMC_fnc_phoneDo), "action requires a nonzero request token"] call TEST_fnc_assert;
+TEST_isRemoteExecuted = true;
+TEST_remoteOwner = 7;
+[!([player,"questStart","eliminate",1001] call ALSPMC_fnc_phoneDo), "quest RPC rejects another client's unit"] call TEST_fnc_assert;
+TEST_isRemoteExecuted = false;
+TEST_noSite = true;
+[!([player,"questStart","eliminate",1002] call ALSPMC_fnc_phoneDo), "no safe site rejects the start"] call TEST_fnc_assert;
+[count ALS_crews == 0 && {count ALS_coopJobs == 0} && {count ALSPMC_questRecords == 0}, "site failure leaves no crew, target or journal row"] call TEST_fnc_assert;
+TEST_noSite = false;
+TEST_noTarget = true;
+[!([player,"questStart","eliminate",1005] call ALSPMC_fnc_phoneDo), "engine target-creation failure rejects the native start"] call TEST_fnc_assert;
+[count ALS_crews == 0 && {count ALS_coopJobs == 0} && {count ALSPMC_questRecords == 0}, "failed spawn rolls back only the temporary crew and offer"] call TEST_fnc_assert;
+TEST_noTarget = false;
+[[player,"questStart","eliminate",1003] call ALSPMC_fnc_phoneDo, "phone starts the test contract through native coopAccept"] call TEST_fnc_assert;
+private _crew = ["p1"] call ALS_fnc_crewOf;
+private _job = ALS_coopJobs get (_crew get "job");
+private _target = _job get "alspmcTarget";
+private _qid = _job get "alspmcQuestId";
+[count ALS_crews == 1 && {(_crew get "members") isEqualTo ["p1"]} && {(_job get "team") isEqualTo ["p1"]}, "solo uses one real native participant"] call TEST_fnc_assert;
+[!isNull _target && {alive _target} && {_target getVariable ["ALS_hitSquad",false]} && {_target getVariable ["ALS_hostile",false]}, "scenario spawns one live hostile target with native law exemptions"] call TEST_fnc_assert;
+[((player getVariable "ALS_coopJob") get "alspmc") && {count (player getVariable "ALS_sideNav") == 1}, "start immediately publishes native progress and navigation"] call TEST_fnc_assert;
+TEST_questMirror = +(player getVariable "ALS_coopJob");
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,0], "starting a contract does not pay or charge money"] call TEST_fnc_assert;
+[[player,"questStart","eliminate",1003] call ALSPMC_fnc_phoneDo, "duplicate request returns its original acknowledgement"] call TEST_fnc_assert;
+[!([player,"questStart","eliminate",1004] call ALSPMC_fnc_phoneDo) && {count ALS_coopJobs == 1}, "another token cannot start a concurrent contract"] call TEST_fnc_assert;
+[_target, player, player] call ALSPMC_fnc_questKilled;
+[(_job get "alspmcResult") == "", "a fabricated kill notification for a live target cannot complete the job"] call TEST_fnc_assert;
+_target setDamage 1;
+// Invoke the actual registered listener, as the Arma server would on death.
+[_target, player, player] call ((TEST_missionHandlers select (count TEST_missionHandlers - 1)) select 1);
+[_target, player, player] call ALSPMC_fnc_questKilled;
+[(_job get "alspmcResult") == "killed", "server kill event credits the starting participant once"] call TEST_fnc_assert;
+call ALS_fnc_coopTick;
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,1000], "native coopEnd pays the solo reward exactly once"] call TEST_fnc_assert;
+[isNull _target && {count ALS_coopJobs == 0} && {(_crew get "job") == -1}, "completion removes the target and releases the native crew job"] call TEST_fnc_assert;
+[(ALSPMC_questRecords get _qid) select 1 == "done", "successful completion enters the shared history"] call TEST_fnc_assert;
+call ALS_fnc_coopTick;
+[player,"questStart","eliminate",1003] call ALSPMC_fnc_phoneDo;
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,1000] && {count ALS_coopJobs == 0}, "extra ticks and a replayed start do not repay or respawn"] call TEST_fnc_assert;
+private _saved = ["alspmc_quests_v1",[]] call ALS_fnc_dbGet;
+[(_saved select 1) == _qid && {(((_saved select 2) select 0) select 1) select 1 == "done"}, "native DB stores a persistent receipt with the reward"] call TEST_fnc_assert;
+
+// The desktop forwards the same operation and sees the same active instance.
+call TEST_fnc_questReset;
+call ALSPMC_fnc_terminalInit;
+private _computer = (ALSPMC_terminals get "h_100_100") select 0;
+[[player,"questStart","eliminate",1100,_computer] call ALSPMC_fnc_desktopDo, "desktop starts the same contract controller"] call TEST_fnc_assert;
+private _phone = player getVariable "ALSPMC_phoneState";
+private _pc = player getVariable "ALSPMC_desktopState";
+[((_phone get "quests") get "active") isEqualTo ((_pc get "quests") get "active"), "phone and desktop expose exactly the same contract instance"] call TEST_fnc_assert;
+_crew = ["p1"] call ALS_fnc_crewOf;
+_job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+private _id = "q" + str (_job get "alspmcQuestId");
+[!([player,"questCancel","q99999",1101] call ALSPMC_fnc_phoneDo), "stale cancellation cannot cancel a different instance"] call TEST_fnc_assert;
+[[player,"questCancel",_id,1102] call ALSPMC_fnc_phoneDo, "phone cancels a contract started from the desktop"] call TEST_fnc_assert;
+[isNull _target && {count ALS_coopJobs == 0} && {(["p1"] call ALS_fnc_moneyGet) isEqualTo [0,0]}, "cancellation removes target without payment"] call TEST_fnc_assert;
+[[player,"questCancel",_id,1102] call ALSPMC_fnc_phoneDo, "cancel request replay is idempotent"] call TEST_fnc_assert;
+
+// Same native engine, genuine two-player team, shared one thousand budget.
+private _other = "TestVan_F" createVehicle [105,100,0];
+_other setVariable ["ALS_uid","p2"]; _other setVariable ["TEST_player",true];
+_other setVariable ["TEST_owner",5];
+call TEST_fnc_questReset;
+TEST_players pushBack _other;
+_crew = createHashMapFromArray [["id","c7"],["leader","p1"],["members",["p1","p2"]],["job",-1],["offers",[]]];
+ALS_crews set ["c7",_crew]; ALS_crewSeq = 7;
+[[player,"questStart","eliminate",1200] call ALSPMC_fnc_phoneDo, "a real two-player crew takes the same mission"] call TEST_fnc_assert;
+_job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+[count ALS_crews == 1 && {(_job get "team") isEqualTo ["p1","p2"]}, "existing crew is preserved and its starting team is frozen"] call TEST_fnc_assert;
+[!([_other,"questCancel","q" + str (_job get "alspmcQuestId"),1201] call ALSPMC_fnc_phoneDo), "nonleader cannot cancel the group contract"] call TEST_fnc_assert;
+[count (([_other] call ALSPMC_fnc_questState) get "active") > 0, "teammate without a PMC licence sees the shared active mission"] call TEST_fnc_assert;
+_target setDamage 1; [_target,_other,_other] call ALSPMC_fnc_questKilled;
+call ALS_fnc_coopTick;
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,500] && {(["p2"] call ALS_fnc_moneyGet) isEqualTo [0,500]}, "native group reward divides one budget between the two participants"] call TEST_fnc_assert;
+[count (([_other] call ALSPMC_fnc_questState) get "history") == 1, "both original teammates see completion history"] call TEST_fnc_assert;
+
+call TEST_fnc_questReset;
+TEST_players pushBack _other;
+ALS_companies set ["co_1",createHashMapFromArray [["id","co_1"],["name","Test Co"],["members",["p1","p2"]],["jobsTo",true],["ledger",[]]]];
+_crew = createHashMapFromArray [["id","c1"],["leader","p1"],["members",["p1","p2"]],["job",-1]];
+ALS_crews set ["c1",_crew]; ALS_crewSeq = 1;
+[player,"questStart","eliminate",1300] call ALSPMC_fnc_phoneDo;
+_job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+_target setDamage 1; [_target,player,player] call ALSPMC_fnc_questKilled;
+call ALS_fnc_coopTick;
+[["co_1"] call ALS_fnc_moneyGet isEqualTo [0,1000] && {(["p1"] call ALS_fnc_moneyGet) isEqualTo [0,0]} && {(["p2"] call ALS_fnc_moneyGet) isEqualTo [0,0]}, "native jobsTo pays the company without additional personal rewards"] call TEST_fnc_assert;
+[count ((ALS_companies get "co_1") get "ledger") == 1, "native company ledger records the contract payment"] call TEST_fnc_assert;
+
+// Failure exits, attribution and restart never manufacture a reward.
+call TEST_fnc_questReset;
+[player,"questStart","eliminate",1400] call ALSPMC_fnc_phoneDo;
+_crew = ["p1"] call ALS_fnc_crewOf; _job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+_target setDamage 1; [_target,_other,_other] call ALSPMC_fnc_questKilled;
+call ALS_fnc_coopTick;
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,0] && {(ALSPMC_questRecords get 1) select 7 == "outsider"}, "outsider kill fails without paying the accepting crew"] call TEST_fnc_assert;
+call TEST_fnc_questReset;
+[player,"questStart","eliminate",1401] call ALSPMC_fnc_phoneDo;
+_crew = ["p1"] call ALS_fnc_crewOf; _job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+_job set ["since",time - 1801];
+_target setDamage 1; [_target,player,player] call ALSPMC_fnc_questKilled;
+call ALS_fnc_coopTick;
+[["p1"] call ALS_fnc_moneyGet isEqualTo [0,0] && {(ALSPMC_questRecords get 1) select 7 == "timeout"}, "kill after deadline does not earn the reward"] call TEST_fnc_assert;
+call TEST_fnc_questReset;
+[player,"questStart","eliminate",1402] call ALSPMC_fnc_phoneDo;
+_crew = ["p1"] call ALS_fnc_crewOf; _job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+deleteVehicle _target;
+call ALS_fnc_coopTick;
+[(ALSPMC_questRecords get 1) select 7 == "lost" && {count ALS_coopJobs == 0}, "deleted target closes as failed instead of hanging"] call TEST_fnc_assert;
+call TEST_fnc_questReset;
+[player,"questStart","eliminate",1403] call ALSPMC_fnc_phoneDo;
+_crew = ["p1"] call ALS_fnc_crewOf; _job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+TEST_players = [];
+call ALS_fnc_coopTick;
+[isNull _target && {(ALSPMC_questRecords get 1) select 7 == "empty"} && {(["p1"] call ALS_fnc_moneyGet) isEqualTo [0,0]}, "native empty-crew failure removes target without paying"] call TEST_fnc_assert;
+
+call TEST_fnc_questReset;
+[player,"questStart","eliminate",1500] call ALSPMC_fnc_phoneDo;
+_crew = ["p1"] call ALS_fnc_crewOf; _job = ALS_coopJobs get (_crew get "job"); _target = _job get "alspmcTarget";
+private _db = +ALS_db;
+deleteVehicle _target;
+call TEST_fnc_reset;
+ALS_db = _db;
+call ALSPMC_fnc_questInit;
+[(ALSPMC_questRecords get 1) select 1 == "interrupted" && {(ALSPMC_questRecords get 1) select 7 == "restart"}, "restart marks the saved active contract interrupted"] call TEST_fnc_assert;
+[count ALS_coopJobs == 0 && {(["p1"] call ALS_fnc_moneyGet) isEqualTo [0,0]}, "restart does not restore an ephemeral job ID or issue money"] call TEST_fnc_assert;
+
+call TEST_fnc_reset;
+private _bad = [1,1,[[1,["broken"]]]];
+["alspmc_quests_v1",_bad] call ALS_fnc_dbSet;
+call ALSPMC_fnc_questInit;
+[!ALSPMC_questsReady && {ALSPMC_ready}, "corrupt quest data disables quests while base/phone remain available"] call TEST_fnc_assert;
+["alspmc_quests_v1",[]] call ALS_fnc_dbSet;
+[["alspmc_quests_v1",[]] call ALS_fnc_dbGet isEqualTo _bad, "native guard preserves a corrupt quest journal"] call TEST_fnc_assert;
+
+ALS_fnc_findPlayer = _findBefore;
+ALSPMC_fnc_questSite = _siteBefore;
+deleteVehicle _other;

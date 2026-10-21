@@ -1,0 +1,12 @@
+params ["_key"];
+private _entries = (player getVariable ["ALSPMC_phoneState", createHashMap]) getOrDefault ["bases", []];
+private _index = _entries findIf {(_x get "key") == _key};
+if (_index < 0) exitWith {};
+private _entry = _entries select _index;
+deleteMarkerLocal "ALSPMC_myBase";
+createMarkerLocal ["ALSPMC_myBase", _entry get "pos"];
+"ALSPMC_myBase" setMarkerTypeLocal "mil_flag";
+"ALSPMC_myBase" setMarkerColorLocal "ColorGUER";
+private _name = toString (_entry get "name");
+"ALSPMC_myBase" setMarkerTextLocal (if (_name == "") then {localize "STR_ALSPMC_base_marker"} else {_name});
+["STR_ALSPMC_base_marked"] call ALSPMC_fnc_message;

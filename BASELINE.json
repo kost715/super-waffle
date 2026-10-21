@@ -1,0 +1,12 @@
+{
+  "version": "0.6.3_alpha1",
+  "received_on": "2026-10-21",
+  "archive": "baselines/0.6.3/LifeSim_PMC_0.6.3_alpha1.zip",
+  "archive_sha256": "f129ddf78e0b4885348821b4eee4bee3add7d03b222172d3d3bdaa211a826099",
+  "pbo_sha256": "ccc8299d699832f1758a2f55db220a342dec206de0da080d17d81806d324e1a5",
+  "game_payload_modified_during_adoption": false,
+  "reconstructed_from_uncompressed_pbo": true,
+  "functional_game_test_performed": false,
+  "review": "docs/BASELINE_0.6.3_REVIEW_RU.md",
+  "full_legacy_suite_port_pending": true
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="LifeSimPMC">
+  <Package name="Foundation">
+    <Container name="RU">
+      <Key ID="STR_ALSPMC_license_name"><Original>Лицензия на создание ЧВК</Original><English>Лицензия на создание ЧВК</English><Russian>Лицензия на создание ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_license_desc"><Original>Позволяет купить свободный склад или ангар под базу ЧВК. Тестовая цена лицензии: 1 €.</Original><English>Позволяет купить свободный склад или ангар под базу ЧВК. Тестовая цена лицензии: 1 €.</English><Russian>Позволяет купить свободный склад или ангар под базу ЧВК. Тестовая цена лицензии: 1 €.</Russian></Key>
+      <Key ID="STR_ALSPMC_base_marker"><Original>База ЧВК</Original><English>База ЧВК</English><Russian>База ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_need_license"><Original>Сначала оформите лицензию за 1 € в приложении «ЧВК», находясь у клерка мэрии.</Original><English>Сначала оформите лицензию за 1 € в приложении «ЧВК», находясь у клерка мэрии.</English><Russian>Сначала оформите лицензию за 1 € в приложении «ЧВК», находясь у клерка мэрии.</Russian></Key>
+      <Key ID="STR_ALSPMC_invalid_property"><Original>Для базы подходит свободный склад или ангар из недвижимости LifeSim. Этот объект не подходит.</Original><English>Для базы подходит свободный склад или ангар из недвижимости LifeSim. Этот объект не подходит.</English><Russian>Для базы подходит свободный склад или ангар из недвижимости LifeSim. Этот объект не подходит.</Russian></Key>
+      <Key ID="STR_ALSPMC_too_far"><Original>Подойдите ближе к зданию, которое хотите купить под базу.</Original><English>Подойдите ближе к зданию, которое хотите купить под базу.</English><Russian>Подойдите ближе к зданию, которое хотите купить под базу.</Russian></Key>
+      <Key ID="STR_ALSPMC_reserved"><Original>Этот объект занят службами LifeSim и не продаётся.</Original><English>Этот объект занят службами LifeSim и не продаётся.</English><Russian>Этот объект занят службами LifeSim и не продаётся.</Russian></Key>
+      <Key ID="STR_ALSPMC_owned"><Original>У этого здания уже есть владелец. Деньги за покупку базы не списаны.</Original><English>У этого здания уже есть владелец. Деньги за покупку базы не списаны.</English><Russian>У этого здания уже есть владелец. Деньги за покупку базы не списаны.</Russian></Key>
+      <Key ID="STR_ALSPMC_already_base"><Original>У вас уже есть база ЧВК. Управление доступно в приложении «ЧВК» телефона.</Original><English>У вас уже есть база ЧВК. Управление доступно в приложении «ЧВК» телефона.</English><Russian>У вас уже есть база ЧВК. Управление доступно в приложении «ЧВК» телефона.</Russian></Key>
+      <Key ID="STR_ALSPMC_not_enough"><Original>Для покупки базы нужно %1 € наличными или в банке.</Original><English>Для покупки базы нужно %1 € наличными или в банке.</English><Russian>Для покупки базы нужно %1 € наличными или в банке.</Russian></Key>
+      <Key ID="STR_ALSPMC_bought"><Original>База ЧВК приобретена за %1 €. Местоположение: %2. Объект доступен в недвижимости LifeSim.</Original><English>База ЧВК приобретена за %1 €. Местоположение: %2. Объект доступен в недвижимости LifeSim.</English><Russian>База ЧВК приобретена за %1 €. Местоположение: %2. Объект доступен в недвижимости LifeSim.</Russian></Key>
+      <Key ID="STR_ALSPMC_invalid_name"><Original>Название должно содержать от 3 до 40 символов, без переносов строк, невидимых символов и угловых скобок.</Original><English>Название должно содержать от 3 до 40 символов, без переносов строк, невидимых символов и угловых скобок.</English><Russian>Название должно содержать от 3 до 40 символов, без переносов строк, невидимых символов и угловых скобок.</Russian></Key>
+      <Key ID="STR_ALSPMC_name_saved"><Original>Название ЧВК сохранено.</Original><English>Название ЧВК сохранено.</English><Russian>Название ЧВК сохранено.</Russian></Key>
+      <Key ID="STR_ALSPMC_license_bought"><Original>Лицензия ЧВК оформлена. Теперь можно задать название и купить базу.</Original><English>Лицензия ЧВК оформлена. Теперь можно задать название и купить базу.</English><Russian>Лицензия ЧВК оформлена. Теперь можно задать название и купить базу.</Russian></Key>
+      <Key ID="STR_ALSPMC_base_marked"><Original>База ЧВК отмечена на карте.</Original><English>База ЧВК отмечена на карте.</English><Russian>База ЧВК отмечена на карте.</Russian></Key>
+      <Key ID="STR_ALSPMC_computer_action"><Original>Открыть управление ЧВК</Original><English>Открыть управление ЧВК</English><Russian>Открыть управление ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_quest_target"><Original>Цель контракта ЧВК</Original><English>Цель контракта ЧВК</English><Russian>Цель контракта ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_quest_no_site"><Original>Не удалось найти свободное место на суше. Контракт не запущен. Переместитесь и попробуйте снова.</Original><English>Не удалось найти свободное место на суше. Контракт не запущен. Переместитесь и попробуйте снова.</English><Russian>Не удалось найти свободное место на суше. Контракт не запущен. Переместитесь и попробуйте снова.</Russian></Key>
+    </Container>
+    <Container name="Contracts">
+      <Key ID="STR_ALSPMC_contract_patrol_point"><Original>Точка патруля ЧВК</Original><English>Точка патруля ЧВК</English><Russian>Точка патруля ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_contract_destination"><Original>Пункт назначения ЧВК</Original><English>Пункт назначения ЧВК</English><Russian>Пункт назначения ЧВК</Russian></Key>
+      <Key ID="STR_ALSPMC_contract_done"><Original>Контракт выполнен. Владельцу ЧВК перечислено %1 €. Результат и рейтинг сохранены.</Original><English>Контракт выполнен. Владельцу ЧВК перечислено %1 €. Результат и рейтинг сохранены.</English><Russian>Контракт выполнен. Владельцу ЧВК перечислено %1 €. Результат и рейтинг сохранены.</Russian></Key>
+      <Key ID="STR_ALSPMC_contract_failed"><Original>Контракт завершён без выплаты. Причина указана в истории контрактов ЧВК.</Original><English>Контракт завершён без выплаты. Причина указана в истории контрактов ЧВК.</English><Russian>Контракт завершён без выплаты. Причина указана в истории контрактов ЧВК.</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_bandits"><Original>ЧВК: уничтожение бандитов</Original><English>ЧВК: уничтожение бандитов</English><Russian>ЧВК: уничтожение бандитов</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_convoy"><Original>ЧВК: сопровождение армейского конвоя</Original><English>ЧВК: сопровождение армейского конвоя</English><Russian>ЧВК: сопровождение армейского конвоя</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_guard"><Original>ЧВК: охрана государственного объекта</Original><English>ЧВК: охрана государственного объекта</English><Russian>ЧВК: охрана государственного объекта</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_base"><Original>ЧВК: штурм военной базы</Original><English>ЧВК: штурм военной базы</English><Russian>ЧВК: штурм военной базы</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_patrol"><Original>ЧВК: атака на вражеский патруль</Original><English>ЧВК: атака на вражеский патруль</English><Russian>ЧВК: атака на вражеский патруль</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_sector"><Original>ЧВК: патрулирование по точкам</Original><English>ЧВК: патрулирование по точкам</English><Russian>ЧВК: патрулирование по точкам</Russian></Key>
+      <Key ID="STR_ALSPMC_title_gov_mines"><Original>ЧВК: разминирование участка</Original><English>ЧВК: разминирование участка</English><Russian>ЧВК: разминирование участка</Russian></Key>
+      <Key ID="STR_ALSPMC_title_private_convoy"><Original>ЧВК: сопровождение коммерческого конвоя</Original><English>ЧВК: сопровождение коммерческого конвоя</English><Russian>ЧВК: сопровождение коммерческого конвоя</Russian></Key>
+      <Key ID="STR_ALSPMC_title_private_guard"><Original>ЧВК: охрана коммерческого объекта</Original><English>ЧВК: охрана коммерческого объекта</English><Russian>ЧВК: охрана коммерческого объекта</Russian></Key>
+      <Key ID="STR_ALSPMC_title_private_vip"><Original>ЧВК: сопровождение VIP</Original><English>ЧВК: сопровождение VIP</English><Russian>ЧВК: сопровождение VIP</Russian></Key>
+      <Key ID="STR_ALSPMC_contract_brief"><Original>Цели и готовность — в приложении «ЧВК».</Original><English>Цели и готовность — в приложении «ЧВК».</English><Russian>Цели и готовность — в приложении «ЧВК».</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_rendezvous"><Original>ПРИБУДЬТЕ И ПОДТВЕРДИТЕ ГОТОВНОСТЬ</Original><English>ПРИБУДЬТЕ И ПОДТВЕРДИТЕ ГОТОВНОСТЬ</English><Russian>ПРИБУДЬТЕ И ПОДТВЕРДИТЕ ГОТОВНОСТЬ</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_active"><Original>КОНТРАКТ ЧВК ВЫПОЛНЯЕТСЯ</Original><English>КОНТРАКТ ЧВК ВЫПОЛНЯЕТСЯ</English><Russian>КОНТРАКТ ЧВК ВЫПОЛНЯЕТСЯ</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_label"><Original>Контракт</Original><English>Контракт</English><Russian>Контракт</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_points"><Original>%1 / %2 точек</Original><English>%1 / %2 точек</English><Russian>%1 / %2 точек</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_seconds"><Original>%1 с</Original><English>%1 с</English><Russian>%1 с</Russian></Key>
+      <Key ID="STR_ALSPMC_mirror_hostiles"><Original>противников: %1</Original><English>противников: %1</English><Russian>противников: %1</Russian></Key>
+    </Container>
+  </Package>
+</Project>
