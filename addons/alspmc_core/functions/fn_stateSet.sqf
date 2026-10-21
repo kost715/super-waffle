@@ -3,5 +3,5 @@
 if (!hasInterface) exitWith {};
 if (isRemoteExecuted && {remoteExecutedOwner != 2}) exitWith {};
 params [["_name", "", [""]], ["_state", createHashMap, [createHashMap]]];
-if !(_name in ["ALSPMC_phoneState", "ALSPMC_desktopState"]) exitWith {};
+if !(_name in ["ALSPMC_phoneState", "ALSPMC_desktopState", "ALSPMC_companyAccess"]) exitWith {};
 player setVariable [_name, _state];

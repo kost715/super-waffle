@@ -15,6 +15,9 @@ isNil {
         if !("alspmc_pmc" in (["lic_" + _uid, []] call ALS_fnc_dbGet)) exitWith {
             ["STR_ALSPMC_need_license"] call _say
         };
+        if (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])) exitWith {false};
+        private _company = [_uid] call ALSPMC_fnc_companyOf;
+        if (count _company > 0 && {(_company get "owner") != _uid}) exitWith {false};
         private _h = ALS_houses getOrDefault [_key, []];
         if (count _h < 8) exitWith {["STR_ALSPMC_invalid_property"] call _say};
         if !((_h select 6) in getArray (configFile >> "ALSPMC_Settings" >> "allowedTypes")) exitWith {
@@ -42,6 +45,7 @@ isNil {
             ["STR_ALSPMC_owned"] call _say
         };
         ALSPMC_bases set [_key, [_uid, _h select 5, _price]];
+        [_uid] call ALSPMC_fnc_companyEnsure;
         // The property remains a native warehouse, with native storage/doors.
         [_key] call ALS_fnc_bizGet;
         call ALSPMC_fnc_save;

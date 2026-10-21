@@ -26,7 +26,7 @@ TEST_remoteOwner=2;
 ["ALSPMC_desktopState",_state] call ALSPMC_fnc_stateSet;
 [(player getVariable "ALSPMC_desktopState") isEqualTo _state,"server-origin desktop packet reaches the local client state"] call TEST_fnc_assert;
 ["ALS_money",_state] call ALSPMC_fnc_stateSet;
-[!((player getVariable ["ALS_money",[]]) isEqualTo _state),"state receiver accepts only its two PMC variable names"] call TEST_fnc_assert;
+[!((player getVariable ["ALS_money",[]]) isEqualTo _state),"state receiver rejects unrelated variable names"] call TEST_fnc_assert;
 TEST_hasInterface=false; TEST_isRemoteExecuted=false;
 
 call TEST_fnc_reset;
@@ -77,14 +77,14 @@ private _truck=_job get "alspmcTruck";
 [count (["p1"] call ALS_fnc_crewOf)==0,"settlement removes the auto-created one-member crew"] call TEST_fnc_assert;
 [count ALSPMC_questRecords==1 && {(ALSPMC_questRecords get 1) select 1=="cancelled"},"solo cleanup preserves the completed quest history"] call TEST_fnc_assert;
 
-// Reproduce a concrete residual issue separately from passing safety checks.
+// Regression: cached sites must reflect live property ownership.
 ALSPMC_contractSitesCache=createHashMap;
 ALS_houses set ["review_shop",[[5100,100,0],"shop.p3d",150,2,"Town",5000,"Shop","Good"]];
 private _sites=["commercial"] call ALSPMC_fnc_contractSites;
 ALS_owned set ["review_shop","p2"];
 private _stale=["commercial"] call ALSPMC_fnc_contractSites;
 private _cachedOwner=(_stale findIf {(_x select 1)=="review_shop"})>=0;
-diag_log ("REVIEW_FINDING_CACHED_PROPERTY: " + str _cachedOwner);
+[!_cachedOwner,"cached site list immediately excludes newly purchased property"] call TEST_fnc_assert;
 TEST_realTime=TEST_realTime+31;
 private _fresh=["commercial"] call ALSPMC_fnc_contractSites;
 [(_fresh findIf {(_x select 1)=="review_shop"})<0,"expired site cache excludes newly purchased property"] call TEST_fnc_assert;

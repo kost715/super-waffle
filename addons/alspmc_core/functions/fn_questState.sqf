@@ -1,5 +1,7 @@
 params ["_unit"];
 private _uid = [_unit] call ALS_fnc_uid;
+private _company = [_uid] call ALSPMC_fnc_companyOf;
+private _founderUID = if (count _company > 0) then {_company get "owner"} else {_uid};
 private _ready = missionNamespace getVariable ["ALSPMC_questsReady", false];
 private _crew = [_uid] call ALS_fnc_crewOf;
 private _nativeJob = (missionNamespace getVariable ["ALS_coopJobs", createHashMap]) getOrDefault [_crew getOrDefault ["job", -1], createHashMap];
@@ -47,15 +49,18 @@ _ids sort false;
         } else {if (count _history < 10) then {_history pushBack _view}};
     };
 } forEach _ids;
-private _licensed = "alspmc_pmc" in (["lic_" + _uid, []] call ALS_fnc_dbGet);
+private _licensed = "alspmc_pmc" in (["lic_" + _founderUID, []] call ALS_fnc_dbGet);
 private _base = (keys ALSPMC_bases) findIf {
-    ((ALSPMC_bases get _x) select 0) == _uid && {[_uid, ALS_owned getOrDefault [_x, ""]] call ALS_fnc_canUse}
+    ((ALSPMC_bases get _x) select 0) == _founderUID && {[_founderUID, ALS_owned getOrDefault [_x, ""]] call ALS_fnc_canUse}
 };
 // A lethal warrant moves a player to EAST, the contract enemies' own side: they
 // would never engage that member, so a crew with one cannot take a contract.
 private _crewUIDs = if (count _crew > 0) then {_crew getOrDefault ["members", []]} else {[_uid]};
 private _wanted = (_crewUIDs findIf {private _p = [_x] call ALS_fnc_findPlayer; !isNull _p && {side group _p == east}}) >= 0;
 private _reason = switch (true) do {
+    case (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])): {"unavailable"};
+    case (count _company > 0 && {(_company get "members") get _uid == "member"}): {"manager"};
+    case (count _company > 0 && {((values ALS_coopJobs) findIf {(_x getOrDefault ["alspmcCompany", ""]) == (_company get "id")}) >= 0}): {"active"};
     case (!_ready): {"unavailable"};
     case (_ownActive || {count _active > 0}): {"active"};
     case (!_licensed): {"license"};
@@ -102,9 +107,10 @@ if (missionNamespace getVariable ["ALSPMC_contractsReady", false]) then {
             private _baseRow = (((missionNamespace getVariable ["ALS_war", createHashMap]) getOrDefault ["bases", []]) select {(_x select 0) == _siteID}) param [0, []];
             createHashMapFromArray [["id", _siteID], ["name", toArray (_baseRow param [4, _siteID])], ["owner", _x select 4], ["grid", mapGridPosition (_x select 0)]]
         }};
-        createHashMapFromArray [["key", _key], ["offer", _ticket], ["targets", _targets], ["category", _category], ["mode", _mode], ["minLevel", _minimum],
+        private _capacity = count _company == 0 || {(_company get "balance") + round (_price * (_rating get "multiplier")) <= 10000000};
+        createHashMapFromArray [["capacity", _capacity], ["key", _key], ["offer", _ticket], ["targets", _targets], ["category", _category], ["mode", _mode], ["minLevel", _minimum],
             ["pay", round (_price * (_rating get "multiplier"))], ["xp", _xp], ["world", _world],
-            ["available", _world && {_reason == ""} && {(_rating get "level") >= _minimum}]]
+            ["available", _capacity && {_world} && {_reason == ""} && {(_rating get "level") >= _minimum}]]
     }];
 } else {
     if (missionNamespace getVariable ["ALSPMC_contractsStarted", false]) then {

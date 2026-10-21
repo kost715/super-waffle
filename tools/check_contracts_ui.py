@@ -89,7 +89,7 @@ def main():
             before=latest()
             click("questStart",guard_entry["offer"])
             assert latest()==before
-            assert "владельцу" in page.locator('#alspmc-confirm-text').inner_text()
+            assert "в казну ЧВК" in page.locator('#alspmc-confirm-text').inner_text()
             click("confirm")
             request=latest()
             assert set(request)=={"a","op","key","token"} and request["key"]==guard_entry["offer"]
@@ -106,7 +106,7 @@ def main():
             push(active,request["token"])
             assert page.locator('[data-alspmc-op="questReady"]').count()==0
             assert "10:00" in page.locator('#alspmc-quests').inner_text()
-            assert "Награда владельцу" in page.locator('#alspmc-quests').inner_text()
+            assert "Награда в казну ЧВК" in page.locator('#alspmc-quests').inner_text()
             passed("nearby readiness starts the active duty and displays the server real-time countdown")
 
             click("questMap")

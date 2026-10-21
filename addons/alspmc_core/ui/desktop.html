@@ -31,6 +31,8 @@ body[data-section=quests] #alspmc-section-name,body[data-section=quests] #alspmc
 #alspmc-quest-tabs [aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 @media(max-width:980px){body{font-size:13px;padding:12px}.sidebar{width:185px;padding:20px 10px}.brand{font-size:21px}.toolbar{padding:18px 22px}.scroll{padding:18px 22px}#alspmc-body{grid-template-columns:1fr}.card{padding:17px}#alspmc-section-summary{display:block}#alspmc-funds{text-align:left;margin-top:12px}}
 @media(max-width:680px){.sidebar{width:145px}.brand{font-size:18px}.brand-note{font-size:10px}.toolbar{padding:15px}.toolbar h1{font-size:18px}.scroll{padding:15px}.session{display:none}nav button{padding:10px;font-size:11px}}
+body:not([data-section=company]) #pmc-company{display:none}
+body[data-section=company] #v-alspmc{display:none}
 </style>
 </head>
 <body data-section="summary">
@@ -38,11 +40,11 @@ body[data-section=quests] #alspmc-section-name,body[data-section=quests] #alspmc
   <header class="titlebar"><svg class="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/><path d="M8 12l3 3 5-6"/></svg><span class="system-name">ЧВК · КОМАНДНЫЙ ЦЕНТР</span><span class="window-label">Рабочее место на базе</span><button class="window-close" data-desktop-close aria-label="Закрыть">×</button></header>
   <div class="workspace">
     <aside class="sidebar"><div class="brand">Штаб ЧВК</div><div class="brand-note">Управление организацией</div><div class="nav-label">РАБОЧИЕ РАЗДЕЛЫ</div>
-      <nav aria-label="Разделы управления"><button data-section="summary" aria-current="true">Обзор</button><button data-section="name" aria-current="false">Организация</button><button data-section="base" aria-current="false">Недвижимость и база</button><button data-section="quests" aria-current="false">Контракты ЧВК</button><button data-section="license" aria-current="false">Лицензия</button></nav>
+      <nav aria-label="Разделы управления"><button data-section="summary" aria-current="true">Обзор</button><button data-section="name" aria-current="false">Организация</button><button data-section="base" aria-current="false">Недвижимость и база</button><button data-section="quests" aria-current="false">Контракты ЧВК</button><button data-section="company" aria-current="false">Компания и казна</button><button data-section="license" aria-current="false">Лицензия</button></nav>
       <div class="sidebar-bottom"><div class="online">Связь с ЧВК</div><div>Общие данные с телефоном</div><button class="logout" data-desktop-close>Завершить сеанс</button></div>
     </aside>
     <main class="content"><div class="toolbar"><div><div class="eyebrow">ПАНЕЛЬ УПРАВЛЕНИЯ</div><h1 id="section-title">Обзор ЧВК</h1></div><div class="session" id="session-label">Подключение к данным…</div></div>
-      <div class="scroll" id="desktop-scroll"><div id="v-alspmc"></div></div>
+      <div class="scroll" id="desktop-scroll"><div id="v-alspmc"></div><section id="pmc-company" class="card" data-noi18n></section></div>
     </main>
   </div>
   <footer class="statusbar"><span>LifeSim PMC · Штаб</span><span>Данные обновляются автоматически</span></footer>

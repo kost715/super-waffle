@@ -1,4 +1,6 @@
 params ["_founder", ["_mode", ""]];
+private _c = [_founder] call ALSPMC_fnc_companyOf;
+if (count _c > 0) then {_founder = _c get "owner"};
 private _xp = (missionNamespace getVariable ["ALSPMC_ratingXP", createHashMap]) getOrDefault [_founder, 0];
 private _thresholds = getArray (configFile >> "ALSPMC_Settings" >> "ratingThresholds");
 if (count _thresholds != 5 || {(_thresholds findIf {!(_x isEqualType 0) || {_x < 0}}) >= 0}) then {_thresholds = [0,100,300,700,1300]};

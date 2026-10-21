@@ -26,6 +26,12 @@ if (_op in ["mark", "furnish", "view"]) exitWith {
         };
     };
 };
+if ((_op select [0,7]) == "company") exitWith {
+    private _arg = _msg getOrDefault ["companyArg", []];
+    if (isNull _computer) then {
+        if (_op in ["companyAccept", "companyDecline"]) then {[player, _op, _arg, _msg getOrDefault ["token",0]] remoteExecCall ["ALSPMC_fnc_phoneDo",2]};
+    } else {[player, _op, _arg, _msg getOrDefault ["token",0], _computer] remoteExecCall ["ALSPMC_fnc_desktopDo",2]};
+};
 if !(_op in ["status", "license", "name", "base", "lock", "unlock", "sell", "questStart", "questCancel", "questReady"]) exitWith {};
 private _arg = if (_op == "name") then {_msg getOrDefault ["name", []]} else {_key};
 if (isNull _computer) then {

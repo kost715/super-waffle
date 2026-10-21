@@ -1,13 +1,14 @@
 # LifeSim PMC
 
-Опциональный аддон управления ЧВК для Arma LifeSim. Текущая база разработки — **0.6.3 alpha 1**.
+Опциональный аддон управления ЧВК для Arma LifeSim. Текущий выпуск — **0.7.0 alpha 1**, на основе полученной 0.6.3.
 
 - [Описание, установка и текущие возможности](README_RU.md)
-- [Готовая сборка 0.6.3](dist/LifeSim_PMC_0.6.3_alpha1.zip)
-- [Исходники для независимой проверки](dist/LifeSim_PMC_0.6.3_review_sources.zip)
+- [Готовая сборка 0.7.0](dist/LifeSim_PMC_0.7.0_alpha1.zip)
+- [Исходники для независимой проверки](dist/LifeSim_PMC_0.7.0_alpha1_sources.zip)
 - [План разработки для команды](docs/TEAM_DEVELOPMENT_PLAN_RU.md) — [PDF](dist/LifeSim_PMC_Team_Development_Plan_RU.pdf), [DOCX](dist/LifeSim_PMC_Team_Development_Plan_RU.docx)
 - [Согласованный проект функций ПК](docs/PMC_PC_DESIGN_RU.md) — [PDF](dist/LifeSim_PMC_PC_Design_RU.pdf)
 - [Отчёт о проверке принятой версии и известные ограничения](docs/BASELINE_0.6.3_REVIEW_RU.md)
+- [Отчёт этапа 1: компания, роли и казна](docs/STAGE_1_COMPANY_TREASURY_RU.md)
 - [История изменений](CHANGELOG.md)
 
 Исходный код аддона находится в `addons/alspmc_core`, проверки — в `tests` и `tools`.

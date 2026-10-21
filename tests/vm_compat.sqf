@@ -66,6 +66,9 @@ TEST_fnc_owner = {_this getVariable ["TEST_owner", 2]};
 // Text rendering is outside the transaction fixture. Keep the localization
 // key visible in recorded messages; the browser/XML tests check actual text.
 TEST_fnc_localize = {_this};
+// Finite fixtures only; VM lacks the engine finite predicate.
+TEST_fnc_finite = {_this == _this && {abs _this < 1e38}};
+TEST_fnc_name = {"Test " + (_this getVariable ["ALS_uid","NPC"])};
 TEST_fnc_grid = {"001001"};
 // SQF-VM's C++ char is signed; Arma/browser UTF-8 transport uses 0..255 bytes.
 TEST_fnc_bytes = {(toArray _this) apply {if (_x < 0) then {_x + 256} else {_x}}};
@@ -210,7 +213,8 @@ TEST_fnc_mineActive = {_this getVariable ["TEST_mineActive", false]};
 TEST_fnc_insert = {
     params ["_compatArray", "_compatArgs"];
     private _compatAt = _compatArgs select 0;
-    private _compatTail = _compatArray select [_compatAt];
+    // VM omits Arma's optional range length; specify it explicitly.
+    private _compatTail = _compatArray select [_compatAt, count _compatArray - _compatAt];
     _compatArray resize _compatAt;
     _compatArray append (_compatArgs select 1);
     _compatArray append _compatTail;
@@ -249,6 +253,8 @@ TEST_fnc_compatCode = {
             case "CALLUNARY publicvariable": {_compatOut append ["GETVARIABLE TEST_fnc_publish", "CALLBINARY call"]};
             case "CALLUNARY isplayer": {_compatOut append ["GETVARIABLE TEST_fnc_isPlayer", "CALLBINARY call"]};
             case "CALLUNARY owner": {_compatOut append ["GETVARIABLE TEST_fnc_owner", "CALLBINARY call"]};
+            case "CALLUNARY finite": {_compatOut append ["GETVARIABLE TEST_fnc_finite", "CALLBINARY call"]};
+            case "CALLUNARY name": {_compatOut append ["GETVARIABLE TEST_fnc_name", "CALLBINARY call"]};
             case "CALLUNARY localize": {_compatOut append ["GETVARIABLE TEST_fnc_localize", "CALLBINARY call"]};
             case "CALLUNARY mapgridposition": {_compatOut append ["GETVARIABLE TEST_fnc_grid", "CALLBINARY call"]};
             case "CALLUNARY toarray": {_compatOut append ["GETVARIABLE TEST_fnc_bytes", "CALLBINARY call"]};

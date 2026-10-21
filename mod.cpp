@@ -1,4 +1,4 @@
-name = "LifeSim PMC - Contracts 0.6.3 alpha 1";
+name = "LifeSim PMC - Headquarters 0.7.0 alpha 1";
 author = "LifeSim PMC project";
 description = "Optional PMC headquarters, desktop management, rating and government/private contracts for Arma LifeSim 0.13.0 / 0.10.1.";
 tooltip = "LifeSim PMC";

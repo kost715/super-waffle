@@ -3,6 +3,7 @@
 params ["_kind", ["_unit", objNull]];
 private _filter = {
     params ["_sites"];
+    _sites = _sites select {[_kind, _x] call ALSPMC_fnc_contractSiteAvailable};
     if (isNull _unit) exitWith {_sites};
     private _base = [_unit] call ALSPMC_fnc_contractBase;
     _sites select {[_base, _x select 0, 100] call ALSPMC_fnc_contractFar}

@@ -1,0 +1,9 @@
+{
+  "version": "0.7.0_alpha1",
+  "based_on": "0.6.3_alpha1",
+  "stage": "1: persistent company, roles and treasury",
+  "requirements": "dist/LifeSim_PMC_PC_Design_RU.pdf",
+  "report": "docs/STAGE_1_COMPANY_TREASURY_RU.md",
+  "independent_review_performed": false,
+  "arma_runtime_tested": false
+}

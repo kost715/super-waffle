@@ -19,7 +19,7 @@ if !([player, _computer] call ALSPMC_fnc_terminalCanUse) exitWith {_disp closeDi
 if !(_disp getVariable ["ALSPMC_ready", false]) exitWith {};
 private _web = _disp displayCtrl 7410;
 if !(_disp getVariable ["ALSPMC_installed", false]) then {
-    _web ctrlWebBrowserAction ["ExecJS", ALSPMC_phoneCode + ";ALSPMCDesktop.start();"];
+    _web ctrlWebBrowserAction ["ExecJS", ALSPMC_phoneCode + ";" + ALSPMC_companyCode + ";ALSPMCDesktop.start();"];
     _disp setVariable ["ALSPMC_installed", true];
     _disp setVariable ["ALSPMC_lastPoll", -10];
 };
@@ -31,7 +31,7 @@ if (count _state > 0 && {(_state getOrDefault ["terminalKey", ""]) == (_computer
     _state set ["bank", _bank];
     private _json = toJSON _state;
     if (_json != (_disp getVariable ["ALSPMC_lastState", ""])) then {
-        _web ctrlWebBrowserAction ["ExecJS", format ["ALSPMCPhone.set(%1)", _json]];
+        _web ctrlWebBrowserAction ["ExecJS", format ["ALSPMCPhone.set(%1);ALSPMCCompany.set(%1)", _json]];
         _disp setVariable ["ALSPMC_lastState", _json];
     };
 };

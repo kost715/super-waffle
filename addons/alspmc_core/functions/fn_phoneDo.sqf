@@ -2,6 +2,8 @@ params [["_unit", objNull, [objNull]], ["_op", "", [""]], ["_arg", ""], ["_token
 if !([_unit] call ALSPMC_fnc_requestAllowed) exitWith {false};
 if (_token < 0 || {_token > 1000000000} || {_token != floor _token}) exitWith {false};
 private _ok = switch (_op) do {
+    case "companyAccept";
+    case "companyDecline": {[_unit, _op, _arg] call ALSPMC_fnc_companyDo};
     case "status": {true};
     case "license": {
         private _bought = [_unit, "alspmc_pmc"] call ALS_fnc_licBuy;

@@ -16,6 +16,7 @@ private _radius = (getNumber (configFile >> "ALSPMC_Settings" >> "contractReadyR
 if ((_job get "state") != "rendezvous" || {!([_uid, _job, _crew] call ALSPMC_fnc_contractBoss)} || {
     (_crew getOrDefault ["id", ""]) != (_job get "crew")
 } || {!(_unit in _team)} || {_unit distance2D (_job get "alspmcSite") > _radius}) exitWith {false};
+if !([_job get "alspmcPlan"] call ALSPMC_fnc_contractPlanAvailable) exitWith {false};
 private _mode = _job get "alspmcMode";
 if (_mode == "guard" && {private _building = (_job get "alspmcPlan") get "building"; isNull _building || {!alive _building}}) exitWith {false};
 // Joining the real Arma group lets its player leader command the VIP normally.

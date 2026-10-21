@@ -74,6 +74,16 @@
     render();
     dom("confirm").scrollIntoView({block: "nearest"});
   }
+  function renderInvites() {
+    const root = dom("invites");
+    root.replaceChildren();
+    const company = state.company || {};
+    root.hidden = !(company.invites || []).length;
+    for (const invite of company.invites || []) {
+      root.append(node("p", "note", "\u041f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435 \u0432 \u0427\u0412\u041a: " + (text(invite.name) || invite.id)));
+      root.append(button("\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u043f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435", "companyAccept", invite.id), button("\u041e\u0442\u043a\u043b\u043e\u043d\u0438\u0442\u044c", "companyDecline", invite.id));
+    }
+  }
   function renderBases() {
     const list = dom("bases");
     list.replaceChildren();
@@ -86,8 +96,8 @@
       card.append(node("div", "note", "\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c: " + money(base.price) + " \u00b7 " + (base.locked ? "\u0414\u0432\u0435\u0440\u0438 \u0437\u0430\u043a\u0440\u044b\u0442\u044b" : "\u0414\u0432\u0435\u0440\u0438 \u043e\u0442\u043a\u0440\u044b\u0442\u044b")));
       const actions = node("div", "meta");
       actions.append(button("\u041d\u0430 \u043a\u0430\u0440\u0442\u0435", "mark", base.key), button("\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c", "view", base.key));
-      actions.append(button(base.locked ? "\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u0432\u0435\u0440\u0438" : "\u0417\u0430\u043f\u0435\u0440\u0435\u0442\u044c \u0434\u0432\u0435\u0440\u0438", base.locked ? "unlock" : "lock", base.key));
-      actions.append(button("\u041e\u0431\u0441\u0442\u0430\u0432\u0438\u0442\u044c", "furnish", base.key, !base.near));
+      actions.append(button(base.locked ? "\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0434\u0432\u0435\u0440\u0438" : "\u0417\u0430\u043f\u0435\u0440\u0435\u0442\u044c \u0434\u0432\u0435\u0440\u0438", base.locked ? "unlock" : "lock", base.key, base.nativeAccess === false));
+      actions.append(button("\u041e\u0431\u0441\u0442\u0430\u0432\u0438\u0442\u044c", "furnish", base.key, !base.near || base.nativeAccess === false));
       if (base.canSell) actions.append(button("\u041f\u0440\u043e\u0434\u0430\u0442\u044c \u0431\u0430\u0437\u0443", "sell", base.key, false, true));
       card.append(actions);
       list.append(card);
@@ -106,6 +116,7 @@
     }
   }
   const questReasons = {
+    manager: "\u041f\u0440\u0438\u043d\u0438\u043c\u0430\u0442\u044c \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u044b \u043c\u043e\u0433\u0443\u0442 \u0432\u043b\u0430\u0434\u0435\u043b\u0435\u0446 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u044f\u044e\u0449\u0438\u0435 \u0427\u0412\u041a.",
     unavailable: "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u044b \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0436\u0443\u0440\u043d\u0430\u043b \u0441\u0435\u0440\u0432\u0435\u0440\u0430.",
     license: "\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043e\u0444\u043e\u0440\u043c\u0438\u0442\u0435 \u043b\u0438\u0446\u0435\u043d\u0437\u0438\u044e \u0427\u0412\u041a.", base: "\u041e\u0441\u043d\u043e\u0432\u0430\u0442\u0435\u043b\u044e \u043d\u0443\u0436\u043d\u0430 \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0430\u044f \u0431\u0430\u0437\u0430 \u0427\u0412\u041a.",
     leader: "\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u043c\u043e\u0436\u0435\u0442 \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c \u0432\u0430\u0448\u0435\u0439 \u0433\u0440\u0443\u043f\u043f\u044b \u0441 \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u0427\u0412\u041a.",
@@ -177,6 +188,7 @@
           applyChoice(); choice.addEventListener("change", applyChoice);
           choice.disabled = !!busy || !entry.available; card.append(choice);
         }
+        if (entry.capacity === false) card.append(node("div", "note", "\u041e\u0441\u0432\u043e\u0431\u043e\u0434\u0438\u0442\u0435 \u0432 \u043a\u0430\u0437\u043d\u0435 \u043c\u0435\u0441\u0442\u043e \u0434\u043b\u044f \u043d\u0430\u0433\u0440\u0430\u0434\u044b: \u0432\u043b\u0430\u0434\u0435\u043b\u0435\u0446 \u043c\u043e\u0436\u0435\u0442 \u0432\u044b\u0432\u0435\u0441\u0442\u0438 \u0447\u0430\u0441\u0442\u044c \u0441\u0440\u0435\u0434\u0441\u0442\u0432 \u043d\u0430 \u041f\u041a."));
         actions.append(accept);
         card.append(actions); list.append(card);
       }
@@ -189,7 +201,7 @@
       const stages = {rendezvous:"\u041f\u0440\u0438\u0431\u0443\u0434\u044c\u0442\u0435 \u043d\u0430 \u043c\u0435\u0441\u0442\u043e \u0438 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u0433\u043e\u0442\u043e\u0432\u043d\u043e\u0441\u0442\u044c", travel:"\u041f\u0440\u0438\u0431\u0443\u0434\u044c\u0442\u0435 \u0432 \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u043d\u043e\u0435 \u043c\u0435\u0441\u0442\u043e", combat:"\u0423\u043d\u0438\u0447\u0442\u043e\u0436\u044c\u0442\u0435 \u0441\u0438\u043b\u044b \u043f\u0440\u043e\u0442\u0438\u0432\u043d\u0438\u043a\u0430", active:"\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u0435\u0442\u0441\u044f"};
       list.append(node("div", "note", stages[active.stage] || "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u0435\u0442\u0441\u044f"));
       list.append(node("div", "note", "\u041a\u0432\u0430\u0434\u0440\u0430\u0442 " + active.grid + " \u00b7 \u0441\u043e\u0441\u0442\u0430\u0432: " + active.teamSize + " \u00b7 \u0432 \u0441\u0442\u0440\u043e\u044e: " + (active.living ?? active.teamSize)));
-      list.append(node("div", "note", "\u041d\u0430\u0433\u0440\u0430\u0434\u0430 \u0432\u043b\u0430\u0434\u0435\u043b\u044c\u0446\u0443: " + money(active.pay) + " \u00b7 \u0441\u043b\u043e\u0436\u043d\u043e\u0441\u0442\u044c: \u0443\u0440\u043e\u0432\u0435\u043d\u044c " + active.level));
+      list.append(node("div", "note", "\u041d\u0430\u0433\u0440\u0430\u0434\u0430 \u0432 \u043a\u0430\u0437\u043d\u0443 \u0427\u0412\u041a: " + money(active.pay) + " \u00b7 \u0441\u043b\u043e\u0436\u043d\u043e\u0441\u0442\u044c: \u0443\u0440\u043e\u0432\u0435\u043d\u044c " + active.level));
       if (active.stage === "combat") list.append(node("div", "note", "\u041f\u0440\u043e\u0442\u0438\u0432\u043d\u0438\u043a\u043e\u0432 \u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c: " + active.remaining));
       if (active.mode === "sector") list.append(node("div", "note", "\u041f\u0440\u043e\u0439\u0434\u0435\u043d\u043e \u0442\u043e\u0447\u0435\u043a: " + (active.routeDone || 0) + " / " + (active.routeTotal || 4) + ". \u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0442\u043e\u0447\u043a\u0430 \u043e\u0442\u043c\u0435\u0447\u0435\u043d\u0430 \u043d\u0430 \u043a\u0430\u0440\u0442\u0435."));
       if (active.left >= 0 && active.stage === "active") list.append(node("div", "note", "\u041e\u0441\u0442\u0430\u043b\u043e\u0441\u044c \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0433\u043e \u0432\u0440\u0435\u043c\u0435\u043d\u0438: " + duration(active.left)));
@@ -277,6 +289,7 @@
     dom("name-save").disabled = !state.canRename || !!busy || count < 3 || count > 40 || !dirty;
     dom("name-note").textContent = state.canRename ? "\u041e\u0442 3 \u0434\u043e 40 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0420\u0443\u0441\u0441\u043a\u0438\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044f \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u044e\u0442\u0441\u044f; \u043f\u0435\u0440\u0435\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u0438\u0435 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e." : "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043c\u043e\u0436\u043d\u043e \u0437\u0430\u0434\u0430\u0442\u044c \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u043a\u0443\u043f\u043a\u0438 \u043b\u0438\u0446\u0435\u043d\u0437\u0438\u0438.";
     dom("refresh").disabled = !!busy;
+    renderInvites();
     renderBases();
     renderQuests();
     dom("confirm").hidden = !pending;
@@ -288,7 +301,7 @@
           const entry = (q.catalog || []).find(e => (e.offer || e.key) === ticket);
           const targetID = pending.key.split("|")[1], target = entry?.targets?.find(t => t.id === targetID);
           const targetText = target ? " \u0426\u0435\u043b\u044c: " + (text(target.name) || target.id) + ", \u043a\u0432\u0430\u0434\u0440\u0430\u0442 " + target.grid + "." : "";
-          return entry ? "\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u00ab" + contracts[entry.key][0] + "\u00bb?" + targetText + " \u041d\u0430\u0433\u0440\u0430\u0434\u0430 \u0432\u043b\u0430\u0434\u0435\u043b\u044c\u0446\u0443: " + money(entry.pay) + ". \u0421\u043e\u0431\u0435\u0440\u0438\u0442\u0435 \u0433\u0440\u0443\u043f\u043f\u0443 \u0434\u043e \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f." :
+          return entry ? "\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u00ab" + contracts[entry.key][0] + "\u00bb?" + targetText + " \u041d\u0430\u0433\u0440\u0430\u0434\u0430 \u0432 \u043a\u0430\u0437\u043d\u0443 \u0427\u0412\u041a: " + money(entry.pay) + ". \u0421\u043e\u0431\u0435\u0440\u0438\u0442\u0435 \u0433\u0440\u0443\u043f\u043f\u0443 \u0434\u043e \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f." :
             "\u041d\u0430\u0447\u0430\u0442\u044c \u0442\u0435\u0441\u0442\u043e\u0432\u044b\u0439 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442? \u0412\u0435\u0441\u044c \u0441\u043e\u0441\u0442\u0430\u0432 \u0433\u0440\u0443\u043f\u043f\u044b \u043d\u0443\u0436\u043d\u043e \u0441\u043e\u0431\u0440\u0430\u0442\u044c \u0434\u043e \u043f\u0440\u0438\u043d\u044f\u0442\u0438\u044f. \u041e\u0431\u0449\u0430\u044f \u043d\u0430\u0433\u0440\u0430\u0434\u0430 \u2014 " + money(q.pay) + ".";
         })() :
         pending.op === "questCancel" ? "\u041e\u0442\u043c\u0435\u043d\u0438\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0438\u0439 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 \u0431\u0435\u0437 \u0432\u044b\u043f\u043b\u0430\u0442\u044b?" :
@@ -302,6 +315,7 @@
     shell: `<div id="alspmc-loading" class="empty">\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043c \u0434\u0430\u043d\u043d\u044b\u0435 \u0427\u0412\u041a\u2026</div>
       <div id="alspmc-body" hidden>
         <div class="card active" id="alspmc-section-summary"><div class="cargo" id="alspmc-title"></div><div class="note" id="alspmc-progress"></div><div class="note" id="alspmc-funds"></div></div>
+        <div class="card" id="alspmc-invites" hidden></div>
         <div class="note alspmc-notice" id="alspmc-notice" role="status" hidden></div>
         <div class="card" id="alspmc-section-license"><div class="k">\u041b\u0418\u0426\u0415\u041d\u0417\u0418\u042f</div><div class="cargo" id="alspmc-license-status"></div>
           <div class="note" id="alspmc-license-note"></div><div class="meta"><button class="btn" id="alspmc-license" data-alspmc-op="license"></button></div></div>
@@ -320,6 +334,7 @@
     clicks: {"[data-alspmc-op]": b => {
       if (b.disabled) return;
       const op = b.dataset.alspmcOp, key = b.dataset.alspmcKey || "";
+      if (["companyAccept", "companyDecline"].includes(op)) return request(op, {companyArg:[0,key]});
       if (op === "questTab") { questTab = key; return render(); }
       if (op === "questCategory") { questCategory = key; return render(); }
       if (op === "cancel") { pending = null; return render(); }

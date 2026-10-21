@@ -21,14 +21,16 @@ isNil {
     private _won = _reason == "complete";
     private _reward = if (_won) then {_row select 2} else {0};
     if (_reward > 0 && {(_meta select 3) == 0}) then {
-        private _before = ([_row select 0] call ALS_fnc_moneyGet) select 1;
-        private _paid = [_row select 0, 0, _reward] call ALS_fnc_moneyAdd;
-        if (!_paid || {(([_row select 0] call ALS_fnc_moneyGet) select 1) != _before + _reward}) then {_won = false; _reason = "payment"};
+        private _companyID = _job getOrDefault ["alspmcCompany", ""];
+        private _paid = if (_companyID != "") then {[_companyID, _qid, _reward, _row select 0] call ALSPMC_fnc_companyReward} else {
+            [_row select 0, 0, _reward] call ALS_fnc_moneyAdd
+        };
+        if (!_paid) then {_won = false; _reason = "payment"};
     };
     if (_reason == "payment") exitWith {_job set ["alspmcEnding", false]};
     if (_won) then {
         _meta set [3, _reward];
-        private _founder = _row select 0;
+        private _founder = _job getOrDefault ["alspmcRatingOwner", _row select 0];
         ALSPMC_ratingXP set [_founder, ((ALSPMC_ratingXP getOrDefault [_founder, 0]) + (_meta select 2)) min 100000000];
     };
     _row set [1, if (_won) then {"done"} else {if (_reason == "cancelled") then {"cancelled"} else {
@@ -54,16 +56,17 @@ isNil {
     if (_job getOrDefault ["alspmcCreatedCrew", false] && {count _crew > 0} && {
         count (_crew get "members") <= 1
     } && {(_crew get "job") isEqualTo -1}) then {ALS_crews deleteAt (_crew get "id")};
-    private _founderUnit = [_row select 0] call ALS_fnc_findPlayer;
+    private _ratingOwner = _job getOrDefault ["alspmcRatingOwner", _row select 0];
+    private _founderUnit = [_ratingOwner] call ALS_fnc_findPlayer;
     if (!isNull _founderUnit) then {
         [_founderUnit, _meta select 0, _won, _job getOrDefault ["alspmcOfferSlot", ""]] call ALSPMC_fnc_contractOffers;
     } else {
         // Rebuild at the founder's next visit if the owner is offline.
-        ALSPMC_contractBoards deleteAt (_row select 0);
+        ALSPMC_contractBoards deleteAt _ratingOwner;
     };
     call ALS_fnc_crewPublish;
     call ALSPMC_fnc_questSave;
-    // One native DB snapshot commits the native wallet, XP and result receipt.
+    // One native DB snapshot commits the company/legacy wallet, XP and result receipt.
     call ALS_fnc_dbSave;
     _out = true;
     true

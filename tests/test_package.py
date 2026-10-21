@@ -88,6 +88,10 @@ class PackageChecks(unittest.TestCase):
             self.assertEqual(len(set(texts)),1)
         code = "\n".join(p.read_text() for p in (root / "functions").glob("*.sqf"))
         used = set(re.findall(r'"(STR_ALSPMC_\w+)"', code))
+        # contract titles are assembled from the configured catalog at runtime.
+        used.discard("STR_ALSPMC_title_")
+        catalog = (root / "config.cpp").read_text()
+        used.update("STR_ALSPMC_title_" + kind for kind in re.findall(r"class (\w+) \{reward =", catalog))
         self.assertLessEqual(used, set(ids))
 
     def test_license_moves_to_phone_without_changing_other_licenses(self):

@@ -5,12 +5,14 @@ private _base = [_unit] call ALSPMC_fnc_contractBase;
 if (_base isEqualTo []) exitWith {_plan};
 private _site = [];
 private _destination = [];
+private _siteKind = "";
 if (_mode in ["bandits", "enemyPatrol", "sector", "mines"]) then {
     private _pos = [_unit] call ALSPMC_fnc_questSite;
     if (_pos isNotEqualTo []) then {_site = [_pos, "field", objNull, [], ""]};
 } else {
     private _kind = if (_category == "private") then {"commercial"} else {if (_mode == "guard") then {"government"} else {"army"}};
     if (_mode == "base") then {_kind = "assaultBase"};
+    _siteKind = _kind;
     private _sites = [_kind, _unit] call ALSPMC_fnc_contractSites;
     // Avoid stacking active contracts on the same source building/base.
     _sites = _sites select {
@@ -22,7 +24,7 @@ if (_mode in ["bandits", "enemyPatrol", "sector", "mines"]) then {
                 _owner in ["Military", "Opfor"] && {_selectedBase == "" || {(_x select 1) == _selectedBase}}
             };
         };
-        _ownerOK && {[_base, _pos, 100] call ALSPMC_fnc_contractFar} && {((values ALS_coopJobs) findIf {_x getOrDefault ["alspmcContract", false] && {(_x get "alspmcSite") distance2D _pos < 250}}) < 0}
+        _ownerOK && {[_base, _pos, 100] call ALSPMC_fnc_contractFar} && {[_kind, _x] call ALSPMC_fnc_contractSiteAvailable} && {((values ALS_coopJobs) findIf {_x getOrDefault ["alspmcContract", false] && {(_x get "alspmcSite") distance2D _pos < 250}}) < 0}
     };
     if (_sites isNotEqualTo []) then {
         private _offset = floor random count _sites;
@@ -44,10 +46,13 @@ if (_mode in ["bandits", "enemyPatrol", "sector", "mines"]) then {
         if (_category == "government") then {
             _destinations append ((["government", _unit] call ALSPMC_fnc_contractSites) select {[_base, _x select 0, 100] call ALSPMC_fnc_contractFar && {(_x select 0) distance2D (_site select 0) >= 1000}});
         };
-        if (_destinations isNotEqualTo []) then {_destination = selectRandom _destinations};
+        if (_destinations isNotEqualTo []) then {_destination = selectRandom _destinations;
+            _plan set ["destinationKind", if (_kind == "army" && {(_destination select 2) isNotEqualTo objNull}) then {"government"} else {_kind}];
+            _plan set ["destinationSite", _destination]};
     };
 };
 if (_site isEqualTo [] || {_mode in ["convoy", "vip"] && {_destination isEqualTo []}}) exitWith {_plan};
+_plan set ["siteKind", _siteKind];
 _plan set ["base", _base];
 _plan set ["site", _site select 0]; _plan set ["source", _site select 1];
 _plan set ["building", _site select 2]; _plan set ["indoor", _site select 3];

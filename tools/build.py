@@ -9,7 +9,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.6.3_alpha1"
+VERSION = "0.7.0_alpha1"
 MOD = "@LifeSim_PMC"
 STAMP = (2026, 10, 21, 0, 0, 0)
 
@@ -59,7 +59,7 @@ def main() -> None:
         dest = ROOT / "build" / MOD / name
         dest.write_bytes(data)
         package[f"{MOD}/{name}"] = data
-    for name in ["CONTRACTS_RU.md", "GAME_CHECKLIST_RU.md", "VALIDATION_RU.md"]:
+    for name in ["CONTRACTS_RU.md", "GAME_CHECKLIST_RU.md", "VALIDATION_RU.md", "STAGE_1_COMPANY_TREASURY_RU.md"]:
         data = (ROOT / "docs" / name).read_bytes()
         dest = ROOT / "build" / MOD / "docs" / name
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -74,7 +74,7 @@ def main() -> None:
         for p in sorted((ROOT / folder).rglob("*")):
             if p.is_file() and "__pycache__" not in p.parts:
                 source_files[f"LifeSim_PMC_sources/{p.relative_to(ROOT).as_posix()}"] = p.read_bytes()
-    for name in ["mod.cpp", "README_RU.md", "LICENSE", "CHANGELOG.md", ".gitignore", "BASELINE.json"]:
+    for name in ["mod.cpp", "README_RU.md", "LICENSE", "CHANGELOG.md", ".gitignore", ".gitattributes", "AGENTS.md", "README.md", "BASELINE.json", "RELEASE.json"]:
         source_files[f"LifeSim_PMC_sources/{name}"] = (ROOT / name).read_bytes()
     sources = dist / f"LifeSim_PMC_{VERSION}_sources.zip"
     write_zip(sources, source_files)
@@ -91,7 +91,8 @@ def main() -> None:
     reports.mkdir(exist_ok=True)
     (reports / "build.json").write_text(json.dumps(report, indent=2) + "\n")
     (dist / "SHA256SUMS.txt").write_text("".join(
-        f"{meta['sha256']}  {name}\n" for name, meta in report["archives"].items()
+        f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n"
+        for p in sorted(dist.iterdir()) if p.suffix in {".zip", ".pdf", ".docx"}
     ))
     print(json.dumps(report, indent=2))
 

@@ -1,12 +1,14 @@
 params ["_unit", ["_reply", 0], ["_ok", true]];
 if (!isServer) exitWith {};
 private _uid = [_unit] call ALS_fnc_uid;
-private _license = "alspmc_pmc" in (["lic_" + _uid, []] call ALS_fnc_dbGet);
+private _company = [_uid] call ALSPMC_fnc_companyOf;
+private _founder = if (count _company > 0) then {_company get "owner"} else {_uid};
+private _license = "alspmc_pmc" in (["lic_" + _founder, []] call ALS_fnc_dbGet);
 private _bases = [];
 {
     private _key = _x;
     private _owner = ALS_owned getOrDefault [_key, ""];
-    if ([_uid, _owner] call ALS_fnc_canUse) then {
+    if ([_uid, _owner] call ALS_fnc_canUse || {count _company > 0 && {(_y select 0) == _founder} && {[_founder, _owner] call ALS_fnc_canUse}}) then {
         private _h = ALS_houses getOrDefault [_key, []];
         private _co = (missionNamespace getVariable ["ALS_companies", createHashMap]) getOrDefault [_owner, createHashMap];
         if (count _h >= 8) then {
@@ -15,14 +17,15 @@ private _bases = [];
                 ["pos", _h select 0], ["name", ALSPMC_names getOrDefault [_y select 0, []]],
                 ["price", _y select 2], ["locked", _key in ALS_locked],
                 ["canSell", _owner == _uid || {(_co getOrDefault ["founder", ""]) == _uid}],
+                ["nativeAccess", [_uid, _owner] call ALS_fnc_canUse],
                 ["near", (_unit distance2D (_h select 0)) <= 40]
             ];
         };
     };
 } forEach ALSPMC_bases;
-private _hasOwnBase = ((keys ALSPMC_bases) findIf {((ALSPMC_bases get _x) select 0) == _uid}) >= 0;
+private _hasOwnBase = ((keys ALSPMC_bases) findIf {((ALSPMC_bases get _x) select 0) == _founder}) >= 0;
 private _nearby = [];
-if (!_hasOwnBase) then {
+if (!_hasOwnBase && {_founder == _uid}) then {
     {
         private _h = ALS_houses get _x;
         private _distance = _unit distance2D (_h select 0);
@@ -46,8 +49,9 @@ if (_reply == 0) then {
     _ok = _previous getOrDefault ["ok", true];
 };
 private _state = createHashMapFromArray [
-    ["licensed", _license], ["name", ALSPMC_names getOrDefault [_uid, []]],
-    ["canRename", _license && {missionNamespace getVariable ["ALSPMC_namesReady", false]}],
+    ["company", [_unit] call ALSPMC_fnc_companyState],
+    ["licensed", _license], ["name", ALSPMC_names getOrDefault [_founder, []]],
+    ["canRename", _founder == _uid && {_license} && {missionNamespace getVariable ["ALSPMC_namesReady", false]}],
     ["licensePrice", _price], ["clerkNear", _clerkNear], ["bases", _bases],
     ["hasOwnBase", _hasOwnBase], ["nearby", _nearby select [0, 8]],
     ["basePrice", (round getNumber (configFile >> "ALSPMC_Settings" >> "basePrice")) max 1],

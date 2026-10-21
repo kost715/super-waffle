@@ -30,9 +30,8 @@ isNil {
     if (_op != "questStart") exitWith {};
     private _state = [_unit] call ALSPMC_fnc_questState;
     if !(_state get "canStart") exitWith {};
-    // The single-target test is only a fallback while the contract catalog is
-    // unavailable; otherwise it would bypass the offer board and its limits.
-    if (_arg == "eliminate" && {missionNamespace getVariable ["ALSPMC_contractsReady", false]}) exitWith {};
+    // Keep old test records readable, but never accept new prototype payouts.
+    if (_arg == "eliminate" && {missionNamespace getVariable ["ALSPMC_companiesReady", false]}) exitWith {};
     private _entry = [];
     private _type = "eliminate";
     private _selection = "";
@@ -61,6 +60,12 @@ isNil {
     if (_pos isEqualTo []) exitWith {
         ["STR_ALSPMC_quest_no_site"] remoteExecCall ["ALSPMC_fnc_message", _unit];
     };
+    private _company = [_uid] call ALSPMC_fnc_companyOf;
+    if (count _company == 0) exitWith {};
+    private _pay = if (_entry isEqualTo []) then {_state get "pay"} else {round ((_entry select 4) * (_profile get "multiplier"))};
+    if ((_company get "balance") + _pay > 10000000) exitWith {
+        ["STR_ALSPMC_treasury_room"] remoteExecCall ["ALSPMC_fnc_message", _unit];
+    };
     private _createdCrew = count _crew == 0;
     if (_createdCrew) then {
         // Same valid one-member schema as native crewDo's initial invitation.
@@ -72,14 +77,14 @@ isNil {
     ALSPMC_questSequence = ALSPMC_questSequence + 1;
     private _qid = ALSPMC_questSequence;
     private _team = (_crew get "members") select {!isNull ([_x] call ALS_fnc_findPlayer)};
-    private _pay = if (_entry isEqualTo []) then {_state get "pay"} else {round ((_entry select 4) * (_profile get "multiplier"))};
     ALSPMC_questRecords set [_qid, [_uid, "starting", _pay, _pos, +_team, date, [], ""]];
     private _offer = createHashMapFromArray [
         ["id", ALS_coopSeq], ["kind", "alspmc_eliminate"], ["min", 1], ["pay", _pay],
         // Native phonePush injects raw JSON into ExecJS. ASCII here also keeps
         // the original English phone safe; our own app uses escaped Russian.
         ["title", "PMC: eliminate one target"], ["brief", "Eliminate the marked hostile. Starting crew members only."],
-        ["pos", _pos], ["alspmcQuestId", _qid], ["alspmcFounder", _uid]
+        ["pos", _pos], ["alspmcQuestId", _qid], ["alspmcFounder", _uid],
+        ["alspmcCompany", _company get "id"], ["alspmcRatingOwner", _company get "owner"]
     ];
     private _oldOffers = +(_crew getOrDefault ["offers", []]);
     if (_entry isNotEqualTo []) then {

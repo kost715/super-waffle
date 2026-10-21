@@ -16,7 +16,7 @@ TEST_fnc_assert = {
     "questInit", "questSave", "questDo", "questState", "questSite", "questScenario", "questKilled",
     "contractInit", "contractSave", "contractCatalog", "contractProfile", "contractSites", "contractPlan", "contractBase", "contractFar",
     "contractTeam", "contractAttack", "contractEquip", "contractReady", "contractScenario", "contractTick", "contractMirror", "contractEnd",
-    "contractAssets", "contractHostility", "contractOffers", "contractGarrison", "contractWarBases"];
+    "contractAssets", "contractHostility", "contractOffers", "contractGarrison", "contractWarBases", "contractBoss", "stateSet", "companyOf", "companyEnsure", "companyInit", "companySave", "companyTick", "companyState", "companyDo", "companyReward", "contractSiteAvailable", "contractPlanAvailable"];
 {
     missionNamespace setVariable ["ALS_fnc_" + _x,
         ("native/functions/fn_" + _x + ".sqf") call TEST_fnc_load];
@@ -132,6 +132,10 @@ TEST_fnc_reset = {
     ALSPMC_appliedBases = createHashMap;
     ALSPMC_basesPublic = [];
     ALSPMC_ready = true;
+    ALSPMC_companiesReady = true;
+    ALSPMC_companies = createHashMap;
+    ALSPMC_companyInvites = createHashMap;
+    ALSPMC_companyClockAt = TEST_realTime;
     ALSPMC_names = createHashMap;
     ALSPMC_namesReady = true;
     ALSPMC_workstationsReady = false;

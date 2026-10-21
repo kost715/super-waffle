@@ -9,6 +9,10 @@ private _fail = {params ["_why"]; _job set ["alspmcResult", _why]};
 if (_mode in ["bandits", "base", "enemyPatrol", "sector", "mines"] && {_living isEqualTo []} && {_members isNotEqualTo []}) exitWith {
     ["wiped"] call _fail; ["failed",0]
 };
+// A building bought/reserved after acceptance interrupts safely, without reward.
+if !([_plan] call ALSPMC_fnc_contractPlanAvailable) exitWith {
+    ["site"] call _fail; ["failed",0]
+};
 private _stage = _job get "state";
 if (_mode == "base") then {
     private _owner = ((missionNamespace getVariable ["ALS_war", createHashMap]) getOrDefault ["own", createHashMap]) getOrDefault [_plan get "source", "Military"];

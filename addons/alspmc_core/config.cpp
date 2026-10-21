@@ -68,6 +68,15 @@ class CfgFunctions {
             file = "\alspmc_core\functions";
             class postInit {postInit = 1;};
             class serverInit {};
+            class companyOf {};
+            class companyEnsure {};
+            class companyInit {};
+            class companySave {};
+            class companyTick {};
+            class companyState {};
+            class companyDo {};
+            class companyReward {};
+
             class clientInit {};
             class clientTick {};
             class buyBase {};
@@ -108,6 +117,8 @@ class CfgFunctions {
             class contractCatalog {};
             class contractProfile {};
             class contractSites {};
+            class contractSiteAvailable {};
+            class contractPlanAvailable {};
             class contractPlan {};
             class contractBase {};
             class contractFar {};

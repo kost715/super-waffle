@@ -65,6 +65,8 @@ call ALSPMC_fnc_reconcile;
 call ALSPMC_fnc_save;
 call ALSPMC_fnc_terminalInit;
 call ALSPMC_fnc_questInit;
+call ALSPMC_fnc_companyInit;
+[{call ALSPMC_fnc_companyTick}, 2] call CBA_fnc_addPerFrameHandler;
 ALSPMC_ready = true;
 publicVariable "ALSPMC_ready";
 [{call ALSPMC_fnc_reconcile}, 2] call CBA_fnc_addPerFrameHandler;
