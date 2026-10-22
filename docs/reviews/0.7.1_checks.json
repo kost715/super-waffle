@@ -1,0 +1,302 @@
+{
+  "arma_runtime_tested": false,
+  "scope": "baseline safety, M1 company transactions and 0.7.1 fixes",
+  "syntax": [
+    {
+      "file": "fn_applyValues.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_buyBase.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_careerRestart.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_clientInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_clientTick.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyDo.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyEnsure.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyOf.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyReward.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companySave.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyState.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_companyTick.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractAssets.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractAttack.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractBase.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractBoss.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractCatalog.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractCivilians.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractEnd.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractEquip.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractFar.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractGarrison.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractHostility.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractMirror.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractOffers.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractPlan.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractPlanAvailable.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractProfile.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractReady.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractSave.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractScenario.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractSiteAvailable.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractSites.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractTeam.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractTick.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_contractWarBases.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_desktopDo.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_desktopOpen.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_desktopTick.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_desktopView.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_markBase.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_message.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_normalizeName.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_phoneBridge.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_phoneDo.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_phoneMsg.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_phoneSync.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_playerName.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_postInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questDo.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questKilled.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questMarker.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questSave.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questScenario.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questSite.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_questState.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_reconcile.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_requestAllowed.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_save.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_sellHouse.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_serverInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_setName.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_stateSet.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalCanUse.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalEnsure.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalFindSpot.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalRemove.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_terminalSync.sqf",
+      "passed": true
+    }
+  ],
+  "targeted": {
+    "passed": true,
+    "assertions": 191
+  },
+  "known_findings": {
+    "property_cache_returns_newly_owned_building": false
+  },
+  "full_legacy_suite_port_pending": true
+}

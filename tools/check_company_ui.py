@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Browser controls on real SQF fixture states; CEF/RPC transport is modeled."""
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from build import game_payload
@@ -8,9 +9,14 @@ from build import game_payload
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def text_of_names(company):
+    return {uid: bytes(v).decode() if all(n < 256 for n in v) else "".join(map(chr, v))
+            for uid, v in company.get("names", {}).items()}
+
+
 def main():
     addon = ROOT / "addons/alspmc_core"
-    reports = ROOT / "reports/stage1-0.7.0"
+    reports = ROOT / "reports/stage1-0.7.1"
     owner = json.loads((reports / "company-owner-state.json").read_text())[0]
     manager = json.loads((reports / "company-manager-state.json").read_text())[0]
     member = json.loads((reports / "company-member-state.json").read_text())[0]
@@ -22,7 +28,7 @@ def main():
              "bases": [], "nearby": [], "reply": 0, "ok": True, "company": owner}
     checks = []
     with sync_playwright() as play:
-        browser = play.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
+        browser = play.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"), args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1280, "height": 800})
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
@@ -81,11 +87,33 @@ def main():
         before = page.evaluate("__requests.length")
         page.get_by_role("button", name="Исключить…", exact=True).click()
         assert page.evaluate("__requests.length") == before
+        # 0.7.1: the active-time counter alone must not rebuild the panel.
+        owner["seconds"] += 120
+        update()
+        assert page.get_by_role("button", name="Подтвердить исключение", exact=True).count()
+        assert str(owner["seconds"] // 60) + " мин" in page.locator("#pmc-company-time").inner_text()
+        checks.append("pending confirmation survives a seconds-only server poll; time still updates")
         page.get_by_role("button", name="Подтвердить исключение", exact=True).click()
         assert latest()["op"] == "companyRemove"
         checks.append("removal requires a separate confirmation click")
         state.update(reply=latest()["token"], ok=True)
         update()
+        actor = owner["ledger"][0][1]
+        assert text_of_names(owner)[actor] + " · " in page.locator("#pmc-company").inner_text()
+        checks.append("ledger shows player names, not UIDs")
+        # Engine toArray may deliver Unicode code points; both forms decode.
+        owner["candidates"] = [{"uid": "ru", "name": [ord(c) for c in "Рубеж"]}, {"uid": "u8", "name": list("Север".encode())}]
+        update()
+        assert page.locator("#pmc-company-candidate option").all_inner_texts() == ["Рубеж", "Север"]
+        checks.append("Cyrillic names decode from code points and from UTF-8 bytes")
+        page.locator("#pmc-company-candidate").focus()
+        page.locator("#pmc-company-candidate").evaluate("e=>e.dataset.mark='open'")
+        owner["candidates"] = owner["candidates"] + [{"uid": "late", "name": list(b"Late")}]
+        update()
+        assert page.locator("#pmc-company-candidate").evaluate("e=>e.dataset.mark") == "open"
+        page.locator("#pmc-company-amount").focus()
+        page.wait_for_function("document.querySelectorAll('#pmc-company-candidate option').length===3")
+        checks.append("an open candidate list is rebuilt only after it loses focus")
         owner["candidates"] = [{"uid": "xss", "name": list('<img src=x onerror="alert(1)">'.encode())}]
         update()
         assert not page.locator("#pmc-company img").count()
@@ -111,6 +139,29 @@ def main():
         page.locator('nav [data-section="company"]').click()
         state.update(reply=latest()["token"], ok=True, company=owner)
         update()
+        # 0.7.1 remote cancel: owner outside the crew, base PC only, two confirmations.
+        state["quests"] = {"ready": True, "canStart": False, "reason": "active", "catalog": [], "history": [],
+                           "active": {"id": "q5", "type": "gov_convoy", "stage": "rendezvous", "mode": "convoy",
+                                      "canCancelRemote": True, "crew": [list(b"Test p2")], "rendezvousLeft": 600,
+                                      "teamSize": 1, "pay": 5000, "level": 1, "grid": "001001"}}
+        update()
+        page.locator('nav [data-section="quests"]').click()
+        page.locator('[data-alspmc-op="questTab"][data-alspmc-key="active"]').click()
+        assert "10:00" in page.locator("#alspmc-quests").inner_text()
+        before = page.evaluate("__requests.length")
+        page.get_by_role("button", name="Отменить контракт…", exact=True).click()
+        assert "Сейчас в группе: Test p2" in page.locator("#alspmc-confirm-text").inner_text()
+        page.locator("#alspmc-confirm-yes").click()
+        assert page.evaluate("__requests.length") == before
+        assert "необратима" in page.locator("#alspmc-confirm-text").inner_text()
+        assert page.locator("#alspmc-confirm-yes").inner_text() == "Да, отменить без награды"
+        page.locator("#alspmc-confirm-yes").click()
+        assert latest()["op"] == "questCancelRemote" and latest()["key"] == "q5"
+        checks.append("remote contract cancel asks twice and sends only after the second confirmation")
+        state.update(reply=latest()["token"], ok=True)
+        state.pop("quests")
+        update()
+        page.locator('nav [data-section="company"]').click()
         for width in [1280, 800]:
             page.set_viewport_size({"width": width, "height": 800})
             assert page.locator("body").evaluate("e=>e.scrollWidth<=innerWidth+1")

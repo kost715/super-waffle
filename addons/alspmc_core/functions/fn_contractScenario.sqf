@@ -37,6 +37,7 @@ switch (_mode) do {
         {if (!isNull _x) then {deleteGroup _x}} forEach (_job getOrDefault ["alspmcGroups", []]);
         if (_job getOrDefault ["alspmcBaseLeased", false]) then {["release", _job] call ALSPMC_fnc_contractGarrison};
         ["release", _job] call ALSPMC_fnc_contractHostility;
+        ["release", _job] call ALSPMC_fnc_contractCivilians;
         true
     };
     default {false};

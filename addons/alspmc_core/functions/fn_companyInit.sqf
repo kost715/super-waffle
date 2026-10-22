@@ -1,7 +1,21 @@
-if (!isServer) exitWith {};
+if (!isServer || {isRemoteExecuted && {!isNil "_fnc_scriptNameParent"} && {_fnc_scriptNameParent == _fnc_scriptName}}) exitWith {};
 ALSPMC_companiesReady = false;
 ALSPMC_companies = createHashMap;
 ALSPMC_companyInvites = createHashMap;
+ALSPMC_companyRequestAt = createHashMap;
+// Optional last-seen display names. Invalid data only loses names, never money.
+ALSPMC_playerNames = createHashMap;
+[["alspmc_player_names_v1"]] call ALS_fnc_dbLoading;
+private _known = ["alspmc_player_names_v1", [1, []]] call ALS_fnc_dbGet;
+if (_known isEqualType [] && {count _known == 2} && {(_known select 0) isEqualTo 1} && {(_known select 1) isEqualType []} && {
+    ((_known select 1) findIf {!(_x isEqualType [] && {count _x == 2} && {(_x select 0) isEqualType ""} && {(_x select 1) isEqualType []} && {
+        count (_x select 1) <= 256} && {((_x select 1) findIf {!(_x isEqualType 0)}) < 0})}) < 0
+}) then {
+    {ALSPMC_playerNames set [_x select 0, +(_x select 1)]} forEach (_known select 1);
+    [["alspmc_player_names_v1"], true] call ALS_fnc_dbLoading;
+} else {
+    ["ALSPMC: player name cache invalid; original key preserved, names shown as UID"] call ALS_fnc_log;
+};
 [["alspmc_companies_v1"]] call ALS_fnc_dbLoading;
 private _migrate = isNil {["alspmc_companies_v1"] call ALS_fnc_dbGet};
 private _saved = ["alspmc_companies_v1", [1, []]] call ALS_fnc_dbGet;

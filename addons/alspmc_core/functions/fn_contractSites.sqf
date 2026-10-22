@@ -42,8 +42,8 @@ if (_kind == "government") then {
         {
             private _building = _x;
             private _floor = [_building] call ALS_fnc_houseFloor;
-            // Never stage a contract inside a player's own property.
-            if (_floor isNotEqualTo [] && {!(([getPosASL _building] call ALS_fnc_houseKey) in ALS_owned)}) exitWith {
+            // Never a player's property or a commercial venue: try the next building.
+            if (_floor isNotEqualTo [] && {["government", [[], "", _building]] call ALSPMC_fnc_contractSiteAvailable}) exitWith {
                 if ((_out findIf {(_x select 2) isEqualTo _building}) < 0) then {
                     _out pushBack [getPosATL _building, str getPosATL _building, _building, _floor select 0, ""];
                 };

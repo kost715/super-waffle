@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise desktop HTML using the exact shared ASCII script shipped in PBO."""
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from build import game_payload
@@ -19,7 +20,7 @@ def main():
     reports.mkdir(exist_ok=True)
     checks = []
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
+        browser = p.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"), args=["--no-sandbox"])
         page = browser.new_page(viewport={"width":1280,"height":800})
         page.set_default_timeout(5000)
         errors = []

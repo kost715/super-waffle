@@ -58,11 +58,23 @@ isNil {
     } && {(_crew get "job") isEqualTo -1}) then {ALS_crews deleteAt (_crew get "id")};
     private _ratingOwner = _job getOrDefault ["alspmcRatingOwner", _row select 0];
     private _founderUnit = [_ratingOwner] call ALS_fnc_findPlayer;
+    // The board belongs to the owner; any online member can stand in for them.
+    if (isNull _founderUnit) then {
+        private _company = ALSPMC_companies getOrDefault [_job getOrDefault ["alspmcCompany", ""], createHashMap];
+        {
+            private _member = [_x] call ALS_fnc_findPlayer;
+            if (!isNull _member) exitWith {_founderUnit = _member};
+        } forEach (keys (_company getOrDefault ["members", createHashMap]));
+    };
+    private _settlement = [_meta select 0, _won, _job getOrDefault ["alspmcOfferSlot", ""]];
     if (!isNull _founderUnit) then {
-        [_founderUnit, _meta select 0, _won, _job getOrDefault ["alspmcOfferSlot", ""]] call ALSPMC_fnc_contractOffers;
+        ([_founderUnit] + _settlement) call ALSPMC_fnc_contractOffers;
     } else {
-        // Rebuild at the founder's next visit if the owner is offline.
-        ALSPMC_contractBoards deleteAt _ratingOwner;
+        // Nobody to plan sites for now: settle the slot at the next board view, so
+        // a failed type still returns instead of the whole board being rerolled.
+        private _queue = missionNamespace getVariable ["ALSPMC_boardSettlements", createHashMap];
+        _queue set [_ratingOwner, (_queue getOrDefault [_ratingOwner, []]) + [_settlement]];
+        ALSPMC_boardSettlements = _queue;
     };
     call ALS_fnc_crewPublish;
     call ALSPMC_fnc_questSave;

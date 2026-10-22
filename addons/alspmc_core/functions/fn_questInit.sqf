@@ -46,6 +46,19 @@ if (!_valid) exitWith {
     ["ALSPMC: quest journal invalid; original journal preserved, only quests disabled"] call ALS_fnc_log;
 };
 [["alspmc_quests_v1"], true] call ALS_fnc_dbLoading;
+// Optional key: which company ran each operation, so every member sees its
+// history. A separate key keeps the 0.7.0 journal format unchanged.
+ALSPMC_questCompanies = createHashMap;
+[["alspmc_quest_companies_v1"]] call ALS_fnc_dbLoading;
+private _owners = ["alspmc_quest_companies_v1", [1, []]] call ALS_fnc_dbGet;
+if (_owners isEqualType [] && {count _owners == 2} && {(_owners select 0) isEqualTo 1} && {(_owners select 1) isEqualType []} && {
+    ((_owners select 1) findIf {!(_x isEqualType [] && {count _x == 2} && {(_x select 0) isEqualType 0} && {(_x select 1) isEqualType ""})}) < 0
+}) then {
+    {if ((_x select 0) in ALSPMC_questRecords) then {ALSPMC_questCompanies set [_x select 0, _x select 1]}} forEach (_owners select 1);
+    [["alspmc_quest_companies_v1"], true] call ALS_fnc_dbLoading;
+} else {
+    ["ALSPMC: contract company links invalid; original key preserved, shared history limited"] call ALS_fnc_log;
+};
 // Native coopInit does not restore live AI/jobs. Never revive or pay an old ID.
 private _interrupted = false;
 {

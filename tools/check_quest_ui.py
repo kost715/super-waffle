@@ -6,6 +6,7 @@ payload shipped in the PBO; no browser demo data or Arma engine is involved.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from build import game_payload
@@ -22,7 +23,7 @@ def main():
     script = game_payload("phone.js", (ROOT / "addons/alspmc_core/ui/phone.js").read_bytes()).decode("ascii")
     results = []
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
+        browser = p.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"), args=["--no-sandbox"])
         for variant, path in [("original", args.original), ("ru-beta3", args.russian),
                               ("desktop", ROOT / "addons/alspmc_core/ui/desktop.html")]:
             desktop = variant == "desktop"

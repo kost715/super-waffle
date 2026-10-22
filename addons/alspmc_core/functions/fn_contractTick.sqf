@@ -14,6 +14,12 @@ if !([_plan] call ALSPMC_fnc_contractPlanAvailable) exitWith {
     ["site"] call _fail; ["failed",0]
 };
 private _stage = _job get "state";
+// Nobody able to confirm readiness must not hold the company's only operation forever.
+if (_stage == "rendezvous" && {
+    diag_tickTime - (_job getOrDefault ["alspmcStartedAt", diag_tickTime]) > ((getNumber (configFile >> "ALSPMC_Settings" >> "contractRendezvousSeconds")) max 300)
+}) exitWith {
+    ["timeout"] call _fail; ["failed",0]
+};
 if (_mode == "base") then {
     private _owner = ((missionNamespace getVariable ["ALS_war", createHashMap]) getOrDefault ["own", createHashMap]) getOrDefault [_plan get "source", "Military"];
     if (_owner != (_plan getOrDefault ["owner", _owner])) then {["site"] call _fail};

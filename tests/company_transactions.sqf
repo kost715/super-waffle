@@ -52,7 +52,7 @@ TEST_realTime=TEST_realTime+601;
 [!([_p3,"companyAccept",[0,_id],112] call ALSPMC_fnc_phoneDo),"M1 expired invitation fails closed"] call TEST_fnc_assert;
 ["p3"] call ALSPMC_fnc_companyEnsure;
 [[player,"companyInvite",[_company get "revision","p3"],113,_computer] call ALSPMC_fnc_desktopDo isEqualTo false,"M1 owner of another PMC cannot be invited"] call TEST_fnc_assert;
-ALSPMC_companyInvites set ["p3",[_id,TEST_realTime+600]];
+ALSPMC_companyInvites set ["p3",createHashMapFromArray [[_id,TEST_realTime+600]]];
 [!([_p3,"companyAccept",[0,_id],114] call ALSPMC_fnc_phoneDo),"M1 stale invitation cannot create double membership"] call TEST_fnc_assert;
 ["money_p1",[10,1000]] call ALS_fnc_dbSet;
 _rev=_company get "revision";
@@ -66,7 +66,10 @@ _rev=_company get "revision";
 _company set ["debt",100]; _company set ["reserve",150];
 [!([player,"companyWithdraw",[_company get "revision",51],120,_computer] call ALSPMC_fnc_desktopDo),"M1 debt and salary reserve protect unavailable funds"] call TEST_fnc_assert;
 _rev=_company get "revision";
+// 0.7.1: money/membership operations are limited to two per second per player.
+TEST_realTime=TEST_realTime+1;
 [[player,"companyWithdraw",[_rev,50],121,_computer] call ALSPMC_fnc_desktopDo,"M1 owner may withdraw only free balance"] call TEST_fnc_assert;
+TEST_realTime=TEST_realTime+1;
 [!([player,"companyWithdraw",[_rev,50],122,_computer] call ALSPMC_fnc_desktopDo),"M1 concurrent second withdrawal on same revision rejected"] call TEST_fnc_assert;
 [_company get "balance"==250 && {(["p1"] call ALS_fnc_moneyGet) select 1==750},"M1 transfer conserves funds and excludes cash"] call TEST_fnc_assert;
 private _forged="Land_PCSet_01_screen_F" createVehicle [100,100,0]; _forged setVariable ["ALSPMC_terminalKey","h_100_100"];
@@ -154,6 +157,7 @@ ALSPMC_fnc_contractPlan=_planner;
 [!([player,"companyLeave",[_company get "revision",""],131,_computer] call ALSPMC_fnc_desktopDo),"M1 owner cannot leave an orphaned company"] call TEST_fnc_assert;
 [[player,"companyInvite",[_company get "revision","p2"],132,_computer] call ALSPMC_fnc_desktopDo,"M1 former employee can receive new invitation"] call TEST_fnc_assert;
 [[_p2,"companyAccept",[0,_id],133] call ALSPMC_fnc_phoneDo,"M1 former employee explicitly rejoins"] call TEST_fnc_assert;
+TEST_realTime=TEST_realTime+1;
 [[_p2,"companyLeave",[_company get "revision",""],134,_computer] call ALSPMC_fnc_desktopDo,"M1 employee can leave after operation ends"] call TEST_fnc_assert;
 [count (["p2"] call ALSPMC_fnc_companyOf)==0,"M1 voluntary exit releases membership"] call TEST_fnc_assert;
 // Fresh ownership filtering at cache, plan readiness and active tick boundaries.

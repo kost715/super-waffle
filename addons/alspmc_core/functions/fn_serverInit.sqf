@@ -61,6 +61,11 @@ ALSPMC_industrialKeys = (keys ALS_houses) select {((ALS_houses get _x) param [6,
 // Compose with the original function; ordinary property sales stay native.
 ALSPMC_nativeHouseSell = ALS_fnc_houseSell;
 ALS_fnc_houseSell = {_this call ALSPMC_fnc_sellHouse};
+// Same composition for a new career: PMC records go before the original runs.
+if (isNil "ALSPMC_nativeCareerRestart") then {
+    ALSPMC_nativeCareerRestart = ALS_fnc_careerRestart;
+    ALS_fnc_careerRestart = {_this call ALSPMC_fnc_careerRestart};
+};
 call ALSPMC_fnc_reconcile;
 call ALSPMC_fnc_save;
 call ALSPMC_fnc_terminalInit;

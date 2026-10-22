@@ -16,6 +16,7 @@ class CfgVehicles {
     class APERSMine {};
     class TestBuilding_F {};
     class TestPlayer_F {};
+    class HeadlessClient_F {};
     class C_Man_formal_1_F {};
     class C_Nikos_aged {};
     class I_C_Soldier_Bandit_1_F: CAManBase {};

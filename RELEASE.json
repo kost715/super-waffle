@@ -1,9 +1,9 @@
 {
-  "version": "0.7.0_alpha1",
-  "based_on": "0.6.3_alpha1",
-  "stage": "1: persistent company, roles and treasury",
+  "version": "0.7.1_alpha1",
+  "based_on": "0.7.0_alpha1",
+  "stage": "1 fixes: compatibility with LifeSim 0.13.0 sources",
   "requirements": "dist/LifeSim_PMC_PC_Design_RU.pdf",
-  "report": "docs/STAGE_1_COMPANY_TREASURY_RU.md",
+  "report": "docs/RELEASE_0.7.1_RU.md",
   "independent_review_performed": false,
   "arma_runtime_tested": false
 }

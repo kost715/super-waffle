@@ -21,20 +21,24 @@ if !(missionNamespace getVariable ["ALSPMC_questMarkerOn", false]) then {
 "ALSPMC_contractTarget" setMarkerTextLocal (if ((_job getOrDefault ["routeTotal", 0]) > 0) then {
     (localize "STR_ALSPMC_contract_patrol_point") + " " + str (((_job getOrDefault ["routeDone", 0]) + 1) min (_job get "routeTotal")) + "/" + str (_job get "routeTotal")
 } else {localize "STR_ALSPMC_quest_target"});
+// Runs four times a second: move existing markers, create/delete only on change.
 private _destination = _job getOrDefault ["destination", []];
-deleteMarkerLocal "ALSPMC_contractDestination";
-if (_destination isNotEqualTo []) then {
-    createMarkerLocal ["ALSPMC_contractDestination", _destination];
-    "ALSPMC_contractDestination" setMarkerTypeLocal "mil_end";
-    "ALSPMC_contractDestination" setMarkerColorLocal "ColorGUER";
-    "ALSPMC_contractDestination" setMarkerTextLocal (localize "STR_ALSPMC_contract_destination");
+if (_destination isEqualTo []) then {deleteMarkerLocal "ALSPMC_contractDestination"} else {
+    if ((getMarkerColor "ALSPMC_contractDestination") == "") then {
+        createMarkerLocal ["ALSPMC_contractDestination", _destination];
+        "ALSPMC_contractDestination" setMarkerTypeLocal "mil_end";
+        "ALSPMC_contractDestination" setMarkerColorLocal "ColorGUER";
+        "ALSPMC_contractDestination" setMarkerTextLocal (localize "STR_ALSPMC_contract_destination");
+    } else {"ALSPMC_contractDestination" setMarkerPosLocal _destination};
 };
 private _sector = _job getOrDefault ["sector", []];
-deleteMarkerLocal "ALSPMC_contractSector";
-if (count _sector == 2) then {
-    createMarkerLocal ["ALSPMC_contractSector", _sector select 0];
-    "ALSPMC_contractSector" setMarkerShapeLocal "ELLIPSE";
+if (count _sector != 2) then {deleteMarkerLocal "ALSPMC_contractSector"} else {
+    if ((getMarkerColor "ALSPMC_contractSector") == "") then {
+        createMarkerLocal ["ALSPMC_contractSector", _sector select 0];
+        "ALSPMC_contractSector" setMarkerShapeLocal "ELLIPSE";
+        "ALSPMC_contractSector" setMarkerColorLocal "ColorYellow";
+        "ALSPMC_contractSector" setMarkerAlphaLocal 0.2;
+    };
+    "ALSPMC_contractSector" setMarkerPosLocal (_sector select 0);
     "ALSPMC_contractSector" setMarkerSizeLocal [_sector select 1, _sector select 1];
-    "ALSPMC_contractSector" setMarkerColorLocal "ColorYellow";
-    "ALSPMC_contractSector" setMarkerAlphaLocal 0.2;
 };

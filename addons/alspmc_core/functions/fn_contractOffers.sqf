@@ -4,6 +4,12 @@ params ["_unit", ["_settledType", ""], ["_success", true], ["_slot", ""]];
 private _uid = [_unit] call ALS_fnc_uid;
 private _c = [_uid] call ALSPMC_fnc_companyOf;
 if (count _c > 0) then {_uid = _c get "owner"};
+private _queue = missionNamespace getVariable ["ALSPMC_boardSettlements", createHashMap];
+if (_settledType == "" && {_uid in _queue}) exitWith {
+    private _out = createHashMap;
+    {_out = ([_unit] + _x) call ALSPMC_fnc_contractOffers} forEach (_queue deleteAt _uid);
+    _out
+};
 private _boards = missionNamespace getVariable ["ALSPMC_contractBoards", createHashMap];
 private _board = _boards getOrDefault [_uid, createHashMap];
 private _keep = count _board > 0 && {diag_tickTime < (_board get "expires")};

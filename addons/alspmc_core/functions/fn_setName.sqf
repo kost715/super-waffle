@@ -1,9 +1,13 @@
 params [["_unit", objNull, [objNull]], ["_bytes", [], [[]]]];
 if !([_unit] call ALSPMC_fnc_requestAllowed) exitWith {false};
 private _uid = [_unit] call ALS_fnc_uid;
-if (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])) exitWith {false};
+if (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])) exitWith {
+    ["STR_ALSPMC_company_unavailable"] remoteExecCall ["ALSPMC_fnc_message", _unit]; false
+};
 private _company = [_uid] call ALSPMC_fnc_companyOf;
-if (count _company > 0 && {(_company get "owner") != _uid}) exitWith {false};
+if (count _company > 0 && {(_company get "owner") != _uid}) exitWith {
+    ["STR_ALSPMC_owner_only"] remoteExecCall ["ALSPMC_fnc_message", _unit]; false
+};
 if !("alspmc_pmc" in (["lic_" + _uid, []] call ALS_fnc_dbGet)) exitWith {
     ["STR_ALSPMC_need_license"] remoteExecCall ["ALSPMC_fnc_message", _unit]; false
 };

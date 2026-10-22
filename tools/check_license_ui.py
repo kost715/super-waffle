@@ -2,6 +2,7 @@
 """Check that the old office UI hides only the PMC licence moved to phone."""
 import argparse
 import json
+import os
 from pathlib import Path
 import xml.etree.ElementTree as ET
 from playwright.sync_api import sync_playwright
@@ -25,7 +26,7 @@ def main():
     reports = ROOT/"reports"
     reports.mkdir(exist_ok=True)
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path="/usr/bin/chromium",args=["--no-sandbox"])
+        browser = p.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"),args=["--no-sandbox"])
         for variant, path in [("original",args.original),("ru-beta3",args.russian)]:
             for encoding, text in cases.items():
                 page = browser.new_page(viewport={"width":1280,"height":900})

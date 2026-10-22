@@ -121,7 +121,29 @@ TEST_fnc_addPVEH = {0};
 TEST_fnc_positionATL = {getPos _this};
 TEST_fnc_vehicle = {_this};
 TEST_fnc_players = {TEST_players};
-TEST_fnc_entities = {[]};
+// Headless clients are the only fixture entities enumerated by class.
+TEST_fnc_entities = {if (_this isEqualTo "HeadlessClient_F") then {TEST_players select {(_x getVariable ["TEST_class", ""]) == "HeadlessClient_F"}} else {[]}};
+// 0.7.1 hostages/defenders: captive state, nearby units, all groups and class checks.
+TEST_nearEntities = [];
+TEST_fnc_captive = {_this getVariable ["TEST_captive", false]};
+TEST_fnc_setCaptive = {(_this select 0) setVariable ["TEST_captive", _this select 1]};
+TEST_fnc_nearEntities = {
+    private _compatCenter = _this select 0;
+    private _compatRadius = (_this select 1) select 1;
+    TEST_nearEntities select {!isNull _x && {(_x distance _compatCenter) <= _compatRadius}}
+};
+TEST_fnc_allGroups = {_this apply {_x select 0}};
+TEST_fnc_isKindOf = {
+    params ["_compatLeft", "_compatParent"];
+    private _compatClass = if (_compatLeft isEqualType objNull) then {_compatLeft getVariable ["TEST_class", ""]} else {_compatLeft};
+    private _compatCfg = configFile >> "CfgVehicles" >> _compatClass;
+    private _compatFound = false;
+    while {isClass _compatCfg && {!_compatFound}} do {
+        _compatFound = (configName _compatCfg) == _compatParent;
+        _compatCfg = inheritsFrom _compatCfg;
+    };
+    _compatFound
+};
 TEST_fnc_noParent = {objNull};
 TEST_fnc_typeOf = {_this getVariable ["TEST_class", ""]};
 TEST_fnc_configOf = {configFile >> "CfgVehicles" >> (_this getVariable ["TEST_class", ""])};
@@ -289,8 +311,15 @@ TEST_fnc_compatCode = {
             case "CALLBINARY setbehaviour";
             case "CALLBINARY setcombatmode";
             case "CALLBINARY setskill";
-            case "CALLBINARY disableai";
-            case "CALLBINARY setcaptive": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_enginePair", "CALLBINARY call"]};
+            case "CALLBINARY disableai": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_enginePair", "CALLBINARY call"]};
+            case "CALLBINARY setcaptive": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_setCaptive", "CALLBINARY call"]};
+            case "CALLUNARY captive": {_compatOut append ["GETVARIABLE TEST_fnc_captive", "CALLBINARY call"]};
+            case "CALLBINARY nearentities": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_nearEntities", "CALLBINARY call"]};
+            case "CALLNULAR allgroups": {_compatOut append ["GETVARIABLE TEST_groupMembers", "GETVARIABLE TEST_fnc_allGroups", "CALLBINARY call"]};
+            case "CALLBINARY iskindof": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_isKindOf", "CALLBINARY call"]};
+            case "CALLBINARY playmovenow": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_enginePair", "CALLBINARY call"]};
+            // Flat fixture terrain: ASL and ATL coincide.
+            case "CALLUNARY getposasl": {_compatOut append ["GETVARIABLE TEST_fnc_positionATL", "CALLBINARY call"]};
             case "CALLBINARY addrating": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_ratingAdd", "CALLBINARY call"]};
             case "CALLBINARY addeventhandler": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_addEH", "CALLBINARY call"]};
             case "CALLBINARY getfriend": {_compatOut append ["MAKEARRAY 2", "GETVARIABLE TEST_fnc_getFriend", "CALLBINARY call"]};

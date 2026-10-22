@@ -36,6 +36,7 @@ private _make = {
     _unit setVariable ["BIS_enableRandomization", false];
     _unit setVariable ["ALS_hitSquad", true, true]; _unit setVariable ["ALS_hostile", true, true];
     _unit setVariable ["ALS_jobEvObj", true];
+    _unit setVariable ["ALSPMC_contractEnemy", _job get "alspmcQuestId"];
     [_unit, _level, _i] call ALSPMC_fnc_contractEquip;
     _created pushBack _unit; _enemies pushBack [_unit, false];
     _unit
@@ -55,6 +56,7 @@ if (_ok && {_vehicleClass != ""}) then {
         if (isNull _vehicle) then {_ok = false} else {
             _created pushBack _vehicle;
             _vehicle setVariable ["ALS_jobEvObj", true]; _vehicle setVariable ["ALS_hostile", true, true];
+            _vehicle setVariable ["ALSPMC_contractEnemy", _job get "alspmcQuestId"];
             _vehicle lock 2;
             private _group = createGroup [_side, true]; _groups pushBack _group;
             if (isNull _group) then {_ok = false};

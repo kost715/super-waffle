@@ -12,7 +12,13 @@ private _ok = false;
 if ((_op select [0,7]) == "company") then {
     _ok = [_unit, _op, _arg, _computer] call ALSPMC_fnc_companyDo;
     [_unit, _token, _ok] call ALSPMC_fnc_phoneSync;
-} else {_ok = [_unit, _op, _arg, _token] call ALSPMC_fnc_phoneDo};
+} else {
+    // Remote cancellation exists only at a base PC; phoneDo has no route to it.
+    if (_op == "questCancelRemote") then {
+        _ok = [_unit, _op, _arg, _token, _computer] call ALSPMC_fnc_questDo;
+        [_unit, _token, _ok] call ALSPMC_fnc_phoneSync;
+    } else {_ok = [_unit, _op, _arg, _token] call ALSPMC_fnc_phoneDo};
+};
 private _state = +(_unit getVariable ["ALSPMC_phoneState", createHashMap]);
 _state set ["company", [_unit, true] call ALSPMC_fnc_companyState];
 _state set ["terminalKey", _key];

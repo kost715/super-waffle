@@ -17,11 +17,11 @@ def main():
     p.add_argument('--lifesim',type=Path,required=True)
     p.add_argument("--transactions-only",action="store_true",help="Development probe: skip syntax pass")
     args=p.parse_args()
-    reports=ROOT/'reports/stage1-0.7.0'
+    reports=ROOT/'reports/stage1-0.7.1'
     reports.mkdir(parents=True,exist_ok=True)
     common=['--command-dummy-binary','4|ctrlWebBrowserAction','--command-dummy-unary','fromJSON','--command-dummy-unary','toJSON']
     config=ROOT/'addons/alspmc_core/config.cpp'
-    report={'arma_runtime_tested':False,'scope':'baseline safety and M1 company transactions','syntax':[]}
+    report={'arma_runtime_tested':False,'scope':'baseline safety, M1 company transactions and 0.7.1 fixes','syntax':[]}
     for sqf in ([] if args.transactions_only else sorted((ROOT/'addons/alspmc_core/functions').glob('*.sqf'))):
         ok,output=run(args.vm,[*common,'--parse-only','--input-config',str(config),'--input-sqf',str(sqf)])
         report['syntax'].append({'file':sqf.name,'passed':ok})
@@ -37,6 +37,7 @@ def main():
     } forEach ["contractBoss","stateSet"];
     call ("tests/baseline_063_review.sqf" call TEST_fnc_load);
     call ("tests/company_transactions.sqf" call TEST_fnc_load);
+    call ("tests/fixes_071.sqf" call TEST_fnc_load);
     diag_log ("TEST_COMPLETE: " + str TEST_count + " assertions");
     ''')
     ok,output=run(args.vm,[*common,'--virtual',str(ROOT)+'|/','--virtual',str(ROOT/'addons/alspmc_core')+'|/alspmc_core','--virtual',str(args.lifesim)+'|/native','--input-config',str(config),'--input-config',str(ROOT/'tests/world_config.hpp'),'--input-sqf',str(entry)])

@@ -1,5 +1,6 @@
 params ["_dead", "_killer", ["_instigator", objNull]];
 if (!isServer || {!(missionNamespace getVariable ["ALSPMC_questsReady", false])}) exitWith {};
+if (!isNil {_dead getVariable "ALS_npc"}) then {["killed", createHashMap, _this] call ALSPMC_fnc_contractCivilians};
 // New contracts count simultaneous deaths, not permanent elimination. Capture
 // the last death now so an immediate respawn before the next native tick cannot
 // erase a wipe. Enemy death records survive subsequent body cleanup/streaming.

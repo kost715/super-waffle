@@ -1,9 +1,11 @@
-// Contract enemies always fight on EAST. In LifeSim 0.13.0 no native AI uses
-// EAST: police and the army are WEST, Opfor and the Syndikat gangs are
-// RESISTANCE; only players with a lethal warrant are moved to EAST. The
-// directed hostility leased below therefore reaches this addon's own units
-// only. Never switch to another side: RESISTANCE would turn every native gang
-// and Opfor garrison on the map against civilians.
+// Contract enemies always fight on EAST. In LifeSim 0.13.0 police and the army
+// are WEST, Opfor and the Syndikat gangs are RESISTANCE, players with a lethal
+// warrant are moved to EAST, and so are the defenders LifeSim 0.12.1 raises at
+// player-held war bases (fn_warArms). Those defenders are moved below to
+// RESISTANCE, which LifeSim gives the same relations as EAST (fn_lawInit), so
+// the hostility leased here reaches this addon's own units only. Never switch
+// the enemies to another side: RESISTANCE would turn every native gang and
+// Opfor garrison on the map against civilians.
 // Never change a player's side, rating, captive state, group or wanted logic.
 params ["_action", "_job"];
 private _side = east;
@@ -37,7 +39,27 @@ if (_action == "release") then {_leases deleteAt _id} else {
     _from setFriend [_to, 0];
 } forEach (_leases getOrDefault [_id, []]);
 ALSPMC_hostileContracts = _leases; ALSPMC_hostileRelations = _relations;
+// Only while RESISTANCE still has LifeSim's EAST relations; another mod may differ.
+if (count _leases > 0 && {(resistance getFriend civilian) >= 0.6} && {(resistance getFriend west) < 0.6}) then {
+    {
+        private _group = _x;
+        private _units = units _group;
+        if (side _group == _side && {_units isNotEqualTo []} && {(_units findIf {isPlayer _x}) < 0} && {
+            (_units findIf {!isNil {_x getVariable "ALS_defender"}}) >= 0
+        }) then {
+            private _moved = createGroup [resistance, true];
+            if (!isNull _moved) then {
+                private _baseID = ((_units select {!isNil {_x getVariable "ALS_defender"}}) select 0) getVariable "ALS_defender";
+                private _at = (((missionNamespace getVariable ["ALS_war", createHashMap]) getOrDefault ["bases", []]) select {(_x select 0) == _baseID}) param [0, []];
+                _units joinSilent _moved;
+                _moved setBehaviour "AWARE"; _moved setCombatMode "RED";
+                [_moved, if (_at isEqualTo []) then {getPosATL leader _moved} else {_at select 1}, 60] call BIS_fnc_taskDefend;
+            };
+        };
+    } forEach allGroups;
+};
 if (_action == "tick") then {
+    ["tick", _job] call ALSPMC_fnc_contractCivilians;
     private _living = ([_job] call ALSPMC_fnc_contractTeam) select {side group _x != _side};
     private _protected = _job getOrDefault ["alspmcProtected", objNull];
     if (!isNull _protected && {alive _protected}) then {_living pushBack _protected};

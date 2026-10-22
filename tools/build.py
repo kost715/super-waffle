@@ -9,9 +9,9 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.7.0_alpha1"
+VERSION = "0.7.1_alpha1"
 MOD = "@LifeSim_PMC"
-STAMP = (2026, 10, 21, 0, 0, 0)
+STAMP = (2026, 10, 22, 0, 0, 0)
 
 
 def game_payload(name: str, data: bytes) -> bytes:
@@ -59,7 +59,7 @@ def main() -> None:
         dest = ROOT / "build" / MOD / name
         dest.write_bytes(data)
         package[f"{MOD}/{name}"] = data
-    for name in ["CONTRACTS_RU.md", "GAME_CHECKLIST_RU.md", "VALIDATION_RU.md", "STAGE_1_COMPANY_TREASURY_RU.md"]:
+    for name in ["CONTRACTS_RU.md", "GAME_CHECKLIST_RU.md", "VALIDATION_RU.md", "STAGE_1_COMPANY_TREASURY_RU.md", "RELEASE_0.7.1_RU.md"]:
         data = (ROOT / "docs" / name).read_bytes()
         dest = ROOT / "build" / MOD / "docs" / name
         dest.parent.mkdir(parents=True, exist_ok=True)

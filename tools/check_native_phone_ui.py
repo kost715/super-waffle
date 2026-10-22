@@ -6,6 +6,7 @@ event engine and network transport are not available in this browser test.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from build import game_payload
@@ -23,7 +24,7 @@ def main():
     script = game_payload("phone.js",(ROOT/"addons/alspmc_core/ui/phone.js").read_bytes()).decode("ascii")
     checks = []
     with sync_playwright() as play:
-        browser = play.chromium.launch(executable_path="/usr/bin/chromium",args=["--no-sandbox"])
+        browser = play.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"),args=["--no-sandbox"])
         for variant,html,states in [("original",args.original,args.states_original),("ru-beta3",args.russian,args.states_russian)]:
             before,after,active,contract = json.loads(states.read_text())
             page = browser.new_page(viewport={"width":430,"height":900},user_agent="Arma 3 integration fixture")

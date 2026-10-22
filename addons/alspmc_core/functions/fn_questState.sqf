@@ -9,13 +9,18 @@ private _records = missionNamespace getVariable ["ALSPMC_questRecords", createHa
 private _active = createHashMap;
 private _history = [];
 private _ownActive = false;
+private _companyID = _company getOrDefault ["id", ""];
+private _boss = _companyID != "" && {((_company get "members") get _uid) in ["owner", "manager"]};
+private _recordCompanies = missionNamespace getVariable ["ALSPMC_questCompanies", createHashMap];
+private _rendezvousSeconds = (getNumber (configFile >> "ALSPMC_Settings" >> "contractRendezvousSeconds")) max 300;
 private _ids = keys _records;
 _ids sort false;
 {
     private _row = _records get _x;
     _row params ["_founder", "_status", "_pay", "_pos", "_team", "_start", "_end", "_reason"];
     if (_founder == _uid && {_status == "active"}) then {_ownActive = true};
-    if (_founder == _uid || {_uid in _team}) then {
+    // Company operations are visible to every member, also when accepted by a manager.
+    if (_founder == _uid || {_uid in _team} || {_companyID != "" && {(_recordCompanies getOrDefault [_x, ""]) == _companyID}}) then {
         private _view = createHashMapFromArray [["id", "q" + str _x], ["status", _status], ["pay", _pay],
             ["grid", mapGridPosition _pos], ["teamSize", count _team], ["reason", _reason], ["date", _end]];
         private _meta = (missionNamespace getVariable ["ALSPMC_contractMeta", createHashMap]) getOrDefault [_x, []];
@@ -45,7 +50,27 @@ _ids sort false;
                     ceil (((getNumber (configFile >> "ALSPMC_Settings" >> "contractSurveySeconds")) - (diag_tickTime - (_nativeJob get "alspmcSurveyAt"))) max 0)
                 } else {0}];
             };
-            _active = _view;
+            private _qid = _x;
+            private _job = if (_sameJob) then {_nativeJob} else {
+                (values ALS_coopJobs) param [(values ALS_coopJobs) findIf {(_x getOrDefault ["alspmcQuestId", -1]) == _qid}, createHashMap]
+            };
+            if (_job getOrDefault ["alspmcContract", false]) then {
+                if (!_sameJob) then {
+                    _view set ["pos", _job get "pos"]; _view set ["grid", mapGridPosition (_job get "pos")];
+                    _view set ["stage", _job get "state"]; _view set ["mode", _job get "alspmcMode"];
+                };
+                _view set ["rendezvousLeft", if ((_job get "state") == "rendezvous") then {
+                    ceil (((_job getOrDefault ["alspmcStartedAt", diag_tickTime]) + _rendezvousSeconds - diag_tickTime) max 0)
+                } else {-1}];
+                _view set ["canCancelRemote", _boss && {(_job getOrDefault ["alspmcCompany", ""]) == _companyID} && {
+                    (_job getOrDefault ["alspmcResult", ""]) == ""
+                }];
+                _view set ["crew", ((ALS_crews getOrDefault [_job get "crew", createHashMap]) getOrDefault ["members", []]) apply {
+                    [_x] call ALSPMC_fnc_playerName
+                }];
+            };
+            // The player's own crew operation wins over another visible one.
+            if (count _active == 0 || {_sameJob}) then {_active = _view};
         } else {if (count _history < 10) then {_history pushBack _view}};
     };
 } forEach _ids;

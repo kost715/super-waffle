@@ -1,4 +1,4 @@
-params ["_unit", "_op", "_arg", "_token"];
+params ["_unit", "_op", "_arg", "_token", ["_computer", objNull]];
 if !([_unit] call ALSPMC_fnc_requestAllowed) exitWith {false};
 if (!(missionNamespace getVariable ["ALSPMC_questsReady", false]) || {!(_arg isEqualType "")} || {_token <= 0}) exitWith {false};
 private _uid = [_unit] call ALS_fnc_uid;
@@ -16,14 +16,30 @@ isNil {
         if (!(_job getOrDefault ["alspmcContract", false]) || {"q" + str (_job get "alspmcQuestId") != _arg}) exitWith {};
         _ok = [_unit, _job] call ALSPMC_fnc_contractReady;
     };
-    if (_op == "questCancel") exitWith {
+    if (_op in ["questCancel", "questCancelRemote"]) exitWith {
         private _job = ALS_coopJobs getOrDefault [_crew getOrDefault ["job", -1], createHashMap];
+        private _company = createHashMap;
+        if (_op == "questCancelRemote") then {
+            // Owner/manager at their company's base PC, possibly outside the crew.
+            _job = (values ALS_coopJobs) param [(values ALS_coopJobs) findIf {"q" + str (_x getOrDefault ["alspmcQuestId", -1]) == _arg}, createHashMap];
+            _company = ALSPMC_companies getOrDefault [_job getOrDefault ["alspmcCompany", ""], createHashMap];
+            private _base = ALSPMC_bases getOrDefault [_computer getVariable ["ALSPMC_terminalKey", ""], []];
+            if (count _company == 0 || {_base isEqualTo []} || {(_base select 0) != (_company get "owner")} || {
+                !([_unit, _computer] call ALSPMC_fnc_terminalCanUse)
+            }) then {_job = createHashMap};
+        };
         if (!("alspmcQuestId" in _job) || {
             !([_uid, _job, _crew] call ALSPMC_fnc_contractBoss)
         } || {"q" + str (_job get "alspmcQuestId") != _arg} || {
             _job getOrDefault ["alspmcEnded", false]
         } || {(_job getOrDefault ["alspmcResult", ""]) != ""}) exitWith {};
         _job set ["alspmcResult", "cancelled"];
+        _company = ALSPMC_companies getOrDefault [_job getOrDefault ["alspmcCompany", ""], createHashMap];
+        if (count _company > 0) then {
+            private _ledger = _company get "ledger";
+            _ledger insert [0, [[date, _uid, 0, "contractCancel", _arg]]]; _company set ["ledger", _ledger select [0,100]];
+            call ALSPMC_fnc_companySave;
+        };
         [_job, 0] call ALS_fnc_coopEnd;
         _ok = true;
     };
@@ -78,6 +94,7 @@ isNil {
     private _qid = ALSPMC_questSequence;
     private _team = (_crew get "members") select {!isNull ([_x] call ALS_fnc_findPlayer)};
     ALSPMC_questRecords set [_qid, [_uid, "starting", _pay, _pos, +_team, date, [], ""]];
+    ALSPMC_questCompanies set [_qid, _company get "id"];
     private _offer = createHashMapFromArray [
         ["id", ALS_coopSeq], ["kind", "alspmc_eliminate"], ["min", 1], ["pay", _pay],
         // Native phonePush injects raw JSON into ExecJS. ASCII here also keeps
@@ -102,6 +119,7 @@ isNil {
     if (!_ok) then {
         _crew set ["offers", _oldOffers];
         ALSPMC_questRecords deleteAt _qid;
+        ALSPMC_questCompanies deleteAt _qid;
         if (_entry isNotEqualTo []) then {ALSPMC_contractMeta deleteAt _qid};
         if (_createdCrew) then {ALS_crews deleteAt (_crew get "id")};
         call ALS_fnc_crewPublish;

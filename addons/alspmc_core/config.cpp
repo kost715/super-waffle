@@ -45,6 +45,9 @@ class ALSPMC_Settings {
     contractSectorRadius = 250;
     contractReadyRadius = 150;
     contractPermanentCasualties = 0;
+    contractRendezvousSeconds = 1200;
+    contractHostageRadius = 300;
+    contractNpcRespawnSeconds = 150;
     contractRewardMultipliers[] = {1, 1.5, 2, 3, 4};
 };
 
@@ -76,6 +79,8 @@ class CfgFunctions {
             class companyState {};
             class companyDo {};
             class companyReward {};
+            class careerRestart {};
+            class playerName {};
 
             class clientInit {};
             class clientTick {};
@@ -133,6 +138,7 @@ class CfgFunctions {
             class contractAssets {};
             class contractBoss {};
             class contractHostility {};
+            class contractCivilians {};
             class contractOffers {};
             class contractGarrison {};
             class contractWarBases {};

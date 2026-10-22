@@ -2,6 +2,7 @@
 """Exercise the real original/RU phone with the shipped ASCII addon script."""
 import argparse
 import json
+import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from build import game_payload
@@ -23,7 +24,7 @@ def main():
     reports = ROOT/"reports"
     reports.mkdir(exist_ok=True)
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path="/usr/bin/chromium",args=["--no-sandbox"])
+        browser = p.chromium.launch(executable_path=os.environ.get("CHROMIUM", "/usr/bin/chromium"),args=["--no-sandbox"])
         for variant,path in [("original",args.original),("ru-beta3",args.russian)]:
             page = browser.new_page(viewport={"width":430,"height":900})
             page.set_default_timeout(6000)

@@ -16,13 +16,14 @@ TEST_fnc_assert = {
     "questInit", "questSave", "questDo", "questState", "questSite", "questScenario", "questKilled",
     "contractInit", "contractSave", "contractCatalog", "contractProfile", "contractSites", "contractPlan", "contractBase", "contractFar",
     "contractTeam", "contractAttack", "contractEquip", "contractReady", "contractScenario", "contractTick", "contractMirror", "contractEnd",
-    "contractAssets", "contractHostility", "contractOffers", "contractGarrison", "contractWarBases", "contractBoss", "stateSet", "companyOf", "companyEnsure", "companyInit", "companySave", "companyTick", "companyState", "companyDo", "companyReward", "contractSiteAvailable", "contractPlanAvailable"];
+    "contractAssets", "contractHostility", "contractOffers", "contractGarrison", "contractWarBases", "contractBoss", "stateSet", "companyOf", "companyEnsure", "companyInit", "companySave", "companyTick", "companyState", "companyDo", "companyReward", "contractSiteAvailable", "contractPlanAvailable",
+    "contractCivilians", "careerRestart", "playerName"];
 {
     missionNamespace setVariable ["ALS_fnc_" + _x,
         ("native/functions/fn_" + _x + ".sqf") call TEST_fnc_load];
 } forEach ["uid", "mine", "dbGet", "dbSet", "dbLoading", "moneyGet", "moneyAdd", "moneyPay", "houseClaim",
     "housePublish", "housePrice", "houseSell", "houseLock", "canUse", "bizGet", "bizCap", "bizPublish", "licInit", "licBuy", "licGrant", "licHas",
-    "crewOf", "coopAccept", "coopTick", "coopEnd", "companyOf", "companySave"];
+    "crewOf", "coopAccept", "coopTick", "coopEnd", "companyOf", "companySave", "houseKey"];
 
 // Only world/renderer side effects are fixtures. Transactions and catalog paths
 // above execute the actual separately supplied LifeSim functions.

@@ -1,6 +1,8 @@
 // Called only for an established legacy founder or a new base/name purchase.
+// isRemoteExecuted stays true inside a legitimate request's call chain; only a
+// client remote-executing this function directly (no calling function) is refused.
 params ["_uid"];
-if (!isServer || {!(missionNamespace getVariable ["ALSPMC_companiesReady", false])}) exitWith {createHashMap};
+if (!isServer || {isRemoteExecuted && {!isNil "_fnc_scriptNameParent"} && {_fnc_scriptNameParent == _fnc_scriptName}} || {!(missionNamespace getVariable ["ALSPMC_companiesReady", false])}) exitWith {createHashMap};
 private _company = [_uid] call ALSPMC_fnc_companyOf;
 if (count _company > 0) exitWith {_company};
 private _id = "pmc_" + _uid;

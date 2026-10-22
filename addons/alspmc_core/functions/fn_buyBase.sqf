@@ -15,9 +15,9 @@ isNil {
         if !("alspmc_pmc" in (["lic_" + _uid, []] call ALS_fnc_dbGet)) exitWith {
             ["STR_ALSPMC_need_license"] call _say
         };
-        if (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])) exitWith {false};
+        if (!(missionNamespace getVariable ["ALSPMC_companiesReady", false])) exitWith {["STR_ALSPMC_company_unavailable"] call _say};
         private _company = [_uid] call ALSPMC_fnc_companyOf;
-        if (count _company > 0 && {(_company get "owner") != _uid}) exitWith {false};
+        if (count _company > 0 && {(_company get "owner") != _uid}) exitWith {["STR_ALSPMC_owner_only"] call _say};
         private _h = ALS_houses getOrDefault [_key, []];
         if (count _h < 8) exitWith {["STR_ALSPMC_invalid_property"] call _say};
         if !((_h select 6) in getArray (configFile >> "ALSPMC_Settings" >> "allowedTypes")) exitWith {
