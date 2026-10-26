@@ -29,7 +29,7 @@
 
 | Материал | Состояние |
 | --- | --- |
-| Технический стенд S1 0.1.0 alpha 1 | Собственный мод, три тестовые миссии и консоль отношений; без LifeSim/CBA |
+| Технический стенд S1 0.1.1 alpha 1 | Собственный мод, три тестовые миссии и консоль отношений; без LifeSim/CBA |
 | Модель двух компаний и восьми точек | Согласованная спецификация; игровой реализации ещё нет |
 | Стартовое меню F1-UI1 | Работающий браузерный макет с условной картой |
 | Полная кампания, казна, контракты, снабжение и персонал | Дальнейшая реализация по дорожной карте |
@@ -40,8 +40,11 @@
 Его ZIP не выдаётся за новую игровую сборку по правилам F2. Проверки Arma не было.
 
 - [Техническая основа и исходники](standalone/README.md).
-- [Готовый архив S1](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1.zip).
-- [Архив исходников S1](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1_sources.zip).
+- [Готовый архив S1 0.1.1](standalone/dist/PMC_Standalone_0.1.1_s1_alpha1.zip) и
+  [исходники](standalone/dist/PMC_Standalone_0.1.1_s1_alpha1_sources.zip);
+  [аудит и исправления 0.1.1](standalone/docs/AUDIT_0.1.1_RU.md).
+- Прежняя сборка: [S1 0.1.0](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1.zip),
+  [исходники](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1_sources.zip).
 - [Отчёт S1](standalone/docs/S1_REPORT_RU.md) и [игровой чек-лист](standalone/docs/GAME_CHECKLIST_RU.md).
 - [История текущего направления](CHANGELOG.md).
 

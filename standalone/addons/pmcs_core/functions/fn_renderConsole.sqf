@@ -31,10 +31,15 @@ if ((_d getVariable ["PMCS_companyList",[]]) isNotEqualTo (_s get "companies")) 
 } forEach [2100,2101];
 _d setVariable ["PMCS_companyList",+(_s get "companies")];
 };
-private _list = _d displayCtrl 1500; lbClear _list;
-{_list lbAdd format ["%1 <-> %2: %3 [%4 / %5]", _x select 0, _x select 1,
-    localize (["STR_PMCS_NEUTRAL","STR_PMCS_HOSTILE"] select ((_x select 2)=="hostile")), _x select 3, _x select 4]} forEach (_s get "relations");
-if ((_s get "relations") isEqualTo []) then {_list lbAdd localize "STR_PMCS_ONE"};
+// State arrives every second; rebuild the list only when its rows changed, so
+// it does not flicker or lose its scroll position.
+if ((_d getVariable ["PMCS_relationRows", -1]) isNotEqualTo (_s get "relations")) then {
+    private _list = _d displayCtrl 1500; lbClear _list;
+    {_list lbAdd format ["%1 <-> %2: %3 [%4 / %5]", _x select 0, _x select 1,
+        localize (["STR_PMCS_NEUTRAL","STR_PMCS_HOSTILE"] select ((_x select 2)=="hostile")), _x select 3, _x select 4]} forEach (_s get "relations");
+    if ((_s get "relations") isEqualTo []) then {_list lbAdd localize "STR_PMCS_ONE"};
+    _d setVariable ["PMCS_relationRows", +(_s get "relations")];
+};
 private _actors = _s get "actors";
 private _living = {_x select 1} count _actors;
 (_d displayCtrl 1102) ctrlSetStructuredText parseText format [localize "STR_PMCS_PROBES", _living, count _actors,

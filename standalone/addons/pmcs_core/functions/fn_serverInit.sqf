@@ -39,7 +39,8 @@ diag_log format ["[PMCS S1] ready session=%1 companies=%2 actorsOK=%3", PMCS_ses
 addMissionEventHandler ["EntityKilled", {
     params ["_unit", "_killer"];
     if ((_unit getVariable ["PMCS_actorRole",""]) != "") then {
-        diag_log format ["[PMCS S1] killed role=%1 side=%2 killerSide=%3 killerRole=%4", _unit getVariable ["PMCS_actorRole",""], side group _unit, side group _killer, _killer getVariable ["PMCS_actorRole", "player-or-other"]];
+        // The victim's side was stored at creation: a dead unit's group can change.
+        diag_log format ["[PMCS S1] killed role=%1 side=%2 killerSide=%3 killerRole=%4", _unit getVariable ["PMCS_actorRole",""], _unit getVariable ["PMCS_actorSide", str side group _unit], side group _killer, _killer getVariable ["PMCS_actorRole", "player-or-other"]];
     };
 }];
 addMissionEventHandler ["PlayerDisconnected", {

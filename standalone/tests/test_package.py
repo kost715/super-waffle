@@ -74,7 +74,10 @@ class StandalonePackage(unittest.TestCase):
             self.assertEqual(len(re.findall(r'name="respawn_',sqm)),count)
             ids=re.findall(r'\bid=(\d+);',sqm)
             self.assertEqual(len(ids),len(set(ids)))
-            self.assertEqual(sqm.count('this setPosATL'),16)
+            # Init fields run on every machine, including late joiners: only the
+            # owner of a unit may move it, or each join teleports everyone.
+            self.assertEqual(sqm.count('init="if (local this) then {this setPosATL'),16)
+            self.assertNotIn('init="this setPosATL',sqm)
             self.assertIn(f'enabled = 1; companies = {count};',desc)
             self.assertIn('disabledAI = 1;',desc)
             self.assertIn('class Commands {mode = 0;',desc)

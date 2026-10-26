@@ -1,5 +1,10 @@
 if (!hasInterface || {missionNamespace getVariable ["PMCS_clientStarted", false]}) exitWith {};
 PMCS_clientStarted = true; PMCS_sequence = 0;
+// Slots are stored at a fixed height in mission.sqm and their init only moves a
+// unit on the machine that owns it. Put this machine's own unit on the ground
+// once, without touching anyone else (safe for late joiners).
+private _start = getPosATL player;
+if (isNull objectParent player && {abs (_start select 2) > 0.5}) then {player setPosATL [_start select 0, _start select 1, 0]};
 PMCS_clientPrefix = str systemTimeUTC;
 uiNamespace setVariable ["PMCS_state", createHashMap];
 uiNamespace setVariable ["PMCS_pending", []];

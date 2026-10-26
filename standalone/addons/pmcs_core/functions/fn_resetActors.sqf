@@ -21,6 +21,7 @@ private _create = {
             deleteVehicle _u; _ok = false;
         };
         _u setVariable ["PMCS_actorRole", _role, true];
+        _u setVariable ["PMCS_actorSide", str _side];
         _u setVariable ["PMCS_owned", true];
         _u setPosATL _free;
         _u setSkill 0.5; _u allowFleeing 0;

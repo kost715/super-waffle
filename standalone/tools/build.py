@@ -8,7 +8,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.1.0_s1_alpha1"
+VERSION = "0.1.1_s1_alpha1"
 STAMP = (2026,10,26,0,0,0)
 MOD = "@PMC_Standalone"
 
@@ -67,7 +67,7 @@ class CfgRemoteExec {{
         for i in range(amount):
             uid=sequence;sequence+=1
             px=x-4+(i%4)*2;py=y-4-(i//4)*2
-            attrs=f'skill=0.6;isPlayable=1;description="{company.upper()} operator {i+1}";name="pmcs_{company}_{i+1}";init="this setPosATL [{px},{py},0]";'
+            attrs=f'skill=0.6;isPlayable=1;description="{company.upper()} operator {i+1}";name="pmcs_{company}_{i+1}";init="if (local this) then {{this setPosATL [{px},{py},0]}}";'
             if first:attrs+='isPlayer=1;';first=False
             objects.append(f'''class Item{i} {{dataType="Object";class PositionInfo {{position[]={{{px},20,{py}}};}};side="{eden}";flags=7;class Attributes {{{attrs}}};id={uid};type="{unit}";atlOffset=0;}};''')
         groups.append(f'''class Item{len(groups)} {{dataType="Group";side="{eden}";class Entities {{items={amount};{''.join(objects)}}};class Attributes {{}};id={group_id};}};''')
@@ -121,7 +121,15 @@ def main():
     zip_write(src,sources)
     manifest={"version":VERSION,"game_files":len(game_files),"pbo_sha256":hashlib.sha256(pbo).hexdigest(),
         "archives":{p.name:{"bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()} for p in [ready,src]},"arma_runtime_tested":False}
-    (dist/"SHA256SUMS.txt").write_text(''.join(f"{row['sha256']}  {name}\n" for name,row in manifest['archives'].items()))
+    # Keep the hashes of earlier releases kept in dist/; replace only this version's rows.
+    sums=dist/"SHA256SUMS.txt"
+    rows={}
+    if sums.exists():
+        for line in sums.read_text().splitlines():
+            digest,name=line.split("  ",1)
+            if (dist/name).exists():rows[name]=digest
+    rows.update({name:row['sha256'] for name,row in manifest['archives'].items()})
+    sums.write_text(''.join(f"{rows[name]}  {name}\n" for name in sorted(rows)))
     reports=ROOT/"reports";reports.mkdir(exist_ok=True)
     (reports/"build.json").write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))
