@@ -34,6 +34,14 @@ class CfgFunctions {
         };
     };
 };
+// Test missions ship inside this PBO: Multiplayer -> Host server -> Altis.
+class CfgMissions {
+    class MPMissions {
+        class PMCS_S1_1PMC {briefingName = "PMC Standalone S1 - 1 PMC"; directory = "pmcs_core\missions\PMCS_S1_1PMC.Altis";};
+        class PMCS_S1_2PMC {briefingName = "PMC Standalone S1 - 2 PMC"; directory = "pmcs_core\missions\PMCS_S1_2PMC.Altis";};
+        class PMCS_S1_3PMC {briefingName = "PMC Standalone S1 - 3 PMC"; directory = "pmcs_core\missions\PMCS_S1_3PMC.Altis";};
+    };
+};
 class CfgRemoteExec {
     class Functions {
         class PMCS_fnc_request {allowedTargets = 2; jip = 0;};

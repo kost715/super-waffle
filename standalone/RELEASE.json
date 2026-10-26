@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1_s1_alpha1",
+  "version": "0.1.2_s1_alpha1",
   "date": "2026-10-26",
   "kind": "standalone technical prototype, not a campaign",
   "namespace": "PMCS",
@@ -24,5 +24,6 @@
     "by": "Claude",
     "date": "2026-10-26",
     "report": "docs/AUDIT_0.1.1_RU.md"
-  }
+  },
+  "missions": "packed into pmcs_core.pbo, registered in CfgMissions >> MPMissions"
 }

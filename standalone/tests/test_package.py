@@ -65,7 +65,7 @@ class StandalonePackage(unittest.TestCase):
 
     def test_missions_slots_and_isolation(self):
         for count in [1,2,3]:
-            folder=ROOT/'missions'/f'PMCS_S1_{count}PMC.Altis'
+            folder=ROOT/'addons/pmcs_core/missions'/f'PMCS_S1_{count}PMC.Altis'
             sqm=(folder/'mission.sqm').read_text();desc=(folder/'description.ext').read_text()
             self.assertIn('version=54;',sqm)
             self.assertEqual(sqm.count('isPlayable=1;'),16)
@@ -80,6 +80,13 @@ class StandalonePackage(unittest.TestCase):
             self.assertNotIn('init="this setPosATL',sqm)
             self.assertIn(f'enabled = 1; companies = {count};',desc)
             self.assertIn('disabledAI = 1;',desc)
+            # Engine places respawned players on the ground at their side marker.
+            self.assertIn('respawnOnStart = 1;',desc)
+            for field in ['addons[]={"A3_Characters_F","pmcs_core"};','class AddonsMetaData {};','randomSeed=1;']:
+                self.assertIn(field,sqm)
+            self.assertNotIn('markerType=',sqm)
+            config=(ROOT/'addons/pmcs_core/config.cpp').read_text()
+            self.assertIn(f'directory = "pmcs_core\\missions\\PMCS_S1_{count}PMC.Altis";',config)
             self.assertIn('class Commands {mode = 0;',desc)
             self.assertEqual(set(re.findall(r'class (PMCS_fnc_\w+)',desc)),{'PMCS_fnc_request','PMCS_fnc_receiveState'})
 
@@ -104,8 +111,10 @@ class StandalonePackage(unittest.TestCase):
             self.assertEqual(expected,payload)
             for count in [1,2,3]:
                 name=f'PMCS_S1_{count}PMC.Altis'
-                _,mission=unpack(z.read(f'MPMissions/{name}.pbo'))
-                self.assertEqual(mission,{p.name:p.read_bytes() for p in (ROOT/'missions'/name).iterdir() if p.is_file()})
+                for part in ['mission.sqm','description.ext']:
+                    self.assertIn(f'missions\\{name}\\{part}',payload)
+            # Missions are inside the mod: no separate MPMissions folder to install.
+            self.assertFalse(any(n.startswith('MPMissions/') for n in z.namelist()))
             self.assertNotIn('als_main.pbo','\n'.join(z.namelist()))
 
     def test_source_archive_rebuild_and_crc(self):
