@@ -1,0 +1,702 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-10-25",
+  "baseline_release": "0.7.0_alpha1",
+  "scope": "Static ALS function references in own addon sources; includes captured native functions and wrappers. This is not a complete runtime dependency graph.",
+  "scanned_sqf_files": 69,
+  "external_ALS_function_symbols": 36,
+  "symbols": [
+    {
+      "symbol": "ALS_fnc_aiDrive",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractReady.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_bizGet",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_bizPublish",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_canUse",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_companyTick.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneSync.sqf",
+          "occurrences": 3
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questState.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_reconcile.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalCanUse.sqf",
+          "occurrences": 2
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_coopAccept",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_coopEnd",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_coopJob_alspmc_contract",
+      "kind": "own_callback_registered_in_native_namespace",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_coopJob_alspmc_eliminate",
+      "kind": "own_callback_registered_in_native_namespace",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_questInit.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_crewOf",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractReady.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questState.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_crewPublish",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractEnd.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_dbGet",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneSync.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questState.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_serverInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_setName.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalInit.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_dbLoading",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_companyInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_serverInit.sqf",
+          "occurrences": 4
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalInit.sqf",
+          "occurrences": 2
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_dbSave",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractEnd.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questScenario.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_sellHouse.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalInit.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_dbSet",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_companySave.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractSave.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questSave.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_save.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_setName.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalEnsure.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalRemove.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_drvStop",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractScenario.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_findPlayer",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_companyDo.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyState.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyTick.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractBoss.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractEnd.sqf",
+          "occurrences": 3
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractHostility.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractScenario.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractTeam.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questScenario.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questState.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_flatSpot",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractTick.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questSite.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_furnOpen",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneMsg.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseClaim",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseFloor",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractSites.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalFindSpot.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseKey",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractSiteAvailable.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractSites.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseLock",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseObj",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_desktopView.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalFindSpot.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_housePublish",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_save.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_houseSell",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_serverInit.sqf",
+          "occurrences": 2
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_landPos",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractAttack.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractReady.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_licBuy",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_log",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_companyInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_serverInit.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalEnsure.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalInit.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_mine",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalCanUse.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_moneyAdd",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractEnd.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_moneyGet",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_moneyPay",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_phoneMsg",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_clientInit.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_clientTick.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_propView",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_desktopOpen.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_desktopView.sqf",
+          "occurrences": 3
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneMsg.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_roadNear",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_uid",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyState.sqf",
+          "occurrences": 3
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_companyTick.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractBase.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractOffers.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_contractReady.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_phoneSync.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questDo.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questKilled.sqf",
+          "occurrences": 2
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_questState.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_setName.sqf",
+          "occurrences": 1
+        },
+        {
+          "path": "addons/alspmc_core/functions/fn_terminalCanUse.sqf",
+          "occurrences": 1
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_warBases",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+          "occurrences": 3
+        }
+      ]
+    },
+    {
+      "symbol": "ALS_fnc_warRoadSpot",
+      "kind": "external_reference",
+      "files": [
+        {
+          "path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+          "occurrences": 1
+        }
+      ]
+    }
+  ]
+}

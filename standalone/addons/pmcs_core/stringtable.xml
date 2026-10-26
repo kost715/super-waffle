@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Project name="PMC Standalone">
+  <Package name="S1">
+    <Container name="Console">
+      <Key ID="STR_PMCS_OPEN">
+        <Original>Open PMC test console</Original>
+        <English>Open PMC test console</English>
+        <Russian>Открыть тестовую консоль ЧВК</Russian>
+      </Key>
+      <Key ID="STR_PMCS_TITLE">
+        <Original>PMC Standalone - S1 test console</Original>
+        <English>PMC Standalone - S1 test console</English>
+        <Russian>Самостоятельная ЧВК — тестовая консоль S1</Russian>
+      </Key>
+      <Key ID="STR_PMCS_LOADING">
+        <Original>Waiting for server state...</Original>
+        <English>Waiting for server state...</English>
+        <Russian>Ожидание состояния сервера…</Russian>
+      </Key>
+      <Key ID="STR_PMCS_OLD_MOD">
+        <Original>Disable LifeSim and the previous addon for this standalone test.</Original>
+        <English>Disable LifeSim and the previous addon for this standalone test.</English>
+        <Russian>Отключите LifeSim и прежний аддон для самостоятельного теста.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_SUMMARY">
+        <Original>Company: %1 | Companies: %2 | Revision: %3&lt;br/&gt;Access: %4</Original>
+        <English>Company: %1 | Companies: %2 | Revision: %3&lt;br/&gt;Access: %4</English>
+        <Russian>ЧВК: %1 | Компаний: %2 | Ревизия: %3&lt;br/&gt;Доступ: %4</Russian>
+      </Key>
+      <Key ID="STR_PMCS_ADMIN">
+        <Original>Host / administrator</Original>
+        <English>Host / administrator</English>
+        <Russian>Хост / администратор</Russian>
+      </Key>
+      <Key ID="STR_PMCS_OBSERVER">
+        <Original>Observer; an administrator changes the test</Original>
+        <English>Observer; an administrator changes the test</English>
+        <Russian>Наблюдение; тест меняет администратор</Russian>
+      </Key>
+      <Key ID="STR_PMCS_DENIED">
+        <Original>Rejected: check authority, computer range and request data.</Original>
+        <English>Rejected: check authority, computer range and request data.</English>
+        <Russian>Отказ: проверьте права, расстояние до ПК и параметры запроса.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_STALE">
+        <Original>State is outdated. Review the updated values and try again.</Original>
+        <English>State is outdated. Review the updated values and try again.</English>
+        <Russian>Состояние устарело. Проверьте обновлённые значения и повторите действие.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_SESSION">
+        <Original>Server session changed; state has been refreshed.</Original>
+        <English>Server session changed; state has been refreshed.</English>
+        <Russian>Сессия сервера изменилась; данные обновлены.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_DONE">
+        <Original>Test state updated.</Original>
+        <English>Test state updated.</English>
+        <Russian>Состояние теста обновлено.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_PARTIAL">
+        <Original>Reset applied, but some test actors failed to spawn. Check the RPT.</Original>
+        <English>Reset applied, but some test actors failed to spawn. Check the RPT.</English>
+        <Russian>Сброс выполнен частично: часть бойцов не создана. Проверьте RPT.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_TIMEOUT">
+        <Original>Server reply delayed. Review state before retrying.</Original>
+        <English>Server reply delayed. Review state before retrying.</English>
+        <Russian>Ответ сервера задерживается. Проверьте состояние перед повтором.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_ASSIGNMENT">
+        <Original>Slot/side mismatch. Reconnect using a slot for your company.</Original>
+        <English>Slot/side mismatch. Reconnect using a slot for your company.</English>
+        <Russian>Сторона слота не совпадает с ЧВК. Подключитесь через слот своей компании.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_NEUTRAL">
+        <Original>neutral</Original>
+        <English>neutral</English>
+        <Russian>нейтралитет</Russian>
+      </Key>
+      <Key ID="STR_PMCS_HOSTILE">
+        <Original>hostile</Original>
+        <English>hostile</English>
+        <Russian>вражда</Russian>
+      </Key>
+      <Key ID="STR_PMCS_ONE">
+        <Original>One company: no intercompany pairs.</Original>
+        <English>One company: no intercompany pairs.</English>
+        <Russian>Одна ЧВК: межкорпоративных пар нет.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_PROBES">
+        <Original>Actors alive: %1 / %2&lt;br/&gt;%3&lt;br/&gt;S1 has no economy or persistent campaign saves.</Original>
+        <English>Actors alive: %1 / %2&lt;br/&gt;%3&lt;br/&gt;S1 has no economy or persistent campaign saves.</English>
+        <Russian>Тестовые НПС живы: %1 / %2&lt;br/&gt;%3&lt;br/&gt;В S1 ещё нет экономики и постоянных сохранений кампании.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_WORLD_FREE">
+        <Original>An independent hostile world side is available in this test.</Original>
+        <English>An independent hostile world side is available in this test.</English>
+        <Russian>В этом тесте есть отдельная сторона мирового противника.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_WORLD_BLOCKED">
+        <Original>3 PMCs: no separate combat side remains for world enemies; neutral civilians are preserved.</Original>
+        <English>3 PMCs: no separate combat side remains for world enemies; neutral civilians are preserved.</English>
+        <Russian>3 ЧВК: отдельной боевой стороны для противника мира нет; мирные жители остаются нейтральными.</Russian>
+      </Key>
+      <Key ID="STR_PMCS_SET_NEUTRAL">
+        <Original>Set neutral</Original>
+        <English>Set neutral</English>
+        <Russian>Задать нейтралитет</Russian>
+      </Key>
+      <Key ID="STR_PMCS_SET_HOSTILE">
+        <Original>Set hostile</Original>
+        <English>Set hostile</English>
+        <Russian>Задать вражду</Russian>
+      </Key>
+      <Key ID="STR_PMCS_ALL_NEUTRAL">
+        <Original>All PMCs neutral</Original>
+        <English>All PMCs neutral</English>
+        <Russian>Нейтралитет всех ЧВК</Russian>
+      </Key>
+      <Key ID="STR_PMCS_AB_HOSTILE">
+        <Original>Alpha vs Bravo</Original>
+        <English>Alpha vs Bravo</English>
+        <Russian>Alpha против Bravo</Russian>
+      </Key>
+      <Key ID="STR_PMCS_RESET">
+        <Original>Reset actors and neutrality</Original>
+        <English>Reset actors and neutrality</English>
+        <Russian>Восстановить НПС и нейтралитет</Russian>
+      </Key>
+      <Key ID="STR_PMCS_CLOSE">
+        <Original>Close</Original>
+        <English>Close</English>
+        <Russian>Закрыть</Russian>
+      </Key>
+      <Key ID="STR_PMCS_PAIR_LABEL">
+        <Original>Choose two different companies</Original>
+        <English>Choose two different companies</English>
+        <Russian>Выберите две разные ЧВК</Russian>
+      </Key>
+      <Key ID="STR_PMCS_WORLD_START">
+        <Original>Start world enemy test</Original>
+        <English>Start world enemy test</English>
+        <Russian>Начать тест противника мира</Russian>
+      </Key>
+      <Key ID="STR_PMCS_WORLD_STOP">
+        <Original>Stop world enemy test</Original>
+        <English>Stop world enemy test</English>
+        <Russian>Остановить противника мира</Russian>
+      </Key>
+      <Key ID="STR_PMCS_BOOT_TIMEOUT">
+        <Original>Server did not start the S1 prototype. Check matching mod/mission and server RPT.</Original>
+        <English>Server did not start the S1 prototype. Check matching mod/mission and server RPT.</English>
+        <Russian>Сервер не запустил прототип S1. Проверьте мод, выбранную миссию и серверный RPT.</Russian>
+      </Key>
+    </Container>
+  </Package>
+</Project>

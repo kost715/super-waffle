@@ -1,0 +1,139 @@
+{
+  "arma_runtime_tested": false,
+  "original_mod_loaded": false,
+  "syntax": [
+    {
+      "file": "fn_allowed.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_applyRelations.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_clientInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_isAdmin.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_openConsole.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_pairKey.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_postInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_receiveState.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_registerPlayer.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_relationSet.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_renderConsole.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_request.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_resetActors.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_sendState.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_serverInit.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_sidePlan.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_snapshot.sqf",
+      "passed": true
+    },
+    {
+      "file": "fn_uiAction.sqf",
+      "passed": true
+    }
+  ],
+  "mission_configs": [
+    {
+      "file": "missions/PMCS_S1_1PMC.Altis/description.ext",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    },
+    {
+      "file": "missions/PMCS_S1_1PMC.Altis/mission.sqm",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    },
+    {
+      "file": "missions/PMCS_S1_2PMC.Altis/description.ext",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    },
+    {
+      "file": "missions/PMCS_S1_2PMC.Altis/mission.sqm",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    },
+    {
+      "file": "missions/PMCS_S1_3PMC.Altis/description.ext",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    },
+    {
+      "file": "missions/PMCS_S1_3PMC.Altis/mission.sqm",
+      "passed": true,
+      "root_wrapped_for_vm": true
+    }
+  ],
+  "transactions": {
+    "passed": true,
+    "assertions": 69
+  },
+  "modeled_boundaries": [
+    "group creation/membership",
+    "AI skills/behavior/targeting",
+    "directional side relations",
+    "player UID/owner/admin authority",
+    "RPC dispatch/capture",
+    "public variable flag",
+    "UI null display",
+    "flat positions/findEmptyPosition geometry"
+  ],
+  "version": "0.1.0_s1_alpha1",
+  "date": "2026-10-26",
+  "package_tests": {
+    "passed": 6,
+    "source_rebuild_byte_identical": true
+  },
+  "game_tests": {
+    "performed": false,
+    "mission_loading": false,
+    "ai_combat": false,
+    "ui_rendering": false,
+    "hosted_and_dedicated": false,
+    "sixteen_players": false
+  },
+  "independent_review_performed": false
+}

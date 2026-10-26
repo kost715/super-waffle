@@ -1,0 +1,19 @@
+author = "PMC project";
+onLoadName = "PMC Standalone S1: 2 PMC, 16 slots";
+onLoadMission = "Independent AI diplomacy test. No LifeSim required.";
+overviewText = "S1 technical prototype. Host/admin changes relations at a camp computer.";
+respawn = 3;
+respawnDelay = 5;
+respawnOnStart = -1;
+disabledAI = 1;
+joinUnassigned = 1;
+class Header {gameType = Coop; minPlayers = 1; maxPlayers = 16;};
+class PMCS_Prototype {enabled = 1; companies = 2;};
+class CfgRemoteExec {
+    class Functions {
+        mode = 1; jip = 0;
+        class PMCS_fnc_request {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_receiveState {allowedTargets = 0; jip = 0;};
+    };
+    class Commands {mode = 0; jip = 0;};
+};

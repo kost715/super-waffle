@@ -1,12 +1,63 @@
-# LifeSim PMC project workflow
+# PMC standalone project workflow
 
-- Use the existing checkout. Read BASELINE.json, RELEASE.json and the latest README/changelog before editing; the user selected 0.6.3 alpha 1 as the starting point for future features. Earlier 0.6.1 documents are historical snapshots.
-- Preserve the user's received archives under baselines/. Do not silently replace the baseline with earlier code or overwrite its archived payload. Use a new release version for functional changes.
-- At each development stage provide a Russian report: what changed, why, checks actually performed, remaining limitations, and the version/files delivered.
-- The user will send our files to Claude for independent review before testing in Arma. Supply reviewable source and a ready build with relevant change/test notes when implementing a feature. Do not claim independent review or an in-game pass unless the user has supplied those results. This workflow does not require asking again for permission to do already authorized work.
-- Keep implemented features separate from the agreed future design. Follow docs/PMC_PC_DESIGN_RU.md and the development plan while accounting for the newer baseline.
-- Automatic SQF/browser checks do not validate real Arma AI, locality, roads, assets or multiplayer. Identify mocked engine/transport boundaries in reports.
-- Read docs/BASELINE_0.6.3_REVIEW_RU.md for current findings. The old full regression suite still needs adaptation to owner-targeted state delivery and changed 0.6.3 rules. The limited review runner is tools/check_baseline_063.py; passing it is not passing the old full suite.
-- Never change production logic merely to make an outdated fixture pass. Keep the original LifeSim files immutable and avoid replacing its global phone or payout behavior.
+## Active direction
 
-- Current functional release is 0.7.0 alpha 1 (PDF stage 1). Read docs/STAGE_1_COMPANY_TREASURY_RU.md; use tools/check_stage1.py for baseline safety and company/treasury checks. BASELINE.json describes the immutable received 0.6.3, not the current version.
+- Work on the standalone Arma 3 project, without a mandatory LifeSim dependency.
+  Read docs/standalone/DEVELOPMENT_DIRECTION_RU.md, ROADMAP_RU.md and
+  FACTIONS_AND_SETUP_RU.md before implementing new features.
+- Exactly two player companies, blue/WEST and red/EAST, up to 16 human players
+  total. Blue PMC, government army and police share WEST. Blue/red and government/red
+  initially remain neutral. Government supports blue if the companies go to war.
+  Green/RESISTANCE is the common enemy from the start. Do not reintroduce a third PMC.
+- Host selects one base per company from four blue and four red candidates: eight
+  separate locations, only two instantiated bases. Actual sites, owner appointment,
+  initial assets and the final persistence backend still require implementation/design.
+- The next implementation stage is the startup configuration and two-company
+  campaign described in the roadmap. Save/restore of base choices is a proposed
+  implementation detail; do not silently relocate bases on restart.
+- standalone/ contains S1 0.1.0 alpha 1, a historical technical foundation with
+  1/2/3-company test missions. Read standalone/README.md first. Its sources and release
+  ZIPs remain unchanged and do not implement F2. Do not claim otherwise. Functional
+  changes need a new release version and reviewable sources/builds/reports.
+- docs/standalone/ui-preview/ is a browser mockup, not an Arma interface. Embedded
+  previews may block JavaScript; downloaded HTML is the interactive demonstration.
+
+## Ownership and engineering
+
+- Keep company roles, treasury, assets and NPC personnel separate. Check membership,
+  authority, ownership and transaction identity on the server for every mutation.
+- Player-company clocks advance only with at least one real company member online.
+  Subcontracts are computed without physical units; one NPC has one assignment.
+- Design for twelve followers per player, potentially 192 across sixteen players;
+  this is an unverified load target, not demonstrated performance.
+- One combat side per company is now compatible with the two-company/government/green
+  model. Native AI targeting, locality and combat still need real multiplayer tests.
+  Do not solve faction behavior by forcing targets or treating uniforms as ownership.
+- Root docs describe the current plan; old proposed numeric settings are not automatic
+  defaults for the independent project. Keep confirmed rules separate from proposals.
+- Use standalone/tools/ and standalone/tests/ for the independent project. Its package
+  build must not include archive/ or original-mod resources. Do not treat legacy tests
+  as standalone proof. Run checks appropriate to the changed files.
+
+## Reports and review
+
+- For each development stage provide a Russian report: what changed, why, actual
+  checks, remaining limitations, and delivered files/version.
+- The user sends our files to Claude for independent review, then tests in Arma.
+  Supply a concrete reviewable result without repeatedly asking permission. Do not
+  claim independent review or game validation unless those results were supplied.
+- Keep modeled engine/RPC/UI boundaries visible in reports. Syntax/browser checks
+  do not validate native AI, roads, terrain, locality or real networked Arma behavior.
+
+## Retired material
+
+- archive/ is explicitly retired and not an active code path. Read archive/README.md.
+- archive/lifesim-pmc-unused/ preserves every previously tracked file from commit
+  35f7ee6 byte for byte, including received baseline 0.6.3 and both GitHub audits.
+  archive/PRESERVATION.json records the original/new paths and SHA-256 hashes.
+- Archived README, AGENTS, plans, tests and version labels describe their historical
+  project only. Do not use them to override the current standalone direction.
+- archive/standalone-planning-v1-unused/ preserves the outdated 1–3-company concept
+  and PDF. Do not silently replace historical ZIP/PDF payloads. Add new versions.
+- Preserve received files and authorship/licenses. Code/assets from referenced mods
+  are not authorized dependencies merely because their design inspired this project.

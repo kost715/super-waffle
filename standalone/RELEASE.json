@@ -1,0 +1,24 @@
+{
+  "version": "0.1.0_s1_alpha1",
+  "date": "2026-10-26",
+  "kind": "standalone technical prototype, not a campaign",
+  "namespace": "PMCS",
+  "requires_lifesim": false,
+  "requires_cba": false,
+  "target_companies": [
+    1,
+    2,
+    3
+  ],
+  "target_human_players": 16,
+  "arma_runtime_tested": false,
+  "independent_review_performed": false,
+  "ai_model": "candidate: one combat side per company; world-enemy limitation with 3 PMCs explicitly exposed",
+  "checks": {
+    "sqf_syntax_files": 18,
+    "mission_config_grammar_files": 6,
+    "transaction_assertions": 69,
+    "package_tests": 6
+  },
+  "report": "docs/S1_REPORT_RU.md"
+}

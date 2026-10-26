@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PMC — настройка кампании · макет</title>
+<style>
+:root{color-scheme:dark;--bg:#10181c;--panel:#172126;--line:#2b373d;--muted:#94a3aa;--text:#eef0ed;--gold:#d4ba83;--blue:#72b8ed;--red:#ed8a7e;--green:#8cba88;--font:"Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#0b1216;color:var(--text);font:14px/1.5 var(--font)}button{font:inherit;color:inherit;cursor:pointer}button:disabled{cursor:not-allowed}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:4px}button{border:0}button svg{pointer-events:none}button,[role=tab]{-webkit-tap-highlight-color:transparent}svg{display:block}h1,h2,h3,p{margin:0}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:700;color:var(--muted)}.muted{color:var(--muted)}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 14% 20%,#29413b55,transparent 55%),radial-gradient(ellipse at 85% 90%,#36444944,transparent 55%),repeating-linear-gradient(130deg,transparent 0 125px,#b0c4b008 126px 127px,transparent 128px 155px)}
+.app{max-width:1760px;min-height:calc(100vh - 40px);margin:20px;border:1px solid #405047;background:#10191df5;box-shadow:0 24px 100px #0008;display:flex;flex-direction:column}
+.topbar{height:74px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 30px;gap:20px}.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:36px;height:36px;border:1px solid var(--gold);display:grid;place-items:center;color:var(--gold);font-size:21px;line-height:1;transform:rotate(45deg)}.brand-mark span{transform:rotate(-45deg)}.brand-name{font-size:22px;letter-spacing:5px;font-weight:800;line-height:1.15}.brand-sub{font-size:9px;letter-spacing:2.2px;color:var(--muted);margin-top:5px}.top-right{display:flex;align-items:center;gap:25px}.top-right .eyebrow{font-size:9px}.host{display:flex;gap:9px;align-items:center;font-size:12px}.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #8cba8844}.preview-label{font-size:9px;letter-spacing:1.4px;border:1px solid #635a42;color:var(--gold);padding:6px 10px}
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);flex:1}.sidebar{border-right:1px solid var(--line);padding:34px 19px 24px;display:flex;flex-direction:column}.nav-label{margin:0 12px 23px;font-size:10px;letter-spacing:2px;color:var(--muted)}.nav{display:grid;gap:9px}.nav-item{text-align:left;display:flex;align-items:center;gap:12px;background:transparent;border:1px solid transparent;padding:15px 12px;border-radius:3px}.nav-item:hover{background:#ffffff04}.nav-item[aria-current=step]{background:#d4ba830b;border-color:#d4ba8340}.step-num{height:27px;width:27px;flex-shrink:0;border:1px solid #48575d;display:grid;place-items:center;font-size:11px;color:var(--muted);border-radius:50%}.nav-item[aria-current=step] .step-num{color:#141c1f;background:var(--gold);border-color:var(--gold)}.nav-title{display:block;font-size:13px;font-weight:600}.nav-caption{display:block;font-size:10px;color:var(--muted);margin-top:3px}.nav-item:disabled{opacity:.45}.sidebar-bottom{margin-top:auto;padding:35px 12px 0}.server-meta{border-top:1px solid var(--line);padding-top:18px}.server-meta .meta-row{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--muted)}.server-meta .meta-row strong{color:#c8d1d2;font-weight:500}.sidebar-note{font-size:10px;color:#6f8189;margin-top:20px;line-height:1.6}
+.workspace{display:flex;flex-direction:column;min-width:0}.heading{display:flex;justify-content:space-between;align-items:center;padding:31px 32px 23px;gap:20px}.heading h1{font-size:27px;letter-spacing:-.5px;font-weight:650;margin:6px 0 7px}.heading p{font-size:12px;color:var(--muted)}.heading-tag{text-align:right;flex-shrink:0}.heading-tag strong{font-size:13px;font-weight:600;letter-spacing:2px}.heading-tag small{display:block;font-size:10px;color:var(--muted);margin-top:5px}.content{padding:0 32px 27px;flex:1;display:flex;min-height:0}.page{width:100%}.page[hidden]{display:none!important}
+.base-layout{display:grid;grid-template-columns:minmax(0,1fr) 307px;gap:20px;min-height:550px;height:100%}.map-panel{display:flex;flex-direction:column;min-width:0;border:1px solid #3c4b49;background:#17272b;border-radius:4px;overflow:hidden}.map-toolbar{height:46px;background:#152126;display:flex;align-items:center;justify-content:space-between;padding:0 17px;border-bottom:1px solid #354641;gap:12px}.map-toolbar .eyebrow{font-size:9px;letter-spacing:1.6px}.map-key{display:flex;gap:17px;font-size:10px;color:#b2c1c2}.key-item{display:flex;align-items:center;gap:7px}.dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}.dot.red{background:var(--red)}.map-canvas{position:relative;flex:1;min-height:460px;overflow:hidden;background:#1a2c32}.map-scene{position:absolute;inset:0;transition:transform .22s ease;transform-origin:center}.map-art{width:100%;height:100%;position:absolute;inset:0}.map-watermark{position:absolute;bottom:70px;left:40px;font-size:42px;letter-spacing:14px;color:#aec4c014;font-weight:700;pointer-events:none}.map-compass{position:absolute;top:17px;right:18px;text-align:center;font-size:10px;line-height:1.2;color:#c2d0cd;pointer-events:none}.map-compass span{display:block;font-size:24px;line-height:1.2;margin-top:4px}.map-controls{position:absolute;bottom:42px;right:15px;display:grid;gap:2px;z-index:3}.map-controls button{width:31px;height:31px;background:#122127e8;color:#d0dbd8;border:1px solid #596e6666;font-size:19px}.map-controls button:hover{background:#33443e}.map-controls button:last-child{font-size:15px}.map-caption{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:#101e24b8;font-size:9px;letter-spacing:.75px;color:#b1c2c2;display:flex;justify-content:space-between;gap:12px;pointer-events:none}.map-pin{position:absolute;padding:0;background:transparent;border:0;transform:translate(-50%,-50%);width:34px;height:34px;color:var(--blue);display:grid;place-items:center;z-index:2}.map-pin.red{color:var(--red)}.pin-shape{height:25px;width:25px;background:#183042;border:1px solid currentColor;border-radius:3px;transform:rotate(45deg);display:grid;place-items:center;box-shadow:0 2px 6px #0007;transition:background .15s}.pin-num{transform:rotate(-45deg);font-size:10px;font-weight:700}.map-pin.red .pin-shape{background:#3c2827}.map-pin[aria-pressed=true] .pin-shape{background:var(--blue);color:#122333;box-shadow:0 0 0 5px #72b8ed20,0 2px 7px #0008}.map-pin.red[aria-pressed=true] .pin-shape{background:var(--red);color:#37211f;box-shadow:0 0 0 5px #ed8a7e20,0 2px 7px #0008}.map-pin:hover .pin-shape{outline:2px solid #d8e1d499;outline-offset:3px}.pin-label{position:absolute;left:36px;top:4px;white-space:nowrap;background:#122127eb;border:1px solid #60869899;padding:3px 7px;font-size:9px;letter-spacing:.5px;display:none}.map-pin.red .pin-label{border-color:#a4676399}.map-pin[aria-pressed=true] .pin-label,.map-pin:hover .pin-label,.map-pin:focus-visible .pin-label{display:block}.map-pin.right-label .pin-label{right:36px;left:auto}.selection-panel{border:1px solid var(--line);background:#172126;display:flex;flex-direction:column;border-radius:4px;overflow:hidden}.selection-heading{padding:20px 19px 16px}.selection-heading h2{font-size:17px;font-weight:600;margin-top:5px}.company-tabs{display:grid;grid-template-columns:1fr 1fr;margin:0 19px 14px;gap:5px;padding:4px;background:#0e191e;border:1px solid #2d393f;border-radius:3px}.company-tab{padding:8px 4px;font-size:11px;font-weight:600;background:transparent;color:var(--muted);border-radius:2px}.company-tab[aria-selected=true]{background:#72b8ed14;color:var(--blue);box-shadow:inset 0 0 0 1px #72b8ed44}.company-tab.red[aria-selected=true]{background:#ed8a7e12;color:var(--red);box-shadow:inset 0 0 0 1px #ed8a7e44}.choices{display:grid;gap:7px;padding:0 19px}.choice{display:flex;text-align:left;align-items:center;gap:11px;background:#131e23;border:1px solid #303f45;border-radius:3px;padding:12px 11px;min-height:62px}.choice:hover{background:#1c2b30}.choice[aria-pressed=true]{border-color:#72b8ed99;background:#72b8ed08}.choice.red[aria-pressed=true]{border-color:#ed8a7e99;background:#ed8a7e08}.radio{width:13px;height:13px;border:1px solid #5c6d74;border-radius:50%;display:grid;place-items:center;flex-shrink:0}.choice[aria-pressed=true] .radio{border-color:var(--blue)}.choice.red[aria-pressed=true] .radio{border-color:var(--red)}.choice[aria-pressed=true] .radio:after{content:"";width:5px;height:5px;background:var(--blue);border-radius:50%}.choice.red[aria-pressed=true] .radio:after{background:var(--red)}.choice-title{display:block;font-size:11px;font-weight:600;line-height:1.35}.choice-sub{display:block;font-size:9px;margin-top:4px;color:var(--muted)}.choice-code{margin-left:auto;font-size:8px;color:#82969d;align-self:flex-start;line-height:1.7}.selection-status{margin-top:auto;padding:19px}.status-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:13px}.status-top strong{font-weight:600;color:var(--gold)}.selected-row{display:flex;gap:9px;margin-top:10px;align-items:flex-start;font-size:10px}.selected-row .dot{margin-top:4px;flex-shrink:0}.selected-row small{display:block;font-size:9px;color:var(--muted);margin-top:3px}.reset{font-size:10px;background:transparent;border-bottom:1px dotted #65767d;color:var(--muted);padding:0;margin-top:18px}.reset:hover{color:var(--text)}.selection-divider{border-top:1px solid var(--line);margin-bottom:14px}
+.footer{border-top:1px solid var(--line);min-height:79px;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#121c21}.footer-progress{display:flex;align-items:center;gap:13px}.progress-bars{display:flex;gap:4px}.progress-bars span{height:3px;width:24px;background:#34444a}.progress-bars span.done{background:var(--gold)}.footer-note{font-size:10px;color:var(--muted)}.footer-note strong{color:#d7dcd6;font-weight:500}.footer-actions{display:flex;gap:10px}.button{padding:11px 23px;background:#223037;border:1px solid #415058;border-radius:3px;font-size:11px;letter-spacing:.4px;min-width:118px;font-weight:600}.button:hover{background:#2c3e46}.button.primary{background:var(--gold);border-color:var(--gold);color:#172025;min-width:177px}.button.primary:hover{background:#e2c996}.button.primary:disabled{background:#2d393a;color:#849190;border-color:#41504f}.arrow{margin-left:20px;font-size:15px;font-weight:400}.button:disabled .arrow{opacity:.4}
+.faction-page{display:flex;flex-direction:column;gap:20px}.faction-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.faction-card{position:relative;overflow:hidden;background:#172126;border:1px solid #34434a;border-radius:4px;padding:23px 24px;min-height:165px}.faction-card:before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--blue)}.faction-card.red:before{background:var(--red)}.faction-card.gov:before{background:#c2b896}.faction-card.enemy:before{background:var(--green)}.faction-icon{float:right;color:#72b8ed;opacity:.7}.faction-card.red .faction-icon{color:var(--red)}.faction-card.gov .faction-icon{color:#c2b896}.faction-card.enemy .faction-icon{color:var(--green)}.faction-card h2{font-size:20px;margin:10px 0 6px;font-weight:600}.faction-card p{max-width:380px;font-size:12px;color:var(--muted)}.faction-card .eyebrow{font-size:9px}.faction-badge{display:inline-block;margin-top:15px;border:1px solid #40514f;padding:3px 8px;font-size:9px;color:#bac7c5}.relations{padding:21px 24px;background:#141f24;border:1px solid var(--line);border-radius:4px}.relations h2{font-size:15px;font-weight:600;margin-bottom:15px}.relation-list{display:grid;grid-template-columns:1fr 1fr;gap:12px 28px}.relation{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2c393e;padding-bottom:10px;font-size:11px;gap:15px}.relation span:last-child{white-space:nowrap;font-size:10px}.relation .peace{color:var(--gold)}.relation .friend{color:var(--blue)}.relation .enemy{color:var(--green)}.relations-note{margin-top:16px;font-size:11px;color:var(--muted);max-width:860px}.summary-page{display:flex;flex-direction:column;gap:20px}.summary-banner{border:1px solid #7e765344;background:#d4ba8309;display:flex;align-items:center;gap:14px;padding:17px 21px;border-radius:4px}.summary-banner .check{width:27px;height:27px;border:1px solid #d4ba8366;border-radius:50%;display:grid;place-items:center;color:var(--gold)}.summary-banner h2{font-size:14px;font-weight:600}.summary-banner p{font-size:11px;color:var(--muted);margin-top:3px}.summary-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}.summary-card{background:#172126;border:1px solid #34434a;border-top:2px solid var(--blue);padding:24px;border-radius:3px}.summary-card.red{border-top-color:var(--red)}.summary-card h2{font-size:20px;margin:10px 0 6px;font-weight:600}.summary-card p{font-size:12px;color:var(--muted);min-height:36px}.summary-location{font-size:11px;padding-top:18px;margin-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.edit-link{font-size:11px;background:none;padding:0;color:var(--gold);border-bottom:1px dotted #d4ba8377}.summary-facts{border:1px solid var(--line);padding:20px 24px;background:#141f24;border-radius:3px}.summary-facts h2{font-size:14px;font-weight:600;margin-bottom:10px}.fact{font-size:12px;display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid #29373c}.fact:last-child{border:0}.fact span:first-child{color:var(--muted)}.fact span:last-child{text-align:right}.summary-note{font-size:11px;color:var(--muted)}
+.dialog-backdrop{position:fixed;inset:0;background:#080e12cf;display:grid;place-items:center;padding:24px;z-index:10;backdrop-filter:blur(6px)}.dialog-backdrop[hidden]{display:none}.dialog{max-width:510px;width:100%;background:#19262c;border:1px solid #687360;padding:32px;box-shadow:0 30px 80px #0009;border-radius:5px}.dialog h2{font-size:23px;margin:8px 0 12px}.dialog p{font-size:13px;color:#b3c1c3}.dialog-selection{border-top:1px solid #39484c;border-bottom:1px solid #39484c;padding:15px 0;margin:20px 0;color:#d4deda;font-size:12px;line-height:2}.dialog .button{margin-top:22px}.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(min-height:950px) and (min-width:1100px){.map-canvas{min-height:520px}.base-layout{min-height:618px}.heading{padding-top:34px;padding-bottom:28px}.sidebar{padding-top:39px}.footer{min-height:86px}.selection-heading{padding-top:23px}.choice{min-height:70px}.choices{gap:9px}}
+@media(min-width:1800px){.app{margin:25px auto}}
+@media(max-width:1250px){.shell{grid-template-columns:193px minmax(0,1fr)}.sidebar{padding:28px 12px 20px}.nav-item{padding:12px 7px;gap:9px}.nav-caption{font-size:9px}.heading{padding:26px 24px 21px}.content{padding:0 24px 23px}.footer{padding:16px 24px}.base-layout{grid-template-columns:minmax(0,1fr) 278px;gap:15px}.choices,.selection-status{padding-left:14px;padding-right:14px}.selection-heading{padding-left:14px;padding-right:14px}.company-tabs{margin-left:14px;margin-right:14px}.map-caption{font-size:8px}.map-key{gap:10px}.map-toolbar{padding:0 12px}}
+@media(max-width:980px){.app{margin:10px;min-height:calc(100vh - 20px)}.shell{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line);padding:12px 20px}.nav{grid-template-columns:repeat(3,1fr);gap:8px}.nav-label,.sidebar-bottom,.nav-caption{display:none}.nav-item{padding:8px 12px}.heading h1{font-size:24px}.base-layout{grid-template-columns:minmax(0,1fr) 278px}.topbar{height:65px;padding:0 24px}.top-right .eyebrow{display:none}.map-toolbar .eyebrow{font-size:8px}.map-key{font-size:9px}.map-canvas{min-height:470px}.pin-label{font-size:8px}.footer-note{max-width:200px}.heading-tag strong{font-size:11px}}
+@media(max-width:700px){.top-right .host{display:none}.topbar{padding:0 17px}.brand-name{font-size:19px}.brand-sub{font-size:8px}.brand-mark{width:29px;height:29px}.preview-label{font-size:8px}.sidebar{padding:10px}.nav-item{padding:9px 7px;gap:7px}.nav-title{font-size:10px}.step-num{width:22px;height:22px;font-size:9px}.heading{padding:22px 17px}.heading h1{font-size:23px}.heading-tag{display:none}.heading p{font-size:11px}.content{padding:0 14px 20px}.base-layout{grid-template-columns:1fr;gap:14px}.map-canvas{min-height:370px}.map-caption{font-size:7px}.selection-panel{display:grid;grid-template-columns:1fr}.selection-heading{padding:17px 17px 12px}.company-tabs{margin-bottom:12px}.choices{grid-template-columns:1fr 1fr;gap:7px}.choice{padding:11px 8px;gap:7px;min-height:72px}.choice-code{display:none}.choice-title{font-size:10px}.choice-sub{font-size:8px}.selection-status{padding-top:17px}.status-top{margin-bottom:10px}.selected-row{margin-top:8px}.reset{margin-top:13px}.map-pin{width:30px;height:30px}.pin-shape{width:22px;height:22px}.pin-label{font-size:7px;left:31px}.map-pin.right-label .pin-label{right:31px}.footer{padding:15px;flex-wrap:wrap;gap:14px}.footer-progress{width:100%}.footer-note{max-width:none}.footer-actions{width:100%;justify-content:flex-end}.button{padding:10px 17px;min-width:100px}.button.primary{min-width:162px}.faction-grid,.summary-cards{grid-template-columns:1fr}.faction-card{min-height:158px;padding:20px}.relation-list{grid-template-columns:1fr}.relations{padding:19px}.relation{font-size:10px}.fact{font-size:11px}.summary-card{padding:20px}.summary-card p{min-height:auto}.summary-banner{padding:16px}.summary-banner p{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"><span>⌖</span></div><div><div class="brand-name">PMC</div><div class="brand-sub">НАСТРОЙКА КАМПАНИИ</div></div></div>
+    <div class="top-right"><span class="eyebrow">НОВАЯ КАМПАНИЯ</span><span class="host"><span class="live-dot"></span>Хост сервера</span><span class="preview-label">МАКЕТ / 01</span></div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="nav-label">ПЕРЕД НАЧАЛОМ</div>
+      <nav class="nav" aria-label="Этапы настройки">
+        <button class="nav-item" data-step="1" aria-current="step"><span class="step-num">01</span><span><span class="nav-title">Стороны</span><span class="nav-caption">Компании и отношения</span></span></button>
+        <button class="nav-item" data-step="2"><span class="step-num">02</span><span><span class="nav-title">Базы</span><span class="nav-caption">Выбор расположения</span></span></button>
+        <button class="nav-item" data-step="3" disabled><span class="step-num">03</span><span><span class="nav-title">Подтверждение</span><span class="nav-caption">Проверка настроек</span></span></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="server-meta"><div class="eyebrow">ПАРАМЕТРЫ РЕЖИМА</div><div class="meta-row"><span>Компании</span><strong>2 ЧВК</strong></div><div class="meta-row"><span>Игроки</span><strong>до 16</strong></div><div class="meta-row"><span>Карта</span><strong>Altis</strong></div></div><p class="sidebar-note">Настройки задаёт хост.<br>Участники ожидают запуска.</p></div>
+    </aside>
+    <main class="workspace">
+      <div class="heading"><div><div class="eyebrow" id="page-kicker">НОВАЯ КАМПАНИЯ / 01</div><h1 id="page-title">Стороны конфликта</h1><p id="page-subtitle">Две компании. Один остров. Разные интересы.</p></div><div class="heading-tag"><strong>ALTIS</strong><small>Профиль кампании</small></div></div>
+      <div class="content">
+        <section class="page faction-page" id="page-1" aria-labelledby="page-title">
+          <div class="faction-grid">
+            <article class="faction-card"><span class="faction-icon" aria-hidden="true">◈</span><div class="eyebrow">КОМПАНИЯ 01 / BLUFOR</div><h2>Синяя ЧВК</h2><p>Официально приглашена правительством. Работает на стороне государственных сил.</p><span class="faction-badge">Управляется игроками</span></article>
+            <article class="faction-card red"><span class="faction-icon" aria-hidden="true">◈</span><div class="eyebrow">КОМПАНИЯ 02 / OPFOR</div><h2>Красная ЧВК</h2><p>Представляет интересы бизнеса. Собственные контракты, имущество и казна.</p><span class="faction-badge">Управляется игроками</span></article>
+            <article class="faction-card gov"><span class="faction-icon" aria-hidden="true">▱</span><div class="eyebrow">ГОСУДАРСТВЕННЫЕ СИЛЫ / BLUFOR</div><h2>Армия и полиция</h2><p>Союзники синей компании. На старте сохраняют нейтралитет к красной ЧВК.</p><span class="faction-badge">Правительственные силы</span></article>
+            <article class="faction-card enemy"><span class="faction-icon" aria-hidden="true">⋈</span><div class="eyebrow">ОБЩИЙ ПРОТИВНИК / INDEPENDENT</div><h2>Зелёные силы</h2><p>Враждебны обеим компаниям, армии и полиции с начала кампании.</p><span class="faction-badge">Общий противник</span></article>
+          </div>
+          <div class="relations"><h2>Отношения в начале кампании</h2><div class="relation-list"><div class="relation"><span>Синяя ЧВК ↔ Красная ЧВК</span><span class="peace">Нейтралитет</span></div><div class="relation"><span>Синяя ЧВК ↔ Правительство</span><span class="friend">Союзники</span></div><div class="relation"><span>Красная ЧВК ↔ Правительство</span><span class="peace">Нейтралитет</span></div><div class="relation"><span>Зелёные ↔ Обе ЧВК</span><span class="enemy">Вражда</span></div></div><p class="relations-note">Если между компаниями начнётся война, правительство выступит на стороне синей ЧВК. Казна, персонал и имущество компаний разделены.</p></div>
+        </section>
+        <section class="page base-layout" id="page-2" aria-labelledby="page-title" hidden>
+          <div class="map-panel">
+            <div class="map-toolbar"><span class="eyebrow">ОБЗОР ТЕРРИТОРИИ</span><div class="map-key"><span class="key-item"><span class="dot"></span>Синие · 4</span><span class="key-item"><span class="dot red"></span>Красные · 4</span></div></div>
+            <div class="map-canvas" aria-label="Схематичная карта с восемью вариантами баз">
+              <div class="map-scene" id="map-scene">
+                <svg class="map-art" viewBox="0 0 800 620" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#a8c0b9" stroke-opacity=".08" stroke-width=".7"/></pattern>
+                    <pattern id="finegrid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#a8c0b9" stroke-opacity=".025" stroke-width=".4"/></pattern>
+                    <path id="land" d="M67 171L89 147 125 146 139 111 176 104 201 71 233 93 263 75 279 107 306 112 320 149 355 142 369 170 412 158 424 185 463 179 486 155 508 180 546 168 553 131 574 114 594 140 625 127 648 153 684 140 707 173 742 179 736 208 763 237 737 265 742 287 703 297 680 330 658 326 641 359 604 374 579 361 562 382 544 371 523 395 492 385 472 421 438 412 423 439 398 424 385 453 365 445 354 486 324 480 301 511 277 491 247 501 243 471 211 456 222 428 196 400 167 410 150 383 121 375 132 350 100 334 104 305 78 294 94 269 73 246 83 215 59 195Z"/>
+                    <clipPath id="land-clip"><use href="#land"/></clipPath>
+                    <filter id="coast-shadow"><feGaussianBlur stdDeviation="5"/></filter>
+                    <linearGradient id="land-fill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a4940"/><stop offset=".65" stop-color="#303f37"/><stop offset="1" stop-color="#414a38"/></linearGradient>
+                  </defs>
+                  <rect width="800" height="620" fill="#1a2c32"/>
+                  <use href="#land" fill="none" stroke="#799185" stroke-width="18" opacity=".11" filter="url(#coast-shadow)"/>
+                  <use href="#land" fill="url(#land-fill)" stroke="#77877a" stroke-width="1.5"/>
+                  <g clip-path="url(#land-clip)" fill="none">
+                    <g stroke="#81906b" stroke-opacity=".14" stroke-width="1">
+                      <path d="M-10 192Q130 37 264 147T570 183 832 109M-10 202Q130 47 264 157T570 193 832 119M-10 214Q130 59 264 169T570 205 832 131M-10 227Q130 72 264 182T570 218 832 144M-10 242Q130 87 264 197T570 233 832 159M-10 260Q130 105 264 215T570 251 832 177M-10 279Q130 124 264 234T570 270 832 196M-10 301Q130 146 264 256T570 292 832 218M-10 325Q130 170 264 280T570 316 832 242M-10 351Q130 196 264 306T570 342 832 268M-10 381Q130 226 264 336T570 372 832 298M-10 413Q130 258 264 368T570 404 832 330M-10 449Q130 294 264 404T570 440 832 366M-10 489Q130 334 264 444T570 480 832 406M-10 535Q130 380 264 490T570 526 832 452"/>
+                      <path d="M82 334Q135 261 212 310T340 341Q410 325 417 277T526 267 669 250M95 337Q140 277 210 324T341 355Q424 339 431 289T526 281 681 264M108 340Q146 293 207 338T342 369Q438 353 445 301T526 295 693 278M121 343Q152 309 205 352T343 383Q452 367 459 313T526 309 705 292"/>
+                      <path d="M158 140C200 98 266 133 255 173S181 203 159 175 170 141 195 140 236 158 216 177M168 145C198 116 249 136 241 169S188 192 171 174 178 151 195 151 223 160 210 169M574 181C621 139 699 168 689 214S612 253 578 230 556 199 574 181M584 187C622 155 684 173 676 211S615 240 590 223 571 202 584 187M594 193C622 171 669 178 663 208S618 227 602 216 586 205 594 193"/>
+                    </g>
+                    <g stroke="#1b2a26" stroke-width="7" opacity=".55"><path d="M121 357L170 302 203 264 244 222 313 243 365 280 444 271 508 248 566 249 623 220 701 231M170 302L206 346 262 375 309 425M244 222L215 165 203 123M365 280L346 330 380 370 434 385M508 248L527 308 573 337 624 324"/></g>
+                    <g stroke="#9a9b7c" stroke-opacity=".62" stroke-width="2"><path d="M121 357L170 302 203 264 244 222 313 243 365 280 444 271 508 248 566 249 623 220 701 231M170 302L206 346 262 375 309 425M244 222L215 165 203 123M365 280L346 330 380 370 434 385M508 248L527 308 573 337 624 324"/></g>
+                    <g stroke="#9a9b7c" stroke-opacity=".32" stroke-width="1" stroke-dasharray="4 4"><path d="M203 264L143 227 115 185M313 243L326 191 302 155M444 271L437 220 407 185M566 249L570 199 585 160M262 375L233 417 273 462M573 337L547 360 510 362M380 370L363 422 331 455M623 220L663 184"/></g>
+                    <g fill="#a2a187" opacity=".4"><rect x="237" y="214" width="5" height="5"/><rect x="246" y="220" width="7" height="4"/><rect x="228" y="224" width="6" height="6"/><rect x="250" y="209" width="4" height="5"/><rect x="359" y="271" width="5" height="6"/><rect x="368" y="279" width="7" height="5"/><rect x="356" y="283" width="5" height="5"/><rect x="615" y="217" width="5" height="6"/><rect x="626" y="224" width="7" height="4"/><rect x="626" y="209" width="6" height="5"/><rect x="520" y="300" width="4" height="5"/><rect x="529" y="311" width="7" height="4"/><rect x="204" y="340" width="5" height="4"/><rect x="212" y="348" width="7" height="5"/></g>
+                  </g>
+                  <path d="M641 422l15-7 14 7-3 19-16 8-12-9Z M686 391l11-3 6 11-11 8-9-5Z M84 405l14-9 10 10-7 13-14-3Z" fill="#38473b" stroke="#66776b" stroke-width="1"/>
+                  <rect width="800" height="620" fill="url(#finegrid)"/><rect width="800" height="620" fill="url(#grid)"/>
+                  <g fill="#93aba5" opacity=".4" font-family="Arial,sans-serif" font-size="8"><text x="15" y="28">A</text><text x="15" y="178">B</text><text x="15" y="328">C</text><text x="15" y="478">D</text><text x="100" y="16">01</text><text x="300" y="16">02</text><text x="500" y="16">03</text><text x="700" y="16">04</text></g>
+                </svg>
+                <div class="map-watermark" aria-hidden="true">ALTIS</div>
+                <div id="map-pins"></div>
+              </div>
+              <div class="map-compass" aria-hidden="true">С<span>↑</span></div>
+              <div class="map-controls" aria-label="Масштаб карты"><button type="button" id="zoom-in" aria-label="Приблизить карту">+</button><button type="button" id="zoom-out" aria-label="Отдалить карту">−</button><button type="button" id="zoom-reset" aria-label="Исходный масштаб">⌖</button></div>
+              <div class="map-caption"><span>СХЕМАТИЧНАЯ КАРТА · ТОЧКИ УСЛОВНЫЕ</span><span>8 ВАРИАНТОВ / 2 БАЗЫ</span></div>
+            </div>
+          </div>
+          <aside class="selection-panel" aria-label="Выбор баз компаний">
+            <div class="selection-heading"><div class="eyebrow">ВЫБОР ХОСТА</div><h2>Базы компаний</h2></div>
+            <div class="company-tabs" role="tablist" aria-label="Компания"><button class="company-tab" role="tab" id="tab-blue" aria-selected="true" aria-controls="base-choices" tabindex="0" data-company="blue">Синяя ЧВК</button><button class="company-tab red" role="tab" id="tab-red" aria-selected="false" aria-controls="base-choices" tabindex="-1" data-company="red">Красная ЧВК</button></div>
+            <div class="choices" id="base-choices" role="tabpanel" aria-labelledby="tab-blue"></div>
+            <div class="selection-status"><div class="selection-divider"></div><div class="status-top"><span class="eyebrow">РАЗМЕЩЕНИЕ БАЗ</span><strong id="selection-count">0 из 2</strong></div><div id="selected-bases"></div><button type="button" class="reset" id="reset-selection">Сбросить выбор</button></div>
+          </aside>
+        </section>
+        <section class="page summary-page" id="page-3" aria-labelledby="page-title" hidden>
+          <div class="summary-banner"><div class="check" aria-hidden="true">✓</div><div><h2>Обе базы выбраны</h2><p>Проверьте расположение штабов и стартовые отношения.</p></div></div>
+          <div class="summary-cards" id="summary-cards"></div>
+          <div class="summary-facts"><h2>Параметры кампании</h2><div class="fact"><span>Карта</span><span>Altis</span></div><div class="fact"><span>Состав</span><span>2 ЧВК · до 16 игроков суммарно</span></div><div class="fact"><span>Отношения компаний на старте</span><span>Нейтралитет</span></div><div class="fact"><span>Правительство</span><span>Союзник синих · нейтрально к красным</span></div><div class="fact"><span>Зелёные силы</span><span>Враждебны обеим ЧВК и правительству</span></div></div>
+          <p class="summary-note">При войне между ЧВК армия и полиция выступают на стороне синей компании.</p>
+        </section>
+      </div>
+      <footer class="footer"><div class="footer-progress"><div class="progress-bars" aria-hidden="true"><span class="done"></span><span></span><span></span></div><div class="footer-note" id="footer-note"><strong>Шаг 1 из 3</strong> · Состав сторон</div></div><div class="footer-actions"><button type="button" class="button" id="previous" hidden>Назад</button><button type="button" class="button primary" id="next"><span id="next-label">К выбору баз</span><span class="arrow" aria-hidden="true">→</span></button></div></footer>
+    </main>
+  </div>
+</div>
+<div id="announcer" class="sr-only" aria-live="polite"></div>
+<div class="dialog-backdrop" id="result" hidden><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-describedby="result-description" tabindex="-1"><div class="eyebrow">ПРЕДПРОСМОТР</div><h2 id="result-title">Настройки подготовлены</h2><p>Так будет выглядеть подтверждение выбранных параметров.</p><div class="dialog-selection" id="result-bases"></div><p id="result-description">Это демонстрация интерфейса. Игровая кампания не запускается.</p><button type="button" class="button primary" id="close-result">Вернуться к макету</button></section></div>
+<script>
+'use strict';
+const bases = [
+  {id:'blue_01',company:'blue',number:1,code:'С-01',name:'Северный опорный пункт',description:'Возвышенность · подъезд по дороге',x:25.5,y:25},
+  {id:'blue_02',company:'blue',number:2,code:'С-02',name:'Западная площадка',description:'Запад острова · открытая территория',x:17.8,y:42.6},
+  {id:'blue_03',company:'blue',number:3,code:'С-03',name:'Узел снабжения',description:'Центральная дорога · транспортный узел',x:37.8,y:38.9},
+  {id:'blue_04',company:'blue',number:4,code:'С-04',name:'Прибрежный комплекс',description:'Юго-запад · близость побережья',x:32.6,y:65},
+  {id:'red_01',company:'red',number:1,code:'К-01',name:'Восточный пост',description:'Восток острова · подъезд по дороге',x:84,y:34.2},
+  {id:'red_02',company:'red',number:2,code:'К-02',name:'Северный перевал',description:'Северо-восток · холмистая местность',x:72.8,y:25},
+  {id:'red_03',company:'red',number:3,code:'К-03',name:'Промышленный двор',description:'Восточная дорога · открытая площадка',x:66,y:49.8},
+  {id:'red_04',company:'red',number:4,code:'К-04',name:'Южный лагерь',description:'Юг острова · удалённое размещение',x:53.1,y:61.1}
+];
+const companyNames={blue:'Синяя ЧВК',red:'Красная ЧВК'};
+const state={step:1,activeCompany:'blue',selected:{blue:null,red:null},zoom:1};
+const $=id=>document.getElementById(id);
+const findBase=id=>bases.find(base=>base.id===id);
+const selectedBase=company=>findBase(state.selected[company]);
+const ready=()=>Boolean(selectedBase('blue') && selectedBase('red'));
+function announce(text){$('announcer').textContent=text;}
+function selectBase(id){
+  const base=findBase(id); if(!base)return;
+  state.selected[base.company]=id;state.activeCompany=base.company;render();
+  announce(`${companyNames[base.company]}: ${base.name}. Выбрано ${Object.values(state.selected).filter(Boolean).length} из двух баз.`);
+}
+function createPin(base){
+  const button=document.createElement('button');button.type='button';button.dataset.base=base.id;
+  button.className=`map-pin ${base.company==='red'?'red right-label':''}`;
+  button.style.left=base.x+'%';button.style.top=base.y+'%';
+  button.setAttribute('aria-label',`${companyNames[base.company]}: ${base.name}, ${base.code}`);
+  button.innerHTML=`<span class="pin-shape"><span class="pin-num">${String(base.number).padStart(2,'0')}</span></span><span class="pin-label">${base.code} / ${base.name}</span>`;
+  button.addEventListener('click',()=>selectBase(base.id));return button;
+}
+bases.forEach(base=>$('map-pins').append(createPin(base)));
+function renderChoices(){
+  const focused=document.activeElement?.dataset.choice;
+  $('base-choices').replaceChildren();
+  bases.filter(base=>base.company===state.activeCompany).forEach(base=>{
+    const button=document.createElement('button');button.type='button';button.dataset.choice=base.id;
+    button.className=`choice ${base.company==='red'?'red':''}`;
+    button.setAttribute('aria-pressed',String(state.selected[base.company]===base.id));
+    button.setAttribute('aria-label',`${base.name}, ${base.code}`);
+    button.innerHTML=`<span class="radio" aria-hidden="true"></span><span><span class="choice-title">${base.name}</span><span class="choice-sub">${base.description}</span></span><span class="choice-code">${base.code}</span>`;
+    button.addEventListener('click',()=>selectBase(base.id));$('base-choices').append(button);
+  });
+  if(focused)$('base-choices').querySelector(`[data-choice="${focused}"]`)?.focus();
+  $('base-choices').setAttribute('aria-labelledby','tab-'+state.activeCompany);
+  document.querySelectorAll('.company-tab').forEach(tab=>{const active=tab.dataset.company===state.activeCompany;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;});
+}
+function renderSummary(){
+  $('summary-cards').replaceChildren();
+  for(const company of ['blue','red']){
+    const base=selectedBase(company);if(!base)continue;
+    const article=document.createElement('article');article.className='summary-card '+(company==='red'?'red':'');
+    article.innerHTML=`<div class="eyebrow">${companyNames[company].toUpperCase()} / ${company==='blue'?'BLUFOR':'OPFOR'}</div><h2>${base.name}</h2><p>${base.description}</p><div class="summary-location"><span>Вариант ${base.number} из 4 · ${base.code}</span><button type="button" class="edit-link">Изменить</button></div>`;
+    article.querySelector('button').addEventListener('click',()=>{state.activeCompany=company;goStep(2);});$('summary-cards').append(article);
+  }
+}
+function render(){
+  document.querySelectorAll('.map-pin').forEach(pin=>{const base=findBase(pin.dataset.base);pin.setAttribute('aria-pressed',String(state.selected[base.company]===base.id));});
+  renderChoices();renderSummary();
+  const count=Object.values(state.selected).filter(Boolean).length;
+  $('selection-count').textContent=count+' из 2';
+  $('selected-bases').innerHTML=['blue','red'].map(company=>{const base=selectedBase(company);return `<div class="selected-row"><span class="dot ${company==='red'?'red':''}"></span><span>${companyNames[company]}<small>${base?base.name:'База не выбрана'}</small></span></div>`;}).join('');
+  const info={1:['Стороны конфликта','Две компании. Один остров. Разные интересы.'],2:['Размещение штабов','Выберите по одной базе для каждой ЧВК.'],3:['Всё готово к началу','Проверьте настройки новой кампании.']}[state.step];
+  $('page-kicker').textContent='НОВАЯ КАМПАНИЯ / 0'+state.step;$('page-title').textContent=info[0];$('page-subtitle').textContent=info[1];
+  document.querySelectorAll('.page').forEach(page=>page.hidden=page.id!=='page-'+state.step);
+  document.querySelectorAll('.nav-item').forEach(button=>{const step=Number(button.dataset.step);if(step===state.step)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');button.disabled=step===3&&!ready();});
+  document.querySelectorAll('.progress-bars span').forEach((bar,index)=>bar.classList.toggle('done',index<state.step));
+  $('footer-note').innerHTML=`<strong>Шаг ${state.step} из 3</strong> · ${state.step===1?'Состав сторон':state.step===2?(ready()?'Обе базы выбраны':'Выберите две базы'):'Итоговые настройки'}`;
+  $('previous').hidden=state.step===1;$('next').disabled=state.step>=2&&!ready();$('next-label').textContent=state.step===1?'К выбору баз':state.step===2?'Продолжить':'Начать кампанию';
+}
+function goStep(step){if(![1,2,3].includes(step)||step===3&&!ready())return;state.step=step;render();}
+document.querySelectorAll('.nav-item').forEach(button=>button.addEventListener('click',()=>goStep(Number(button.dataset.step))));
+document.querySelectorAll('.company-tab').forEach(button=>{
+  button.addEventListener('click',()=>{state.activeCompany=button.dataset.company;render();});
+  button.addEventListener('keydown',event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();state.activeCompany=event.key==='Home'?'blue':event.key==='End'?'red':state.activeCompany==='blue'?'red':'blue';render();$('tab-'+state.activeCompany).focus();}});
+});
+$('reset-selection').addEventListener('click',()=>{state.selected={blue:null,red:null};render();announce('Выбор обеих баз сброшен.');});
+$('previous').addEventListener('click',()=>goStep(state.step-1));
+$('next').addEventListener('click',()=>{
+  if(state.step<3){goStep(state.step+1);return;}if(!ready())return;
+  $('result-bases').replaceChildren();
+  for(const company of ['blue','red']){const row=document.createElement('div');row.textContent=`${companyNames[company]} — ${selectedBase(company).name}`;$('result-bases').append(row);}
+  $('result').hidden=false;$('close-result').focus();
+});
+function closeDialog(){$('result').hidden=true;$('next').focus();}
+$('close-result').addEventListener('click',closeDialog);
+$('result').addEventListener('click',event=>{if(event.target===$('result'))closeDialog();});
+document.addEventListener('keydown',event=>{
+  if($('result').hidden)return;
+  if(event.key==='Escape'){event.preventDefault();closeDialog();}
+  else if(event.key==='Tab'){event.preventDefault();$('close-result').focus();}
+});
+function changeZoom(value){state.zoom=Math.max(1,Math.min(1.5,Math.round(value*100)/100));$('map-scene').style.transform=`scale(${state.zoom})`;$('zoom-in').disabled=state.zoom>=1.5;$('zoom-out').disabled=state.zoom<=1;}
+$('zoom-in').addEventListener('click',()=>changeZoom(state.zoom+.1));$('zoom-out').addEventListener('click',()=>changeZoom(state.zoom-.1));$('zoom-reset').addEventListener('click',()=>changeZoom(1));
+render();changeZoom(1);
+</script>
+</body>
+</html>

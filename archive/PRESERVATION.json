@@ -1,0 +1,742 @@
+{
+  "source_commit": "35f7ee663335e116a92b77c60d863d0853b51cc4",
+  "files": [
+    {
+      "original_path": ".gitattributes",
+      "archived_path": "archive/lifesim-pmc-unused/.gitattributes",
+      "sha256": "b82c6e892a4bc1dbf92de002d51b35c4aabf6b8efda66e2f604096fb278f4fd2"
+    },
+    {
+      "original_path": ".gitignore",
+      "archived_path": "archive/lifesim-pmc-unused/.gitignore",
+      "sha256": "83db92c02f21a90a3a4ad49f6b758a181beb7772bc395eaf8e3050e17608a713"
+    },
+    {
+      "original_path": "AGENTS.md",
+      "archived_path": "archive/lifesim-pmc-unused/AGENTS.md",
+      "sha256": "00cddf0316c866b1bf643835796f72552349d8e4e60c5df4caf4ecf2b1aa13b2"
+    },
+    {
+      "original_path": "BASELINE.json",
+      "archived_path": "archive/lifesim-pmc-unused/BASELINE.json",
+      "sha256": "375292d98904b7986f46986acc57fcff8a61d2173ef970aeebda67301011b4a7"
+    },
+    {
+      "original_path": "CHANGELOG.md",
+      "archived_path": "archive/lifesim-pmc-unused/CHANGELOG.md",
+      "sha256": "ed497438fc17e3849c28cbc9724c0af122ae0110383bb1582bf9f330d16d30ab"
+    },
+    {
+      "original_path": "LICENSE",
+      "archived_path": "archive/lifesim-pmc-unused/LICENSE",
+      "sha256": "9989172caa5d443e41d2c1e521ec3352fc47cf7ecafb828561216ffbfff3f24f"
+    },
+    {
+      "original_path": "README.md",
+      "archived_path": "archive/lifesim-pmc-unused/README.md",
+      "sha256": "ad46c6ff5cf962f96432a62843729c0d4e1099c09b2565ab94b706f72ab937b6"
+    },
+    {
+      "original_path": "README_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/README_RU.md",
+      "sha256": "6447444440230c67ca457899b2f13447f69302876427b4ea2262a9fbfdc5c31e"
+    },
+    {
+      "original_path": "RELEASE.json",
+      "archived_path": "archive/lifesim-pmc-unused/RELEASE.json",
+      "sha256": "6ba27a82c3f9cc14def2cd325e93ed2c84ecaf51eb22183e908512114fe0062e"
+    },
+    {
+      "original_path": "addons/alspmc_core/config.cpp",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/config.cpp",
+      "sha256": "4427de0043a79d484040f44225aa8f1006604b67db9b17c7e457b0d81ad73b44"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_applyValues.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_applyValues.sqf",
+      "sha256": "555f3c75a25c53a8e2e5ae6e0962c0abf2b81f2301960a5a854c64aef4bdfa01"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_buyBase.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_buyBase.sqf",
+      "sha256": "a50b01498a09003b29918beffcda76a9f82b389dda8851a1a1df8a0c2fdb375e"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_clientInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_clientInit.sqf",
+      "sha256": "de5339cf96bd0438e4b0e88b172adc6af4e8389068512b2d882038197afdc952"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_clientTick.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_clientTick.sqf",
+      "sha256": "24952fa16f1168a96225b4bf2bf5ed031965b2f3c09fe2da1eb3fcf61f5a761c"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyDo.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyDo.sqf",
+      "sha256": "960a121fc5dddb6ccc38600018fde8d6bc3c701bd17fca4c32832ecf053f5821"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyEnsure.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyEnsure.sqf",
+      "sha256": "71108b227a33bbdae03f7fc7138f60236e287802b4d9155df184c4e28e4291f6"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyInit.sqf",
+      "sha256": "5c64dcdb35cdf525bf4e902cffbbb2754d74fe333a922c96d52e064f66ef3d76"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyOf.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyOf.sqf",
+      "sha256": "a4002d39fb2e85a3014037e23fd4036df3d94a4284f25c1a6a16d4539fa8359d"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyReward.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyReward.sqf",
+      "sha256": "9fb14323e7e439fc9b0fac99fe7c2db62ff88d6ec9d5d6b2082173d1db3f283a"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companySave.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companySave.sqf",
+      "sha256": "a23059526d698fcda8a3de4df5d632a68d33648d9baf1da1fc6b1cd84b835143"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyState.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyState.sqf",
+      "sha256": "a21817c582717f61842b0f1bc6549a55c27133620e8c95e39d94cedabfdb1273"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_companyTick.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_companyTick.sqf",
+      "sha256": "0b0088cafe3629e295acdca7d4a780d4846dc1b74c8197acd376cd59d58bf8b9"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractAssets.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractAssets.sqf",
+      "sha256": "e856fedce3577f4766205f08a9e854078e9f73a88e01ac012b5050cc49bb11d3"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractAttack.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractAttack.sqf",
+      "sha256": "17a6ddcec1d4cf553da94cddc456af09dae7634be70398685375420025aa32c0"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractBase.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractBase.sqf",
+      "sha256": "add9a6d0eb704bbdcc0d0ae211b0035bf7efb18bb15de017a2be64b6022b1f5f"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractBoss.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractBoss.sqf",
+      "sha256": "cb1db23e167b3e6155b8e01a863c962c6392a39b8f76ce00c2c8ffbc072431d4"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractCatalog.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractCatalog.sqf",
+      "sha256": "7de336f78494f6ecee626e887424aa3230559c0c392690a81f9e8234e833264b"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractEnd.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractEnd.sqf",
+      "sha256": "cd32ba84fa898d4e630c2ada5b40711132e35e2b05815502953b473f46c1e936"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractEquip.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractEquip.sqf",
+      "sha256": "191451e136557b5a9520b2410e8c1043e0caa2996687ae20d29f152a481c0bd1"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractFar.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractFar.sqf",
+      "sha256": "30d7334224a2ce73d8b26c8bfbba4c2da7ddf2b455ed3caffd8a0c90d0455862"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractGarrison.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractGarrison.sqf",
+      "sha256": "0558eb0660ddd9b02f629bc4934f631c38c486aef1c5287e50b19de7c7e26155"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractHostility.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractHostility.sqf",
+      "sha256": "ceee72487adec38adc0a551ad0b0b86eed2b21bda253860c6a33daa1197d3e67"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractInit.sqf",
+      "sha256": "240ed76d87bba35e75417f7bfc1afe1f6b029273cac0ad75342cb59972a63d4b"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractMirror.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractMirror.sqf",
+      "sha256": "7436f5eaa456b3a6fc7e5adc0d0b8bafe969fe23d14210be43c083f94c30eec5"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractOffers.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractOffers.sqf",
+      "sha256": "a4c4ebe410c5627db7763aed7507b790681b4894310c7ca728681ea173064719"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractPlan.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractPlan.sqf",
+      "sha256": "a93838202622702f50bbcd25acd5ead67d330cbf1224414f05c8c2b247ec0b68"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractPlanAvailable.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractPlanAvailable.sqf",
+      "sha256": "89bccb11c8b7a6e48f21de3b30b41f144215fb3d1856e0761085f8ac18dda467"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractProfile.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractProfile.sqf",
+      "sha256": "a1a7ab9675def60ad8ef32e377a6ad0f8ef60ff6ce9a9bc475cf1bec509c2406"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractReady.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractReady.sqf",
+      "sha256": "e804a9c427576bffaa619ec9c3c1031957ca54ea6163b7cb5395bfe28cedadd3"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractSave.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractSave.sqf",
+      "sha256": "cbd942ff3c8ad0903cc0a7b47999e9dfbf5324d7a01e21a7607df5a494e37311"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractScenario.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractScenario.sqf",
+      "sha256": "1dbbb56afe3e1d6e62fee2b9a5192a0e4891e62f68c5d4211e9fb92826859d34"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractSiteAvailable.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractSiteAvailable.sqf",
+      "sha256": "60ed6e02336142a681ce33dd242f34f606297f057eb9c693067be0571e811d35"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractSites.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractSites.sqf",
+      "sha256": "cd15ac61f0560e376ea2517f84bfdded0cd8ef2cec2a0c6ad33cd55a8bae24e3"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractTeam.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractTeam.sqf",
+      "sha256": "748c4280100909e785f52bb7ff2b08ed4290fbb67f13cfb54deb06439a1f3fef"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractTick.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractTick.sqf",
+      "sha256": "087590514db3b2334fcce18c481a57e05cc3a8deadb8740a02abb86aeb48b2cf"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_contractWarBases.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_contractWarBases.sqf",
+      "sha256": "d8ca40ccd4a453365cbec79b0a272bae4c5659dc5794a811a9b5508a4a41a891"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_desktopDo.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_desktopDo.sqf",
+      "sha256": "fe5f142a20994baa91c4104217d2bd9b029f5ccd1706543ee55e5d4a462a2ef8"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_desktopOpen.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_desktopOpen.sqf",
+      "sha256": "a546d628df6513c560b19e09fe99b5aecbe7d37c74053a951d7542269da6e8a4"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_desktopTick.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_desktopTick.sqf",
+      "sha256": "f6f0bf382d2e2c7f622e85e9d574e31d8d9eb9f4650225aa043934657f7e1ce2"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_desktopView.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_desktopView.sqf",
+      "sha256": "cf044662547392a3310f431f07066756284799c3f35932d5ead3b2513c832d87"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_markBase.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_markBase.sqf",
+      "sha256": "d419687cf2e91b477ce064657970e746e923a5a34657df93c39f76c727b9591e"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_message.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_message.sqf",
+      "sha256": "26f80914d29513ae8492b223c20532ef25b060b4520fe658cb5630f01b97806e"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_normalizeName.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_normalizeName.sqf",
+      "sha256": "bf1814c19ba3fa00cc8c84f89da98ea9217fbec8722bab275e800254c1218cb9"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_phoneBridge.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_phoneBridge.sqf",
+      "sha256": "278a27cc4305f1039545360274f54e2a6b36eef2d2c99d86be9964c68e8efe29"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_phoneDo.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_phoneDo.sqf",
+      "sha256": "36b3a5fd7e2d3617393a0052afd4dd1a5b433afd6e56baecc64dfb04a9a564df"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_phoneMsg.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_phoneMsg.sqf",
+      "sha256": "40f66e2fdcfa9dce8288671aff7baea8d9665106c87fc3c9f6e2f3d643eebfac"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_phoneSync.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_phoneSync.sqf",
+      "sha256": "ad6b6334d155efb1b3452c1339d1d3eff26453708a758d73b487b057cfd42ea8"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_postInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_postInit.sqf",
+      "sha256": "a0564dfbec38a7d9c9b058536bcb71898705b11fa9cbe8744ac38b2d7d1b0ecd"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questDo.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questDo.sqf",
+      "sha256": "e8603235e6e370b2eb771e2d0a6c4abacd11483ad8415b8d2fe87fd4cc4b67ea"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questInit.sqf",
+      "sha256": "ab204e18e09f3b2fce8482c30053e9e4b8ae3d153947c3c27393cd41736067d1"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questKilled.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questKilled.sqf",
+      "sha256": "45f1c1d25a1602cbcae62aba757d1523cb16ef013602a7766641c98789c59dd7"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questMarker.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questMarker.sqf",
+      "sha256": "c461f660f72c721bd00e94eb1b662abb9726842b62abc49e4bb858f4d98cd2b2"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questSave.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questSave.sqf",
+      "sha256": "97c48078026c29602af02286f5b7971ad25523dbe9039d9e14a1596c8fda5a91"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questScenario.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questScenario.sqf",
+      "sha256": "db30fd89f7a739549cd04c8b3a5245bae155e9fd2d34d9b48a76d7d0425dd246"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questSite.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questSite.sqf",
+      "sha256": "5bcb2b2bc274087db9fc7219fb3239a45323e0aa8e130bf8766fced73904562a"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_questState.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_questState.sqf",
+      "sha256": "c4a1f4c02abbb2060ff6cb668b1a4b9f6a9527df8b37f0c373463560aebfce53"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_reconcile.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_reconcile.sqf",
+      "sha256": "30b25cd4a2e751550945ae9b11b5e8b6191c72d68f70a25ea48cff68fc802e7f"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_requestAllowed.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_requestAllowed.sqf",
+      "sha256": "2355b3d3ebae4bbe91057ddc2a2e36309cbd8aa3cd0a9a79d3c353544fa2b442"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_save.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_save.sqf",
+      "sha256": "d1f6f347933ffcef2155aa6a819301915173e1e9e7e90b92f4019ecd2f6c871f"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_sellHouse.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_sellHouse.sqf",
+      "sha256": "66fd8a90086ea46d812df9ee1ea3c98396b17526b221d4d69551aa2f2b79f363"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_serverInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_serverInit.sqf",
+      "sha256": "686a392e73d93512aba5d85c49af0867197c4b994186bcf30521fcdae23a5dbb"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_setName.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_setName.sqf",
+      "sha256": "2627bc0344d886e99332daf87192e9f7904a0d1b99b653cea5ddb576d78c8583"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_stateSet.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_stateSet.sqf",
+      "sha256": "b7f4b6a20138b02a968538c6773eb933582addee42113de017484924597335f0"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalCanUse.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalCanUse.sqf",
+      "sha256": "3da17015903acad3b5f2cbe56db7dd146b9dcfea2b7b42c1585fde0c5203d292"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalEnsure.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalEnsure.sqf",
+      "sha256": "cc5488ce91504f3a9588d90007eeede259e9221f9a3a176cc9b70112443139bb"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalFindSpot.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalFindSpot.sqf",
+      "sha256": "87006218ed6d8b5de65c3318d3478788ad872f1da6b9525f882f91bafc1f83f5"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalInit.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalInit.sqf",
+      "sha256": "2bef758cb788ab3b1bc31de7413f47c0752a6d56645f6018d4cea78d48f13fc5"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalRemove.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalRemove.sqf",
+      "sha256": "d7ef49c14e90402ab5a2de939280d21b68e2f58ea071a38e1a65da3c7a7c7b4c"
+    },
+    {
+      "original_path": "addons/alspmc_core/functions/fn_terminalSync.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/functions/fn_terminalSync.sqf",
+      "sha256": "f0807dbaee286b7ffd07ecc2726a9af7bb0f39b693c3aaa9a19a29337ac53a0e"
+    },
+    {
+      "original_path": "addons/alspmc_core/stringtable.xml",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/stringtable.xml",
+      "sha256": "497b0f7035f8c60a106cbbd8cacb1561839a5bd7115232485f55639551904fe5"
+    },
+    {
+      "original_path": "addons/alspmc_core/ui/company.js",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/ui/company.js",
+      "sha256": "589ea1f520f2a5d9745f2716237cfcb1c9a786bcf198f0a17ec5029cb1bcfd3a"
+    },
+    {
+      "original_path": "addons/alspmc_core/ui/desktop.html",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/ui/desktop.html",
+      "sha256": "ee03653368374f8643fc15b23ed277811b79900e37dbd5fab8605b64776216a0"
+    },
+    {
+      "original_path": "addons/alspmc_core/ui/licensePhoneOnly.js",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/ui/licensePhoneOnly.js",
+      "sha256": "ac8f2f48754f37afbacc6453d9f52b3ef60213bc63cf64e33b5622789289044f"
+    },
+    {
+      "original_path": "addons/alspmc_core/ui/phone.js",
+      "archived_path": "archive/lifesim-pmc-unused/addons/alspmc_core/ui/phone.js",
+      "sha256": "fff3cf07f7f4f08ca95c0f6a838fee85c08f1d7fee283cb7dd523ee0fd631713"
+    },
+    {
+      "original_path": "audit/README.md",
+      "archived_path": "archive/lifesim-pmc-unused/audit/README.md",
+      "sha256": "1b53246ad272046fd0e219dd9069319c3560a7008235a0e9d2d3a4632928eb76"
+    },
+    {
+      "original_path": "audit/итоги аудита аддона PMC.md",
+      "archived_path": "archive/lifesim-pmc-unused/audit/итоги аудита аддона PMC.md",
+      "sha256": "cf88927e04052582f51d9968483e976e1a7895f2dee3590fa20334b7ba75de96"
+    },
+    {
+      "original_path": "audit/итоги аудита.md",
+      "archived_path": "archive/lifesim-pmc-unused/audit/итоги аудита.md",
+      "sha256": "967615b54aef39ad12cd8d73faa44d691129599fbd974259682068041436ba07"
+    },
+    {
+      "original_path": "baselines/0.6.3/LifeSim_PMC_0.6.3_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/baselines/0.6.3/LifeSim_PMC_0.6.3_alpha1.zip",
+      "sha256": "f129ddf78e0b4885348821b4eee4bee3add7d03b222172d3d3bdaa211a826099"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.1.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.1.0_alpha1.zip",
+      "sha256": "78f750e7960d4ffa488ce8a70a0b6180a54877f239f5ab688cbecabe5d499c00"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.1.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.1.0_alpha1_sources.zip",
+      "sha256": "69b315f047568459aceb31147bf0ba398578124d3a905b5935d61dca3fa7ff7d"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.2.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.2.0_alpha1.zip",
+      "sha256": "037f21181ee44455440f58c7b34518ad64455defd34ca6d5d9551c263b2e3c5b"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.2.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.2.0_alpha1_sources.zip",
+      "sha256": "30a91baad08f596e79ebfc628e98d463080c4d47da5d7615c5d636adfce8851f"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.3.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.3.0_alpha1.zip",
+      "sha256": "6ebf09daf73fab80dfc85f941527df0dd8b6b5155c48d9ba9631f67885873efc"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.3.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.3.0_alpha1_sources.zip",
+      "sha256": "9d18ac4acde4f673559c66723ebd9c2b04745f436461343c552c6fdc8692d71c"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.3.1_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.3.1_alpha1.zip",
+      "sha256": "76f4a84100cf34b5befa8fa154ce114ace00fb2c2fed61e4ac07c8ddaa5944b4"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.3.1_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.3.1_alpha1_sources.zip",
+      "sha256": "b5b0b38cfbabb1e81fd64d68a58837178f365910e5a0d24ce488822d9c284fba"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.4.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.4.0_alpha1.zip",
+      "sha256": "2f9dd3f14306b0dc5214954d131bcb719425b19842032ba0d40312739e0edc17"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.4.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.4.0_alpha1_sources.zip",
+      "sha256": "c3dff58dd31cea91e0c2ba840bb74ee315e6d6776675c278b51538cec1148934"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.5.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.5.0_alpha1.zip",
+      "sha256": "9f01da5dc085bfbbe878e0798d4b78c059915eb5809d81cf1ecd27a81d5cb510"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.5.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.5.0_alpha1_sources.zip",
+      "sha256": "8cf0db3c7ac58c8df1e964a49cecb571b8c53a447ddba381267c35b31e2110b1"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.0_alpha1.zip",
+      "sha256": "767eddeb9b188acebe50a88df470b4e77e781f9891f4a539f769ec2040123cf6"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.0_alpha1_sources.zip",
+      "sha256": "f79b275a190cd2acfab7e7e5e4b15998cfe5b3b24c2d33bef22a17fdedfaaf00"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.1_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.1_alpha1.zip",
+      "sha256": "e71ef0cae20bc80edd6123729e9e9673f9d6e0a2c8b8bc0b63d181a7b851aebd"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.1_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.1_alpha1_sources.zip",
+      "sha256": "fe77fe2f645a94f678ee86c79b69eb8653d0f334137169b5868469e85d6db031"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.3_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.3_alpha1.zip",
+      "sha256": "f129ddf78e0b4885348821b4eee4bee3add7d03b222172d3d3bdaa211a826099"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.6.3_review_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.6.3_review_sources.zip",
+      "sha256": "488211de3d48ff8bbcdf6a20fd51a68b088f0e4c4a560d4afe107cf1e0b59111"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.7.0_alpha1.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.7.0_alpha1.zip",
+      "sha256": "5425cbe06d1d678cbd0dab33dcf19801192d71e555500802524ae71a476932d4"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_0.7.0_alpha1_sources.zip",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_0.7.0_alpha1_sources.zip",
+      "sha256": "9cb826d6cefc2a1bd414fd9ac056f241e8f35a1886850c5fbd8d09b43ad6a81a"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_PC_Design_RU.pdf",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_PC_Design_RU.pdf",
+      "sha256": "d928dc0c05e01321f8695b4c416f5319f6689f6036c478b1c669eb537ebf03d7"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_Team_Development_Plan_RU.docx",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_Team_Development_Plan_RU.docx",
+      "sha256": "7cfee466cdeaa9953416ffa1f1f1d0cb98e557c49b0d17f0913299b1edd6fdb7"
+    },
+    {
+      "original_path": "dist/LifeSim_PMC_Team_Development_Plan_RU.pdf",
+      "archived_path": "archive/lifesim-pmc-unused/dist/LifeSim_PMC_Team_Development_Plan_RU.pdf",
+      "sha256": "cc4c22212a202d8d817dad543f7a4a2eb97c9d1f63e87e5617e18447d50cb108"
+    },
+    {
+      "original_path": "dist/SHA256SUMS.txt",
+      "archived_path": "archive/lifesim-pmc-unused/dist/SHA256SUMS.txt",
+      "sha256": "20420ff176e9d9afbc6a1b38d2336f5c9903a29e924dabec92d926cd5d04c079"
+    },
+    {
+      "original_path": "docs/BASELINE_0.6.3_REVIEW_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/BASELINE_0.6.3_REVIEW_RU.md",
+      "sha256": "fcbd48530645d73f2734bd66cccd804afdfbb948708d16e92e4f85a0b18b9351"
+    },
+    {
+      "original_path": "docs/CONTRACTS_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/CONTRACTS_RU.md",
+      "sha256": "5ec9dd146d14e3e439a2b2f501bbf53bd0051918f2939233560218f51eb9c05a"
+    },
+    {
+      "original_path": "docs/DEVELOPMENT.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/DEVELOPMENT.md",
+      "sha256": "54e62b49ed953efa3d88c88916688ee73480ba141372984f1d960fc510b91545"
+    },
+    {
+      "original_path": "docs/GAME_CHECKLIST_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/GAME_CHECKLIST_RU.md",
+      "sha256": "39faf2c2ce12fc90b1a5a3c8a7bf6b9b268077aa530f8ddeeccdc0cdea35b41c"
+    },
+    {
+      "original_path": "docs/NATIVE_INTEGRATION.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/NATIVE_INTEGRATION.md",
+      "sha256": "f66b905d43dd48cc36c7ff5abd761859b29e1fb9dd5b603e8f1339cb676a622d"
+    },
+    {
+      "original_path": "docs/PMC_PC_DESIGN_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/PMC_PC_DESIGN_RU.md",
+      "sha256": "cc6578dadc57c40c4cf66210bc6d38baced9a5b65161e68c9b75d7eb1ff011b6"
+    },
+    {
+      "original_path": "docs/PMC_QUESTS_DESIGN_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/PMC_QUESTS_DESIGN_RU.md",
+      "sha256": "11f057e4d0a6b39183033e7daea11eca59e132337a33fb11aebc383765db13e0"
+    },
+    {
+      "original_path": "docs/STAGE_1_COMPANY_TREASURY_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/STAGE_1_COMPANY_TREASURY_RU.md",
+      "sha256": "8af474aa54844427422562652c96ff15d73fee9e883086a0346237869b0597e3"
+    },
+    {
+      "original_path": "docs/TEAM_DEVELOPMENT_PLAN_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/TEAM_DEVELOPMENT_PLAN_RU.md",
+      "sha256": "cfa3b251ac9f922ae2122ac5208272aff96c1c9eb70116d8bab33b97d69fc59b"
+    },
+    {
+      "original_path": "docs/TEST_CONTRACT_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/TEST_CONTRACT_RU.md",
+      "sha256": "3b05868d1239a195b53fc2b6b8d5bde62b000b6177ac38559d1b28e1bddd35f7"
+    },
+    {
+      "original_path": "docs/VALIDATION_RU.md",
+      "archived_path": "archive/lifesim-pmc-unused/docs/VALIDATION_RU.md",
+      "sha256": "c9a51a385b09ef3d97867602f6f7ebf125f8a9a162d38f592c59ec6f978864d6"
+    },
+    {
+      "original_path": "docs/reviews/0.7.0_checks.json",
+      "archived_path": "archive/lifesim-pmc-unused/docs/reviews/0.7.0_checks.json",
+      "sha256": "e847856b8baedbccbd99ea9fb59af024a09286b9f9b78f71df4bc3242e33d873"
+    },
+    {
+      "original_path": "mod.cpp",
+      "archived_path": "archive/lifesim-pmc-unused/mod.cpp",
+      "sha256": "1717885d356f555ce3f631a1d2758f3604193bef41022728f13fc4f5ba8024fa"
+    },
+    {
+      "original_path": "tests/baseline_063_review.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/baseline_063_review.sqf",
+      "sha256": "1b96a34191b2a5786ca11da38e015bbc4a7659201979fac1e1fa001f27a68f6a"
+    },
+    {
+      "original_path": "tests/company_transactions.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/company_transactions.sqf",
+      "sha256": "d559ee69bd6d6be86e7be6a77a7ca501fdd169adc8550cb21e8d60e9f3baea16"
+    },
+    {
+      "original_path": "tests/contract_transactions.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/contract_transactions.sqf",
+      "sha256": "b32526472c253f65ff656932f316d8e342448419fd2b3ad98a662909b2e4f26f"
+    },
+    {
+      "original_path": "tests/desktop_transactions.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/desktop_transactions.sqf",
+      "sha256": "2e437e5ac4372d7b0417ef343b78d8807ba6222468693ced1a4ffdd6a5a0cf3b"
+    },
+    {
+      "original_path": "tests/phone_integration.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/phone_integration.sqf",
+      "sha256": "0039500f60c16c68ea3dfda113da38675980ec4147c13004bddc6f1c52d68c24"
+    },
+    {
+      "original_path": "tests/quest_transactions.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/quest_transactions.sqf",
+      "sha256": "7d01bb7a7973dfd2f4bce63474ab83c2f552dd3c0bad7e0bc100ede291c27d06"
+    },
+    {
+      "original_path": "tests/test_package.py",
+      "archived_path": "archive/lifesim-pmc-unused/tests/test_package.py",
+      "sha256": "7a99f247cc5e3d918761bd8dfb1cbe447e0d3e95c2caa21dbce10955520c7dc2"
+    },
+    {
+      "original_path": "tests/transactions.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/transactions.sqf",
+      "sha256": "f411cf449cd895b78fbb24674b0f412a4420c10544ff3ffa40959a15b6325fa6"
+    },
+    {
+      "original_path": "tests/vm_compat.sqf",
+      "archived_path": "archive/lifesim-pmc-unused/tests/vm_compat.sqf",
+      "sha256": "9eae080201f86d46dbc124ed3d7ab1cb0df913518442621a93c9efe32687b7d3"
+    },
+    {
+      "original_path": "tests/world_config.hpp",
+      "archived_path": "archive/lifesim-pmc-unused/tests/world_config.hpp",
+      "sha256": "fd7c636d757591329627d0989f647c79a393ced13c5426232bd189936149f889"
+    },
+    {
+      "original_path": "tools/build.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/build.py",
+      "sha256": "93c056fd79cc11a2d8d1359a4fe2733947188839c8148342bdeb4b76f1cfb1d7"
+    },
+    {
+      "original_path": "tools/build_team_document.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/build_team_document.py",
+      "sha256": "2b04f98fc7fa6a1683cc68ef8fac9b436f37280910af48e466b83368fa73c921"
+    },
+    {
+      "original_path": "tools/check_baseline_063.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_baseline_063.py",
+      "sha256": "b0edf737d16b68e10e16195c79ed9bd5b081c6a5113308aacf786175ba0babfa"
+    },
+    {
+      "original_path": "tools/check_company_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_company_ui.py",
+      "sha256": "8bfa9538773284411cb71c5a85228777025bccad49c9f03939418c3008b890f8"
+    },
+    {
+      "original_path": "tools/check_contracts_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_contracts_ui.py",
+      "sha256": "5b6c775756c9fa61304875747d0992f8792af5d78cec8f5ce859206f06c713ea"
+    },
+    {
+      "original_path": "tools/check_desktop_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_desktop_ui.py",
+      "sha256": "a780e15bf2f882247584a63a931f157edc7901144e88bef405c7cd1520342269"
+    },
+    {
+      "original_path": "tools/check_license_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_license_ui.py",
+      "sha256": "d87aee8052248934dde1ffd0f7e01e9e95080af419b3a43216ae301ee5b60d1e"
+    },
+    {
+      "original_path": "tools/check_native_phone_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_native_phone_ui.py",
+      "sha256": "f3fc8a14528b9b69f227b5c7b1a653d16085002e20058ed562d941517a87918a"
+    },
+    {
+      "original_path": "tools/check_phone_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_phone_ui.py",
+      "sha256": "f753be66ab58a82088bb353bb4c377954e5be0e38d21e6a6b560f0ca0b5bd091"
+    },
+    {
+      "original_path": "tools/check_quest_ui.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_quest_ui.py",
+      "sha256": "23c55aefe38911b0b4a1d7737aa263e7c2f7feb76cf3103b27d3dc94f91f0d46"
+    },
+    {
+      "original_path": "tools/check_sqf.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_sqf.py",
+      "sha256": "19cf28b225409a3cd964de53f243ded03fea271a21d8e59e22dd6eb3f1522714"
+    },
+    {
+      "original_path": "tools/check_stage1.py",
+      "archived_path": "archive/lifesim-pmc-unused/tools/check_stage1.py",
+      "sha256": "cd5374b6e218f01d30f5164e72b00e34f90a1779b48750a779f430f8621a6820"
+    }
+  ],
+  "files_preserved": 147,
+  "policy": "Every previously tracked file is preserved byte for byte under lifesim-pmc-unused."
+}

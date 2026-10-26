@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+/build/
+/reports/
+/dist/*
+!/dist/*.zip
+!/dist/SHA256SUMS.txt

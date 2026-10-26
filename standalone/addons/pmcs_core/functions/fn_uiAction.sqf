@@ -1,0 +1,20 @@
+disableSerialization;
+params [["_op", "", [""]], ["_value", "", [""]]];
+private _display = uiNamespace getVariable ["PMCS_console",displayNull];
+if (isNull _display) exitWith {};
+private _state = uiNamespace getVariable ["PMCS_state",createHashMap];
+if (count _state == 0 || {(uiNamespace getVariable ["PMCS_pending",[]]) isNotEqualTo []}) exitWith {};
+private _arg = [];
+if (_op == "relation") then {
+    private _a = _display displayCtrl 2100;
+    private _b = _display displayCtrl 2101;
+    _arg = [_a lbData lbCurSel _a, _b lbData lbCurSel _b, _value];
+};
+if (_op == "preset") then {_arg = [_value]};
+if (_op == "world") then {_arg = [["hostile","neutral"] select (_state get "worldHostile")]};
+PMCS_sequence = PMCS_sequence + 1;
+private _id = PMCS_clientPrefix + ":" + str PMCS_sequence;
+uiNamespace setVariable ["PMCS_pending",[_id,diag_tickTime]];
+uiNamespace setVariable ["PMCS_localNotice",""];
+[player,_state get "session",_id,_op,_state get "revision",_arg,uiNamespace getVariable ["PMCS_computer",objNull]] remoteExecCall ["PMCS_fnc_request",2];
+call PMCS_fnc_renderConsole;
