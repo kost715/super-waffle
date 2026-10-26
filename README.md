@@ -42,7 +42,8 @@
 - [Техническая основа и исходники](standalone/README.md).
 - [Готовый архив S1 0.1.2](standalone/dist/PMC_Standalone_0.1.2_s1_alpha1.zip) и
   [исходники](standalone/dist/PMC_Standalone_0.1.2_s1_alpha1_sources.zip): миссии
-  встроены в мод; [аудит и исправления 0.1.1](standalone/docs/AUDIT_0.1.1_RU.md).
+  встроены в мод; [аудит и исправления 0.1.1](standalone/docs/AUDIT_0.1.1_RU.md);
+  [результаты игровых прогонов](standalone/docs/GAME_RESULTS_RU.md).
 - Прежняя сборка: [S1 0.1.1](standalone/dist/PMC_Standalone_0.1.1_s1_alpha1.zip).
 - Прежняя сборка: [S1 0.1.0](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1.zip),
   [исходники](standalone/dist/PMC_Standalone_0.1.0_s1_alpha1_sources.zip).
