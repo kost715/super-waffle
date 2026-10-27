@@ -1,5 +1,16 @@
 # PMC standalone project workflow
 
+## Engineering principles (required)
+
+- Every code change follows .claude/skills/ub-mode/SKILL.md (user request, 27 Oct 2026):
+  First Make it Work, Then Make it Right, Follow Practice. In particular: failing
+  test before the change, tests of behaviour not of source text, one decision in one
+  place, business logic in pure functions, small commits stating why/what/proof,
+  and a log of actions reported at the end.
+- Tools named there (crapper, dryer, mutator) are not available for SQF here. Say so
+  in the report and apply the rule by hand. SQF behaviour tests need SQF-VM; without
+  it, state that only build/structure checks ran.
+
 ## Active direction
 
 - 27 Oct 2026: the user's Override GDD (docs/standalone/OVERRIDE_GDD_STATE_MACHINE_RU.md)
