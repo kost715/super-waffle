@@ -29,7 +29,7 @@
 
 | Материал | Состояние |
 | --- | --- |
-| Стенды S1 (отношения) и S2 (стейт-машина) 0.2.0 alpha 1 | Собственный мод, три тестовые миссии и консоль отношений; без LifeSim/CBA |
+| Стенды S1 (отношения) и S2 (стейт-машина) 0.2.1 alpha 1 | Собственный мод, три тестовые миссии и консоль отношений; без LifeSim/CBA |
 | Модель двух компаний и восьми точек | Согласованная спецификация; игровой реализации ещё нет |
 | Стартовое меню F1-UI1 | Работающий браузерный макет с условной картой |
 | Полная кампания, казна, контракты, снабжение и персонал | Дальнейшая реализация по дорожной карте |
@@ -40,8 +40,8 @@
 Его ZIP не выдаётся за новую игровую сборку по правилам F2. Проверки Arma не было.
 
 - [Техническая основа и исходники](standalone/README.md).
-- [Готовый архив 0.2.0 со стендом S2](standalone/dist/PMC_Standalone_0.2.0_s2_alpha1.zip) и
-  [исходники](standalone/dist/PMC_Standalone_0.2.0_s2_alpha1_sources.zip);
+- [Готовый архив 0.2.1 со стендом S2](standalone/dist/PMC_Standalone_0.2.1_s2_alpha1.zip) и
+  [исходники](standalone/dist/PMC_Standalone_0.2.1_s2_alpha1_sources.zip);
   [Override GDD](docs/standalone/OVERRIDE_GDD_STATE_MACHINE_RU.md) и
   [разбор с решениями](docs/standalone/STATE_MACHINE_DECISIONS_RU.md).
 - Прежняя сборка S1 0.1.2: [архив](standalone/dist/PMC_Standalone_0.1.2_s1_alpha1.zip),

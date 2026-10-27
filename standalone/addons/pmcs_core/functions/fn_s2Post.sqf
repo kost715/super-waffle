@@ -9,15 +9,17 @@ if (_faction == "clear") exitWith {
 };
 private _old = PMCS2_posts getOrDefault [_faction, []];
 if (_old isNotEqualTo []) then {(_old select 1) apply {if (!isNull _x) then {deleteVehicle _x}}};
+// "gang" is the camp in the gang control zone, the others stand in the combat zone.
 private _spec = createHashMapFromArray [
-    ["west", [west, "B_Soldier_F", [-40, 0]]], ["east", [east, "O_Soldier_F", [40, 0]]],
-    ["guer", [resistance, "I_G_Soldier_F", [0, 60]]], ["civ", [civilian, "C_man_1", [0, -40]]]] get _faction;
-_spec params ["_side", "_class", "_offset"];
+    ["west", [west, "B_Soldier_F", PMCS2_zone, [-40, 0]]], ["east", [east, "O_Soldier_F", PMCS2_zone, [40, 0]]],
+    ["guer", [resistance, "I_G_Soldier_F", PMCS2_zone, [0, 60]]], ["civ", [civilian, "C_man_1", PMCS2_zone, [0, -40]]],
+    ["gang", [resistance, "I_G_Soldier_F", PMCS2_gangZone, [-6, 0]]]] get _faction;
+_spec params ["_side", "_class", "_center", "_offset"];
 private _g = createGroup [_side, true];
 if (isNull _g) exitWith {false};
 private _units = [];
 for "_i" from 0 to 3 do {
-    private _at = [(PMCS2_zone select 0) + (_offset select 0) + _i * 4, (PMCS2_zone select 1) + (_offset select 1), 0] findEmptyPosition [0, 15, _class];
+    private _at = [(_center select 0) + (_offset select 0) + _i * 4, (_center select 1) + (_offset select 1), 0] findEmptyPosition [0, 15, _class];
     if (_at isNotEqualTo []) then {
         private _u = _g createUnit [_class, _at, [], 0, "NONE"];
         if (!isNull _u) then {

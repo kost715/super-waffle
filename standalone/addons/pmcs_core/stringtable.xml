@@ -235,9 +235,9 @@
         <Russian>Маскировка: сторона CIV</Russian>
       </Key>
       <Key ID="STR_PMCS2_U_CAPTIVE">
-        <Original>Undercover: captive flag</Original>
-        <English>Undercover: captive flag</English>
-        <Russian>Маскировка: флаг пленного</Russian>
+        <Original>Captive flag (comparison)</Original>
+        <English>Captive flag (comparison)</English>
+        <Russian>Флаг пленного (сравнение)</Russian>
       </Key>
       <Key ID="STR_PMCS2_AURA_30">
         <Original>Aura 30 s</Original>
@@ -274,6 +274,11 @@
         <English>Civilians</English>
         <Russian>Мирные</Russian>
       </Key>
+      <Key ID="STR_PMCS2_P_GANG">
+        <Original>Gang camp</Original>
+        <English>Gang camp</English>
+        <Russian>Лагерь банды</Russian>
+      </Key>
       <Key ID="STR_PMCS2_P_CLEAR">
         <Original>Remove posts</Original>
         <English>Remove posts</English>
@@ -290,9 +295,9 @@
         <Russian>нет</Russian>
       </Key>
       <Key ID="STR_PMCS2_SUMMARY">
-        <Original>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</Original>
-        <English>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</English>
-        <Russian>Состояние: %1 | флаг пленного: %2 | причина: %3&lt;br/&gt;Контракт: %4 | ручной: %5 | в зоне: %6 (%7 м) | аура: %8 с&lt;br/&gt;После смены (%9 с назад): первый выстрел поста %10 с, последний %11 с&lt;br/&gt;%12 | аура %13 с | сброс знаний ИИ: %14 | посты: %15</Russian>
+        <Original>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | gang zone: %16 | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</Original>
+        <English>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | gang zone: %16 | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</English>
+        <Russian>Состояние: %1 | флаг пленного: %2 | причина: %3&lt;br/&gt;Контракт: %4 | ручной: %5 | в зоне: %6 (%7 м) | зона банды: %16 | аура: %8 с&lt;br/&gt;После смены (%9 с назад): первый выстрел поста %10 с, последний %11 с&lt;br/&gt;%12 | аура %13 с | сброс знаний ИИ: %14 | посты: %15</Russian>
       </Key>
     </Container>
   </Package>

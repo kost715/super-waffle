@@ -49,6 +49,8 @@ class CfgFunctions {
             class s2Ui {};
             class s2Receive {};
             class s2Render {};
+            class s2Demask {};
+            class s2Regroup {};
         };
     };
 };
@@ -69,6 +71,7 @@ class CfgRemoteExec {
         class PMCS_fnc_s2Event {allowedTargets = 2; jip = 0;};
         class PMCS_fnc_s2Captive {allowedTargets = 0; jip = 0;};
         class PMCS_fnc_s2Receive {allowedTargets = 0; jip = 0;};
+        class PMCS_fnc_s2Regroup {allowedTargets = 0; jip = 0;};
     };
 };
 #include "ui.hpp"

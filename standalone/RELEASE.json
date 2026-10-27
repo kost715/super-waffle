@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0_s2_alpha1",
+  "version": "0.2.1_s2_alpha1",
   "date": "2026-10-27",
   "kind": "standalone technical prototype: S1 relations stand + S2 state-machine stand, not a campaign",
   "namespace": "PMCS",
@@ -27,5 +27,6 @@
     "report": "docs/AUDIT_0.1.1_RU.md"
   },
   "missions": "S1 1/2/3 PMC and S2 state machine, packed into pmcs_core.pbo (CfgMissions >> MPMissions)",
-  "side_table": "S2: fixed at start, WEST-EAST allied, WEST/EAST hostile to GUER, CIV friendly to all"
+  "side_table": "S2: fixed at start, WEST-EAST allied, WEST/EAST hostile to GUER, CIV friendly to all",
+  "undercover": "civilian side (main); captive flag kept for comparison"
 }

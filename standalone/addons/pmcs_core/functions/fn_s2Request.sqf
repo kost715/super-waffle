@@ -28,7 +28,7 @@ private _ok = switch (_op) do {
         PMCS2_settings set ["forget", _arg]; true
     };
     case "post": {
-        if (!_admin || {!(_arg in ["west", "east", "guer", "civ", "clear"])}) exitWith {false};
+        if (!_admin || {!(_arg in ["west", "east", "guer", "civ", "gang", "clear"])}) exitWith {false};
         [_arg] call PMCS_fnc_s2Post
     };
     default {false};

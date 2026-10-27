@@ -8,7 +8,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.0_s2_alpha1"
+VERSION = "0.2.1_s2_alpha1"
 STAMP = (2026,10,26,0,0,0)
 MOD = "@PMC_Standalone"
 
@@ -116,7 +116,7 @@ def make_s2_mission():
 briefingName = "PMC Standalone S2 - state machine";
 onLoadName = "PMC Standalone S2: state machine stand, 8 slots";
 onLoadMission = "Dynamic sides and undercover test. No LifeSim required.";
-overviewText = "S2 stand. Each player has an own group with two bots. Use the S2 console (action menu).";
+overviewText = "S2 stand. Each player has an own group with two bots. Combat zone (orange) and gang control zone (green). Use the S2 console (action menu).";
 respawn = 3;
 respawnDelay = 5;
 respawnOnStart = 1;
@@ -125,7 +125,7 @@ disabledAI = 1;
 joinUnassigned = 1;
 saving = 0;
 class Header {gameType = "Coop"; minPlayers = 1; maxPlayers = 8;};
-class PMCS_S2 {enabled = 1; zone[] = {14500, 16500}; zoneRadius = 150;};
+class PMCS_S2 {enabled = 1; zone[] = {14500, 16500}; zoneRadius = 150; gangZone[] = {14750, 16300}; gangRadius = 60;};
 class CfgRemoteExec {
     class Functions {
         mode = 1; jip = 0;
@@ -133,6 +133,7 @@ class CfgRemoteExec {
         class PMCS_fnc_s2Event {allowedTargets = 2; jip = 0;};
         class PMCS_fnc_s2Captive {allowedTargets = 0; jip = 0;};
         class PMCS_fnc_s2Receive {allowedTargets = 0; jip = 0;};
+        class PMCS_fnc_s2Regroup {allowedTargets = 0; jip = 0;};
     };
     class Commands {mode = 0; jip = 0;};
 };

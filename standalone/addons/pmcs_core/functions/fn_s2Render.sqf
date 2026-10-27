@@ -16,7 +16,8 @@ private _shot = {if (_this < 0) then {"-"} else {str _this}};
     [_s get "contract"] call _name, [_s get "manual"] call _name, (_s get "inZone") call _yes, _s get "distance", _s get "auraLeft",
     _s get "changedAgo", (_s get "firstShot") call _shot, (_s get "lastShot") call _shot,
     localize (["STR_PMCS2_U_SIDE", "STR_PMCS2_U_CAPTIVE"] select ((_s get "undercover") == "captive")), _s get "aura",
-    (_s get "forget") call _yes, if ((_s get "posts") isEqualTo []) then {"-"} else {(_s get "posts") joinString ", "}];
+    (_s get "forget") call _yes, if ((_s get "posts") isEqualTo []) then {"-"} else {(_s get "posts") joinString ", "},
+    (_s getOrDefault ["inGang", false]) call _yes];
 // Highlight current choices.
 private _mark = {
     params ["_idcs", "_values", "_current"];
@@ -28,7 +29,7 @@ private _mark = {
 [[4122, 4123], [30, 300], _s get "aura"] call _mark;
 [[4124], [true], _s get "forget"] call _mark;
 private _admin = _s get "admin";
-{(_d displayCtrl _x) ctrlEnable _admin} forEach [4120, 4121, 4122, 4123, 4124, 4130, 4131, 4132, 4133, 4134];
+{(_d displayCtrl _x) ctrlEnable _admin} forEach [4120, 4121, 4122, 4123, 4124, 4130, 4131, 4132, 4133, 4134, 4135];
 private _events = _s get "events";
 if ((_d getVariable ["PMCS2_events", []]) isNotEqualTo _events) then {
     private _list = _d displayCtrl 4200; lbClear _list;

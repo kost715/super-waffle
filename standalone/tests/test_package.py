@@ -101,7 +101,8 @@ class StandalonePackage(unittest.TestCase):
             self.assertIn(f'name="{marker}"',sqm)
         self.assertNotIn('init="this setPosATL',sqm)
         self.assertIn('class PMCS_S2 {enabled = 1;',desc)
-        remote={'PMCS_fnc_s2Request','PMCS_fnc_s2Event','PMCS_fnc_s2Captive','PMCS_fnc_s2Receive'}
+        self.assertIn('gangZone[] =',desc)
+        remote={'PMCS_fnc_s2Request','PMCS_fnc_s2Event','PMCS_fnc_s2Captive','PMCS_fnc_s2Receive','PMCS_fnc_s2Regroup'}
         self.assertEqual(set(re.findall(r'class (PMCS_fnc_\w+)',desc)),remote)
         config=(addon/'config.cpp').read_text()
         self.assertLessEqual(remote,set(re.findall(r'class (PMCS_fnc_\w+)',config)))
@@ -114,6 +115,12 @@ class StandalonePackage(unittest.TestCase):
         self.assertIn('[west, east, 1]',init);self.assertIn('[west, resistance, 0]',init);self.assertIn('[east, resistance, 0]',init)
         # Captive is set where units are local; posts are never forced to shoot.
         self.assertIn('if (local _x',(functions/'fn_s2Captive.sqf').read_text())
+        # 0.2.1: civilian side is the default cover; a shot from cover demasks at
+        # once; bots get their orders back after a move; gang zone demasks.
+        self.assertIn('[["undercover", "side"]',init)
+        self.assertIn('call PMCS_fnc_s2Apply',(functions/'fn_s2Event.sqf').read_text())
+        self.assertIn('doFollow',(functions/'fn_s2Regroup.sqf').read_text())
+        self.assertIn('entered gang control zone',(functions/'fn_s2Tick.sqf').read_text())
         code='\n'.join(f.read_text() for f in functions.glob('fn_s2*.sqf'))
         self.assertNotRegex(code,r'\bdoFire\b|\bdoTarget\b')
 

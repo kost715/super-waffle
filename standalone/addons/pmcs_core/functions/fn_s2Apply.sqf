@@ -15,8 +15,11 @@ if (_sideChanged) then {
         [format ["group limit: cannot create %1 group for %2", _color, _uid]] call PMCS_fnc_s2Log;
     };
     _new setVariable ["PMCS2_uid", _uid, true];
+    private _settings = [formation _g, combatMode _g, behaviour leader _g];
     ([_p] + ((units _g) - [_p])) joinSilent _new;
     _g = _new;
+    // Group settings and bot follow orders are lost with the old group.
+    ([_g] + _settings) remoteExecCall ["PMCS_fnc_s2Regroup", owner _p];
 };
 if (_sideChanged && {side group _p != _side}) exitWith {
     [format ["side change for %1 to %2 did not take effect", _uid, _color]] call PMCS_fnc_s2Log;
