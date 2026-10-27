@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build only standalone sources; the 1/2/3-company Altis test missions are packed into the mod."""
+"""Build only standalone sources; the S1 (1/2/3-company) and S2 (state machine) Altis test missions are packed into the mod."""
 from __future__ import annotations
 import hashlib
 import json
@@ -8,7 +8,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.1.2_s1_alpha1"
+VERSION = "0.2.0_s2_alpha1"
 STAMP = (2026,10,26,0,0,0)
 MOD = "@PMC_Standalone"
 
@@ -105,11 +105,75 @@ class Mission {{
     return folder
 
 
+def make_s2_mission():
+    """S2 state-machine stand: 8 players, each in an own civilian group (Override
+    GDD: players start as civilians and never share a group). A respawn marker for
+    every side sits at the camp because a recoloured player respawns by side."""
+    name="PMCS_S2_State.Altis"
+    folder=MISSIONS/name
+    folder.mkdir(parents=True,exist_ok=True)
+    desc='''author = "PMC project";
+briefingName = "PMC Standalone S2 - state machine";
+onLoadName = "PMC Standalone S2: state machine stand, 8 slots";
+onLoadMission = "Dynamic sides and undercover test. No LifeSim required.";
+overviewText = "S2 stand. Each player has an own group with two bots. Use the S2 console (action menu).";
+respawn = 3;
+respawnDelay = 5;
+respawnOnStart = 1;
+respawnDialog = 0;
+disabledAI = 1;
+joinUnassigned = 1;
+saving = 0;
+class Header {gameType = "Coop"; minPlayers = 1; maxPlayers = 8;};
+class PMCS_S2 {enabled = 1; zone[] = {14500, 16500}; zoneRadius = 150;};
+class CfgRemoteExec {
+    class Functions {
+        mode = 1; jip = 0;
+        class PMCS_fnc_s2Request {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_s2Event {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_s2Captive {allowedTargets = 0; jip = 0;};
+        class PMCS_fnc_s2Receive {allowedTargets = 0; jip = 0;};
+    };
+    class Commands {mode = 0; jip = 0;};
+};
+'''
+    (folder/"description.ext").write_text(desc)
+    x,y=14500,16210
+    groups=[];sequence=1
+    for i in range(8):
+        group_id=sequence;sequence+=1;uid=sequence;sequence+=1
+        px=x-7+(i%4)*4;py=y-(i//4)*4
+        attrs=f'description="PMC operator {i+1}";isPlayable=1;name="pmcs2_p{i+1}";init="if (local this) then {{this setPosATL [{px},{py},0]}}";'
+        flags=5
+        if i==0:attrs='isPlayer=1;'+attrs;flags=7
+        unit=f'class Item0 {{dataType="Object";class PositionInfo {{position[]={{{px},0,{py}}};}};side="Civilian";flags={flags};class Attributes {{{attrs}}};id={uid};type="C_man_1";}};'
+        groups.append(f'class Item{i} {{dataType="Group";side="Civilian";class Entities {{items=1;{unit}}};class Attributes {{}};id={group_id};}};')
+    markers=[]
+    for j,(marker,color) in enumerate([("respawn_west","ColorWEST"),("respawn_east","ColorEAST"),("respawn_guerrila","ColorGUER"),("respawn_civilian","ColorCIV")]):
+        text=' text="PMC camp";' if j==0 else ''
+        markers.append(f'class Item{8+j} {{dataType="Marker";position[]={{{x},0,{y}}};name="{marker}";{text}type="{"mil_start" if j==0 else "Empty"}";colorName="{color}";id={sequence};}};');sequence+=1
+    sqm=f'''version=54;
+class EditorData {{}};
+binarizationWanted=0;
+addons[]={{"A3_Characters_F","pmcs_core"}};
+class AddonsMetaData {{}};
+randomSeed=1;
+class ScenarioData {{author="PMC project";respawn=3;}};
+class Mission {{
+    class Intel {{briefingName="PMC Standalone S2 - state machine";year=2035;month=6;day=24;hour=12;minute=0;startWeather=0;forecastWeather=0;}};
+    class Entities {{items={8+len(markers)};{"".join(groups)}{"".join(markers)}}};
+}};
+'''
+    (folder/"mission.sqm").write_text(sqm)
+    return folder
+
+
 def main():
     build=ROOT/"build";dist=ROOT/"dist"
     payload={}
     # Missions live inside the mod PBO; generate them before collecting files.
     for count in [1,2,3]:make_mission(count)
+    make_s2_mission()
     source=ROOT/"addons/pmcs_core"
     game_files={p.relative_to(source).as_posix().replace("/","\\"):p.read_bytes() for p in sorted(source.rglob("*")) if p.is_file()}
     pbo=pack(game_files,"pmcs_core")

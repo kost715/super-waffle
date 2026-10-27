@@ -90,6 +90,33 @@ class StandalonePackage(unittest.TestCase):
             self.assertIn('class Commands {mode = 0;',desc)
             self.assertEqual(set(re.findall(r'class (PMCS_fnc_\w+)',desc)),{'PMCS_fnc_request','PMCS_fnc_receiveState'})
 
+    def test_s2_state_machine_stand(self):
+        addon=ROOT/'addons/pmcs_core'
+        folder=addon/'missions/PMCS_S2_State.Altis'
+        sqm=(folder/'mission.sqm').read_text();desc=(folder/'description.ext').read_text()
+        # Eight players, each alone in an own civilian group; respawn marker per side.
+        self.assertEqual(sqm.count('isPlayable=1;'),8)
+        self.assertEqual(sqm.count('dataType="Group";side="Civilian";class Entities {items=1;'),8)
+        for marker in ['respawn_west','respawn_east','respawn_guerrila','respawn_civilian']:
+            self.assertIn(f'name="{marker}"',sqm)
+        self.assertNotIn('init="this setPosATL',sqm)
+        self.assertIn('class PMCS_S2 {enabled = 1;',desc)
+        remote={'PMCS_fnc_s2Request','PMCS_fnc_s2Event','PMCS_fnc_s2Captive','PMCS_fnc_s2Receive'}
+        self.assertEqual(set(re.findall(r'class (PMCS_fnc_\w+)',desc)),remote)
+        config=(addon/'config.cpp').read_text()
+        self.assertLessEqual(remote,set(re.findall(r'class (PMCS_fnc_\w+)',config)))
+        self.assertIn('directory = "pmcs_core\\missions\\PMCS_S2_State.Altis";',config)
+        # Side relations are set once at start and never at runtime.
+        functions=addon/'functions'
+        setfriend=[f.name for f in functions.glob('fn_s2*.sqf') if 'setFriend' in f.read_text()]
+        self.assertEqual(setfriend,['fn_s2ServerInit.sqf'])
+        init=(functions/'fn_s2ServerInit.sqf').read_text()
+        self.assertIn('[west, east, 1]',init);self.assertIn('[west, resistance, 0]',init);self.assertIn('[east, resistance, 0]',init)
+        # Captive is set where units are local; posts are never forced to shoot.
+        self.assertIn('if (local _x',(functions/'fn_s2Captive.sqf').read_text())
+        code='\n'.join(f.read_text() for f in functions.glob('fn_s2*.sqf'))
+        self.assertNotRegex(code,r'\bdoFire\b|\bdoTarget\b')
+
     def test_ui_controls_and_endpoint_contract(self):
         ui=(ROOT/'addons/pmcs_core/ui.hpp').read_text()
         ids=[int(x) for x in re.findall(r'\bidc = (\d+)',ui)]

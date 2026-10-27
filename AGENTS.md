@@ -2,6 +2,14 @@
 
 ## Active direction
 
+- 27 Oct 2026: the user's Override GDD (docs/standalone/OVERRIDE_GDD_STATE_MACHINE_RU.md)
+  replaces fixed company sides: players and their bots start as civilians and get a
+  combat side dynamically. Decisions and open points:
+  docs/standalone/STATE_MACHINE_DECISIONS_RU.md (WEST and EAST are allies; the side
+  table is set once and never changed at runtime). S2 0.2.0 is the research stand
+  for it. Where the F2 notes below conflict with Override, Override wins until the
+  F2 documents are rewritten after S2 game results.
+
 - Work on the standalone Arma 3 project, without a mandatory LifeSim dependency.
   Read docs/standalone/DEVELOPMENT_DIRECTION_RU.md, ROADMAP_RU.md and
   FACTIONS_AND_SETUP_RU.md before implementing new features.

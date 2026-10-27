@@ -153,5 +153,147 @@
         <Russian>Сервер не запустил прототип S1. Проверьте мод, выбранную миссию и серверный RPT.</Russian>
       </Key>
     </Container>
+    <Container name="S2">
+      <Key ID="STR_PMCS2_OPEN">
+        <Original>Open S2 state console</Original>
+        <English>Open S2 state console</English>
+        <Russian>Открыть консоль стейт-машины S2</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_TITLE">
+        <Original>PMC Standalone - S2 state machine stand</Original>
+        <English>PMC Standalone - S2 state machine stand</English>
+        <Russian>Самостоятельная ЧВК — стенд стейт-машины S2</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_ROW_CONTRACT">
+        <Original>Contract of my group (colour inside the combat zone):</Original>
+        <English>Contract of my group (colour inside the combat zone):</English>
+        <Russian>Контракт моей группы (цвет внутри зоны БД):</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_ROW_MANUAL">
+        <Original>Manual colour for the test (Auto = state machine):</Original>
+        <English>Manual colour for the test (Auto = state machine):</English>
+        <Russian>Ручной цвет для теста (Авто — решает стейт-машина):</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_ROW_SETTINGS">
+        <Original>Shared settings (host/admin):</Original>
+        <English>Shared settings (host/admin):</English>
+        <Russian>Общие настройки (хост/администратор):</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_ROW_POSTS">
+        <Original>Test AI posts in the combat zone (host/admin):</Original>
+        <English>Test AI posts in the combat zone (host/admin):</English>
+        <Russian>Тестовые посты ИИ в зоне БД (хост/администратор):</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_C_NONE">
+        <Original>No contract</Original>
+        <English>No contract</English>
+        <Russian>Без контракта</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_C_WEST">
+        <Original>Government (WEST)</Original>
+        <English>Government (WEST)</English>
+        <Russian>Правительство (WEST)</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_C_EAST">
+        <Original>Corp. defence (EAST)</Original>
+        <English>Corp. defence (EAST)</English>
+        <Russian>Корп. оборона (EAST)</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_C_GUER">
+        <Original>Corp. attack (GUER)</Original>
+        <English>Corp. attack (GUER)</English>
+        <Russian>Корп. атака (GUER)</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_M_AUTO">
+        <Original>Auto</Original>
+        <English>Auto</English>
+        <Russian>Авто</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_SIDE_WEST">
+        <Original>Blue WEST</Original>
+        <English>Blue WEST</English>
+        <Russian>Синие WEST</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_SIDE_EAST">
+        <Original>Red EAST</Original>
+        <English>Red EAST</English>
+        <Russian>Красные EAST</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_SIDE_GUER">
+        <Original>Green GUER</Original>
+        <English>Green GUER</English>
+        <Russian>Зелёные GUER</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_SIDE_CIV">
+        <Original>Civilian CIV</Original>
+        <English>Civilian CIV</English>
+        <Russian>Гражданские CIV</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_U_SIDE">
+        <Original>Undercover: CIV side</Original>
+        <English>Undercover: CIV side</English>
+        <Russian>Маскировка: сторона CIV</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_U_CAPTIVE">
+        <Original>Undercover: captive flag</Original>
+        <English>Undercover: captive flag</English>
+        <Russian>Маскировка: флаг пленного</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_AURA_30">
+        <Original>Aura 30 s</Original>
+        <English>Aura 30 s</English>
+        <Russian>Аура 30 с</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_AURA_300">
+        <Original>Aura 300 s</Original>
+        <English>Aura 300 s</English>
+        <Russian>Аура 300 с</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_FORGET">
+        <Original>AI knowledge reset</Original>
+        <English>AI knowledge reset</English>
+        <Russian>Сброс знаний ИИ</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_P_WEST">
+        <Original>Army post</Original>
+        <English>Army post</English>
+        <Russian>Пост армии</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_P_EAST">
+        <Original>Corporate post</Original>
+        <English>Corporate post</English>
+        <Russian>Пост корпорации</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_P_GUER">
+        <Original>Gang post</Original>
+        <English>Gang post</English>
+        <Russian>Пост банды</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_P_CIV">
+        <Original>Civilians</Original>
+        <English>Civilians</English>
+        <Russian>Мирные</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_P_CLEAR">
+        <Original>Remove posts</Original>
+        <English>Remove posts</English>
+        <Russian>Убрать посты</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_YES">
+        <Original>yes</Original>
+        <English>yes</English>
+        <Russian>да</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_NO">
+        <Original>no</Original>
+        <English>no</English>
+        <Russian>нет</Russian>
+      </Key>
+      <Key ID="STR_PMCS2_SUMMARY">
+        <Original>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</Original>
+        <English>State: %1 | captive: %2 | reason: %3&lt;br/&gt;Contract: %4 | manual: %5 | in zone: %6 (%7 m) | aura left: %8 s&lt;br/&gt;Since last change (%9 s ago): first post shot %10 s, last %11 s&lt;br/&gt;%12 | aura %13 s | AI knowledge reset: %14 | posts: %15</English>
+        <Russian>Состояние: %1 | флаг пленного: %2 | причина: %3&lt;br/&gt;Контракт: %4 | ручной: %5 | в зоне: %6 (%7 м) | аура: %8 с&lt;br/&gt;После смены (%9 с назад): первый выстрел поста %10 с, последний %11 с&lt;br/&gt;%12 | аура %13 с | сброс знаний ИИ: %14 | посты: %15</Russian>
+      </Key>
+    </Container>
   </Package>
 </Project>

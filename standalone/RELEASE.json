@@ -1,7 +1,7 @@
 {
-  "version": "0.1.2_s1_alpha1",
-  "date": "2026-10-26",
-  "kind": "standalone technical prototype, not a campaign",
+  "version": "0.2.0_s2_alpha1",
+  "date": "2026-10-27",
+  "kind": "standalone technical prototype: S1 relations stand + S2 state-machine stand, not a campaign",
   "namespace": "PMCS",
   "requires_lifesim": false,
   "requires_cba": false,
@@ -15,15 +15,17 @@
   "independent_review_performed": true,
   "ai_model": "candidate: one combat side per company; world-enemy limitation with 3 PMCs explicitly exposed",
   "checks": {
-    "package_tests": 6,
+    "package_tests": 7,
     "sqfvm_rerun_for_this_version": false,
-    "note": "sqf_syntax_files 18 and transaction_assertions 69 are 0.1.0 SQF-VM results (docs/CHECK_RESULTS.json)"
+    "arma_s2_tested": false,
+    "note": "S1 in-game results: docs/GAME_RESULTS_RU.md; 0.1.0 SQF-VM results: docs/CHECK_RESULTS.json"
   },
-  "report": "docs/S1_REPORT_RU.md",
+  "report": "docs/S2_REPORT_RU.md",
   "review": {
     "by": "Claude",
     "date": "2026-10-26",
     "report": "docs/AUDIT_0.1.1_RU.md"
   },
-  "missions": "packed into pmcs_core.pbo, registered in CfgMissions >> MPMissions"
+  "missions": "S1 1/2/3 PMC and S2 state machine, packed into pmcs_core.pbo (CfgMissions >> MPMissions)",
+  "side_table": "S2: fixed at start, WEST-EAST allied, WEST/EAST hostile to GUER, CIV friendly to all"
 }
