@@ -87,6 +87,13 @@ call TEST_fnc_fresh;
 private _names = TEST_settings apply {_x select 0};
 [_names isEqualTo ["PMCB_notes", "PMCB_currency", "PMCB_groupName", "PMCB_startBalance", "PMCB_logLimit"] && {(TEST_settings findIf {(_x select 3) != 1}) < 0},
     "settings: banknotes, currency, group name, starting balance and journal size, forced by the server"] call TEST_fnc_assert;
+private _arpi = [1000, 500, 200, 100, 50, 25, 5] apply {[format ["ar_money_%1dollar", _x], _x]};
+private _defaultNotes = PMCB_notes;
+PMCB_notes = (TEST_settings select {(_x select 0) == "PMCB_notes"}) select 0 select 2;
+[(call PMCB_fnc_notes) isEqualTo _arpi, "the default banknotes are the ARPI ones, 5 to 1000"] call TEST_fnc_assert;
+[([1985, _arpi] call PMCB_fnc_compose) isEqualTo [["ar_money_1000dollar", 1], ["ar_money_500dollar", 1], ["ar_money_200dollar", 2], ["ar_money_50dollar", 1], ["ar_money_25dollar", 1], ["ar_money_5dollar", 2]] && {
+    ([1983, _arpi] call PMCB_fnc_compose) isEqualTo []}, "with ARPI notes any multiple of 5 can be paid"] call TEST_fnc_assert;
+PMCB_notes = _defaultNotes;
 private _notes = call PMCB_fnc_notes;
 [_notes isEqualTo [["Money_100", 100], ["Money_50", 50], ["Money_20", 20], ["Money_Coins", 5]],
     "banknotes are read from the setting largest first; unknown classes, bad and repeated values are skipped"] call TEST_fnc_assert;

@@ -6,6 +6,14 @@ class CfgWeapons {
     class Money_50: ItemCore {displayName = "50 note";};
     class Money_20: ItemCore {displayName = "20 note";};
     class FirstAidKit: ItemCore {displayName = "First Aid Kit";};
+    // ARPI banknote names (the default setting).
+    class ar_money_5dollar: ItemCore {};
+    class ar_money_25dollar: ItemCore {};
+    class ar_money_50dollar: ItemCore {};
+    class ar_money_100dollar: ItemCore {};
+    class ar_money_200dollar: ItemCore {};
+    class ar_money_500dollar: ItemCore {};
+    class ar_money_1000dollar: ItemCore {};
 };
 class CfgMagazines {
     class CA_Magazine {count = 1;};

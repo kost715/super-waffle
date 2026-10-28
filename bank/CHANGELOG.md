@@ -1,5 +1,12 @@
 # PMC Bank — история изменений
 
+## 0.1.1 alpha 1 — 2026-10-29
+
+- Купюры по умолчанию — ARES Military Roleplay Items: `ar_money_5dollar`,
+  `ar_money_25dollar`, `ar_money_50dollar`, `ar_money_100dollar`,
+  `ar_money_200dollar`, `ar_money_500dollar`, `ar_money_1000dollar`.
+  Снять можно любую сумму, кратную 5.
+
 ## 0.1.0 alpha 1 — 2026-10-29
 
 Первая версия. Отдельный мод, требует CBA_A3.

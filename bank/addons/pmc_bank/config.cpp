@@ -8,7 +8,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "3DEN", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings"};
-        version = "0.1.0";
+        version = "0.1.1";
     };
 };
 
