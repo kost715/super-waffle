@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="PMC-Interactions">
+    <Package name="Interactions">
+        <Container name="Main">
+            <Key ID="STR_PMCI_SET_CATEGORY">
+                <Original>PMC Interactions</Original>
+                <Russian>PMC Interactions</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_GENERAL">
+                <Original>General</Original>
+                <Russian>Общие</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_DIFFICULTY">
+                <Original>Difficulty</Original>
+                <Russian>Сложность</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_DIFFICULTY_TIP">
+                <Original>Trained medics and engineers get a 20% easier game.</Original>
+                <Russian>Обученным медикам и инженерам игра на 20% легче.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_EASY">
+                <Original>Easy</Original>
+                <Russian>Легко</Russian>
+            </Key>
+            <Key ID="STR_PMCI_NORMAL">
+                <Original>Normal</Original>
+                <Russian>Нормально</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HARD">
+                <Original>Hard</Original>
+                <Russian>Сложно</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_PREP">
+                <Original>Preparation bar (s)</Original>
+                <Russian>Полоска подготовки (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_PREP_TIP">
+                <Original>Short ACE bar before the game starts.</Original>
+                <Russian>Короткая полоска ACE перед началом игры.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_ENABLE">
+                <Original>Hands-on instead of the ACE bar</Original>
+                <Russian>Мини-игра вместо полоски ACE</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_CPR_DURATION">
+                <Original>CPR duration (s)</Original>
+                <Russian>Длительность СЛР (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_CPR_QUALITY">
+                <Original>Minimum rhythm quality for CPR to count</Original>
+                <Russian>Минимальное качество ритма, чтобы СЛР засчиталась</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LIMIT">
+                <Original>Time limit (s)</Original>
+                <Russian>Лимит времени (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_BANDAGE_EFFECT">
+                <Original>Effect of play quality on the bandage</Original>
+                <Russian>Влияние качества на эффективность бинта</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_NUT_TIME">
+                <Original>Time per nut (s)</Original>
+                <Russian>Время на гайку (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SWAP_TIME">
+                <Original>Time to swap the wheel (s)</Original>
+                <Russian>Время на смену колеса (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_cpr">
+                <Original>CPR</Original>
+                <Russian>Сердечно-лёгочная реанимация</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_tourniquet">
+                <Original>Tourniquet</Original>
+                <Russian>Жгут</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_bandage">
+                <Original>Bandage</Original>
+                <Russian>Перевязка</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_wheel">
+                <Original>Wheel change</Original>
+                <Russian>Замена колеса</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_cpr">
+                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The light shows the pace.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Лампа показывает темп.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_tourniquet">
+                <Original>Hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to tighten. Stop in the green zone and press &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt; to fix it. Past the end it slips.</Original>
+                <Russian>Держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы затягивать. Остановитесь в зелёной зоне и нажмите &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt;, чтобы зафиксировать. Перетянете — соскользнёт.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_bandage">
+                <Original>Keep the white needle in the moving green zone: hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to press harder, release to ease off.</Original>
+                <Russian>Держите белую стрелку в движущейся зелёной зоне: &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; — давить сильнее, отпустить — ослабить.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_wheel">
+                <Original>Loosen the nuts in a star (every second nut, start anywhere), swap the wheel, then tighten them in a star.</Original>
+                <Russian>Ослабьте гайки «звездой» (через одну, с любой), смените колесо, затем затяните гайки «звездой».</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_CPR">
+                <Original>Good compressions: %1 of ~%2. Quality: %3%</Original>
+                <Russian>Правильных нажатий: %1 из ~%2. Качество: %3%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_TOURNIQUET">
+                <Original>Pressure: %1%. Slips left: %2</Original>
+                <Russian>Давление: %1%. Осталось срывов: %2</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_BANDAGE">
+                <Original>Packed: %1%. Quality: %2%</Original>
+                <Russian>Набито: %1%. Качество: %2%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_WHEEL">
+                <Original>%1. Mistakes: %2</Original>
+                <Russian>%1. Ошибок: %2</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WHEEL_loosen">
+                <Original>Loosen the nuts</Original>
+                <Russian>Ослабьте гайки</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WHEEL_swap">
+                <Original>Swap the wheel</Original>
+                <Russian>Смените колесо</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WHEEL_tighten">
+                <Original>Tighten the nuts</Original>
+                <Russian>Затяните гайки</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WHEEL_done">
+                <Original>Done</Original>
+                <Russian>Готово</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WHEEL_SWAP_BUTTON">
+                <Original>Swap wheel</Original>
+                <Russian>Сменить колесо</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HOLD">
+                <Original>Press / hold</Original>
+                <Russian>Жать / держать</Russian>
+            </Key>
+            <Key ID="STR_PMCI_FIX">
+                <Original>Fix</Original>
+                <Russian>Зафиксировать</Russian>
+            </Key>
+            <Key ID="STR_PMCI_CANCEL">
+                <Original>Give up</Original>
+                <Russian>Прекратить</Russian>
+            </Key>
+            <Key ID="STR_PMCI_RESULT_OK">
+                <Original>%1: done (quality %2%).</Original>
+                <Russian>%1: выполнено (качество %2%).</Russian>
+            </Key>
+            <Key ID="STR_PMCI_RESULT_FAIL">
+                <Original>%1: failed.</Original>
+                <Russian>%1: не получилось.</Russian>
+            </Key>
+        </Container>
+    </Package>
+</Project>
