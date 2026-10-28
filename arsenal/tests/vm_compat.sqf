@@ -164,6 +164,16 @@ TEST_fnc_local = {_this getVariable ["TEST_local", true]};
 TEST_fnc_attachedTo = {_this getVariable ["TEST_attachedTo", objNull]};
 TEST_fnc_synced = {_this getVariable ["TEST_synced", []]};
 TEST_fnc_curator = {_this getVariable ["TEST_curator", objNull]};
+// Files: TEST_files maps a path to its text; missing files read as "".
+TEST_files = createHashMap;
+TEST_filePatching = false;
+TEST_parseFails = false;
+TEST_fnc_loadFile = {if (_this in TEST_files) then {TEST_files get _this} else {""}};
+// Arma's parseSimpleArray takes plain data only: comments make it fail.
+TEST_fnc_parseSimple = {
+    if (TEST_parseFails || {_this == ""} || {(_this find (toString [47, 47])) >= 0}) exitWith {[]};
+    call compile _this
+};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -202,6 +212,9 @@ TEST_fnc_compatCode = {
             case "CALLBINARY addmagazineammocargo": {"TEST_fnc_addMagAmmo" call _compatPair};
             case "CALLBINARY addweaponwithattachmentscargoglobal": {"TEST_fnc_addWeaponItems" call _compatPair};
             case "CALLUNARY group": {"TEST_fnc_identity" call _compatCall};
+            case "CALLUNARY loadfile": {"TEST_fnc_loadFile" call _compatCall};
+            case "CALLUNARY parsesimplearray": {"TEST_fnc_parseSimple" call _compatCall};
+            case "CALLNULAR isfilepatchingenabled": {_compatOut pushBack "GETVARIABLE TEST_filePatching"};
             case "CALLUNARY side": {"TEST_fnc_side" call _compatCall};
             case "CALLUNARY local": {"TEST_fnc_local" call _compatCall};
             case "CALLUNARY attachedto": {"TEST_fnc_attachedTo" call _compatCall};

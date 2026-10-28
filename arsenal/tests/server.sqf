@@ -13,7 +13,7 @@ TEST_fnc_assert = {
     missionNamespace setVariable ["PMCA_fnc_" + _x, ("pmc_arsenal/Server/fn_" + _x + ".sqf") call TEST_fnc_load];
 } forEach ["serverInit", "serverLoad", "registerStorage", "storageAdd", "storageItems", "storageList", "allowedTabs",
     "itemKey", "loadoutItems", "cargoItems", "broadcast", "preview", "commit", "restoreCargo", "save", "requestOwner",
-    "unlock", "boxCargo", "boxRestore", "boxScan", "boxLoad", "debugLoad", "moduleStorage"];
+    "unlock", "boxCargo", "boxRestore", "boxScan", "boxLoad", "debugLoad", "moduleStorage", "stockFile", "exportStock"];
 PMCA_fnc_moduleDebugLoad = "pmc_arsenal/Client/fn_moduleDebugLoad.sqf" call TEST_fnc_load;
 PMCA_fnc_settings = "pmc_arsenal/Init/fn_settings.sqf" call TEST_fnc_load;
 {
@@ -573,5 +573,67 @@ _blank setVariable ["TEST_synced", [[[7, 5, 0]] call TEST_fnc_crate]];
 private _count = count PMCA_storageObjects;
 [_blank, [], true] call PMCA_fnc_moduleStorage;
 [count PMCA_storageObjects == _count, "a module without a storage ID registers nothing"] call TEST_fnc_assert;
+
+// --- Editable stock file -------------------------------------------------------------
+call TEST_fnc_fresh;
+profileNamespace setVariable ["PMCA_stockFile_v1", nil];
+TEST_files = createHashMap;
+TEST_filePatching = false;
+private _c = toString [47, 47];
+private _nl = toString [10];
+private _fileText = _c + " Склад арсенала" + _nl + "[" + _nl
+    + "  [""base"", [[""arifle_MX_F"", 5], " + _c + " пять винтовок" + _nl
+    + "    [""30Rnd_65x39_caseless_mag"", 2, 10], [""FirstAidKit"", -1], [""Nope_Item"", 3], [""optic_Aco"", 1.5]]]," + _nl
+    + "  [""depot"", [[""optic_Aco"", 3]]]" + _nl + "]";
+TEST_files set ["pmc_arsenal_stock.txt", _fileText];
+PMCA_dirty = false;
+[call PMCA_fnc_stockFile, "the mission's stock file is applied"] call TEST_fnc_assert;
+[(["arifle_MX_F"] call TEST_fnc_stock) == 5 && {([TEST_mag] call TEST_fnc_stock) == 70} && {(["FirstAidKit"] call TEST_fnc_stock) == -1} && {
+    (["HandGrenade"] call TEST_fnc_stock) == 0} && {(["optic_Aco"] call TEST_fnc_stock) == 0},
+    "a listed storage gets exactly the file's stock; magazines plus extra rounds; bad rows are skipped"] call TEST_fnc_assert;
+[(["optic_Aco", "depot"] call TEST_fnc_stock) == 3 && {PMCA_dirty} && {(profileNamespace getVariable ["PMCA_stockFile_v1", ""]) isEqualTo _fileText},
+    "a storage named only in the file is created; the change is saved"] call TEST_fnc_assert;
+["base", [["arifle_MX_F", 1]]] call PMCA_fnc_storageAdd;
+[!(call PMCA_fnc_stockFile) && {(["arifle_MX_F"] call TEST_fnc_stock) == 6}, "an unchanged file is not applied again; changes from play stay"] call TEST_fnc_assert;
+TEST_filePatching = true;
+TEST_files set ["userconfig\pmc_arsenal_stock.txt", "[[""base"", [[""arifle_MX_F"", 9]]]]"];
+[call PMCA_fnc_stockFile && {(["arifle_MX_F"] call TEST_fnc_stock) == 9} && {(["optic_Aco", "depot"] call TEST_fnc_stock) == 3},
+    "with -filePatching the userconfig file comes first; unlisted storages stay"] call TEST_fnc_assert;
+TEST_files set ["userconfig\pmc_arsenal_stock.txt", "[[""base"", [[""arifle_MX_F"", 4]]]"];
+TEST_parseFails = true;
+[!(call PMCA_fnc_stockFile) && {(["arifle_MX_F"] call TEST_fnc_stock) == 9}, "a file that does not parse changes nothing"] call TEST_fnc_assert;
+TEST_parseFails = false;
+TEST_files set ["userconfig\pmc_arsenal_stock.txt", "[[""base"", 5]]"];
+[!(call PMCA_fnc_stockFile) && {(["arifle_MX_F"] call TEST_fnc_stock) == 9}, "a file of the wrong shape changes nothing"] call TEST_fnc_assert;
+TEST_filePatching = false;
+// Export: what the server writes can be read back unchanged.
+((PMCA_storages get "base") get "items") set [TEST_mag, 100];
+private _expected = (["base"] call PMCA_fnc_storageItems) + (["depot"] call PMCA_fnc_storageItems);
+private _export = [false] call PMCA_fnc_exportStock;
+[(_export find "[""30Rnd_65x39_caseless_mag"", 3, 10]") >= 0, "export writes magazines as magazines plus extra rounds"] call TEST_fnc_assert;
+((PMCA_storages get "base") get "items") set ["arifle_MX_F", 1];
+((PMCA_storages get "depot") get "items") set ["optic_Aco", 1];
+TEST_files set ["pmc_arsenal_stock.txt", _export];
+call PMCA_fnc_stockFile;
+private _back = (["base"] call PMCA_fnc_storageItems) + (["depot"] call PMCA_fnc_storageItems);
+[count _back == count _expected && {(_expected findIf {!(_x in _back)}) < 0}, "an exported file applies back to the same stock"] call TEST_fnc_assert;
+PMCA_saveBlocked = true;
+TEST_files set ["pmc_arsenal_stock.txt", "[]"];
+[!(call PMCA_fnc_stockFile), "no file is applied while saving is blocked"] call TEST_fnc_assert;
+PMCA_saveBlocked = false;
+// Server init applies it after restoring the arsenal objects.
+TEST_files set ["pmc_arsenal_stock.txt", "[[""base"", [[""launch_RPG32_F"", 7]]]]"];
+TEST_deferSpawn = true;
+call PMCA_fnc_serverInit;
+TEST_deferSpawn = false;
+TEST_deferred = [];
+[(["base"] call PMCA_fnc_storageItems) isEqualTo [["launch_RPG32_F", 7]], "server init applies an edited stock file"] call TEST_fnc_assert;
+// The template shipped with the mod is only comments and an empty list.
+private _template = loadFile "userconfig/pmc_arsenal_stock.txt";
+TEST_files set ["pmc_arsenal_stock.txt", _template];
+[_template != "" && {call PMCA_fnc_stockFile} && {(["base"] call PMCA_fnc_storageItems) isEqualTo [["launch_RPG32_F", 7]]},
+    "the shipped template parses and changes nothing"] call TEST_fnc_assert;
+profileNamespace setVariable ["PMCA_stockFile_v1", nil];
+TEST_files = createHashMap;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

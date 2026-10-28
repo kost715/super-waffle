@@ -9,10 +9,10 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.2.0_alpha1"
+VERSION = "0.3.0_alpha1"
 MOD = "@PMC_Arsenal"
 PREFIX = "pmc_arsenal"
-STAMP = (2026, 10, 28, 12, 0, 0)
+STAMP = (2026, 10, 28, 18, 0, 0)
 
 
 def pack_pbo(files: dict[str, bytes], prefix: str) -> bytes:
@@ -46,8 +46,9 @@ def main() -> None:
     (build / "addons").mkdir(parents=True, exist_ok=True)
     (build / "addons" / f"{PREFIX}.pbo").write_bytes(pbo)
     package = {f"{MOD}/addons/{PREFIX}.pbo": pbo}
-    for name in ["mod.cpp", "README_RU.md", "LICENSE", "CHANGELOG.md"]:
+    for name in ["mod.cpp", "README_RU.md", "LICENSE", "CHANGELOG.md", "userconfig/pmc_arsenal_stock.txt"]:
         data = (ROOT / name).read_bytes()
+        (build / name).parent.mkdir(parents=True, exist_ok=True)
         (build / name).write_bytes(data)
         package[f"{MOD}/{name}"] = data
     dist = ROOT / "dist"
@@ -55,7 +56,7 @@ def main() -> None:
     ready = dist / f"PMC_Arsenal_{VERSION}.zip"
     write_zip(ready, package)
     source_files = {}
-    for folder in ["addons", "tools", "tests"]:
+    for folder in ["addons", "tools", "tests", "userconfig"]:
         for p in sorted((ROOT / folder).rglob("*")):
             if p.is_file() and "__pycache__" not in p.parts:
                 source_files[f"PMC_Arsenal_sources/{p.relative_to(ROOT).as_posix()}"] = p.read_bytes()

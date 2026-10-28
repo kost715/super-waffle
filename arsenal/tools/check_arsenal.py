@@ -31,6 +31,7 @@ def stage(tree):
     shutil.copytree(ADDON, tree / "pmc_arsenal")
     shutil.copytree(ROOT / "tests/a3stub", tree / "A3")
     shutil.copytree(ROOT / "tests", tree / "tests", ignore=shutil.ignore_patterns("a3stub"))
+    shutil.copytree(ROOT / "userconfig", tree / "userconfig")
     for path in (tree / "pmc_arsenal").rglob("*"):
         if path.suffix in (".sqf", ".inc", ".hpp"):
             text = path.read_text(encoding="utf-8")
