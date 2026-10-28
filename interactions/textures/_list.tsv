@@ -1,0 +1,34 @@
+ui_gauge_frame_ca.png	512	64	Рамка шкалы (серая, окрашивается в игре)
+ui_gauge_fill_ca.png	512	64	Заливка шкалы: давление, набивка, глубина нажатия (серая)
+ui_gauge_band_ca.png	256	64	Зелёная зона шкалы (серая, окрашивается)
+ui_gauge_marker_ca.png	32	64	Стрелка на шкале
+ui_board_bg_ca.png	1024	1024	Фон окна
+icon_cpr_ca.png	128	128	Значок СЛР в заголовке
+icon_tourniquet_ca.png	128	128	Значок жгута
+icon_bandage_ca.png	128	128	Значок перевязки
+icon_wheel_ca.png	128	128	Значок замены колеса
+cpr_scene_ca.png	1024	512	СЛР: пациент сверху, цель на грудине
+cpr_hands_up_ca.png	256	256	СЛР: руки подняты (между нажатиями)
+cpr_hands_down_ca.png	256	256	СЛР: руки нажимают
+cpr_beat_on_ca.png	128	128	СЛР: метроном, удар
+cpr_beat_off_ca.png	128	128	СЛР: метроном, пауза
+tq_scene_ca.png	1024	512	Жгут: рука с раной и наложенным жгутом
+tq_windlass_0_ca.png	256	256	Жгут: вороток, кадр 0 (0°)
+tq_windlass_1_ca.png	256	256	Жгут: вороток, кадр 1 (22.5°)
+tq_windlass_2_ca.png	256	256	Жгут: вороток, кадр 2 (45°)
+tq_windlass_3_ca.png	256	256	Жгут: вороток, кадр 3 (67.5°)
+tq_windlass_4_ca.png	256	256	Жгут: вороток, кадр 4 (90°)
+tq_windlass_5_ca.png	256	256	Жгут: вороток, кадр 5 (112.5°)
+tq_windlass_6_ca.png	256	256	Жгут: вороток, кадр 6 (135°)
+tq_windlass_7_ca.png	256	256	Жгут: вороток, кадр 7 (157.5°)
+bandage_scene_ca.png	1024	512	Перевязка: рана крупно
+bandage_gauze_1_ca.png	512	256	Перевязка: бинт, стадия 1 из 4
+bandage_gauze_2_ca.png	512	256	Перевязка: бинт, стадия 2 из 4
+bandage_gauze_3_ca.png	512	256	Перевязка: бинт, стадия 3 из 4
+bandage_gauze_4_ca.png	512	256	Перевязка: бинт, стадия 4 из 4
+wheel_old_ca.png	512	512	Колесо: старое (пробитое)
+wheel_new_ca.png	512	512	Колесо: новое
+wheel_nut_tight_ca.png	128	128	Гайка затянута
+wheel_nut_loose_ca.png	128	128	Гайка ослаблена
+wheel_nut_next_ca.png	128	128	Гайка: следующая по «звезде» (подсказка)
+wheel_nut_done_ca.png	128	128	Гайка: готова
