@@ -58,7 +58,7 @@ def main() -> None:
     source_files = {}
     for folder in ["addons", "tools", "tests"]:
         for p in sorted((ROOT / folder).rglob("*")):
-            if p.is_file() and "__pycache__" not in p.parts:
+            if p.is_file() and "__pycache__" not in p.parts and ".cache" not in p.parts:
                 source_files[f"PMC_Interactions_sources/{p.relative_to(ROOT).as_posix()}"] = p.read_bytes()
     for name in ["mod.cpp", "README_RU.md", "LICENSE", "CHANGELOG.md", ".gitignore"]:
         source_files[f"PMC_Interactions_sources/{name}"] = (ROOT / name).read_bytes()
