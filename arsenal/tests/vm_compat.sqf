@@ -1,6 +1,8 @@
 // SQF-VM lacks the inventory, network and scheduler commands the arsenal uses.
 // Compiled opcodes are adapted to the fixtures below; application code is unchanged.
 TEST_isServer = true;
+TEST_hasInterface = false;
+TEST_dialogs = [];
 TEST_isRemoteExecuted = false;
 TEST_remoteOwner = 2;
 TEST_messages = [];
@@ -177,6 +179,9 @@ TEST_fnc_parseSimple = {
     if (TEST_parseFails || {_this == ""} || {(_this find (toString [47, 47])) >= 0}) exitWith {[]};
     call compile _this
 };
+TEST_fnc_createDialog = {TEST_dialogs pushBack _this; true};
+TEST_fnc_name = {_this getVariable ["TEST_name", "Unit"]};
+TEST_fnc_uid = {_this getVariable ["TEST_uid", ""]};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -192,7 +197,10 @@ TEST_fnc_compatCode = {
         private _compatPair = {_compatOut append ["MAKEARRAY 2", "GETVARIABLE " + _this, "CALLBINARY call"]};
         switch (_compatLine) do {
             case "CALLNULAR isserver": {_compatOut pushBack "GETVARIABLE TEST_isServer"};
-            case "CALLNULAR hasinterface": {_compatOut pushBack "PUSH false"};
+            case "CALLNULAR hasinterface": {_compatOut pushBack "GETVARIABLE TEST_hasInterface"};
+            case "CALLUNARY createdialog": {"TEST_fnc_createDialog" call _compatCall};
+            case "CALLUNARY name": {"TEST_fnc_name" call _compatCall};
+            case "CALLUNARY getplayeruid": {"TEST_fnc_uid" call _compatCall};
             case "CALLNULAR isremoteexecuted": {_compatOut pushBack "GETVARIABLE TEST_isRemoteExecuted"};
             case "CALLNULAR remoteexecutedowner": {_compatOut pushBack "GETVARIABLE TEST_remoteOwner"};
             case "CALLNULAR clientowner": {_compatOut pushBack "PUSH 2"};

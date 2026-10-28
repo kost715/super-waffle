@@ -13,7 +13,11 @@ TEST_fnc_assert = {
     missionNamespace setVariable ["PMCA_fnc_" + _x, ("pmc_arsenal/Server/fn_" + _x + ".sqf") call TEST_fnc_load];
 } forEach ["serverInit", "serverLoad", "registerStorage", "storageAdd", "storageItems", "storageList", "allowedTabs",
     "itemKey", "loadoutItems", "cargoItems", "broadcast", "preview", "commit", "restoreCargo", "save", "requestOwner",
-    "unlock", "boxCargo", "boxRestore", "boxScan", "boxLoad", "debugLoad", "moduleStorage", "stockFile", "exportStock"];
+    "unlock", "boxCargo", "boxRestore", "boxScan", "boxLoad", "debugLoad", "moduleStorage", "stockFile", "exportStock",
+    "stockRows", "zeusCaller", "zeusStock", "zeusStockId", "zeusEdit"];
+PMCA_fnc_moduleZeusStock = "pmc_arsenal/Client/fn_moduleZeusStock.sqf" call TEST_fnc_load;
+PMCA_fnc_stockReceive = "pmc_arsenal/Client/fn_stockReceive.sqf" call TEST_fnc_load;
+PMCA_fnc_stockUi = {TEST_stockDraws = (missionNamespace getVariable ["TEST_stockDraws", 0]) + 1};
 PMCA_fnc_moduleDebugLoad = "pmc_arsenal/Client/fn_moduleDebugLoad.sqf" call TEST_fnc_load;
 PMCA_fnc_settings = "pmc_arsenal/Init/fn_settings.sqf" call TEST_fnc_load;
 {
@@ -640,5 +644,86 @@ TEST_files set ["pmc_arsenal_stock.txt", _template];
     "the shipped template parses and changes nothing"] call TEST_fnc_assert;
 profileNamespace setVariable ["PMCA_stockFile_v1", nil];
 TEST_files = createHashMap;
+
+// --- Zeus stock window ------------------------------------------------------------------
+call TEST_fnc_fresh;
+TEST_zeus = [4, [400, 0, 0]] call TEST_fnc_unit;
+TEST_zeus setVariable ["TEST_curator", TEST_box];
+[TEST_unit, 3] call TEST_fnc_open;
+TEST_messages = [];
+3 call TEST_fnc_as;
+[TEST_unit, TEST_box] call PMCA_fnc_zeusStock;
+[TEST_messages isEqualTo [], "only a Zeus opens the stock window"] call TEST_fnc_assert;
+4 call TEST_fnc_as;
+private _wall = [[3, 3, 0], "Land_Wall_F"] call TEST_fnc_crate;
+[TEST_zeus, _wall] call PMCA_fnc_zeusStock;
+[count (["PMCA_fnc_notify", "STR_PMCA_ERR_STOCK_OBJECT", 4] call TEST_fnc_sent) == 1, "the module must be placed on an arsenal"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_zeus, TEST_box] call PMCA_fnc_zeusStock;
+private _sent = ["PMCA_fnc_stockReceive", "base", 4] call TEST_fnc_sent;
+private _rows = ((_sent select 0) select 0) select 1;
+[count _sent == 1 && {count _rows == count (["base"] call PMCA_fnc_storageItems)} && {(_rows select {(_x select 0) == "arifle_MX_F"}) isEqualTo [["arifle_MX_F", 2, 0]]},
+    "Zeus gets the storage's items with their counts and arsenal tabs"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_zeus, "base", TEST_mag, "remove", 2] call PMCA_fnc_zeusEdit;
+private _seen = (["PMCA_fnc_arsenal", "", 3] call TEST_fnc_sent) apply {_x select 0};
+[([TEST_mag] call TEST_fnc_stock) == 30 && {PMCA_dirty} && {_seen isEqualTo [["UpdateItemRemove", [26, TEST_mag, -1, true]], ["UpdateItemAdd", [26, TEST_mag, 30, true]]]},
+    "removing 2 magazines takes 60 rounds; open arsenals show the new count"] call TEST_fnc_assert;
+[count (["PMCA_fnc_stockReceive", "base", 4] call TEST_fnc_sent) == 1, "the window gets the new stock"] call TEST_fnc_assert;
+[TEST_zeus, "base", TEST_mag, "remove", 5] call PMCA_fnc_zeusEdit;
+[!(TEST_mag in ((PMCA_storages get "base") get "items")), "removing more than there is removes the item"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_zeus, "base", "U_B_CombatUniform_mcam", "remove", 1] call PMCA_fnc_zeusEdit;
+[count (["PMCA_fnc_notify", "STR_PMCA_ERR_STOCK_UNLIMITED", 4] call TEST_fnc_sent) == 1 && {(["U_B_CombatUniform_mcam"] call TEST_fnc_stock) == -1}, "nothing is counted off an unlimited item"] call TEST_fnc_assert;
+PMCA_unlockThreshold = 5;
+[TEST_zeus, "base", "arifle_MX_F", "set", 50] call PMCA_fnc_zeusEdit;
+[(["arifle_MX_F"] call TEST_fnc_stock) == 50, "Zeus sets an exact count; the unlimited threshold does not apply"] call TEST_fnc_assert;
+PMCA_unlockThreshold = 0;
+[TEST_zeus, "base", "U_B_CombatUniform_mcam", "set", 3] call PMCA_fnc_zeusEdit;
+[TEST_zeus, "base", "optic_Aco", "unlimited", 0] call PMCA_fnc_zeusEdit;
+[TEST_zeus, "base", "HandGrenade", "clear", 0] call PMCA_fnc_zeusEdit;
+[(["U_B_CombatUniform_mcam"] call TEST_fnc_stock) == 3 && {(["optic_Aco"] call TEST_fnc_stock) == -1} && {!("HandGrenade" in ((PMCA_storages get "base") get "items"))},
+    "an unlimited item can be made limited, a limited one unlimited, and an item removed"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_zeus, "base", "launch_RPG32_F", "set", 0] call PMCA_fnc_zeusEdit;
+[!("launch_RPG32_F" in ((PMCA_storages get "base") get "items")), "setting 0 removes the item"] call TEST_fnc_assert;
+{
+    TEST_messages = [];
+    [TEST_zeus, "base", "arifle_MX_F", _x select 0, _x select 1] call PMCA_fnc_zeusEdit;
+    [count (["PMCA_fnc_notify", "STR_PMCA_ERR_STOCK_AMOUNT", 4] call TEST_fnc_sent) == 1 && {(["arifle_MX_F"] call TEST_fnc_stock) == 50}, format ["a bad count is refused: %1", _x]] call TEST_fnc_assert;
+} forEach [["remove", 0], ["set", 1.5], ["set", -3]];
+TEST_messages = [];
+[TEST_zeus, "base", "HandGrenade", "set", 4] call PMCA_fnc_zeusEdit;
+[count (["PMCA_fnc_notify", "STR_PMCA_ERR_STOCK_ITEM", 4] call TEST_fnc_sent) == 1, "only items in stock can be changed"] call TEST_fnc_assert;
+[TEST_zeus, "base", "arifle_MX_F", "explode", 1] call PMCA_fnc_zeusEdit;
+[(["arifle_MX_F"] call TEST_fnc_stock) == 50, "an unknown action changes nothing"] call TEST_fnc_assert;
+3 call TEST_fnc_as;
+[TEST_unit, "base", "arifle_MX_F", "clear", 0] call PMCA_fnc_zeusEdit;
+[TEST_zeus, "base", "arifle_MX_F", "clear", 0] call PMCA_fnc_zeusEdit;
+[(["arifle_MX_F"] call TEST_fnc_stock) == 50, "players cannot change the stock, nor act as a Zeus"] call TEST_fnc_assert;
+4 call TEST_fnc_as;
+TEST_messages = [];
+[TEST_zeus, "base"] call PMCA_fnc_zeusStockId;
+[count (["PMCA_fnc_stockReceive", "base", 4] call TEST_fnc_sent) == 1, "the window can ask for the stock again"] call TEST_fnc_assert;
+// Zeus client side.
+TEST_hasInterface = true;
+TEST_isRemoteExecuted = true;
+TEST_remoteOwner = 2;
+PMCA_stockUi = nil;
+TEST_dialogs = [];
+["base", [["arifle_MX_F", 50, 0]]] call PMCA_fnc_stockReceive;
+[TEST_dialogs isEqualTo ["PMCA_RscStock"] && {(PMCA_stockUi get "rows") isEqualTo [["arifle_MX_F", 50, 0]]}, "the stock arrives in a new window"] call TEST_fnc_assert;
+TEST_remoteOwner = 9;
+PMCA_stockUi = nil;
+["base", []] call PMCA_fnc_stockReceive;
+[isNil "PMCA_stockUi", "only the server opens the stock window"] call TEST_fnc_assert;
+TEST_isRemoteExecuted = false;
+TEST_messages = [];
+private _stockLogic = "Logic" createVehicle [0, 0, 0];
+_stockLogic setVariable ["bis_fnc_curatorAttachObject_object", TEST_box];
+[_stockLogic, [], true] call PMCA_fnc_moduleZeusStock;
+private _ask = ["PMCA_fnc_zeusStock", "", 2] call TEST_fnc_sent;
+[count _ask == 1 && {((_ask select 0) select 0) isEqualTo [player, TEST_box]} && {isNull _stockLogic}, "the module sends its arsenal to the server and removes itself"] call TEST_fnc_assert;
+TEST_hasInterface = false;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

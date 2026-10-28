@@ -1,13 +1,15 @@
+#include "ui_defines.hpp"
+
 class CfgPatches {
     class pmc_arsenal {
         name = "PMC Arsenal";
         author = "LifeSim PMC project; arsenal interface by Jeroen Notenbomer (Antistasi)";
-        units[] = {"PMCA_ModuleStorage", "PMCA_ModuleDebugLoad"};
+        units[] = {"PMCA_ModuleStorage", "PMCA_ModuleDebugLoad", "PMCA_ModuleZeusStock"};
         weapons[] = {};
         requiredVersion = 2.14;
         // CBA for the mod settings. ACE, TFAR and ACRE are detected at runtime when loaded.
         requiredAddons[] = {"A3_Ui_F", "3DEN", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings"};
-        version = "0.3.1";
+        version = "0.4.0";
     };
 };
 
@@ -82,6 +84,11 @@ class CfgFunctions {
             class moduleStorage {};
             class stockFile {};
             class exportStock {};
+            class stockRows {};
+            class zeusCaller {};
+            class zeusStock {};
+            class zeusStockId {};
+            class zeusEdit {};
         };
         class Client {
             file = "\pmc_arsenal\Client";
@@ -89,6 +96,9 @@ class CfgFunctions {
             class applyLoadout {};
             class notify {};
             class moduleDebugLoad {};
+            class moduleZeusStock {};
+            class stockReceive {};
+            class stockUi {};
         };
     };
 };
@@ -101,6 +111,10 @@ class CfgRemoteExec {
         class PMCA_fnc_arsenal_cargoToArsenal {allowedTargets = 2; jip = 0;};
         class PMCA_fnc_preview {allowedTargets = 2; jip = 0;};
         class PMCA_fnc_debugLoad {allowedTargets = 2; jip = 0;};
+        class PMCA_fnc_zeusStock {allowedTargets = 2; jip = 0;};
+        class PMCA_fnc_zeusStockId {allowedTargets = 2; jip = 0;};
+        class PMCA_fnc_zeusEdit {allowedTargets = 2; jip = 0;};
+        class PMCA_fnc_stockReceive {allowedTargets = 0; jip = 0;};
         class PMCA_fnc_arsenal {allowedTargets = 0; jip = 0;};
         class PMCA_fnc_arsenal_init {allowedTargets = 0; jip = 1;};
         class PMCA_fnc_applyLoadout {allowedTargets = 0; jip = 0;};
@@ -188,4 +202,18 @@ class CfgVehicles {
         isTriggerActivated = 0;
         curatorCanAttach = 1;
     };
+    // Zeus: place on an arsenal object to remove items from its storage or change counts.
+    class PMCA_ModuleZeusStock: Module_F {
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "$STR_PMCA_MODULE_STOCK";
+        category = "PMCA_Modules";
+        function = "PMCA_fnc_moduleZeusStock";
+        functionPriority = 1;
+        isGlobal = 1;
+        isTriggerActivated = 0;
+        curatorCanAttach = 1;
+    };
 };
+
+#include "ui.hpp"

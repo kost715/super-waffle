@@ -425,5 +425,107 @@
                 <Russian>Загрузить ящик в арсенал (отладка)</Russian>
             </Key>
         </Container>
+        <Container name="Stock">
+            <Key ID="STR_PMCA_MODULE_STOCK">
+                <Original>Arsenal stock (place on an arsenal)</Original>
+                <Russian>Склад арсенала (поставить на арсенал)</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_STOCK_OBJECT">
+                <Original>Place the module on an arsenal object.</Original>
+                <Russian>Поставьте модуль на объект-арсенал.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_STOCK_ITEM">
+                <Original>This item is no longer in stock.</Original>
+                <Russian>Этого предмета уже нет на складе.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_STOCK_AMOUNT">
+                <Original>Enter a whole number (at least 1 to remove).</Original>
+                <Russian>Введите целое число (для «Убрать» — не меньше 1).</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_STOCK_UNLIMITED">
+                <Original>The item is unlimited: set a count or remove it entirely.</Original>
+                <Russian>Предмет бесконечный: задайте количество или уберите его целиком.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_TITLE">
+                <Original>Arsenal stock: %1</Original>
+                <Russian>Склад арсенала «%1»</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_ALL">
+                <Original>All</Original>
+                <Russian>Все</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_WEAPONS">
+                <Original>Weapons</Original>
+                <Russian>Оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_LAUNCHERS">
+                <Original>Launchers</Original>
+                <Russian>Гранатомёты</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_EXPLOSIVES">
+                <Original>Explosives</Original>
+                <Russian>Взрывчатка</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_EQUIPMENT">
+                <Original>Equipment</Original>
+                <Russian>Снаряжение</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_OTHER">
+                <Original>Other</Original>
+                <Russian>Прочее</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_SEARCH">
+                <Original>Search:</Original>
+                <Russian>Поиск:</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_AMOUNT">
+                <Original>Count:</Original>
+                <Russian>Количество:</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_REMOVE">
+                <Original>Remove</Original>
+                <Russian>Убрать</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_SET">
+                <Original>Set</Original>
+                <Russian>Задать</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_UNLIMITED">
+                <Original>Unlimited</Original>
+                <Russian>Бесконечно</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_CLEAR">
+                <Original>Remove entirely</Original>
+                <Russian>Убрать всё</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_REFRESH">
+                <Original>Refresh</Original>
+                <Russian>Обновить</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_CLOSE">
+                <Original>Close</Original>
+                <Russian>Закрыть</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_PICK">
+                <Original>Select an item in the list.</Original>
+                <Russian>Выберите предмет в списке.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_INFINITE">
+                <Original>unlimited</Original>
+                <Russian>бесконечно</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_MAGS">
+                <Original>%1 mag.</Original>
+                <Russian>%1 маг.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_ROUNDS">
+                <Original> + %1 rds</Original>
+                <Russian> + %1 патр.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_STOCK_INFO">
+                <Original>Shown: %1 of %2 (%3). Magazines are counted in full magazines.</Original>
+                <Russian>Показано: %1 из %2 (%3). Магазины считаются полными магазинами.</Russian>
+            </Key>
+        </Container>
     </Package>
 </Project>
