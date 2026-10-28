@@ -2,18 +2,22 @@ class CfgPatches {
     class pmc_arsenal {
         name = "PMC Arsenal";
         author = "LifeSim PMC project; arsenal interface by Jeroen Notenbomer (Antistasi)";
-        units[] = {};
+        units[] = {"PMCA_ModuleStorage", "PMCA_ModuleDebugLoad"};
         weapons[] = {};
         requiredVersion = 2.14;
-        // Vanilla only. ACE, TFAR and ACRE are detected at runtime when loaded.
-        requiredAddons[] = {"A3_Ui_F", "3DEN"};
-        version = "0.1.0";
+        // CBA for the mod settings. ACE, TFAR and ACRE are detected at runtime when loaded.
+        requiredAddons[] = {"A3_Ui_F", "3DEN", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings"};
+        version = "0.2.0";
     };
 };
 
 class CfgFunctions {
     class PMCA {
         tag = "PMCA";
+        class Init {
+            file = "\pmc_arsenal\Init";
+            class settings {preInit = 1;};
+        };
         class Common {
             file = "\pmc_arsenal\Common";
             class common_addActionSelect {};
@@ -69,12 +73,20 @@ class CfgFunctions {
             class restoreCargo {};
             class save {};
             class requestOwner {};
+            class unlock {};
+            class boxCargo {};
+            class boxRestore {};
+            class boxScan {};
+            class boxLoad {};
+            class debugLoad {};
+            class moduleStorage {};
         };
         class Client {
             file = "\pmc_arsenal\Client";
             class clientInit {postInit = 1;};
             class applyLoadout {};
             class notify {};
+            class moduleDebugLoad {};
         };
     };
 };
@@ -86,6 +98,7 @@ class CfgRemoteExec {
         class PMCA_fnc_arsenal_requestClose {allowedTargets = 2; jip = 0;};
         class PMCA_fnc_arsenal_cargoToArsenal {allowedTargets = 2; jip = 0;};
         class PMCA_fnc_preview {allowedTargets = 2; jip = 0;};
+        class PMCA_fnc_debugLoad {allowedTargets = 2; jip = 0;};
         class PMCA_fnc_arsenal {allowedTargets = 0; jip = 0;};
         class PMCA_fnc_arsenal_init {allowedTargets = 0; jip = 1;};
         class PMCA_fnc_applyLoadout {allowedTargets = 0; jip = 0;};
@@ -114,5 +127,63 @@ class Cfg3DEN {
                 };
             };
         };
+    };
+};
+
+class CfgFactionClasses {
+    class PMCA_Modules {
+        displayName = "PMC Arsenal";
+        priority = 2;
+        side = 7;
+    };
+};
+
+class CfgVehicles {
+    class Logic;
+    class Module_F: Logic {
+        class AttributesBase {
+            class Edit;
+            class ModuleDescription;
+        };
+        class ModuleDescription;
+    };
+    // Eden: synchronise objects with inventory to make them open this storage.
+    class PMCA_ModuleStorage: Module_F {
+        scope = 2;
+        scopeCurator = 0;
+        displayName = "$STR_PMCA_MODULE_STORAGE";
+        category = "PMCA_Modules";
+        icon = "\A3\ui_f\data\GUI\Rsc\RscDisplayArsenal\spaceArsenal_ca.paa";
+        function = "PMCA_fnc_moduleStorage";
+        functionPriority = 1;
+        isGlobal = 0;
+        isTriggerActivated = 0;
+        isDisposable = 0;
+        is3DEN = 0;
+        class Attributes: AttributesBase {
+            class StorageID: Edit {
+                property = "PMCA_ModuleStorage_StorageID";
+                displayName = "Storage ID";
+                tooltip = "$STR_PMCA_MODULE_STORAGE_ID_TIP";
+                typeName = "STRING";
+                defaultValue = """base""";
+            };
+            class ModuleDescription: ModuleDescription {};
+        };
+        class ModuleDescription: ModuleDescription {
+            description = "$STR_PMCA_MODULE_STORAGE_DESC";
+        };
+    };
+    // Zeus, debug mode: place on a box near an arsenal to make its contents unlimited there.
+    class PMCA_ModuleDebugLoad: Module_F {
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "$STR_PMCA_MODULE_DEBUG";
+        category = "PMCA_Modules";
+        function = "PMCA_fnc_moduleDebugLoad";
+        functionPriority = 1;
+        isGlobal = 1;
+        isTriggerActivated = 0;
+        curatorCanAttach = 1;
     };
 };

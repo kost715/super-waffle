@@ -62,6 +62,7 @@ if (_hasClaim && {canSuspend}) then {
 private _settled = false;
 private _revert = _abort;
 private _missing = [];
+private _returned = [];
 isNil {
     // A disconnect handler or a newer request may have settled it meanwhile.
     if (((PMCA_sessions getOrDefault [_owner, createHashMap]) getOrDefault ["token", -1]) != _token) exitWith {};
@@ -99,6 +100,7 @@ isNil {
             };
         } forEach _delta;
         if (count _delta > 0 && {_storage getOrDefault ["persist", true]}) then {PMCA_dirty = true};
+        _returned = (keys _delta) select {(_delta get _x) < 0};
     };
     // Others saw this session's picks at once; correct them to what was settled.
     private _preview = _session get "preview";
@@ -114,6 +116,7 @@ isNil {
     [_id, _removes, false, []] call PMCA_fnc_broadcast;
 };
 if (!_settled) exitWith {};
+[_id, _returned] call PMCA_fnc_unlock;
 if (_revert && {!isNull _subject}) then {
     if (_isUnit) then {
         if (!_abort) then {[_session get "loadout"] remoteExecCall ["PMCA_fnc_applyLoadout", _owner]};

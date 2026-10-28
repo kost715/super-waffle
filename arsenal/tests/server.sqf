@@ -12,7 +12,10 @@ TEST_fnc_assert = {
 {
     missionNamespace setVariable ["PMCA_fnc_" + _x, ("pmc_arsenal/Server/fn_" + _x + ".sqf") call TEST_fnc_load];
 } forEach ["serverInit", "serverLoad", "registerStorage", "storageAdd", "storageItems", "storageList", "allowedTabs",
-    "itemKey", "loadoutItems", "cargoItems", "broadcast", "preview", "commit", "restoreCargo", "save", "requestOwner"];
+    "itemKey", "loadoutItems", "cargoItems", "broadcast", "preview", "commit", "restoreCargo", "save", "requestOwner",
+    "unlock", "boxCargo", "boxRestore", "boxScan", "boxLoad", "debugLoad", "moduleStorage"];
+PMCA_fnc_moduleDebugLoad = "pmc_arsenal/Client/fn_moduleDebugLoad.sqf" call TEST_fnc_load;
+PMCA_fnc_settings = "pmc_arsenal/Init/fn_settings.sqf" call TEST_fnc_load;
 {
     missionNamespace setVariable ["PMCA_fnc_" + _x, ("pmc_arsenal/JNA/fn_" + _x + ".sqf") call TEST_fnc_load];
 } forEach ["arsenal_itemType", "arsenal_requestOpen", "arsenal_requestClose", "arsenal_cargoToArsenal"];
@@ -24,6 +27,13 @@ BIS_fnc_baseWeapon = {
     if (_base == "") then {_this} else {_base}
 };
 BIS_fnc_basicBackpack = {_this};
+// CBA settings: record each setting and apply its default, as CBA does on a fresh server.
+TEST_settings = [];
+CBA_fnc_addSetting = {
+    params ["_name", "_type", "_title", "_category", "_value", ["_global", 0], ["_script", {}]];
+    TEST_settings pushBack [_name, _type, _category, _value, _global, _script];
+    missionNamespace setVariable [_name, if (_type == "LIST") then {(_value select 0) select (_value select 2)} else {_value}];
+};
 // The display is client-side; the server only messages it. Class lists are preset
 // so itemType never needs the Virtual Arsenal preload.
 PMCA_fnc_arsenal = {};
@@ -81,6 +91,11 @@ TEST_fnc_close = {
 };
 TEST_fnc_fresh = {
     PMCA_storages = nil;
+    PMCA_ready = nil;
+    PMCA_debugMode = false;
+    PMCA_unlockThreshold = 0;
+    PMCA_accessMode = 0;
+    profileNamespace setVariable ["PMCA_boxes_v1", nil];
     PMCA_sessions = nil;
     PMCA_accessHandler = nil;
     PMCA_itemTypes = nil;
@@ -112,8 +127,11 @@ private _added = ["base", [["Nope_Item", 1], ["FirstAidKit", 1.5], ["FirstAidKit
 [(["arifle_MX_F"] call TEST_fnc_stock) == 2, "initial items apply only to a new storage"] call TEST_fnc_assert;
 TEST_messages = [];
 [TEST_box, "base"] call PMCA_fnc_registerStorage;
+private _box2 = [[0, 1, 0]] call TEST_fnc_crate;
+[_box2, "base"] call PMCA_fnc_registerStorage;
 private _init = ["PMCA_fnc_arsenal_init"] call TEST_fnc_sent;
-[count _init == 1 && {(((_init select 0) select 1) select 2) isEqualTo TEST_box}, "actions are sent to every client with JIP on the object"] call TEST_fnc_assert;
+[count _init == 1 && {(((_init select 0) select 1) select 2) isEqualTo _box2}, "actions are sent once per object to every client with JIP"] call TEST_fnc_assert;
+[(TEST_box getVariable "PMCA_boxKey") == "base#1" && {(_box2 getVariable "PMCA_boxKey") == "base#2"}, "objects of a storage are numbered in registration order"] call TEST_fnc_assert;
 
 // --- Taking and returning --------------------------------------------------
 call TEST_fnc_fresh;
@@ -370,5 +388,190 @@ PMCA_dirty = true;
 TEST_profilesSaved = 0;
 [] call (["MPEnded"] call _handler);
 [TEST_profilesSaved == 1, "mission end saves pending changes"] call TEST_fnc_assert;
+
+// --- CBA settings ------------------------------------------------------------------
+TEST_settings = [];
+call PMCA_fnc_settings;
+private _names = TEST_settings apply {_x select 0};
+[count TEST_settings == 19 && {"PMCA_access_guer_launchers" in _names} && {(TEST_settings findIf {(_x select 4) != 1}) < 0},
+    "settings: debug, threshold, access mode and 16 side checkboxes, all forced by the server"] call TEST_fnc_assert;
+[!PMCA_debugMode && {PMCA_unlockThreshold == 0} && {PMCA_accessMode == 0} && {PMCA_access_east_explosives},
+    "defaults: debug off, nothing turns unlimited, everyone may take everything"] call TEST_fnc_assert;
+private _threshold = TEST_settings select {(_x select 0) == "PMCA_unlockThreshold"} select 0;
+[((_threshold select 3) select 0) isEqualTo [0, 5, 20, 50], "threshold choices are never, 5, 20 and 50"] call TEST_fnc_assert;
+
+// --- Items turn unlimited at the threshold -------------------------------------
+call TEST_fnc_fresh;
+PMCA_unlockThreshold = 5;
+["base", [["FirstAidKit", 4]]] call PMCA_fnc_storageAdd;
+[(["FirstAidKit"] call TEST_fnc_stock) == 4, "below the threshold an item stays limited"] call TEST_fnc_assert;
+["base", [[TEST_mag, 1]]] call PMCA_fnc_storageAdd;
+[([TEST_mag] call TEST_fnc_stock) == 120, "120 rounds are four magazines, below the threshold"] call TEST_fnc_assert;
+[TEST_unit, 3] call TEST_fnc_open;
+TEST_messages = [];
+["base", [["FirstAidKit", 1], [TEST_mag, 1]]] call PMCA_fnc_storageAdd;
+[(["FirstAidKit"] call TEST_fnc_stock) == -1 && {([TEST_mag] call TEST_fnc_stock) == -1}, "five pieces or five full magazines turn unlimited"] call TEST_fnc_assert;
+[count (["PMCA_fnc_arsenal", "UpdateItemAdd", 3] call TEST_fnc_sent select {(((_x select 0) select 1) select 2) == -1}) == 2, "open arsenals are told the item is unlimited"] call TEST_fnc_assert;
+[3, call TEST_emptyLoadout] call TEST_fnc_close;
+["base", [["arifle_MX_F", 2]]] call PMCA_fnc_storageAdd;
+TEST_unit setVariable ["TEST_loadout", [30] call TEST_rifleLoadout];
+[TEST_unit, 3] call TEST_fnc_open;
+TEST_unit setVariable ["TEST_loadout", call TEST_emptyLoadout];
+[3, call TEST_emptyLoadout] call TEST_fnc_close;
+[(["arifle_MX_F"] call TEST_fnc_stock) == -1, "a returned item that reaches the threshold turns unlimited"] call TEST_fnc_assert;
+[TEST_unit, 3] call TEST_fnc_open;
+TEST_unit setVariable ["TEST_loadout", [30] call TEST_rifleLoadout];
+[3, [30] call TEST_rifleLoadout] call TEST_fnc_close;
+[(["arifle_MX_F"] call TEST_fnc_stock) == -1, "taking an unlimited item leaves it unlimited"] call TEST_fnc_assert;
+PMCA_unlockThreshold = 0;
+["base", [["optic_Aco", 60]]] call PMCA_fnc_storageAdd;
+[(["optic_Aco"] call TEST_fnc_stock) == 61, "threshold off: stock is never unlimited"] call TEST_fnc_assert;
+PMCA_unlockThreshold = 50;
+[PMCA_unlockThreshold] call (_threshold select 5);
+[(["optic_Aco"] call TEST_fnc_stock) == -1 && {(["HandGrenade"] call TEST_fnc_stock) == 2}, "changing the setting applies it to existing stock"] call TEST_fnc_assert;
+
+// --- Access by side ------------------------------------------------------------------
+call TEST_fnc_fresh;
+TEST_settings = [];
+call PMCA_fnc_settings;
+PMCA_accessMode = 1;
+{missionNamespace setVariable ["PMCA_access_west_" + _x, false]} forEach ["weapons", "launchers", "explosives"];
+[TEST_unit, 3] call TEST_fnc_open;
+private _westList = ((((["PMCA_fnc_arsenal", "Open", 3] call TEST_fnc_sent) select 0) select 0) select 1) select 0;
+[(_westList select 0) isEqualTo [] && {(_westList select 3) isEqualTo [["U_B_CombatUniform_mcam", -1]]}, "BLUFOR sees only the categories ticked for BLUFOR"] call TEST_fnc_assert;
+TEST_unit setVariable ["TEST_loadout", [30] call TEST_rifleLoadout];
+[3, [30] call TEST_rifleLoadout] call TEST_fnc_close;
+[(["arifle_MX_F"] call TEST_fnc_stock) == 2 && {count (["PMCA_fnc_applyLoadout", "", 3] call TEST_fnc_sent) == 1}, "a category not ticked for the side cannot be taken"] call TEST_fnc_assert;
+TEST_other setVariable ["TEST_side", east];
+TEST_messages = [];
+[TEST_other, 5] call TEST_fnc_open;
+[(["PMCA_fnc_arsenal", "Open", 5] call TEST_fnc_sent) isNotEqualTo [], "OPFOR keeps its own (default) categories"] call TEST_fnc_assert;
+[5, call TEST_emptyLoadout] call TEST_fnc_close;
+{missionNamespace setVariable ["PMCA_access_east_" + _x, false]} forEach ["weapons", "launchers", "explosives", "equipment"];
+TEST_messages = [];
+[TEST_other, 5] call TEST_fnc_open;
+[!(5 in PMCA_sessions) && {count (["PMCA_fnc_notify", "STR_PMCA_ERR_NO_ACCESS", 5] call TEST_fnc_sent) == 1}, "a side with no category ticked cannot open the arsenal"] call TEST_fnc_assert;
+PMCA_accessMode = 0;
+[TEST_other, 5] call TEST_fnc_open;
+[5 in PMCA_sessions, "mode everyone ignores the side checkboxes"] call TEST_fnc_assert;
+
+// --- The arsenal object's own inventory is saved and restored --------------------
+call TEST_fnc_fresh;
+private _uniform = "U_B_CombatUniform_mcam";
+TEST_box setVariable ["TEST_mags", [[TEST_mag, 30], [TEST_mag, 7]]];
+TEST_box setVariable ["TEST_weapons", [["arifle_MX_F", "", "", "optic_Aco", [TEST_mag, 21], [], ""]]];
+[TEST_box, ["FirstAidKit", 2]] call TEST_fnc_addItemCargo;
+[TEST_box, [_uniform, 1]] call TEST_fnc_addItemCargo;
+[TEST_box, ["B_AssaultPack_rgr", 1]] call TEST_fnc_addPackCargo;
+private _inner = TEST_box getVariable "TEST_containers";
+((_inner select 0) select 1) setVariable ["TEST_items", [["FirstAidKit", 1]]];
+((_inner select 1) select 1) setVariable ["TEST_mags", [["HandGrenade", 1]]];
+private _record = [TEST_box] call PMCA_fnc_boxCargo;
+[(_record select 1) isEqualTo [["FirstAidKit", 2]] && {count (_record select 3) == 2}, "a uniform in the box is saved as a container, not as an item"] call TEST_fnc_assert;
+[call PMCA_fnc_boxScan && {!(call PMCA_fnc_boxScan)}, "a changed inventory is detected once"] call TEST_fnc_assert;
+call PMCA_fnc_save;
+private _savedBoxes = profileNamespace getVariable ["PMCA_boxes_v1", []];
+[(_savedBoxes select 1) isEqualTo [["base#1", _record]], "the inventory is saved under the storage key"] call TEST_fnc_assert;
+// Restart: the mission box comes back with its Eden default inventory.
+PMCA_storages = nil;
+PMCA_ready = nil;
+private _again = [[0, 0, 0]] call TEST_fnc_crate;
+[_again, ["H_HelmetB", 3]] call TEST_fnc_addItemCargo;
+[_again, "base"] call PMCA_fnc_registerStorage;
+[(_again getVariable ["TEST_items", []]) isEqualTo [["H_HelmetB", 3]], "nothing is restored before mission objects are initialised"] call TEST_fnc_assert;
+TEST_deferSpawn = true;
+call PMCA_fnc_serverInit;
+TEST_deferSpawn = false;
+TEST_deferred = [];
+[([_again] call PMCA_fnc_boxCargo) isEqualTo _record, "after init the box holds exactly what was saved: partial magazines, attachments, nested contents"] call TEST_fnc_assert;
+private _late = [[0, 2, 0]] call TEST_fnc_crate;
+PMCA_boxes set ["late#1", [[], [["FirstAidKit", 4]], [], []]];
+[_late, "late"] call PMCA_fnc_registerStorage;
+[(_late getVariable ["TEST_items", []]) isEqualTo [["FirstAidKit", 4]], "an object registered later is restored at once"] call TEST_fnc_assert;
+[_late, "late"] call PMCA_fnc_registerStorage;
+_late setVariable ["TEST_items", []];
+[_late, "late"] call PMCA_fnc_registerStorage;
+[(_late getVariable ["TEST_items", []]) isEqualTo [], "registering again does not restore twice"] call TEST_fnc_assert;
+private _tempBox = [[0, 3, 0]] call TEST_fnc_crate;
+[_tempBox, "mission", [["persistent", false]]] call PMCA_fnc_registerStorage;
+[_tempBox, ["FirstAidKit", 1]] call TEST_fnc_addItemCargo;
+call PMCA_fnc_boxScan;
+[!("mission#1" in PMCA_boxes), "inventories of non-persistent storages are not saved"] call TEST_fnc_assert;
+_again setDamage 1;
+_again setVariable ["TEST_items", []];
+[!(call PMCA_fnc_boxScan) && {(PMCA_boxes get "base#1") isEqualTo _record}, "a destroyed box keeps its last saved inventory"] call TEST_fnc_assert;
+profileNamespace setVariable ["PMCA_boxes_v1", [1, [["base#1", [[["x", "bad"]], [], [], []]]]]];
+PMCA_storages = nil;
+call PMCA_fnc_serverLoad;
+[PMCA_saveBlocked && {count PMCA_boxes == 0}, "damaged inventory records block saving like damaged stock"] call TEST_fnc_assert;
+profileNamespace setVariable ["PMCA_boxes_v1", nil];
+
+// --- Debug mode and the Zeus module ----------------------------------------------
+call TEST_fnc_fresh;
+PMCA_storages = nil;
+PMCA_debugMode = true;
+[TEST_box, "base", [["items", [["arifle_MX_F", 2]]]]] call PMCA_fnc_registerStorage;
+[(["base"] call PMCA_fnc_storageItems) isEqualTo [], "in debug mode a new storage starts empty"] call TEST_fnc_assert;
+private _depot = [[300, 0, 0]] call TEST_fnc_crate;
+[_depot, "depot"] call PMCA_fnc_registerStorage;
+private _source = [[60, 0, 0]] call TEST_fnc_crate;
+_source setVariable ["TEST_weapons", [["arifle_MX_ACO_F", "", "", "optic_Aco", [TEST_mag, 30], [], ""]]];
+[_source, ["B_AssaultPack_rgr", 1]] call TEST_fnc_addPackCargo;
+(((_source getVariable "TEST_containers") select 0) select 1) setVariable ["TEST_mags", [["HandGrenade", 1]]];
+private _before = [_source] call PMCA_fnc_boxCargo;
+TEST_unit setVariable ["TEST_curator", TEST_box];
+TEST_messages = [];
+3 call TEST_fnc_as;
+[TEST_unit, _source] call PMCA_fnc_debugLoad;
+[(["arifle_MX_F"] call TEST_fnc_stock) == -1 && {(["optic_Aco"] call TEST_fnc_stock) == -1} && {([TEST_mag] call TEST_fnc_stock) == -1} && {
+    (["HandGrenade"] call TEST_fnc_stock) == -1} && {(["B_AssaultPack_rgr"] call TEST_fnc_stock) == -1}, "everything in the box becomes unlimited in the nearest arsenal"] call TEST_fnc_assert;
+[(["depot"] call PMCA_fnc_storageItems) isEqualTo [] && {([_source] call PMCA_fnc_boxCargo) isEqualTo _before} && {PMCA_dirty},
+    "other arsenals and the box itself are untouched; the change is saved"] call TEST_fnc_assert;
+private _loaded = ["PMCA_fnc_notify", "STR_PMCA_DEBUG_LOADED", 3] call TEST_fnc_sent;
+[count _loaded == 1 && {(((_loaded select 0) select 0) select 1) isEqualTo [5, "base"]}, "Zeus is told how many items were loaded and where"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_unit, [[150, 0, 0]] call TEST_fnc_crate] call PMCA_fnc_debugLoad;
+[count (["PMCA_fnc_notify", "STR_PMCA_ERR_DEBUG_FAR", 3] call TEST_fnc_sent) == 1, "a box farther than 100 m from any arsenal is refused"] call TEST_fnc_assert;
+TEST_unit setVariable ["TEST_curator", objNull];
+TEST_messages = [];
+[TEST_unit, _source] call PMCA_fnc_debugLoad;
+[TEST_messages isEqualTo [], "only a Zeus may load"] call TEST_fnc_assert;
+TEST_unit setVariable ["TEST_curator", TEST_box];
+PMCA_debugMode = false;
+[TEST_unit, _source] call PMCA_fnc_debugLoad;
+[count (["PMCA_fnc_notify", "STR_PMCA_ERR_DEBUG_OFF", 3] call TEST_fnc_sent) == 1, "the module does nothing while debug mode is off"] call TEST_fnc_assert;
+// The Zeus side of the module: the box it was placed on goes to the server.
+private _zeusLogic = "Logic" createVehicle [60, 0, 0];
+_zeusLogic setVariable ["bis_fnc_curatorAttachObject_object", _source];
+TEST_messages = [];
+[_zeusLogic, [], true] call PMCA_fnc_moduleDebugLoad;
+private _request = ["PMCA_fnc_debugLoad", "", 2] call TEST_fnc_sent;
+[count _request == 1 && {((_request select 0) select 0) isEqualTo [player, _source]} && {isNull _zeusLogic}, "the placed module sends its box to the server and removes itself"] call TEST_fnc_assert;
+private _remoteLogic = "Logic" createVehicle [60, 0, 0];
+_remoteLogic setVariable ["TEST_local", false];
+TEST_messages = [];
+[_remoteLogic, [], true] call PMCA_fnc_moduleDebugLoad;
+[TEST_messages isEqualTo [], "other machines ignore the module"] call TEST_fnc_assert;
+
+// --- Eden module --------------------------------------------------------------------
+call TEST_fnc_fresh;
+private _logic = "Logic" createVehicle [0, 0, 0];
+_logic setVariable ["TEST_class", "Logic"];
+_logic setVariable ["StorageID", "depot"];
+private _crateA = [[5, 5, 0]] call TEST_fnc_crate;
+private _crateB = [[6, 5, 0]] call TEST_fnc_crate;
+private _otherLogic = "Logic" createVehicle [0, 0, 0];
+_otherLogic setVariable ["TEST_class", "Logic"];
+_logic setVariable ["TEST_synced", [_crateA, TEST_unit, _crateB, _otherLogic]];
+[_logic, [], true] call PMCA_fnc_moduleStorage;
+[(_crateA getVariable ["PMCA_storage", ""]) == "depot" && {(_crateB getVariable ["PMCA_storage", ""]) == "depot"} && {"depot" in PMCA_storages},
+    "objects synchronised with the module become arsenals of its storage"] call TEST_fnc_assert;
+[(TEST_unit getVariable ["PMCA_storage", ""]) == "" && {(_otherLogic getVariable ["PMCA_storage", ""]) == ""}, "units and logics are not made arsenals"] call TEST_fnc_assert;
+private _blank = "Logic" createVehicle [0, 0, 0];
+_blank setVariable ["TEST_class", "Logic"];
+_blank setVariable ["TEST_synced", [[[7, 5, 0]] call TEST_fnc_crate]];
+private _count = count PMCA_storageObjects;
+[_blank, [], true] call PMCA_fnc_moduleStorage;
+[count PMCA_storageObjects == _count, "a module without a storage ID registers nothing"] call TEST_fnc_assert;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

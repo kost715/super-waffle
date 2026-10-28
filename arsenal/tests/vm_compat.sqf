@@ -49,20 +49,17 @@ TEST_fnc_forEach = {
 TEST_fnc_remote = {TEST_messages pushBack +_this; 0};
 TEST_fnc_owner = {_this getVariable ["TEST_owner", 2]};
 TEST_fnc_typeOf = {_this getVariable ["TEST_class", ""]};
+// SQF-VM's inheritsFrom returns the enclosing class, not the parent, so fixture
+// classes list their kinds in TEST_kinds[] (inherited by subclasses).
 TEST_fnc_isKindOf = {
     params ["_compatLeft", "_compatRight"];
     private _compatRoot = configFile >> "CfgVehicles";
     private _compatParent = _compatRight;
     if (_compatRight isEqualType []) then {_compatParent = _compatRight select 0; _compatRoot = _compatRight select 1};
     private _compatClass = if (_compatLeft isEqualType objNull) then {_compatLeft getVariable ["TEST_class", ""]} else {_compatLeft};
-    if (_compatClass == "") exitWith {false};
-    private _compatCfg = _compatRoot >> _compatClass;
-    private _compatFound = false;
-    while {isClass _compatCfg && {!_compatFound}} do {
-        _compatFound = (toLower configName _compatCfg) == toLower _compatParent;
-        _compatCfg = inheritsFrom _compatCfg;
-    };
-    _compatFound
+    if (_compatClass == "" || {!isClass (_compatRoot >> _compatClass)}) exitWith {false};
+    toLower _compatClass == toLower _compatParent || {
+        (getArray (_compatRoot >> _compatClass >> "TEST_kinds")) findIf {toLower _x == toLower _compatParent} >= 0}
 };
 // VM's isNil {code} loses its stack when the code ends after a skipped exitWith.
 TEST_fnc_isNil = {
@@ -102,9 +99,29 @@ TEST_fnc_backpackCargo = {[_this, "TEST_packs"] call TEST_fnc_pairsCargo};
 TEST_fnc_weaponsCargo = {+(_this getVariable ["TEST_weapons", []])};
 TEST_fnc_containers = {+(_this getVariable ["TEST_containers", []])};
 TEST_fnc_clearMags = {_this setVariable ["TEST_mags", []]};
-TEST_fnc_clearItems = {_this setVariable ["TEST_items", []]; _this setVariable ["TEST_containers", []]};
+TEST_fnc_isPack = {getNumber (configFile >> "CfgVehicles" >> _this >> "isBackpack") == 1};
+TEST_fnc_clearItems = {
+    _this setVariable ["TEST_items", []];
+    _this setVariable ["TEST_containers", (_this getVariable ["TEST_containers", []]) select {(_x select 0) call TEST_fnc_isPack}];
+};
 TEST_fnc_clearWeapons = {_this setVariable ["TEST_weapons", []]};
-TEST_fnc_clearPacks = {_this setVariable ["TEST_packs", []]; _this setVariable ["TEST_containers", []]};
+TEST_fnc_clearPacks = {
+    _this setVariable ["TEST_packs", []];
+    _this setVariable ["TEST_containers", (_this getVariable ["TEST_containers", []]) select {!((_x select 0) call TEST_fnc_isPack)}];
+};
+// Uniforms, vests and backpacks added to cargo become container objects of their own.
+TEST_fnc_addContainers = {
+    params ["_compatObject", "_compatClass", "_compatCount"];
+    private _compatType = getNumber (configFile >> "CfgWeapons" >> _compatClass >> "ItemInfo" >> "type");
+    if !(_compatType in [701, 801] || {_compatClass call TEST_fnc_isPack}) exitWith {};
+    private _compatList = _compatObject getVariable ["TEST_containers", []];
+    for "_compatI" from 1 to _compatCount do {
+        private _compatNew = _compatClass createVehicle [0, 0, 0];
+        _compatNew setVariable ["TEST_class", _compatClass];
+        _compatList pushBack [_compatClass, _compatNew];
+    };
+    _compatObject setVariable ["TEST_containers", _compatList];
+};
 TEST_fnc_addPairs = {
     params ["_compatObject", "_compatVar", "_compatClass", "_compatCount"];
     private _compatPairs = _compatObject getVariable [_compatVar, []];
@@ -114,8 +131,20 @@ TEST_fnc_addPairs = {
     };
     _compatObject setVariable [_compatVar, _compatPairs];
 };
-TEST_fnc_addItemCargo = {[_this select 0, "TEST_items", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs};
-TEST_fnc_addPackCargo = {[_this select 0, "TEST_packs", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs};
+TEST_fnc_addItemCargo = {
+    [_this select 0, "TEST_items", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs;
+    [_this select 0, (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addContainers;
+};
+TEST_fnc_addPackCargo = {
+    [_this select 0, "TEST_packs", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs;
+    [_this select 0, (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addContainers;
+};
+TEST_fnc_addWeaponItems = {
+    params ["_compatObject", "_compatSpec"];
+    private _compatWeapons = _compatObject getVariable ["TEST_weapons", []];
+    for "_compatI" from 1 to (_compatSpec select 1) do {_compatWeapons pushBack +(_compatSpec select 0)};
+    _compatObject setVariable ["TEST_weapons", _compatWeapons];
+};
 TEST_fnc_addWeaponCargo = {
     params ["_compatObject", "_compatSpec"];
     private _compatWeapons = _compatObject getVariable ["TEST_weapons", []];
@@ -128,6 +157,13 @@ TEST_fnc_addMagAmmo = {
     for "_compatI" from 1 to (_compatSpec select 1) do {_compatMags pushBack [_compatSpec select 0, _compatSpec select 2]};
     _compatObject setVariable ["TEST_mags", _compatMags];
 };
+// Units: side via TEST_side (group is the unit itself); Zeus, locality and Eden sync via variables.
+TEST_fnc_identity = {_this};
+TEST_fnc_side = {_this getVariable ["TEST_side", west]};
+TEST_fnc_local = {_this getVariable ["TEST_local", true]};
+TEST_fnc_attachedTo = {_this getVariable ["TEST_attachedTo", objNull]};
+TEST_fnc_synced = {_this getVariable ["TEST_synced", []]};
+TEST_fnc_curator = {_this getVariable ["TEST_curator", objNull]};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -164,6 +200,15 @@ TEST_fnc_compatCode = {
             case "CALLBINARY addbackpackcargoglobal": {"TEST_fnc_addPackCargo" call _compatPair};
             case "CALLBINARY addweaponcargoglobal": {"TEST_fnc_addWeaponCargo" call _compatPair};
             case "CALLBINARY addmagazineammocargo": {"TEST_fnc_addMagAmmo" call _compatPair};
+            case "CALLBINARY addweaponwithattachmentscargoglobal": {"TEST_fnc_addWeaponItems" call _compatPair};
+            case "CALLUNARY group": {"TEST_fnc_identity" call _compatCall};
+            case "CALLUNARY side": {"TEST_fnc_side" call _compatCall};
+            case "CALLUNARY local": {"TEST_fnc_local" call _compatCall};
+            case "CALLUNARY attachedto": {"TEST_fnc_attachedTo" call _compatCall};
+            case "CALLUNARY synchronizedobjects": {"TEST_fnc_synced" call _compatCall};
+            case "CALLUNARY getassignedcuratorlogic": {"TEST_fnc_curator" call _compatCall};
+            // Mission strings are checked in the stringtable; the VM keeps the keys.
+            case "CALLUNARY localize": {"TEST_fnc_identity" call _compatCall};
             case "CALLUNARY isnil": {"TEST_fnc_isNil" call _compatCall};
             case "CALLUNARY values": {"TEST_fnc_values" call _compatCall};
             case "CALLUNARY owner": {"TEST_fnc_owner" call _compatCall};

@@ -1,6 +1,7 @@
 // Minimal vanilla-like classes for the SQF-VM server checks. Only the config
 // properties the arsenal reads are present; TEST_itemType stands in for
-// BIS_fnc_itemType, which needs the full game config.
+// BIS_fnc_itemType, which needs the full game config, and TEST_kinds for the
+// inheritance chain isKindOf follows.
 class CfgWeapons {
     class Default {};
     class Throw {
@@ -37,12 +38,13 @@ class CfgMagazines {
 class CfgVehicles {
     class All {};
     class AllVehicles: All {};
-    class CAManBase: AllVehicles {};
+    class CAManBase: AllVehicles {TEST_kinds[] = {"CAManBase", "AllVehicles", "All"};};
     class B_Soldier_F: CAManBase {};
-    class ReammoBox_F: All {transportMaxWeapons = 20; transportMaxMagazines = 100; transportMaxBackpacks = 5;};
+    class ReammoBox_F: All {TEST_kinds[] = {"ReammoBox_F", "All"}; transportMaxWeapons = 20; transportMaxMagazines = 100; transportMaxBackpacks = 5;};
     class Box_NATO_Ammo_F: ReammoBox_F {};
     class Land_Wall_F: All {};
-    class Bag_Base: All {isBackpack = 1;};
+    class Logic: All {TEST_kinds[] = {"Logic", "All"};};
+    class Bag_Base: All {TEST_kinds[] = {"Bag_Base", "All"}; isBackpack = 1;};
     class B_AssaultPack_rgr: Bag_Base {displayName = "Assault Pack";};
 };
 class CfgGlasses {

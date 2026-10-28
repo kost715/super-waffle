@@ -23,4 +23,5 @@ private _added = [];
 } forEach _list;
 if (_added isNotEqualTo [] && {_storage getOrDefault ["persist", true]}) then {PMCA_dirty = true};
 [_id, _added, true, []] call PMCA_fnc_broadcast;
+[_id, _added apply {_x select 0}] call PMCA_fnc_unlock;
 count _added

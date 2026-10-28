@@ -1,5 +1,5 @@
-name = "PMC Arsenal 0.1.0 alpha 1";
+name = "PMC Arsenal 0.2.0 alpha 1";
 author = "LifeSim PMC project; arsenal interface by Jeroen Notenbomer (Antistasi)";
-description = "Standalone limited arsenal with server-side stock: any object with inventory can open a shared, persistent storage. Based on the Jeroen (Not) Limited Arsenal from Antistasi Ultimate (MIT).";
+description = "Limited arsenal with server-side stock: any object with inventory can open a shared, persistent storage. Access by side, unlimited items by threshold and a Zeus debug loader in the CBA settings. Based on the Jeroen (Not) Limited Arsenal from Antistasi Ultimate (MIT).";
 tooltip = "PMC Arsenal";
-overview = "Standalone addon. No LifeSim, CBA or Antistasi dependency; ACE, TFAR and ACRE are optional.";
+overview = "Requires CBA_A3. No LifeSim or Antistasi dependency; ACE, TFAR and ACRE are optional.";

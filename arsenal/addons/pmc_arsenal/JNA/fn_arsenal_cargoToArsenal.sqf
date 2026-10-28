@@ -44,4 +44,5 @@ private _rows = [];
 } forEach _items;
 if (_rows isNotEqualTo [] && {_storage getOrDefault ["persist", true]}) then {PMCA_dirty = true};
 [_id, _rows, true, []] call PMCA_fnc_broadcast;
+[_id, keys _items] call PMCA_fnc_unlock;
 _container setVariable ["PMCA_cargoToArsenal_busy", false];

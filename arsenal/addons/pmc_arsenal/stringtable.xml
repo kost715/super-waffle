@@ -323,5 +323,107 @@
                 <Russian>На складе не хватило: %1. Снаряжение возвращено к состоянию на момент открытия арсенала.</Russian>
             </Key>
         </Container>
+        <Container name="Settings">
+            <Key ID="STR_PMCA_SET_CATEGORY">
+                <Original>PMC Arsenal</Original>
+                <Russian>PMC Arsenal</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_DEBUG">
+                <Original>Debug mode</Original>
+                <Russian>Режим отладки</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_DEBUG_TIP">
+                <Original>New storages start empty. A Zeus module placed on a box within 100 m of an arsenal makes everything in the box unlimited there. Stock is saved as usual.</Original>
+                <Russian>Новые хранилища создаются пустыми. Модуль Зевса, поставленный на ящик в 100 м от арсенала, делает всё содержимое ящика бесконечным в этом арсенале. Склад сохраняется как обычно.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_UNLOCK">
+                <Original>Unlimited from</Original>
+                <Russian>Бесконечно с количества</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_UNLOCK_TIP">
+                <Original>An item whose stock reaches this many pieces (magazines: full magazines) becomes unlimited for good.</Original>
+                <Russian>Предмет, которого на складе набралось столько штук (магазины — полных магазинов), становится бесконечным навсегда.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_UNLOCK_NEVER">
+                <Original>Never (only items loaded in debug mode are unlimited)</Original>
+                <Russian>Никогда (бесконечны только загруженные через отладку)</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_ACCESS">
+                <Original>Who may take</Original>
+                <Russian>Кто может брать</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_ACCESS_TIP">
+                <Original>Returning items is always allowed.</Original>
+                <Russian>Возвращать на склад можно всегда.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_ACCESS_GROUP">
+                <Original>Access</Original>
+                <Russian>Доступ</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_ACCESS_ALL">
+                <Original>Everyone, all categories</Original>
+                <Russian>Все, все категории</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_ACCESS_SIDE">
+                <Original>By side (settings below)</Original>
+                <Russian>По сторонам (настройки ниже)</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_CAT_weapons">
+                <Original>Weapons, attachments, magazines</Original>
+                <Russian>Оружие, обвесы, магазины</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_CAT_launchers">
+                <Original>Launchers</Original>
+                <Russian>Гранатомёты</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_CAT_explosives">
+                <Original>Grenades and explosives</Original>
+                <Russian>Гранаты и взрывчатка</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_CAT_equipment">
+                <Original>Clothing and equipment</Original>
+                <Russian>Одежда и снаряжение</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_SIDE">
+                <Original>Access: %1</Original>
+                <Russian>Доступ: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCA_SET_CIV">
+                <Original>Civilians</Original>
+                <Russian>Гражданские</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_DEBUG_OFF">
+                <Original>Arsenal debug mode is off (CBA settings, PMC Arsenal).</Original>
+                <Russian>Режим отладки арсенала выключен (настройки CBA, PMC Arsenal).</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_DEBUG_BOX">
+                <Original>Place the module on a box or vehicle.</Original>
+                <Russian>Поставьте модуль на ящик или машину.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_DEBUG_FAR">
+                <Original>No arsenal within 100 m of this box.</Original>
+                <Russian>В 100 м от ящика нет арсенала.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_DEBUG_LOADED">
+                <Original>Items made unlimited in storage %2: %1.</Original>
+                <Russian>В хранилище %2 стали бесконечными предметов: %1.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_MODULE_STORAGE">
+                <Original>Arsenal storage</Original>
+                <Russian>Хранилище арсенала</Russian>
+            </Key>
+            <Key ID="STR_PMCA_MODULE_STORAGE_ID_TIP">
+                <Original>Objects synchronised with this module open the arsenal of this storage. Objects with the same ID share one stock.</Original>
+                <Russian>Синхронизированные с модулем объекты открывают арсенал этого хранилища. Объекты с одинаковым ID делят один склад.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_MODULE_STORAGE_DESC">
+                <Original>Synchronise objects with inventory (boxes, vehicles) with this module to make them arsenals of the storage.</Original>
+                <Russian>Синхронизируйте с модулем объекты с инвентарём (ящики, машины) — они станут арсеналами хранилища.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_MODULE_DEBUG">
+                <Original>Load box into arsenal (debug)</Original>
+                <Russian>Загрузить ящик в арсенал (отладка)</Russian>
+            </Key>
+        </Container>
     </Package>
 </Project>

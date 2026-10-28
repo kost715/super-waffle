@@ -2,7 +2,8 @@
 // Arsenal tabs a unit may take from in a storage, or false when it may not open it.
 // Categories: weapons (firearms, attachments, ammunition), launchers, explosives
 // (grenades, mines, charges) and equipment (clothing, gear, tools, medicine).
-// Returning items is always allowed. An integration may set the server variable
+// Returning items is always allowed. Granted: the storage's categories, limited by
+// the CBA setting per side of the unit, then by an integration's server variable
 // PMCA_accessHandler = {params ["_unit", "_storageID"]; ...categories or false}.
 params [["_unit", objNull, [objNull]], ["_id", "", [""]]];
 private _byCategory = createHashMapFromArray [
@@ -21,6 +22,12 @@ private _storage = (missionNamespace getVariable ["PMCA_storages", createHashMap
 if (count _storage == 0 || {isNull _unit}) exitWith {false};
 private _categories = _storage getOrDefault ["categories", []];
 if (_categories isEqualTo []) then {_categories = keys _byCategory};
+if ((missionNamespace getVariable ["PMCA_accessMode", 0]) == 1) then {
+    private _side = toLowerANSI str side group _unit;
+    private _granted = (keys _byCategory) select {missionNamespace getVariable [format ["PMCA_access_%1_%2", _side, _x], false]};
+    _categories = if (_granted isEqualTo []) then {false} else {_categories arrayIntersect _granted};
+};
+if (_categories isEqualTo false) exitWith {false};
 if (!isNil "PMCA_accessHandler") then {
     private _granted = [_unit, _id] call PMCA_accessHandler;
     _categories = if (_granted isEqualType []) then {_categories arrayIntersect _granted} else {false};
