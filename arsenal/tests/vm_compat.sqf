@@ -168,7 +168,10 @@ TEST_fnc_curator = {_this getVariable ["TEST_curator", objNull]};
 TEST_files = createHashMap;
 TEST_filePatching = false;
 TEST_parseFails = false;
-TEST_fnc_loadFile = {if (_this in TEST_files) then {TEST_files get _this} else {""}};
+// Arma reports reading a missing file as a script error; record any such read.
+TEST_missingReads = [];
+TEST_fnc_fileExists = {_this in TEST_files};
+TEST_fnc_loadFile = {if (_this in TEST_files) then {TEST_files get _this} else {TEST_missingReads pushBack _this; ""}};
 // Arma's parseSimpleArray takes plain data only: comments make it fail.
 TEST_fnc_parseSimple = {
     if (TEST_parseFails || {_this == ""} || {(_this find (toString [47, 47])) >= 0}) exitWith {[]};
@@ -213,6 +216,7 @@ TEST_fnc_compatCode = {
             case "CALLBINARY addweaponwithattachmentscargoglobal": {"TEST_fnc_addWeaponItems" call _compatPair};
             case "CALLUNARY group": {"TEST_fnc_identity" call _compatCall};
             case "CALLUNARY loadfile": {"TEST_fnc_loadFile" call _compatCall};
+            case "CALLUNARY fileexists": {"TEST_fnc_fileExists" call _compatCall};
             case "CALLUNARY parsesimplearray": {"TEST_fnc_parseSimple" call _compatCall};
             case "CALLNULAR isfilepatchingenabled": {_compatOut pushBack "GETVARIABLE TEST_filePatching"};
             case "CALLUNARY side": {"TEST_fnc_side" call _compatCall};

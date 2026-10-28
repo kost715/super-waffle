@@ -9,8 +9,9 @@
 if (!isServer || {PMCA_saveBlocked}) exitWith {false};
 private _path = "";
 private _text = "";
+// Reading a missing file is a script error in Arma: check first.
 {
-    if (_text == "") then {_text = loadFile _x; _path = _x};
+    if (_text == "" && {fileExists _x}) then {_text = loadFile _x; _path = _x};
 } forEach ((["userconfig\pmc_arsenal_stock.txt"] select {isFilePatchingEnabled}) + ["pmc_arsenal_stock.txt"]);
 if (_text == "") exitWith {false};
 if (_text isEqualTo (profileNamespace getVariable ["PMCA_stockFile_v1", ""])) exitWith {false};
@@ -21,7 +22,9 @@ private _lines = (_text splitString toString [10, 13]) apply {
     private _at = _line find _comment;
     if (_at >= 0 && {(count ((toArray (_line select [0, _at])) select {_x == 34})) % 2 == 0}) then {_line select [0, _at]} else {_line}
 };
-private _clean = _lines joinString " ";
+// The list starts at the first "["; anything before it (an editor's byte order mark) is dropped.
+private _codes = toArray (_lines joinString " ");
+private _clean = toString (_codes select [(_codes find 91) max 0, count _codes]);
 private _data = parseSimpleArray _clean;
 private _blank = ((toArray _clean) select {!(_x in [9, 32])}) isEqualTo [91, 93];
 if !(_data isEqualType [] && {_data isNotEqualTo [] || {_blank}} && {

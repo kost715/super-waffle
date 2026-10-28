@@ -9,10 +9,10 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.3.0_alpha1"
+VERSION = "0.3.1_alpha1"
 MOD = "@PMC_Arsenal"
 PREFIX = "pmc_arsenal"
-STAMP = (2026, 10, 28, 18, 0, 0)
+STAMP = (2026, 10, 29, 0, 0, 0)
 
 
 def pack_pbo(files: dict[str, bytes], prefix: str) -> bytes:

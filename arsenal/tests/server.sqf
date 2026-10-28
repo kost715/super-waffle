@@ -585,13 +585,18 @@ private _fileText = _c + " Склад арсенала" + _nl + "[" + _nl
     + "  [""base"", [[""arifle_MX_F"", 5], " + _c + " пять винтовок" + _nl
     + "    [""30Rnd_65x39_caseless_mag"", 2, 10], [""FirstAidKit"", -1], [""Nope_Item"", 3], [""optic_Aco"", 1.5]]]," + _nl
     + "  [""depot"", [[""optic_Aco"", 3]]]" + _nl + "]";
-TEST_files set ["pmc_arsenal_stock.txt", _fileText];
+TEST_filePatching = true;
+TEST_missingReads = [];
+[!(call PMCA_fnc_stockFile) && {TEST_missingReads isEqualTo []}, "no stock file: nothing is read, so Arma shows no error"] call TEST_fnc_assert;
+TEST_filePatching = false;
+// Notepad may start the file with a byte order mark.
+TEST_files set ["pmc_arsenal_stock.txt", toString [65279] + _fileText];
 PMCA_dirty = false;
 [call PMCA_fnc_stockFile, "the mission's stock file is applied"] call TEST_fnc_assert;
 [(["arifle_MX_F"] call TEST_fnc_stock) == 5 && {([TEST_mag] call TEST_fnc_stock) == 70} && {(["FirstAidKit"] call TEST_fnc_stock) == -1} && {
     (["HandGrenade"] call TEST_fnc_stock) == 0} && {(["optic_Aco"] call TEST_fnc_stock) == 0},
     "a listed storage gets exactly the file's stock; magazines plus extra rounds; bad rows are skipped"] call TEST_fnc_assert;
-[(["optic_Aco", "depot"] call TEST_fnc_stock) == 3 && {PMCA_dirty} && {(profileNamespace getVariable ["PMCA_stockFile_v1", ""]) isEqualTo _fileText},
+[(["optic_Aco", "depot"] call TEST_fnc_stock) == 3 && {PMCA_dirty} && {(profileNamespace getVariable ["PMCA_stockFile_v1", ""]) isEqualTo (toString [65279] + _fileText)},
     "a storage named only in the file is created; the change is saved"] call TEST_fnc_assert;
 ["base", [["arifle_MX_F", 1]]] call PMCA_fnc_storageAdd;
 [!(call PMCA_fnc_stockFile) && {(["arifle_MX_F"] call TEST_fnc_stock) == 6}, "an unchanged file is not applied again; changes from play stay"] call TEST_fnc_assert;

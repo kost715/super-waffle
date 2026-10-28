@@ -7,7 +7,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         // CBA for the mod settings. ACE, TFAR and ACRE are detected at runtime when loaded.
         requiredAddons[] = {"A3_Ui_F", "3DEN", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings"};
-        version = "0.3.0";
+        version = "0.3.1";
     };
 };
 
