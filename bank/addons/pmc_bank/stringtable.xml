@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="PMC-Bank">
+    <Package name="Bank">
+        <Container name="Main">
+            <Key ID="STR_PMCB_ACT_ATM">
+                <Original>ATM</Original>
+                <Russian>Банкомат</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_ATM_ADD">
+                <Original>The object is now an ATM.</Original>
+                <Russian>Объект стал банкоматом.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_ATM_REMOVE">
+                <Original>The object is no longer an ATM.</Original>
+                <Russian>Объект больше не банкомат.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_DEPOSIT">
+                <Original>Paid in: %1.</Original>
+                <Russian>Внесено: %1.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_WITHDRAW">
+                <Original>Withdrawn: %1.</Original>
+                <Russian>Выдано: %1.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_TREASURER_ADD">
+                <Original>%1 may now withdraw from the group's account.</Original>
+                <Russian>%1 теперь может снимать деньги со счёта группировки.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_TREASURER_REMOVE">
+                <Original>%1 may no longer withdraw from the group's account.</Original>
+                <Russian>%1 больше не может снимать деньги со счёта группировки.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_ZEUS_ADD">
+                <Original>Added to the group's account: %1. Balance: %2.</Original>
+                <Russian>На счёт группировки зачислено: %1. Баланс: %2.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_DONE_ZEUS_REMOVE">
+                <Original>Removed from the group's account: %1. Balance: %2.</Original>
+                <Russian>Со счёта группировки списано: %1. Баланс: %2.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_AMOUNT">
+                <Original>Enter a whole amount greater than zero.</Original>
+                <Russian>Введите целую сумму больше нуля.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_BUSY">
+                <Original>The previous operation is still in progress.</Original>
+                <Russian>Предыдущая операция ещё выполняется.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_FAR">
+                <Original>You are too far from the ATM.</Original>
+                <Russian>Вы слишком далеко от банкомата.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_FUNDS">
+                <Original>Not enough money on the account.</Original>
+                <Russian>На счёте недостаточно денег.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_GROUP_FUNDS">
+                <Original>The group's account holds only %1.</Original>
+                <Russian>На счёте группировки только %1.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_NOTHING">
+                <Original>No banknotes were handed over; nothing was paid in.</Original>
+                <Russian>Купюры не переданы, ничего не внесено.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_NOT_CARRIED">
+                <Original>You do not carry these banknotes.</Original>
+                <Russian>У вас нет этих купюр.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_NOT_PLAYER">
+                <Original>Place the module on a player.</Original>
+                <Russian>Поставьте модуль на игрока.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_NOT_TREASURER">
+                <Original>Only a treasurer appointed by Zeus may withdraw from the group's account.</Original>
+                <Russian>Снимать со счёта группировки может только казначей, назначенный Зевсом.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_ERR_NO_OBJECT">
+                <Original>Place the module on an object.</Original>
+                <Russian>Поставьте модуль на объект.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_EXPORTED">
+                <Original>Copied to the clipboard (and the RPT): %1 operation(s).</Original>
+                <Russian>Скопировано в буфер обмена (и в RPT): операций — %1.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_EXPORT_HEADER">
+                <Original>No;Date;Account;Operation;Amount;Balance after;Who;UID;Mission</Original>
+                <Russian>№;Дата;Счёт;Операция;Сумма;Баланс после;Кто;UID;Миссия</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_ATM">
+                <Original>ATM</Original>
+                <Russian>Банкомат</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_ATM_DESC">
+                <Original>Synchronise objects with this module to make them ATMs.</Original>
+                <Russian>Синхронизируйте с модулем объекты — они станут банкоматами.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_ZEUS_ATM">
+                <Original>ATM (place on an object)</Original>
+                <Russian>Банкомат (поставить на объект)</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_ADD">
+                <Original>Add to the group's account</Original>
+                <Russian>Зачислить на счёт группировки</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_REMOVE">
+                <Original>Remove from the group's account</Original>
+                <Russian>Списать со счёта группировки</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_TREASURER">
+                <Original>Treasurer (place on a player)</Original>
+                <Russian>Казначей (поставить на игрока)</Russian>
+            </Key>
+            <Key ID="STR_PMCB_MODULE_JOURNAL">
+                <Original>Bank journal</Original>
+                <Russian>Журнал банка</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_deposit">
+                <Original>Deposit</Original>
+                <Russian>Пополнение</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_withdraw">
+                <Original>Withdrawal</Original>
+                <Russian>Снятие</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_zeus_add">
+                <Original>Added by Zeus</Original>
+                <Russian>Зачисление (Зевс)</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_zeus_remove">
+                <Original>Removed by Zeus</Original>
+                <Russian>Списание (Зевс)</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_treasurer_add">
+                <Original>Treasurer appointed</Original>
+                <Russian>Назначен казначей</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_treasurer_remove">
+                <Original>Treasurer removed</Original>
+                <Russian>Снят казначей</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_CATEGORY">
+                <Original>PMC Bank</Original>
+                <Russian>PMC Bank</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_CURRENCY">
+                <Original>Currency sign</Original>
+                <Russian>Знак валюты</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_GROUP">
+                <Original>Group name</Original>
+                <Russian>Название группировки</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_GROUP_DEFAULT">
+                <Original>Group</Original>
+                <Russian>Группировка</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_LOG">
+                <Original>Journal size</Original>
+                <Russian>Размер журнала</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_LOG_TIP">
+                <Original>How many operations are kept; the oldest are dropped.</Original>
+                <Russian>Сколько операций хранить; самые старые удаляются.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_NOTES">
+                <Original>Banknotes</Original>
+                <Russian>Купюры</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_NOTES_TIP">
+                <Original>Item or magazine classes with their values, comma-separated: class:value, class:value</Original>
+                <Russian>Классы предметов или магазинов с номиналами через запятую: класс:номинал, класс:номинал</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_START">
+                <Original>Starting personal balance</Original>
+                <Russian>Начальный личный баланс</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SET_START_TIP">
+                <Original>Given once, when a player first uses an ATM.</Original>
+                <Russian>Начисляется один раз, когда игрок впервые пользуется банкоматом.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_SPILLED">
+                <Original>Not everything fit into your inventory: the rest is on the ground.</Original>
+                <Russian>Не всё поместилось в инвентарь: остаток лежит на земле.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_ALL">
+                <Original>All</Original>
+                <Russian>Всё</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_AMOUNT">
+                <Original>Amount:</Original>
+                <Russian>Сумма:</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_ATM">
+                <Original>ATM</Original>
+                <Russian>Банкомат</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_BACK">
+                <Original>Back</Original>
+                <Russian>Назад</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_BALANCE">
+                <Original>Balance</Original>
+                <Russian>Баланс</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_CANCEL">
+                <Original>Cancel</Original>
+                <Russian>Отмена</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_CANNOT_PAY">
+                <Original>This amount cannot be paid with the available banknotes.</Original>
+                <Russian>Эту сумму нельзя выдать имеющимися купюрами.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_CLOSE">
+                <Original>Close</Original>
+                <Russian>Закрыть</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_DO_DEPOSIT">
+                <Original>Pay in</Original>
+                <Russian>Внести</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_DO_WITHDRAW">
+                <Original>Withdraw</Original>
+                <Russian>Снять</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_EXPORT_ALL">
+                <Original>Export all</Original>
+                <Russian>Экспорт всех</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_EXPORT_ONE">
+                <Original>Export selected</Original>
+                <Russian>Экспорт выбранной</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_GROUP">
+                <Original>%1 account</Original>
+                <Russian>Счёт «%1»</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_JOURNAL">
+                <Original>Operations journal (Zeus)</Original>
+                <Russian>Журнал операций (Зевс)</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_JOURNAL_INFO">
+                <Original>All operations: %1. Select a row to export it.</Original>
+                <Russian>Всего операций: %1. Выберите строку, чтобы экспортировать её.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_LOADING">
+                <Original>Loading...</Original>
+                <Russian>Загрузка...</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_NO_CASH">
+                <Original>You carry no banknotes.</Original>
+                <Russian>У вас нет купюр.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_NO_NOTES">
+                <Original>Banknotes are not set up (CBA settings, PMC Bank).</Original>
+                <Russian>Купюры не настроены (настройки CBA, PMC Bank).</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_OK">
+                <Original>OK</Original>
+                <Russian>ОК</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_PERSONAL">
+                <Original>Personal account</Original>
+                <Russian>Личный счёт</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_PICK">
+                <Original>Pick notes</Original>
+                <Russian>Подобрать</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_TO_DEPOSIT">
+                <Original>To pay in</Original>
+                <Russian>К внесению</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_TO_WITHDRAW">
+                <Original>To withdraw</Original>
+                <Russian>К выдаче</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_TREASURER">
+                <Original>You are a treasurer: you may withdraw.</Original>
+                <Russian>Вы казначей: можете снимать деньги.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_TREASURER_ONLY">
+                <Original>Only a treasurer appointed by Zeus may withdraw.</Original>
+                <Russian>Снимать может только казначей, назначенный Зевсом.</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_deposit">
+                <Original>Pay in</Original>
+                <Russian>Внести</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_history">
+                <Original>History</Original>
+                <Russian>История</Russian>
+            </Key>
+            <Key ID="STR_PMCB_UI_withdraw">
+                <Original>Withdraw</Original>
+                <Russian>Снять</Russian>
+            </Key>
+        </Container>
+    </Package>
+</Project>
