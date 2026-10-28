@@ -1,0 +1,20 @@
+// TEST STUB for SQF-VM only; the game supplies \A3\ui_f\hpp\defineDIKCodes.inc.
+#define DIK_ESCAPE 1
+#define DIK_1 2
+#define DIK_2 3
+#define DIK_3 4
+#define DIK_4 5
+#define DIK_5 6
+#define DIK_6 7
+#define DIK_7 8
+#define DIK_8 9
+#define DIK_9 10
+#define DIK_0 11
+#define DIK_TAB 15
+#define DIK_O 24
+#define DIK_RETURN 28
+#define DIK_LCONTROL 29
+#define DIK_S 31
+#define DIK_LSHIFT 42
+#define DIK_LALT 56
+#define DIK_NUMPADENTER 156

@@ -4,9 +4,9 @@
 	overwrites default arsenal script, original arsenal needs to be running first in order to initilize the display.
 
     fuctions:
-    ["Preload"] call jn_fnc_arsenal;
+    ["Preload"] call PMCA_fnc_arsenal;
     	preloads the arsenal like the default arsenal but it doesnt have "BIS_fnc_endLoadingScreen" so you dont have errors
-    ["customInit", "arsenalDisplay"] call jn_fnc_arsenal;
+    ["customInit", "arsenalDisplay"] call PMCA_fnc_arsenal;
     	overwrites all functions in the arsenal with JNA ones.
 */
 
@@ -117,8 +117,7 @@ disableserialization;
 // Calculate the minimum number of an item needed before non-members can take it
 private _minItemsMember = {
 	params ["_index", "_item"];					// Arsenal tab index, item classname
-	private _min = jna_minItemMember select _index;
-	_min = A3A_arsenalLimits getOrDefault [_item, _min];
+	private _min = pmca_minItemMember select _index;
 	if (_index == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG || _index == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL) then {
 		_min = _min * getNumber (configfile >> "CfgMagazines" >> _item >> "count");
 	};
@@ -133,39 +132,39 @@ switch _mode do {
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "CustomInit":{
 		params ["_display"];
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 
 		missionnamespace setVariable ["bis_fnc_arsenal_center",_objectSelected];
 
 		//save crap in array
-		jnva_loadout = (_objectSelected call jn_fnc_arsenal_cargoToArray);
-		jnva_loadout_mass = ["getMass"] call jn_fnc_vehicleArsenal;
+		pmca_va_loadout = (_objectSelected call PMCA_fnc_arsenal_cargoToArray);
+		pmca_va_loadout_mass = ["getMass"] call PMCA_fnc_vehicleArsenal;
        	clearMagazineCargoGlobal _objectSelected;
         clearItemCargoGlobal _objectSelected;
         clearweaponCargoGlobal _objectSelected;
         clearbackpackCargoGlobal _objectSelected;
 
-		["customGUI",[_display]] call jn_fnc_vehicleArsenal;
-		["customEvents",[_display]] call jn_fnc_vehicleArsenal;
-		["ColorTabs",[_display]] call jn_fnc_vehicleArsenal;
+		["customGUI",[_display]] call PMCA_fnc_vehicleArsenal;
+		["customEvents",[_display]] call PMCA_fnc_vehicleArsenal;
+		["ColorTabs",[_display]] call PMCA_fnc_vehicleArsenal;
 
-		['showMessage',[_display,(localize "STR_JNA_ACT_VEHICLE_INVENTORY")]] call jn_fnc_arsenal;
-		["jn_fnc_arsenal"] call BIS_fnc_endLoadingScreen;
+		['showMessage',[_display,(localize "STR_PMCA_ACT_VEHICLE_INVENTORY")]] call PMCA_fnc_arsenal;
+		["PMCA_fnc_arsenal"] call BIS_fnc_endLoadingScreen;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "getMass":{
 		_massTotal = 0;
 
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 		
-		_loadout = (_objectSelected call jn_fnc_arsenal_cargoToArray);
+		_loadout = (_objectSelected call PMCA_fnc_arsenal_cargoToArray);
 		{
 			_index = _forEachIndex;
 			{
 				_item = _x select 0;
 				_amount = _x select 1;
-				_mass = ["getMassItem",[_item,_amount,_index]] call jn_fnc_vehicleArsenal;
+				_mass = ["getMassItem",[_item,_amount,_index]] call PMCA_fnc_vehicleArsenal;
 				_massTotal = _massTotal + _mass;
 			} forEach _x;
 		}foreach _loadout;
@@ -265,15 +264,15 @@ switch _mode do {
 		//Keys
 		_display displayRemoveAllEventHandlers "keydown";
 		_display displayRemoveAllEventHandlers "keyup";
-		_display displayAddEventHandler ["keydown",{['KeyDown',_this] call jn_fnc_arsenal;}];
-		_display displayAddEventHandler ["keyup",{['KeyUp',_this] call jn_fnc_arsenal;}];
+		_display displayAddEventHandler ["keydown",{['KeyDown',_this] call PMCA_fnc_arsenal;}];
+		_display displayAddEventHandler ["keyup",{['KeyUp',_this] call PMCA_fnc_arsenal;}];
 
 		//--- UI event handlers
 		_ctrlButtonRandom = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONRANDOM;
 		_ctrlButtonRandom ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonRandom ctrladdeventhandler ["buttonclick",{["Unload",[ctrlparent (_this select 0)]] call jn_fnc_vehicleArsenal;}];
-		_ctrlButtonRandom ctrlSetText localize "STR_JNA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL_BUTTON";
-		_ctrlButtonRandom ctrlSetTooltip localize "STR_JNA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL";
+		_ctrlButtonRandom ctrladdeventhandler ["buttonclick",{["Unload",[ctrlparent (_this select 0)]] call PMCA_fnc_vehicleArsenal;}];
+		_ctrlButtonRandom ctrlSetText localize "STR_PMCA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL_BUTTON";
+		_ctrlButtonRandom ctrlSetTooltip localize "STR_PMCA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL";
 
 		_ctrlButtonExport = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONEXPORT;
 		_ctrlButtonExport ctrlRemoveAllEventHandlers "buttonclick";
@@ -285,21 +284,21 @@ switch _mode do {
 
 		_ctrlArrowLeft = _display displayctrl IDC_RSCDISPLAYARSENAL_ARROWLEFT;
 		_ctrlArrowLeft ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlArrowLeft ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),-1]] call jn_fnc_vehicleArsenal;}];
+		_ctrlArrowLeft ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),-1]] call PMCA_fnc_vehicleArsenal;}];
 
 		_ctrlArrowRight = _display displayctrl IDC_RSCDISPLAYARSENAL_ARROWRIGHT;
 		_ctrlArrowRight ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlArrowRight ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),+1]] call jn_fnc_vehicleArsenal;}];
+		_ctrlArrowRight ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),+1]] call PMCA_fnc_vehicleArsenal;}];
 
 		_ctrlButtonLoad = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONLOAD;
 		_ctrlButtonLoad ctrlRemoveAllEventHandlers "buttonclick";
 		_ctrlButtonLoad ctrlSetTextColor [1,0,0,1];
-		//_ctrlButtonLoad ctrladdeventhandler ["buttonclick",{["buttonLoad",[ctrlparent (_this select 0)]] call jn_fnc_vehicleArsenal;}];
+		//_ctrlButtonLoad ctrladdeventhandler ["buttonclick",{["buttonLoad",[ctrlparent (_this select 0)]] call PMCA_fnc_vehicleArsenal;}];
 
 		_ctrlButtonSave = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONSAVE;
 		_ctrlButtonSave ctrlRemoveAllEventHandlers "buttonclick";
 		_ctrlButtonSave ctrlSetTextColor [1,0,0,1];
-		//_ctrlButtonSave ctrladdeventhandler ["buttonclick",{["buttonSave",[ctrlparent (_this select 0)]] call jn_fnc_vehicleArsenal;}];
+		//_ctrlButtonSave ctrladdeventhandler ["buttonclick",{["buttonSave",[ctrlparent (_this select 0)]] call PMCA_fnc_vehicleArsenal;}];
 
 		//disable annoying deselecting of tabs when you misclick
 		_ctrlMouseArea = _display displayctrl IDC_RSCDISPLAYARSENAL_MOUSEAREA;
@@ -313,18 +312,18 @@ switch _mode do {
 
 			_ctrlList = _display displayctrl (IDC_RSCDISPLAYARSENAL_LIST + _idc);
 			_ctrlList ctrlRemoveAllEventHandlers "LBSelChanged";
-			_ctrlList ctrlAddEventHandler ["MouseButtonUp",	{uiNamespace setvariable ['jna_userInput',true];}];
+			_ctrlList ctrlAddEventHandler ["MouseButtonUp",	{uiNamespace setvariable ['pmca_userInput',true];}];
 			_ctrlList ctrlAddEventHandler ["LBSelChanged",	format ["
-				if(uiNamespace getvariable ['jna_userInput',false])then{
-					['SelectItem',[ctrlparent (_this select 0),(_this select 0),%1]] call jn_fnc_vehicleArsenal;
-					uiNamespace setvariable ['jna_userInput',false];
+				if(uiNamespace getvariable ['pmca_userInput',false])then{
+					['SelectItem',[ctrlparent (_this select 0),(_this select 0),%1]] call PMCA_fnc_vehicleArsenal;
+					uiNamespace setvariable ['pmca_userInput',false];
 				};
 			",_idc]];
 
 
 			_ctrlTab = _display displayctrl (IDC_RSCDISPLAYARSENAL_TAB + _idc);
 			_ctrlTab ctrlRemoveAllEventHandlers "buttonclick";
-			_ctrlTab ctrladdeventhandler ["buttonclick",format ["['TabSelect',[ctrlparent (_this select 0),%1],true] call jn_fnc_vehicleArsenal;",_idc]];
+			_ctrlTab ctrladdeventhandler ["buttonclick",format ["['TabSelect',[ctrlparent (_this select 0),%1],true] call PMCA_fnc_vehicleArsenal;",_idc]];
 
 
 		} foreach IDCS;
@@ -340,9 +339,9 @@ switch _mode do {
 		_display = _this select 0;
 		_index = _this select 1;
 		_ctrlList = ctrlnull;
-		jnca_tab_selected = _index;
+		pmca_ca_tab_selected = _index;
 		
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 
 		_isSelectedLeft = _index in [IDCS_LEFT];
 		_listSelected = [IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL] select _isSelectedLeft;
@@ -354,7 +353,7 @@ switch _mode do {
 			// Use toLower because modsets are bugged, eg. rhs_45Rnd_545x39_AK vs rhs_45Rnd_545X39_AK
 			private _usableMagazines = [];
 			{
-				private _weapons = jnva_loadout select _x;
+				private _weapons = pmca_va_loadout select _x;
 				{
 					_usableMagazines append ((compatibleMagazines (_x select 0)) apply {toLower _x});
 				} forEach _weapons;
@@ -367,7 +366,8 @@ switch _mode do {
 
 			// Add compatible vehicle magazines for 3CB-style ammunition systems
 			private _cfgVehicle = configFile >> "cfgVehicles" >> typeof _objectSelected;
-			private _vehMagTypes = _cfgVehicle call A3A_fnc_allMagazines;
+			private _vehMagTypes = getArray (_cfgVehicle >> "magazines");
+			{_vehMagTypes append getArray (_x >> "magazines")} forEach ("true" configClasses (_cfgVehicle >> "Turrets"));
 			{ _usableMagazines pushBackUnique toLower _x } forEach _vehMagTypes;
 
 
@@ -381,7 +381,7 @@ switch _mode do {
 				if(_itemAvailable in _usableMagazines)then{
 					_magazines set [count _magazines,[_itemAvailable, _amountAvailable]];
 				};
-			} forEach (jna_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
+			} forEach (pmca_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
 			
 			//Then add mags in the car, but say we have none available - we'll add available number later
 			{
@@ -389,23 +389,23 @@ switch _mode do {
 
 				if(_itemAvailable in _usableMagazines)then{
 					//Use addToArray to avoid duplicating the type if they're already in the arsenal
-					_magazines = [_magazines, [_itemAvailable,0]] call jn_fnc_arsenal_addToArray
+					_magazines = [_magazines, [_itemAvailable,0]] call PMCA_fnc_arsenal_addToArray
 				};
-			} forEach (jnva_loadout select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
+			} forEach (pmca_va_loadout select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
 			//return
 			_magazines;
 		}else{
-			(jna_dataList select _index);
+			(pmca_dataList select _index);
 		};
 
 		//update list
-		["CreateList",[_display,_index,_inventory,_listSelected]] call jn_fnc_vehicleArsenal;
-		["updateItemInfo",[ _display,_ctrlList,_index]] call jn_fnc_arsenal;
+		["CreateList",[_display,_index,_inventory,_listSelected]] call PMCA_fnc_vehicleArsenal;
+		["updateItemInfo",[ _display,_ctrlList,_index]] call PMCA_fnc_arsenal;
 
 
 		//add items to list that are in the vehicle
 		if(_index == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG)then{
-			_items = jnva_loadout select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL;
+			_items = pmca_va_loadout select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL;
 
 			_itemsUnique = [];
 			{
@@ -414,14 +414,14 @@ switch _mode do {
 
 			_itemsUnique2 = [];
 			{
-				_weapons = jnva_loadout select _x;
+				_weapons = pmca_va_loadout select _x;
 				{
 					_weapon = _x select 0;
 					{
 
 						if(_x in _itemsUnique)then{
 							_itemsUnique2 pushBackUnique _x;
-							["UpdateItemAdd",[_index,_x,0]] call jn_fnc_arsenal;
+							["UpdateItemAdd",[_index,_x,0]] call PMCA_fnc_arsenal;
 						}
 					} forEach (getarray (configfile >> "cfgweapons" >> _weapon >> "magazines"));
 				} forEach _weapons;
@@ -434,16 +434,16 @@ switch _mode do {
 			private _magazineItemsInTab = [];
 			{
 				_item = _x;
-				_amount = [_items, _item] call jn_fnc_arsenal_itemCount;
-				_magazineItemsInTab	= [_magazineItemsInTab, [_item,_amount]] call jn_fnc_arsenal_addToArray;
+				_amount = [_items, _item] call PMCA_fnc_arsenal_itemCount;
+				_magazineItemsInTab	= [_magazineItemsInTab, [_item,_amount]] call PMCA_fnc_arsenal_addToArray;
 			} forEach _itemsUnique2;
-			jnva_loadout set [_index,_magazineItemsInTab];
+			pmca_va_loadout set [_index,_magazineItemsInTab];
 
 		}else{
 			{
 				_item = _x select 0;
-				["UpdateItemAdd",[_index,_item,0]] call jn_fnc_arsenal;
-			} forEach (jnva_loadout select _index);
+				["UpdateItemAdd",[_index,_item,0]] call PMCA_fnc_arsenal;
+			} forEach (pmca_va_loadout select _index);
 		};
 
 		{
@@ -498,7 +498,7 @@ switch _mode do {
 				ctrlsetfocus _ctrlList;
 
 				//set right item counters
-				_items = jnva_loadout select _idc;
+				_items = pmca_va_loadout select _idc;
 				for "_l" from 0 to ((lnbsize _ctrlList select 0) - 1) do {
 					_dataStr = _ctrlList lnbdata [_l,0];
 					_data = call compile _dataStr;
@@ -515,7 +515,7 @@ switch _mode do {
 					_ctrlList lnbsettext [[_l,2],str (_amount)];
 				};
 
-				//["SelectItemRight",[_display,_ctrlList,_idc]] call jn_fnc_vehicleArsenal;
+				//["SelectItemRight",[_display,_ctrlList,_idc]] call PMCA_fnc_vehicleArsenal;
 
 
 
@@ -555,7 +555,7 @@ switch _mode do {
 		_center = (missionnamespace getvariable ["BIS_fnc_arsenal_center",player]);
 		_type = (ctrltype _ctrlList == 102);
 
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 
 		_maximumLoad = maxLoad _objectSelected;
 
@@ -577,7 +577,7 @@ switch _mode do {
 			_grayout = false;
 
 			_min = [_index, _item] call _minItemsMember;
-			if ((_amount <= _min) AND (_amount != -1) AND (_amount !=0) AND !(player call A3A_fnc_isMember)) then{_grayout = true};
+			if ((_amount <= _min) AND (_amount != -1) AND (_amount !=0) AND false) then{_grayout = true};
 
 			_isIncompatible = _ctrlList lnbvalue [_r,1];
 			_mass = _ctrlList lbvalue (_r * _columns);
@@ -604,19 +604,19 @@ switch _mode do {
 		{
 			_item = _x select 0;
 			_amount = _x select 1;
-			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call jn_fnc_arsenal;
+			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call PMCA_fnc_arsenal;
 		} forEach _inventory;
 
-		["UpdateListGui",[ _display,_ctrlList, _index]] call jn_fnc_arsenal;
+		["UpdateListGui",[ _display,_ctrlList, _index]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "SelectItem":{
 		_display = _this select 0;
 		_ctrlList = _this select 1;
-		_index = jnca_tab_selected;
+		_index = pmca_ca_tab_selected;
 
-		["updateItemInfo",[ _display,_ctrlList,_index]] call jn_fnc_arsenal;
+		["updateItemInfo",[ _display,_ctrlList,_index]] call PMCA_fnc_arsenal;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////// event
@@ -624,9 +624,9 @@ switch _mode do {
 		_display = _this select 0;
 		_add = _this select 1;
 
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 
-		_index = jnca_tab_selected;
+		_index = pmca_ca_tab_selected;
 
 		if(_index == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG)then{_index = IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL};
 
@@ -674,8 +674,8 @@ switch _mode do {
 
 				//non-member limits
 				_min = [_index, _item] call _minItemsMember;
-				if((_amount <= _min) AND (_amount != -1) AND !(player call A3A_fnc_isMember)) exitWith{
-					['showMessage',[_display,(localize "STR_JNA_ACT_ONLY_MEMBERS")]] call jn_fnc_arsenal;
+				if((_amount <= _min) AND (_amount != -1) AND false) exitWith{
+					['showMessage',[_display,(localize "STR_PMCA_ACT_ONLY_MEMBERS")]] call PMCA_fnc_arsenal;
 				};
 
 				//magazines are handeld by bullet count
@@ -688,14 +688,14 @@ switch _mode do {
 				};
 
 				if(_count > 0)then{
-					_mass = jnva_loadout_mass + (["getMassItem",[_item,_count,_index]] call jn_fnc_vehicleArsenal);
+					_mass = pmca_va_loadout_mass + (["getMassItem",[_item,_count,_index]] call PMCA_fnc_vehicleArsenal);
 					if(_mass <= _max)then{
 						_ctrlList lnbsettext [[_lbcursel,2],str (_amountOld + _count)];
 
-						jnva_loadout set [_index,[jnva_loadout select _index,[_item,_count]] call jn_fnc_arsenal_addToArray];
-						jnva_loadout_mass = _mass;
-						//[_index, _item, _count] remoteExecCall ["jn_fnc_arsenal_removeItem"];
-						[_index, _item, _count] call jn_fnc_arsenal_removeItem; //Sparker: why execute it on all clients?
+						pmca_va_loadout set [_index,[pmca_va_loadout select _index,[_item,_count]] call PMCA_fnc_arsenal_addToArray];
+						pmca_va_loadout_mass = _mass;
+						//[_index, _item, _count] remoteExecCall ["PMCA_fnc_arsenal_removeItem"];
+						[_index, _item, _count] call PMCA_fnc_arsenal_removeItem; //Sparker: why execute it on all clients?
 					};
 				};
 
@@ -711,17 +711,17 @@ switch _mode do {
 				if(_count > 0)then{
 					_ctrlList lnbsettext [[_lbcursel,2],str (_amountOld - _count)];
 
-					jnva_loadout set [_index,[jnva_loadout select _index,[_item,_count]] call jn_fnc_arsenal_removeFromArray];
-					_mass = ["getMassItem",[_item,_count,_index]] call jn_fnc_vehicleArsenal;
-					jnva_loadout_mass = jnva_loadout_mass - _mass;
-					//[_index, _item, _count] remoteExecCall ["jn_fnc_arsenal_addItem"];
-					[_index, _item, _count] call jn_fnc_arsenal_addItem; //Sparker: why execute it on all clients?
+					pmca_va_loadout set [_index,[pmca_va_loadout select _index,[_item,_count]] call PMCA_fnc_arsenal_removeFromArray];
+					_mass = ["getMassItem",[_item,_count,_index]] call PMCA_fnc_vehicleArsenal;
+					pmca_va_loadout_mass = pmca_va_loadout_mass - _mass;
+					//[_index, _item, _count] remoteExecCall ["PMCA_fnc_arsenal_addItem"];
+					[_index, _item, _count] call PMCA_fnc_arsenal_addItem; //Sparker: why execute it on all clients?
 				};
 			};
 		};
 
-		["ColorTabs",[_display]] call jn_fnc_vehicleArsenal;
-		['showMessage',[_display,("Load"+str round (jnva_loadout_mass/_max *100)+"%")]] call jn_fnc_arsenal;
+		["ColorTabs",[_display]] call PMCA_fnc_vehicleArsenal;
+		['showMessage',[_display,("Load"+str round (pmca_va_loadout_mass/_max *100)+"%")]] call PMCA_fnc_arsenal;
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////// event
@@ -746,7 +746,7 @@ switch _mode do {
 					_ctrlMouseBlock = _display displayctrl IDC_RSCDISPLAYARSENAL_MOUSEBLOCK;
 					_ctrlMouseBlock ctrlenable false;
 				} else {
-					if (true) then {["buttonClose",[_display]] spawn jn_fnc_arsenal;} else {_display closedisplay 2;};
+					if (true) then {["buttonClose",[_display]] spawn PMCA_fnc_arsenal;} else {_display closedisplay 2;};
 				};
 				_return = true;
 			};
@@ -756,9 +756,9 @@ switch _mode do {
 				_ctrlTemplate = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_TEMPLATE;
 				if (ctrlfade _ctrlTemplate == 0) then {
 					if (BIS_fnc_arsenal_type == 0) then {
-						//["buttonTemplateOK",[_display]] spawn jn_fnc_arsenal;
+						//["buttonTemplateOK",[_display]] spawn PMCA_fnc_arsenal;
 					} else {
-						//["buttonTemplateOK",[_display]] spawn jn_fnc_arsenal;
+						//["buttonTemplateOK",[_display]] spawn PMCA_fnc_arsenal;
 					};
 					_return = true;
 				};
@@ -795,11 +795,11 @@ switch _mode do {
 
 			//--- Save
 			case (_key == DIK_S): {
-				//if (_ctrl) then {['buttonSave',[_display]] call jn_fnc_arsenal;};
+				//if (_ctrl) then {['buttonSave',[_display]] call PMCA_fnc_arsenal;};
 			};
 			//--- Open
 			case (_key == DIK_O): {
-				//if (_ctrl) then {['buttonLoad',[_display]] call jn_fnc_arsenal;};
+				//if (_ctrl) then {['buttonLoad',[_display]] call PMCA_fnc_arsenal;};
 			};
 
 			//--- Vision mode
@@ -860,28 +860,28 @@ switch _mode do {
 	case "Unload":{
 		params ["_display"];
 
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
 
-		jnva_loadout_mass = 0;
-        jnva_loadout remoteExecCall ["jn_fnc_arsenal_addItem",2];
+		pmca_va_loadout_mass = 0;
+        pmca_va_loadout call PMCA_fnc_arsenal_addItem; // preview; the server settles stock from the container at close
 
-       	jnva_loadout = (_objectSelected call jn_fnc_arsenal_cargoToArray);
+       	pmca_va_loadout = (_objectSelected call PMCA_fnc_arsenal_cargoToArray);
 
-       	_list = missionnamespace getVariable ["jnca_tab_selected",-1];
+       	_list = missionnamespace getVariable ["pmca_ca_tab_selected",-1];
        	if(_list != -1)then{
-       		["TabSelect",[_display, _list]] call jn_fnc_vehicleArsenal;
+       		["TabSelect",[_display, _list]] call PMCA_fnc_vehicleArsenal;
        	};
-       	["ColorTabs",[_display]] call jn_fnc_vehicleArsenal;
+       	["ColorTabs",[_display]] call PMCA_fnc_vehicleArsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "Close": {
-		jnva_loadout_mass = nil;
-		private _objectSelected = uiNamespace getVariable "jn_object_selected";
-		jnca_tab_selected = nil;
+		pmca_va_loadout_mass = nil;
+		private _objectSelected = uiNamespace getVariable "pmca_ui_object_selected";
+		pmca_ca_tab_selected = nil;
 		//weapons
 		{
-			_list = jnva_loadout select _x;
+			_list = pmca_va_loadout select _x;
 			{
 				_item = _x select 0;
 				_amount = _x select 1;
@@ -895,7 +895,7 @@ switch _mode do {
 
 		//items
 		{
-			_list = jnva_loadout select _x;
+			_list = pmca_va_loadout select _x;
 			{
 				_item = _x select 0;
 				_amount = _x select 1;
@@ -922,7 +922,7 @@ switch _mode do {
 
 		//magazines
 		{
-			_list = jnva_loadout select _x;
+			_list = pmca_va_loadout select _x;
 			{
 				_item = _x select 0;
 				_amount = _x select 1;
@@ -941,7 +941,7 @@ switch _mode do {
 
 		//backpack
 		{
-			_list = jnva_loadout select _x;
+			_list = pmca_va_loadout select _x;
 			{
 				_item = _x select 0;
 				_amount = _x select 1;
@@ -952,7 +952,7 @@ switch _mode do {
 		];
 
 
-		jnva_loadout = nil;
+		pmca_va_loadout = nil;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////

@@ -4,9 +4,9 @@
 	overwrites default arsenal script, original arsenal needs to be running first in order to initilize the display.
 
     fuctions:
-    ["Preload"] call jn_fnc_arsenal;
+    ["Preload"] call PMCA_fnc_arsenal;
     	preloads the arsenal like the default arsenal but it doesnt have "BIS_fnc_endLoadingScreen" so you dont have errors
-    ["customInit", "arsenalDisplay"] call jn_fnc_arsenal;
+    ["customInit", "arsenalDisplay"] call PMCA_fnc_arsenal;
     	overwrites all functions in the arsenal with JNA ones.
 */
 
@@ -142,8 +142,7 @@ _arrayContains = {
 private _minItemsMember = {
 	params ["_index", "_item"];					// Arsenal tab index, item classname
 	if (_index in [IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG, IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG2]) then { _index = IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG };
-	private _min = jna_minItemMember select _index;
-	_min = A3A_arsenalLimits getOrDefault [_item, _min];
+	private _min = pmca_minItemMember select _index;
 	if (_index in [IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG, IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL]) then {
 		_min = _min * getNumber (configfile >> "CfgMagazines" >> _item >> "count");
 	};
@@ -172,7 +171,7 @@ private _getUsableMagazines = {
 		if([_usableMagazines, _itemAvailable] call _arrayContains) then {
 			_magazines set [count _magazines,[_itemAvailable, _amountAvailable]];
 		};
-	} forEach (jna_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
+	} forEach (pmca_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
 	//return
 	_magazines;
 };
@@ -295,13 +294,21 @@ switch _mode do {
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////// Externaly called
+	// Server reply to PMCA_fnc_arsenal_requestOpen: [stock list, arsenal object, kind, container]
 	case "Open": {
 		Info("JNA open arsenal");
-		jna_dataList = _this select 0;
-		["SaveTFAR"] call jn_fnc_arsenal;
-		private _object = missionnamespace getVariable ["jna_object",objNull];
+		if (isRemoteExecuted && {remoteExecutedOwner != 2}) exitWith {};
+		_this params [["_list", [], [[]]], ["_object", objNull, [objNull]]];
+		pmca_dataList = +_list;
+		missionnamespace setVariable ["pmca_object",_object];
+		["SaveTFAR"] call PMCA_fnc_arsenal;
 		["Open",[nil,_object,player,false]] call bis_fnc_arsenal;
-		if (isNil {profileNamespace getVariable "A3U_11_8_5_arsenal_update_ack"} && {uiNamespace getVariable ["isLoadoutArsenal", false]}) then { ["ShowUpdateMessage"] spawn SCRT_fnc_arsenal_loadoutArsenal };
+	};
+
+	// Server refused to open (out of reach, no access, container busy).
+	case "Abort": {
+		UINamespace setVariable ["pmca_ui_type",""];
+		["PMCA_fnc_arsenal"] call BIS_fnc_endLoadingScreen;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -367,28 +374,28 @@ switch _mode do {
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "CustomInit":{
 		_display = _this select 0;
-		["ReplaceBaseItems",[_display]] call jn_fnc_arsenal;
-		["CustomControls", [_display]] call jn_fnc_arsenal;
-		["customEvents",[_display]] call jn_fnc_arsenal;
-		["CreateListAll", [_display]] call jn_fnc_arsenal;
-		['showMessage',[_display,"Jeroen (Not) Limited Arsenal"]] call jn_fnc_arsenal;
-		["HighlightMissingIcons",[_display]] call jn_fnc_arsenal;
+		["ReplaceBaseItems",[_display]] call PMCA_fnc_arsenal;
+		["CustomControls", [_display]] call PMCA_fnc_arsenal;
+		["customEvents",[_display]] call PMCA_fnc_arsenal;
+		["CreateListAll", [_display]] call PMCA_fnc_arsenal;
+		['showMessage',[_display,"Jeroen (Not) Limited Arsenal"]] call PMCA_fnc_arsenal;
+		["HighlightMissingIcons",[_display]] call PMCA_fnc_arsenal;
 
-		["jn_fnc_arsenal"] call BIS_fnc_endLoadingScreen;
+		["PMCA_fnc_arsenal"] call BIS_fnc_endLoadingScreen;
 	};
 	///////////////////////////////////////////////////////////////////////////////////////////
 
 	case "SaveTFAR": {
-		jna_backpackRadioSettings = nil;
-		jna_swRadioSettings = nil;
-		if (A3A_hasTFAR) then {
+		pmca_backpackRadioSettings = nil;
+		pmca_swRadioSettings = nil;
+		if (PMCA_HAS_TFAR) then {
 			private _backpackRadio = player call TFAR_fnc_backpackLr;
 			if (!isNil "_backpackRadio" && {count _backpackRadio >= 2}) then {
-				jna_backpackRadioSettings = _backpackRadio call TFAR_fnc_getLrSettings;
+				pmca_backpackRadioSettings = _backpackRadio call TFAR_fnc_getLrSettings;
 			};
 			private _swRadio = if (call TFAR_fnc_haveSWRadio) then { call TFAR_fnc_activeSwRadio } else { nil };
 			if (!isNil "_swRadio") then {
-				jna_swRadioSettings = _swRadio call TFAR_fnc_getSwSettings;
+				pmca_swRadioSettings = _swRadio call TFAR_fnc_getSwSettings;
 			};
 		};
 	};
@@ -397,13 +404,13 @@ switch _mode do {
 	//Restore TFAR radio settings
 
 	case "RestoreTFAR": {
-		if (A3A_hasTFAR) then {
+		if (PMCA_HAS_TFAR) then {
 			private _backpackRadio = player call TFAR_fnc_backpackLr;
 			if (!isNil "_backpackRadio" && {count _backpackRadio >= 2}) then {
-				if (isNil "jna_backpackRadioSettings" || {typeName jna_backpackRadioSettings != typeName []}) exitWith {
+				if (isNil "pmca_backpackRadioSettings" || {typeName pmca_backpackRadioSettings != typeName []}) exitWith {
 					Error("Arsenal failed to restore TFAR longrange radio settings due to invalid saved setting");
 				};
-				[_backpackRadio select 0, _backpackRadio select 1, jna_backpackRadioSettings] call TFAR_fnc_setLrSettings;
+				[_backpackRadio select 0, _backpackRadio select 1, pmca_backpackRadioSettings] call TFAR_fnc_setLrSettings;
 				Verbose("TFAR longrange radio settings restored on arsenal exit.");
 			} else {
 				Verbose("No longrange radio found on arsenal exit.");
@@ -411,18 +418,18 @@ switch _mode do {
 			//Arsenal gives players base TFAR radio items. TFAR will, at some point, replace this with an 'instanced' version.
 			//This can cause freq to reset. To fix, check if we have a radio first, and wait around if we do, but TFAR isn't showing it.
 			//Spawn so we can sleep without bothering the arsenal.
-			private _hasRadio = player call A3A_fnc_hasARadio;
+			private _hasRadio = (call TFAR_fnc_haveSWRadio) || {call TFAR_fnc_haveLRRadio};
 			if (_hasRadio) then {
 				[] spawn {
 					//Wait around until TFAR has done its work. Frequent checks - we shouldn't have to wait more than a handful of seconds for TFAR;
-					waitUntil {sleep 1; player call A3A_fnc_hasARadio && call TFAR_fnc_haveSWRadio};
+					waitUntil {sleep 1; call TFAR_fnc_haveSWRadio};
 					private _swRadio = if (call TFAR_fnc_haveSWRadio) then { call TFAR_fnc_activeSwRadio } else { nil };
 					//Doesn't hurt to be careful!
 					if (!isNil "_swRadio") then {
-						if (isNil "jna_swRadioSettings" || {typeName jna_swRadioSettings != typeName []}) exitWith {
+						if (isNil "pmca_swRadioSettings" || {typeName pmca_swRadioSettings != typeName []}) exitWith {
 							Error("Arsenal failed to restore TFAR shortwave radio settings due to invalid saved setting");
 						};
-						[_swRadio, jna_swRadioSettings] call TFAR_fnc_setSwSettings;
+						[_swRadio, pmca_swRadioSettings] call TFAR_fnc_setSwSettings;
 						Verbose("TFAR shortwave radio settings restored on arsenal exit.");
 					} else {
 						Verbose("No shortwave radio found on arsenal exit.");
@@ -439,56 +446,55 @@ switch _mode do {
 		//Keys
 		_display displayRemoveAllEventHandlers "keydown";
 		_display displayRemoveAllEventHandlers "keyup";
-		_display displayAddEventHandler ["keydown",{['KeyDown',_this] call jn_fnc_arsenal;}];
-		_display displayAddEventHandler ["keyup",{['KeyUp',_this] call jn_fnc_arsenal;}];
+		_display displayAddEventHandler ["keydown",{['KeyDown',_this] call PMCA_fnc_arsenal;}];
+		_display displayAddEventHandler ["keyup",{['KeyUp',_this] call PMCA_fnc_arsenal;}];
 		//--- UI event handlers
 		_ctrlButtonClose = _display displayctrl (getnumber (configfile >> "RscDisplayArsenal" >> "Controls" >> "ControlBar" >> "controls" >> "ButtonClose" >> "idc"));
 		_ctrlButtonClose ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonClose ctrladdeventhandler ["buttonclick",{["buttonClose",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
+		_ctrlButtonClose ctrladdeventhandler ["buttonclick",{["buttonClose",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];
 
 		_ctrlButtonLoad = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONLOAD;
 		_ctrlButtonLoad ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonLoad ctrladdeventhandler ["buttonclick",{["buttonLoad",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
+		_ctrlButtonLoad ctrladdeventhandler ["buttonclick",{["buttonLoad",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];
 
 		_ctrlTemplateButtonOK = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_BUTTONOK;
 		_ctrlTemplateButtonOK ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlTemplateButtonOK ctrladdeventhandler ["buttonclick",{["buttonTemplateOK",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];//todo remove
+		_ctrlTemplateButtonOK ctrladdeventhandler ["buttonclick",{["buttonTemplateOK",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];//todo remove
 
 		_ctrlTemplateButtonDelete = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_BUTTONDELETE;
 		_ctrlTemplateButtonDelete ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlTemplateButtonDelete ctrladdeventhandler ["buttonclick",{["buttonTemplateDelete",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
+		_ctrlTemplateButtonDelete ctrladdeventhandler ["buttonclick",{["buttonTemplateDelete",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];
 
 		_ctrlButtonExport = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONEXPORT;
 		_ctrlButtonExport ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonExport ctrlSetText "TODO";
+		_ctrlButtonExport ctrlShow false;
 
+		// Antistasi's "default gear" handed out free items; stock here is finite.
 		_ctrlButtonImport = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONIMPORT;
 		_ctrlButtonImport ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonImport ctrlSetText localize "STR_JNA_ACT_DEF_GEAR_BUTTON";
-		_ctrlButtonImport ctrlSetTooltip localize "STR_JNA_ACT_DEF_GEAR";
-		_ctrlButtonImport ctrladdeventhandler ["buttonclick",{["buttonDefaultGear",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
+		_ctrlButtonImport ctrlShow false;
 
 		_ctrlButtonSave = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONSAVE;
 		_ctrlButtonSave ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonSave ctrladdeventhandler ["buttonclick",{["buttonSave",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
+		_ctrlButtonSave ctrladdeventhandler ["buttonclick",{["buttonSave",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];
 
 		_ctrlButtonRandom = _display displayctrl IDC_RSCDISPLAYARSENAL_CONTROLSBAR_BUTTONRANDOM;
 		_ctrlButtonRandom ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlButtonRandom ctrladdeventhandler ["buttonclick",{["buttonInvToJNA",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];
-		_ctrlButtonRandom ctrlSetText localize "STR_JNA_ACT_MOVE_FROM_CRATE_TO_ARSENAL_BUTTON";
-		_ctrlButtonRandom ctrlSetTooltip localize "STR_JNA_ACT_MOVE_FROM_CRATE_TO_ARSENAL";
+		_ctrlButtonRandom ctrladdeventhandler ["buttonclick",{["buttonInvToJNA",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];
+		_ctrlButtonRandom ctrlSetText localize "STR_PMCA_ACT_MOVE_FROM_CRATE_TO_ARSENAL_BUTTON";
+		_ctrlButtonRandom ctrlSetTooltip localize "STR_PMCA_ACT_MOVE_FROM_CRATE_TO_ARSENAL";
 
 		_ctrlArrowLeft = _display displayctrl IDC_RSCDISPLAYARSENAL_ARROWLEFT;
 		_ctrlArrowLeft ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlArrowLeft ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),-1]] call jn_fnc_arsenal;}];
+		_ctrlArrowLeft ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),-1]] call PMCA_fnc_arsenal;}];
 
 		_ctrlArrowRight = _display displayctrl IDC_RSCDISPLAYARSENAL_ARROWRIGHT;
 		_ctrlArrowRight ctrlRemoveAllEventHandlers "buttonclick";
-		_ctrlArrowRight ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),+1]] call jn_fnc_arsenal;}];
+		_ctrlArrowRight ctrladdeventhandler ["buttonclick",{["buttonCargo",[ctrlparent (_this select 0),+1]] call PMCA_fnc_arsenal;}];
 
 		_ctrlTemplateValue = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_VALUENAME;
 		_ctrlTemplateValue ctrlRemoveAllEventHandlers "lbdblclick";
-		_ctrlTemplateValue ctrladdeventhandler ["lbdblclick",{["buttonTemplateOK",[ctrlparent (_this select 0)]] call jn_fnc_arsenal;}];//todo remove
+		_ctrlTemplateValue ctrladdeventhandler ["lbdblclick",{["buttonTemplateOK",[ctrlparent (_this select 0)]] call PMCA_fnc_arsenal;}];//todo remove
 
 		//disable annoying deselecting of tabs when you misclick
 		_ctrlMouseArea = _display displayctrl IDC_RSCDISPLAYARSENAL_MOUSEAREA;
@@ -498,17 +504,17 @@ switch _mode do {
 		_ctrlButtonInterface ctrlRemoveAllEventHandlers "buttonclick";
 
 		//--- Menus
-		_sortValues = uinamespace getvariable ["jn_fnc_arsenal_sort",[]];
+		_sortValues = uinamespace getvariable ["PMCA_fnc_arsenal_sort",[]];
 		{
 			_idc = _x;
 
 			_ctrlList = _display displayctrl (IDC_RSCDISPLAYARSENAL_LIST + _idc);
 			_ctrlList ctrlRemoveAllEventHandlers "LBSelChanged";
-			_ctrlList ctrlAddEventHandler ["MouseButtonUp",	{uiNamespace setvariable ['jna_userInput',true];}];
+			_ctrlList ctrlAddEventHandler ["MouseButtonUp",	{uiNamespace setvariable ['pmca_userInput',true];}];
 			_ctrlList ctrlAddEventHandler ["LBSelChanged",	format ["
-				if(uiNamespace getvariable ['jna_userInput',false])then{
-					['SelectItem',[ctrlparent (_this select 0),(_this select 0),%1]] call jn_fnc_arsenal;
-					uiNamespace setvariable ['jna_userInput',false];
+				if(uiNamespace getvariable ['pmca_userInput',false])then{
+					['SelectItem',[ctrlparent (_this select 0),(_this select 0),%1]] call PMCA_fnc_arsenal;
+					uiNamespace setvariable ['pmca_userInput',false];
 				};
 			",_idc]];
 
@@ -518,9 +524,9 @@ switch _mode do {
 			{
 				_x ctrlRemoveAllEventHandlers "buttonclick";
 				if (_idc in [IDCS_LEFT]) then {
-					_x ctrladdeventhandler ["buttonclick",format ["['TabSelectLeft',[ctrlparent (_this select 0),%1],true] call jn_fnc_arsenal;",_idc]];
+					_x ctrladdeventhandler ["buttonclick",format ["['TabSelectLeft',[ctrlparent (_this select 0),%1],true] call PMCA_fnc_arsenal;",_idc]];
 				} else {
-					_x ctrladdeventhandler ["buttonclick",format ["['TabSelectRight',[ctrlparent (_this select 0),%1],true] call jn_fnc_arsenal;",_idc]];
+					_x ctrladdeventhandler ["buttonclick",format ["['TabSelectRight',[ctrlparent (_this select 0),%1],true] call PMCA_fnc_arsenal;",_idc]];
 				};
 			} foreach [_ctrlIcon,_ctrlTab];
 
@@ -528,7 +534,7 @@ switch _mode do {
 			_sort = _sortValues param [_idc, SORT_DEFAULT];
 			_ctrlSort = _display displayctrl (IDC_RSCDISPLAYARSENAL_SORT + _idc);
 			_ctrlSort ctrlRemoveAllEventHandlers "lbselchanged";
-			_ctrlSort ctrladdeventhandler ["lbselchanged",format ["['SortBy',[_this,%1]] call jn_fnc_arsenal;",_idc]];
+			_ctrlSort ctrladdeventhandler ["lbselchanged",format ["['SortBy',[_this,%1]] call PMCA_fnc_arsenal;",_idc]];
 
 			//Delete "Sort by mod" as it doesn't work currently.
 			if (lbSize _ctrlSort > 1) then {
@@ -536,10 +542,10 @@ switch _mode do {
 			};
 
 
-			private _sortByAmountIndex =  _ctrlSort lbadd (localize "STR_JNA_SORT_BY_AMOUNT");
-			private _sortDefaultIndex = _ctrlSort lbadd (localize "STR_JNA_SORT_DEFAULT");
-			private _sortColorIndex = _ctrlSort lbadd (localize "STR_JNA_SORT_COLOR");
-	  		private _sortModIndex = _ctrlSort lbadd (localize "STR_JNA_SORT_MOD");
+			private _sortByAmountIndex =  _ctrlSort lbadd (localize "STR_PMCA_SORT_BY_AMOUNT");
+			private _sortDefaultIndex = _ctrlSort lbadd (localize "STR_PMCA_SORT_DEFAULT");
+			private _sortColorIndex = _ctrlSort lbadd (localize "STR_PMCA_SORT_COLOR");
+	  		private _sortModIndex = _ctrlSort lbadd (localize "STR_PMCA_SORT_MOD");
 
 			_ctrlSort lbSetValue [0, SORT_ALPHABETICAL];
 			_ctrlSort lbSetValue [_sortByAmountIndex, SORT_AMOUNT];
@@ -553,7 +559,7 @@ switch _mode do {
 			_sortValues set [_idc,_sort];
 
 		} foreach IDCS;
-		uinamespace setvariable ["jn_fnc_arsenal_sort",_sortValues];
+		uinamespace setvariable ["PMCA_fnc_arsenal_sort",_sortValues];
 	};
 
   	case "SortBy":{
@@ -731,7 +737,7 @@ switch _mode do {
 
 			//Some mod backpacks have no empty variant
 			if (count _backpack > 0) then {
-				_backpack set [0,((_backpack select 0) call A3A_fnc_basicBackpack)];
+				_backpack set [0,((_backpack select 0) call BIS_fnc_basicBackpack)];
 			};
 
 			_uniformitems = [_unifrom,1,[]] call BIS_fnc_param;
@@ -757,12 +763,12 @@ switch _mode do {
 			_container = _x;
 			{
 				_container addItemCargoGlobal [_x,1];
-			} forEach ((missionNamespace getVariable "jna_containerCargo_init") select _foreachindex);
+			} forEach ((missionNamespace getVariable "pmca_containerCargo_init") select _foreachindex);
 		} forEach [uniformContainer player,vestContainer player,backpackContainer player];
 
 		//replace magazines with partial filled, just like it was before entering the box, entering the arsenal refilles all ammo
 		// Do this after setUnitLoadout, because that fills magazines when you have >1 with the same bullet count (BIS bug)
-		_mags = missionNamespace getVariable "jna_magazines_init";//get ammo list from before arsenal started
+		_mags = missionNamespace getVariable "pmca_magazines_init";//get ammo list from before arsenal started
 		{
 			if!(isnil "_x")then{
 				_container = switch _foreachindex do{
@@ -793,17 +799,17 @@ switch _mode do {
 		_index = _this select 1;
 		_ctrlList = _display displayctrl (IDC_RSCDISPLAYARSENAL_LIST + _index);
 		//create list
-		["UpdateListGui",[ _display,_ctrlList,_index]] call jn_fnc_arsenal;
+		["UpdateListGui",[ _display,_ctrlList,_index]] call PMCA_fnc_arsenal;
 
 
 		//add current selected items
-		_inventory_player = ["ListCurSel",[_index]] call jn_fnc_arsenal;
-		["UpdateItemAdd",[_index,_inventory_player,0]] call jn_fnc_arsenal;
+		_inventory_player = ["ListCurSel",[_index]] call PMCA_fnc_arsenal;
+		["UpdateItemAdd",[_index,_inventory_player,0]] call PMCA_fnc_arsenal;
 
 
 		//TODO sort (add select current item to sort?)
 
-		["ListSelectCurrent",[_display,_index]] call jn_fnc_arsenal;
+		["ListSelectCurrent",[_display,_index]] call PMCA_fnc_arsenal;
 
 		//show selected, disable others
 		{
@@ -889,7 +895,7 @@ switch _mode do {
 				case (_index == IDC_RSCDISPLAYARSENAL_TAB_HANDGUN): { player selectWeapon (handgunWeapon player) };
 			};
 
-			['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG]] call jn_fnc_arsenal;
+			['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG]] call PMCA_fnc_arsenal;
 		};
 
 		//--- Containers
@@ -928,7 +934,7 @@ switch _mode do {
 			_ctrlLoadCargo = _display displayctrl IDC_RSCDISPLAYARSENAL_LOADCARGO;
 			_ctrlLoadCargo progresssetposition _load;
 
-			['TabSelectRight',[_display, IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG]] call jn_fnc_arsenal;
+			['TabSelectRight',[_display, IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG]] call PMCA_fnc_arsenal;
 		};
 
 
@@ -989,10 +995,10 @@ switch _mode do {
 				_glmuzzle = configName (_config >> _glmuzzle);                      // bad-case fix. compatibleMagazines is case-sensitive as of 2.12
 				[compatibleMagazines [_weapon, _glmuzzle]] call _getUsableMagazines;
 			};
-			default { (jna_datalist select _index) };
+			default { (pmca_datalist select _index) };
 		};
 
-		["CreateList",[ _display, _index, _inventory]] call jn_fnc_arsenal;
+		["CreateList",[ _display, _index, _inventory]] call PMCA_fnc_arsenal;
 		switch _index do {
 			case IDC_RSCDISPLAYARSENAL_TAB_ITEMMUZZLE;
 			case IDC_RSCDISPLAYARSENAL_TAB_ITEMACC;
@@ -1016,14 +1022,14 @@ switch _mode do {
 				] find _index;
 
 				_item = _weaponItems select _accIndex;
-				["UpdateItemAdd",[_index,_item,0]] call jn_fnc_arsenal;
-				["ListSelectCurrent",[_display,_index,_item]] call jn_fnc_arsenal;
+				["UpdateItemAdd",[_index,_item,0]] call PMCA_fnc_arsenal;
+				["ListSelectCurrent",[_display,_index,_item]] call PMCA_fnc_arsenal;
 			};
 			case IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG: {
 				_item = currentMagazine player;
 
-				["UpdateItemAdd",[_index,_item,0]] call jn_fnc_arsenal;
-				["ListSelectCurrent",[_display,_index,_item]] call jn_fnc_arsenal;
+				["UpdateItemAdd",[_index,_item,0]] call PMCA_fnc_arsenal;
+				["ListSelectCurrent",[_display,_index,_item]] call PMCA_fnc_arsenal;
 			};
 			case IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG2: {
 				_weapon = primaryWeapon player;
@@ -1035,8 +1041,8 @@ switch _mode do {
 					if (_x in compatibleMagazines [_weapon, _muzzle]) exitWith { _item = _x};
 				} forEach (primaryWeaponMagazine player);
 				
-				["UpdateItemAdd",[_index,_item,0]] call jn_fnc_arsenal;
-				["ListSelectCurrent",[_display,_index,_item]] call jn_fnc_arsenal;
+				["UpdateItemAdd",[_index,_item,0]] call PMCA_fnc_arsenal;
+				["ListSelectCurrent",[_display,_index,_item]] call PMCA_fnc_arsenal;
 			};
 			case IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG;
 			case IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL;
@@ -1056,7 +1062,7 @@ switch _mode do {
 
 				_itemsUnique = [];
 				{
-					_type = _x call jn_fnc_arsenal_itemType;
+					_type = _x call PMCA_fnc_arsenal_itemType;
 					if(_type == _index || (_type == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL &&  _index == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG))then{
 						_itemsUnique pushBackUnique _x;
 					};
@@ -1066,19 +1072,19 @@ switch _mode do {
 					{
 						{
 							if([_itemsUnique, _x] call _arrayContains)then{
-								["UpdateItemAdd",[_index,_x,0]] call jn_fnc_arsenal;
+								["UpdateItemAdd",[_index,_x,0]] call PMCA_fnc_arsenal;
 							}
 						} forEach (getarray (configfile >> "cfgweapons" >> _x >> "magazines"));
 					}forEach [primaryweapon player, secondaryweapon player, handgunweapon player];
 				}else{
 					{
-						["UpdateItemAdd",[_index,_x,0]] call jn_fnc_arsenal;
+						["UpdateItemAdd",[_index,_x,0]] call PMCA_fnc_arsenal;
 					} forEach _itemsUnique;
 				}
 			};
 		};
 
-		["UpdateListGui",[ _display,_ctrlList,_index]] call jn_fnc_arsenal;
+		["UpdateListGui",[ _display,_ctrlList,_index]] call PMCA_fnc_arsenal;
 
 
 
@@ -1132,7 +1138,7 @@ switch _mode do {
 					]
 				) then {
 					//to reselect same right-tab when switching between uniform vest backpack
-					uiNamespace setVariable ["jna_lastCargoListSelected", _idc];
+					uiNamespace setVariable ["pmca_lastCargoListSelected", _idc];
 
 					//--- Update counts for all items in the list
 					_container = switch true do {
@@ -1167,7 +1173,7 @@ switch _mode do {
 
 						_ctrlList lnbsettext [[_l,2],str (_amount)];
 					};
-					["SelectItemRight",[_display,_ctrlList,_idc]] call jn_fnc_arsenal;
+					["SelectItemRight",[_display,_ctrlList,_idc]] call PMCA_fnc_arsenal;
 				};
 			};
 
@@ -1184,7 +1190,7 @@ switch _mode do {
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "CreateListAll":{
 		_display =  _this select 0;
-		_inventory_box_all = jna_dataList;
+		_inventory_box_all = pmca_dataList;
 		{
 			_inventory_box = _x;
 			_index = _foreachindex;
@@ -1192,7 +1198,7 @@ switch _mode do {
 				_ctrlList = _display displayctrl (IDC_RSCDISPLAYARSENAL_LIST + _index);
 				lbclear _ctrlList;
 				//create list with avalable items
-				["CreateList",[_display,_index,_inventory_box]] call jn_fnc_arsenal;
+				["CreateList",[_display,_index,_inventory_box]] call PMCA_fnc_arsenal;
 			};
 		} forEach _inventory_box_all;
 	};
@@ -1235,7 +1241,7 @@ switch _mode do {
 			case IDC_RSCDISPLAYARSENAL_TAB_RADIO:{
 				_return1 = "";
 				{
-					if(_index == _x call jn_fnc_arsenal_itemType)exitwith{_return1 = _x};
+					if(_index == _x call PMCA_fnc_arsenal_itemType)exitwith{_return1 = _x};
 				}foreach assignedItems player;
 
 				//TFAR FIX
@@ -1258,7 +1264,7 @@ switch _mode do {
 			case IDC_RSCDISPLAYARSENAL_TAB_WATCH:{
 				_return1 = "";
 				{
-					if(_index == _x call jn_fnc_arsenal_itemType)exitwith{_return1 = _x};
+					if(_index == _x call PMCA_fnc_arsenal_itemType)exitwith{_return1 = _x};
 				}foreach assignedItems player;
 				_return1;
 			};
@@ -1301,7 +1307,7 @@ switch _mode do {
 
 
 		if(isnil "_item")then{
-			_item = ["ListCurSel",[_index]] call jn_fnc_arsenal;
+			_item = ["ListCurSel",[_index]] call PMCA_fnc_arsenal;
 		};
 
 		for "_l" from 0 to (lbsize _ctrlList - 1) do {
@@ -1357,11 +1363,11 @@ switch _mode do {
 		{
 			_item = _x select 0;
 			_amount = _x select 1;
-			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call jn_fnc_arsenal;
+			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call PMCA_fnc_arsenal;
 		} forEach _inventory;
 
 		//TODO better sorting of scopes gray items?
-		["ListSort",[_display,_index]] call jn_fnc_arsenal;
+		["ListSort",[_display,_index]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -1381,17 +1387,19 @@ switch _mode do {
 		_type = (ctrltype _ctrlList == 102);
 		_rows = if _type then{ (lnbsize _ctrlList select 0) - 1}else{lbsize _ctrlList - 1};
 		for "_l" from 0 to _rows do {
-			["UpdateItemGui",[_display,_ctrlList,_index,_l]] call jn_fnc_arsenal;
+			["UpdateItemGui",[_display,_ctrlList,_index,_l]] call PMCA_fnc_arsenal;
 		};
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////  GLOBAL
 	case "UpdateItemAdd":{
 		params ["_index","_item","_amount",["_updateDataList",false]];
+		// Counts arrive from the server (PMCA_fnc_broadcast) or from this interface itself.
+		if (isRemoteExecuted && {remoteExecutedOwner != 2}) exitWith {};
 
 		//update datalist
 		if(_updateDataList) then {
-			jna_dataList set [_index, [jna_dataList select _index, [_item, _amount]] call jn_fnc_arsenal_addToArray];
+			pmca_dataList set [_index, [pmca_dataList select _index, [_item, _amount]] call PMCA_fnc_arsenal_addToArray];
 		};
 
 		private _display =  uiNamespace getVariable ["arsenalDisplay","No display"];
@@ -1410,7 +1418,7 @@ switch _mode do {
 		};
 
 		private _indexList = _index;
-		if(UINamespace getVariable ["jn_type","arsenal"] isEqualTo "containerArsenal")then{
+		if(UINamespace getVariable ["pmca_ui_type","arsenal"] isEqualTo "containerArsenal")then{
 			_indexList = [IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL] select (_index in [IDCS_LEFT]);
 		};
 
@@ -1442,19 +1450,21 @@ switch _mode do {
 
 
 		if(_l_found == -1)then{
-			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call jn_fnc_arsenal;
+			["CreateItem",[_display,_ctrlList,_index,_item,_amount]] call PMCA_fnc_arsenal;
 			_l_found = _rowSize + 1;
 		};
-		["UpdateItemGui",[_display,_ctrlList,_index,_l_found]] call jn_fnc_arsenal;
+		["UpdateItemGui",[_display,_ctrlList,_index,_l_found]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////  GLOBAL
 	case "UpdateItemRemove":{
 		params ["_index","_item","_amount",["_updateDataList",false]];
+		// Counts arrive from the server (PMCA_fnc_broadcast) or from this interface itself.
+		if (isRemoteExecuted && {remoteExecutedOwner != 2}) exitWith {};
 
 		//update datalist
 		if(_updateDataList)then{
-			jna_dataList set [_index, [jna_dataList select _index, [_item, _amount]] call jn_fnc_arsenal_removeFromArray];
+			pmca_dataList set [_index, [pmca_dataList select _index, [_item, _amount]] call PMCA_fnc_arsenal_removeFromArray];
 		};
 
 		private _display =  uiNamespace getVariable ["arsenalDisplay","No display"];
@@ -1473,7 +1483,7 @@ switch _mode do {
 
 		//when used by vehicleArsenal;
 		_indexList = _index;
-		if(UINamespace getVariable ["jn_type","arsenal"] isEqualTo "containerArsenal")then{
+		if(UINamespace getVariable ["pmca_ui_type","arsenal"] isEqualTo "containerArsenal")then{
 			_indexList = [IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL] select (_index in [IDCS_LEFT]);
 		};
 
@@ -1519,7 +1529,7 @@ switch _mode do {
 				}else{
 					_data = str [_item,_amount,_displayNameCurrent];
 					if _type then{_ctrlList lnbsetdata [[_l,0],_data]}else{_ctrlList lbsetdata [_l,_data]};
-					["UpdateItemGui",[_display,_ctrlList,_index,_l_found]] call jn_fnc_arsenal;
+					["UpdateItemGui",[_display,_ctrlList,_index,_l_found]] call PMCA_fnc_arsenal;
 				};
 			};
 		};
@@ -1670,8 +1680,8 @@ switch _mode do {
 		// Except in the vehicle arsenal, where this function is used for the right items too
 		_grayout = false;
 		_min = [_index, _item] call _minItemsMember;
-		_initialEquipment = FactionGet(reb,"initialRebelEquipment");
-		if (_amount <= _min && {_amount != -1 && {!([player] call A3A_fnc_isMember)}}) then{_grayout = true};
+		_initialEquipment = []; // Antistasi highlighted the rebels' free starting gear; none here
+		if (_amount <= _min && {_amount != -1 && {false}}) then{_grayout = true};
 
 		//grayout attachments
 		private _isIncompatible = if (_index in [
@@ -1700,7 +1710,7 @@ switch _mode do {
 			case (_grayout): {
 				FORBIDDEN_ITEM_COLOR;
 			};
-			case (605 in getArray (configfile >> "CfgWeapons" >> _item >>"ItemInfo" >> "allowedSlots") && {!(_item in allArmoredHeadgear)});
+			case (605 in getArray (configfile >> "CfgWeapons" >> _item >>"ItemInfo" >> "allowedSlots") && {getNumber (configfile >> "CfgWeapons" >> _item >> "ItemInfo" >> "HitpointsProtectionInfo" >> "Head" >> "armor") <= 0});
 			case (_item in _initialEquipment): {
 				INITIAL_EQUIPMENT_COLOR;
 			};
@@ -1756,7 +1766,7 @@ switch _mode do {
 						if (_amount == -1) then {_ammoTotal = -1; breakTo "updateWeapon"};//TODO marker for changed entry
 						_ammoTotal = _ammoTotal + _amount;
 					}
-				} forEach (jna_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
+				} forEach (pmca_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL);
 
 				//change color;
 				_colorMult = switch (_item call BIS_fnc_itemType select 1) do{
@@ -1778,41 +1788,41 @@ switch _mode do {
 
 				_strAmount = switch true do {
 					case (_amount == 0): {
-						localize "STR_A3AP_arsenal_scarcity_0"
+						localize "STR_PMCA_arsenal_scarcity_0"
 					};
 					case (_amount > 50): {
-						localize "STR_A3AP_arsenal_scarcity_1"
+						localize "STR_PMCA_arsenal_scarcity_1"
 					};
 					case (_amount > 10): {
-						localize "STR_A3AP_arsenal_scarcity_2"
+						localize "STR_PMCA_arsenal_scarcity_2"
 					};
 					case (_amount > 3): {
-						localize "STR_A3AP_arsenal_scarcity_3"
+						localize "STR_PMCA_arsenal_scarcity_3"
 					};
 					case (_amount > 1): {
-						localize "STR_A3AP_arsenal_scarcity_4"
+						localize "STR_PMCA_arsenal_scarcity_4"
 					};
 					case (_amount == 1): {
-						localize "STR_A3AP_arsenal_scarcity_5"
+						localize "STR_PMCA_arsenal_scarcity_5"
 					};
 					case (_amount == -1): {//TODO marker for changed entry
-						localize "STR_A3AP_arsenal_scarcity_1"
+						localize "STR_PMCA_arsenal_scarcity_1"
 					};
 					default{""};
 				};
 
 				_strAmmo = switch true do {
 					case (_colorMult == 0): {
-						localize "STR_A3AP_arsenal_scarcity_ammo_0"
+						localize "STR_PMCA_arsenal_scarcity_ammo_0"
 					};
 					case (_colorMult > 0.9): {
-						localize "STR_A3AP_arsenal_scarcity_ammo_1"
+						localize "STR_PMCA_arsenal_scarcity_ammo_1"
 					};
 					case (_colorMult > 0.2): {
-						localize "STR_A3AP_arsenal_scarcity_ammo_2"
+						localize "STR_PMCA_arsenal_scarcity_ammo_2"
 					};
 					case (_colorMult > 0): {
-						localize "STR_A3AP_arsenal_scarcity_ammo_3"
+						localize "STR_PMCA_arsenal_scarcity_ammo_3"
 					};
 					default{""};
 				};
@@ -1864,8 +1874,8 @@ switch _mode do {
 			default										{configfile >> "cfgweapons" >> _item};
 		};
 
-		["ShowItemInfo",[_itemCfg]] call jn_fnc_arsenal;
-		["ShowItemStats",[_itemCfg]] call jn_fnc_arsenal;
+		["ShowItemInfo",[_itemCfg]] call PMCA_fnc_arsenal;
+		["ShowItemStats",[_itemCfg]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -1888,23 +1898,23 @@ switch _mode do {
 
 		// Prevent equipping item when there aren't any left
 		if (_amount == 0 and _item != "") exitWith{
-			if(missionnamespace getvariable ["jna_reselect_item",true])then{//prefent loop when unavalable item was worn and a other unavalable item was selected
-				missionnamespace setvariable ["jna_reselect_item",false];
-				["ListSelectCurrent",[_display,_index]] call jn_fnc_arsenal;
-				missionnamespace setvariable ["jna_reselect_item",true];
+			if(missionnamespace getvariable ["pmca_reselect_item",true])then{//prefent loop when unavalable item was worn and a other unavalable item was selected
+				missionnamespace setvariable ["pmca_reselect_item",false];
+				["ListSelectCurrent",[_display,_index]] call PMCA_fnc_arsenal;
+				missionnamespace setvariable ["pmca_reselect_item",true];
 			};
 		};
 
 		//check if weapon is unlocked
 		private _min = [_index, _item] call _minItemsMember;
-		if ((_amount <= _min) AND (_amount != -1) AND (_item !="") AND !(player call A3A_fnc_isMember) AND !_type) exitWith{
-			['showMessage',[_display,localize "STR_JNA_ACT_ONLY_MEMBERS"]] call jn_fnc_arsenal;
+		if ((_amount <= _min) AND (_amount != -1) AND (_item !="") AND false AND !_type) exitWith{
+			['showMessage',[_display,localize "STR_PMCA_ACT_ONLY_MEMBERS"]] call PMCA_fnc_arsenal;
 
 			//reset _cursel
-			if(missionnamespace getvariable ["jna_reselect_item",true])then{//prefent loop when unavalable item was worn and a other unavalable item was selected
-				missionnamespace setvariable ["jna_reselect_item",false];
-				["ListSelectCurrent",[_display,_index]] call jn_fnc_arsenal;
-				missionnamespace setvariable ["jna_reselect_item",true];
+			if(missionnamespace getvariable ["pmca_reselect_item",true])then{//prefent loop when unavalable item was worn and a other unavalable item was selected
+				missionnamespace setvariable ["pmca_reselect_item",false];
+				["ListSelectCurrent",[_display,_index]] call PMCA_fnc_arsenal;
+				missionnamespace setvariable ["pmca_reselect_item",true];
 			};
 		};
 
@@ -1948,7 +1958,7 @@ switch _mode do {
 						case IDC_RSCDISPLAYARSENAL_TAB_BACKPACK:{removebackpack player;};
 					};
 
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 
 					if (_item != "") then{
 						switch _index do{
@@ -1974,7 +1984,7 @@ switch _mode do {
 							case IDC_RSCDISPLAYARSENAL_TAB_BACKPACK:{backpackContainer player;};
 						};
 
-						[_index, _item] call jn_fnc_arsenal_removeItem;
+						[_index, _item] call PMCA_fnc_arsenal_removeItem;
 					};
 					{
 						_canAdd = switch _index do{
@@ -1990,14 +2000,14 @@ switch _mode do {
 							};
 
 						}else{
-							_indexItem = _x call jn_fnc_arsenal_itemType;
+							_indexItem = _x call PMCA_fnc_arsenal_itemType;
 							if!(_indexItem in [
 							   IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG,
 							   IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL,
 							   IDC_RSCDISPLAYARSENAL_TAB_CARGOTHROW,
 							   IDC_RSCDISPLAYARSENAL_TAB_CARGOPUT
 							])then{
-								[_indexItem, _x] call jn_fnc_arsenal_addItem;
+								[_indexItem, _x] call PMCA_fnc_arsenal_addItem;
 							};
 						};
 					} foreach _items;
@@ -2015,23 +2025,23 @@ switch _mode do {
 						if(_canAdd)then{
 							_container addMagazineAmmoCargo [_magazine,1,_count];
 						}else{
-							_indexItem = _magazine call jn_fnc_arsenal_itemType;
-							[_indexItem, _magazine, _count] call jn_fnc_arsenal_addItem;
+							_indexItem = _magazine call PMCA_fnc_arsenal_itemType;
+							[_indexItem, _magazine, _count] call PMCA_fnc_arsenal_addItem;
 						};
 					}forEach _magazines;
 
 				};
-				_lastCargoListSelected = uiNamespace getVariable ["jna_lastCargoListSelected", IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG];
-				['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG]] call jn_fnc_arsenal;
+				_lastCargoListSelected = uiNamespace getVariable ["pmca_lastCargoListSelected", IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG];
+				['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG]] call PMCA_fnc_arsenal;
 			};
 			case IDC_RSCDISPLAYARSENAL_TAB_HEADGEAR: {
 				_oldItem = headgear player;
 				if (_oldItem != _item) then {
 					removeheadgear player;
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 					if (_item != "") then{
 						player addheadgear _item;
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 
@@ -2040,10 +2050,10 @@ switch _mode do {
 				_oldItem = goggles player;
 				if (_oldItem != _item) then {
 					removeGoggles player;
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 					if (_item != "") then{
 						player addGoggles _item;
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 			};
@@ -2051,10 +2061,10 @@ switch _mode do {
 				_oldItem = hmd player;
 				if (_oldItem != _item) then {
 					player removeWeaponGlobal _oldItem;
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 					if (_item != "") then{
 						player addweapon _item;
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 			};
@@ -2062,16 +2072,16 @@ switch _mode do {
 				_oldItem = binocular player;
 				if (_oldItem != _item) then {
 					player removeWeaponGlobal _oldItem;
-					[_index,_oldItem] call jn_fnc_arsenal_addItem;
+					[_index,_oldItem] call PMCA_fnc_arsenal_addItem;
 					if (_item != "") then{
 						player addweapon _item;
 						_magazines = getarray (configfile >> "cfgweapons" >> _item >> "magazines");
 						if (count _magazines > 0) then {
 							_mag = (_magazines select 0);
-							if([jna_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL, _mag] call jn_fnc_arsenal_itemCount > 0)then{
+							if([pmca_dataList select IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL, _mag] call PMCA_fnc_arsenal_itemCount > 0)then{
 								if((player canAddItemToUniform _mag)||(player canAddItemToVest _mag)||(player canAddItemToBackpack _mag))then{
 									player addmagazine _mag;
-									[IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL, _mag]call jn_fnc_arsenal_removeItem;
+									[IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL, _mag]call PMCA_fnc_arsenal_removeItem;
 								}else{
 									titleText["I can't take batteries, I have no space for it", "PLAIN"];
 								};
@@ -2079,7 +2089,7 @@ switch _mode do {
 								titleText["Shit there are no more batteries", "PLAIN"];
 							};
 						};
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 			};
@@ -2110,13 +2120,13 @@ switch _mode do {
 
 					//remove weapon
 					player removeWeaponGlobal _oldItem;
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 
 					//add new weapon
 					if (_item != "") then {
 						//give player new weapon
 						[player,_item,0] call bis_fnc_addweapon;
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 
 						//Remove any attachments that spawn *with* the weapon.
 						switch _index do {
@@ -2170,9 +2180,9 @@ switch _mode do {
 					{
 						_magazine = _x select 0;
 						_amount = _x select 1;
-						_indexItem = _magazine call jn_fnc_arsenal_itemType;
+						_indexItem = _magazine call PMCA_fnc_arsenal_itemType;
 						if (_indexItem < 0) then { continue };
-						[_indexItem, _magazine, _amount] call jn_fnc_arsenal_addItem;//TODO
+						[_indexItem, _magazine, _amount] call PMCA_fnc_arsenal_addItem;//TODO
 					}forEach(_oldMagazines - _newMagazines);
 
 					_newAttachments = switch _index do {
@@ -2194,7 +2204,7 @@ switch _mode do {
 							case "AccessoryBipod": {IDC_RSCDISPLAYARSENAL_TAB_ITEMBIPOD};
 							default {-1};
 						};
-						if(_idcList != -1)then{[_idcList, _x] call jn_fnc_arsenal_addItem};
+						if(_idcList != -1)then{[_idcList, _x] call PMCA_fnc_arsenal_addItem};
 					}foreach _oldAttachments - _newAttachments;
 					{
 						private["_idcList","_type"];
@@ -2206,10 +2216,10 @@ switch _mode do {
 							case "AccessoryBipod": {IDC_RSCDISPLAYARSENAL_TAB_ITEMBIPOD};
 							default {-1};
 						};
-						if(_idcList != -1)then{[_idcList, _x] call jn_fnc_arsenal_removeItem};
+						if(_idcList != -1)then{[_idcList, _x] call PMCA_fnc_arsenal_removeItem};
 					}foreach _newAttachments - _oldAttachments;
 
-					['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG]] call jn_fnc_arsenal;
+					['TabSelectRight',[_display,IDC_RSCDISPLAYARSENAL_TAB_LOADEDMAG]] call PMCA_fnc_arsenal;
 				};
 			};
 			case IDC_RSCDISPLAYARSENAL_TAB_MAP;
@@ -2219,7 +2229,7 @@ switch _mode do {
 			case IDC_RSCDISPLAYARSENAL_TAB_WATCH: {
 				_oldItem = "";
 				{
-					if(_index == (_x call jn_fnc_arsenal_itemType))exitwith{
+					if(_index == (_x call PMCA_fnc_arsenal_itemType))exitwith{
 						_oldItem = _x;
 					};
 				}foreach assignedItems player;
@@ -2245,10 +2255,10 @@ switch _mode do {
 				if (_oldItem != _item) then {
 					player unassignitem _OldItemUnequal;
 					player removeitem _OldItemUnequal;
-					[_index, _oldItem] call jn_fnc_arsenal_addItem;
+					[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 					if (_item != "") then {
 						player linkitem _item;
-						[_index, _item]call jn_fnc_arsenal_removeItem;
+						[_index, _item]call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 			};
@@ -2267,7 +2277,7 @@ switch _mode do {
 				//prevent selecting grey items, needs to be this complicated because bis_fnc_compatibleItems returns some crap resolts like optic_aco instead of Optic_Aco
 				_compatibleItems = compatibleItems _weapon;
 				if not (({_x == _item} count _compatibleItems > 0) || _item isequalto "")exitwith{
-					['TabSelectRight',[_display,_index]] call jn_fnc_arsenal;
+					['TabSelectRight',[_display,_index]] call PMCA_fnc_arsenal;
 				};
 
 				_accIndex = [
@@ -2283,10 +2293,10 @@ switch _mode do {
 						_oldItem = (primaryWeaponItems player select _accIndex);
 						if (_oldItem != _item) then {
 							player removeprimaryweaponitem _oldItem;
-							[_index, _oldItem] call jn_fnc_arsenal_addItem;
+							[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 							if (_item != "") then {
 								player addprimaryweaponitem _item;
-								[_index, _item]call jn_fnc_arsenal_removeItem;
+								[_index, _item]call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
@@ -2294,10 +2304,10 @@ switch _mode do {
 						_oldItem = (secondaryWeaponItems player select _accIndex);
 						if (_oldItem != _item) then {
 							player removesecondaryweaponitem _oldItem;
-							[_index, _oldItem] call jn_fnc_arsenal_addItem;
+							[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 							if (_item != "") then {
 								player addsecondaryweaponitem _item;
-								[_index, _item]call jn_fnc_arsenal_removeItem;
+								[_index, _item]call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
@@ -2305,10 +2315,10 @@ switch _mode do {
 						_oldItem = (handgunitems player select _accIndex);
 						if (_oldItem != _item) then {
 							player removehandgunitem _oldItem;
-							[_index, _oldItem] call jn_fnc_arsenal_addItem;
+							[_index, _oldItem] call PMCA_fnc_arsenal_addItem;
 							if (_item != "") then {
 								player addhandgunitem _item;
-								[_index, _item]call jn_fnc_arsenal_removeItem;
+								[_index, _item]call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
@@ -2336,30 +2346,30 @@ switch _mode do {
 					case (ctrlenabled _ctrlListPrimaryWeapon): {
 						if (_oldMag != _newMag) then {
 							player removePrimaryWeaponItem _oldMag;
-							[_index, _oldMag, _oldAmmoCount] call jn_fnc_arsenal_addItem;
+							[_index, _oldMag, _oldAmmoCount] call PMCA_fnc_arsenal_addItem;
 							if (_newMag != "") then {
 								player addPrimaryWeaponItem _newMag;
-								[_index, _newMag, _newAmmoCount] call jn_fnc_arsenal_removeItem;
+								[_index, _newMag, _newAmmoCount] call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
 					case (ctrlEnabled _ctrlListSecondaryWeapon): {
 						if (_oldMag != _newMag) then {
 							player removeSecondaryWeaponItem _oldMag;
-							[_index, _oldMag, _oldAmmoCount] call jn_fnc_arsenal_addItem;
+							[_index, _oldMag, _oldAmmoCount] call PMCA_fnc_arsenal_addItem;
 							if (_newMag != "") then {
 								player addSecondaryWeaponItem _newMag;
-								[_index, _newMag, _newAmmoCount] call jn_fnc_arsenal_removeItem;
+								[_index, _newMag, _newAmmoCount] call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
 					case (ctrlEnabled _ctrlListHandgun): {
 						if (_oldMag != _newMag) then {
 							player removeHandgunItem _oldMag;
-							[_index, _oldMag, _oldAmmoCount] call jn_fnc_arsenal_addItem;
+							[_index, _oldMag, _oldAmmoCount] call PMCA_fnc_arsenal_addItem;
 							if (_newMag != "") then {
 								player addHandgunItem _newMag;
-								[_index, _newMag, _newAmmoCount] call jn_fnc_arsenal_removeItem;
+								[_index, _newMag, _newAmmoCount] call PMCA_fnc_arsenal_removeItem;
 							};
 						};
 					};
@@ -2381,10 +2391,10 @@ switch _mode do {
 
 				if (_oldMag != _newMag) then {
 					player removePrimaryWeaponItem _oldMag;
-					[_index, _oldMag] call jn_fnc_arsenal_addItem;
+					[_index, _oldMag] call PMCA_fnc_arsenal_addItem;
 					if (_newMag != "") then {
 						player addPrimaryWeaponItem _newMag;
-						[_index, _newMag] call jn_fnc_arsenal_removeItem;
+						[_index, _newMag] call PMCA_fnc_arsenal_removeItem;
 					};
 				};
 			};
@@ -2399,8 +2409,8 @@ switch _mode do {
 
 
 
-		["updateItemInfo",[ _display,_ctrlList,_index]] call jn_fnc_arsenal;
-		["HighlightMissingIcons",[_display]] call jn_fnc_arsenal;
+		["updateItemInfo",[ _display,_ctrlList,_index]] call PMCA_fnc_arsenal;
+		["HighlightMissingIcons",[_display]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -2453,7 +2463,7 @@ switch _mode do {
 			_grayout = false;
 
 			_min = [_index, _item] call _minItemsMember;
-			if ((_amount <= _min) AND (_amount != -1) AND (_amount !=0) AND !(player call A3A_fnc_isMember)) then{_grayout = true};
+			if ((_amount <= _min) AND (_amount != -1) AND (_amount !=0) AND false) then{_grayout = true};
 
 			_isIncompatible = _ctrlList lnbvalue [_r,1];
 			_mass = _ctrlList lbvalue (_r * _columns);
@@ -2511,8 +2521,8 @@ switch _mode do {
 
 			if (_add > 0) then {//add
 				_min = [_index, _item] call _minItemsMember;
-				if((_amount <= _min) AND (_amount != -1) AND !(player call A3A_fnc_isMember)) exitWith{
-					['showMessage',[_display, localize "STR_JNA_ACT_ONLY_MEMBERS"]] call jn_fnc_arsenal;
+				if((_amount <= _min) AND (_amount != -1) AND false) exitWith{
+					['showMessage',[_display, localize "STR_PMCA_ACT_ONLY_MEMBERS"]] call PMCA_fnc_arsenal;
 				};
 				if(_index in [IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG,IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL])then{//magazines are handeld by bullet count
 					//check if full mag can be optaind
@@ -2582,10 +2592,10 @@ switch _mode do {
 			_amountOld = parseNumber (_ctrlList lnbtext [_lbcursel,2]);
 			if(_add > 0)then{
 				_ctrlList lnbsettext [[_lbcursel,2],str (_amountOld + _count)];
-				[_index, _item, _count]call jn_fnc_arsenal_removeItem;
+				[_index, _item, _count]call PMCA_fnc_arsenal_removeItem;
 			}else{
 				_ctrlList lnbsettext [[_lbcursel,2],str (_amountOld - _count)];
-				[_index, _item, _count] call jn_fnc_arsenal_addItem;
+				[_index, _item, _count] call PMCA_fnc_arsenal_addItem;
 			};
 		};
 
@@ -2597,15 +2607,15 @@ switch _mode do {
 
 		_ctrlLoadCargo progresssetposition _load;
 
-		["SelectItemRight",[_display,_ctrlList,_index]] call jn_fnc_arsenal;
+		["SelectItemRight",[_display,_ctrlList,_index]] call PMCA_fnc_arsenal;
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	case "buttonInvToJNA": {
 		//_display = _this select 0;
-		private _object = missionnamespace getVariable ["jna_object",objNull];
-		//update server
-		[_object] remoteExec ["jn_fnc_arsenal_cargoToArsenal",2];
+		private _object = missionnamespace getVariable ["pmca_object",objNull];
+		//the server empties the arsenal object's own inventory into its storage
+		[player, _object, _object] remoteExecCall ["PMCA_fnc_arsenal_cargoToArsenal",2];
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
@@ -2871,7 +2881,7 @@ switch _mode do {
 
 		{
 			_index = _x;
-			_item = ["ListCurSel",[_index]] call jn_fnc_arsenal;
+			_item = ["ListCurSel",[_index]] call PMCA_fnc_arsenal;
 			_ctrlTab = _display displayctrl(IDC_RSCDISPLAYARSENAL_TAB + _index);
 
 			//check if some item was selected
@@ -2905,7 +2915,7 @@ switch _mode do {
 					_ctrlMouseBlock = _display displayctrl IDC_RSCDISPLAYARSENAL_MOUSEBLOCK;
 					_ctrlMouseBlock ctrlenable false;
 				} else {
-					if (true) then {["buttonClose",[_display]] spawn jn_fnc_arsenal;} else {_display closedisplay 2;};
+					if (true) then {["buttonClose",[_display]] spawn PMCA_fnc_arsenal;} else {_display closedisplay 2;};
 				};
 				_return = true;
 			};
@@ -2915,9 +2925,9 @@ switch _mode do {
 				_ctrlTemplate = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_TEMPLATE;
 				if (ctrlfade _ctrlTemplate == 0) then {
 					if (BIS_fnc_arsenal_type == 0) then {
-						["buttonTemplateOK",[_display]] spawn jn_fnc_arsenal;
+						["buttonTemplateOK",[_display]] spawn PMCA_fnc_arsenal;
 					} else {
-						["buttonTemplateOK",[_display]] spawn jn_fnc_arsenal;
+						["buttonTemplateOK",[_display]] spawn PMCA_fnc_arsenal;
 					};
 					_return = true;
 				};
@@ -2954,11 +2964,11 @@ switch _mode do {
 
 			//--- Save
 			case (_key == DIK_S): {
-				if (_ctrl && (vehicle player isEqualTo player)) then {['buttonSave',[_display]] call jn_fnc_arsenal;};
+				if (_ctrl && (vehicle player isEqualTo player)) then {['buttonSave',[_display]] call PMCA_fnc_arsenal;};
 			};
 			//--- Open
 			case (_key == DIK_O): {
-				if (_ctrl && (vehicle player isEqualTo player)) then {['buttonLoad',[_display]] call jn_fnc_arsenal;};
+				if (_ctrl && (vehicle player isEqualTo player)) then {['buttonLoad',[_display]] call PMCA_fnc_arsenal;};
 			};
 
 			//--- Vision mode
@@ -3019,7 +3029,7 @@ switch _mode do {
 	case "buttonClose": {
 		_display = _this select 0;
 
-		["RestoreTFAR"] call jn_fnc_arsenal;
+		["RestoreTFAR"] call PMCA_fnc_arsenal;
 
 		//remove missing item message
 		titleText["", "PLAIN"];
@@ -3030,139 +3040,12 @@ switch _mode do {
 	};
 
 	///////////////////////////////////////////////////////////////////////////////////////////
-	case "buttonDefaultGear":{
-
-		/////////////////////////////////////////////////////////////////////////////////
-		// unifrom
-		_itemsUnifrom = [];
-		if(A3A_hasACEMedical)then{
-			_itemsUnifrom pushBack ["ACE_elasticBandage",2];
-			_itemsUnifrom pushBack ["ACE_packingBandage",2];
-			_itemsUnifrom pushBack ["ACE_morphine",1];
-			_itemsUnifrom pushBack ["ACE_epinephrine",1];
-			_itemsUnifrom pushBack ["ACE_adenosine", 1];
-			_itemsUnifrom pushBack ["ACE_tourniquet",1];
-			_itemsUnifrom pushBack ["ACE_splint", 1];
-		}else{
-			_itemsUnifrom pushBack ["FirstAidKit",2];
-			if(A3A_hasACE) then {
-				_itemsUnifrom pushBack ["ACE_EarPlugs",1];
-				_itemsUnifrom pushBack ["ACE_MapTools",1];
-				_itemsUnifrom pushBack ["ACE_CableTie",2];
-			};
-		};
-
-		if ((A3A_hasACE) AND (sunOrMoon <1)) then {
-			_itemsUnifrom pushback ["ACE_HandFlare_Red",1];
-			_itemsUnifrom pushback ["ACE_Chemlight_HiRed",1];
-			_itemsUnifrom pushBack ["ACE_Flashlight_MX991",1];
-		};
-		//check items that already exist
-		{
-			_itemsUnifrom = [_itemsUnifrom,_x] call jn_fnc_arsenal_removeFromArray;
-		} forEach (uniformItems player);
-		//add non existing items to uniform
-		{
-			_item = _x select 0;
-			_amount = _x select 1;
-			_amountAdded = 0;
-			while {(_amountAdded < _amount) && (player canAddItemToUniform _x)}do{
-				_amountAdded = _amountAdded + 1;
-				player addItemToUniform _item;
-			};
-
-			if(_amountAdded > 0)then{
-
-			};
-		} forEach _itemsUnifrom;
-
-		/////////////////////////////////////////////////////////////////////////////////
-		// backpack stuff
-		_itemsBackpack = [];
-
-		if([player] call A3A_fnc_isMedic)then{
-
-			if(A3A_hasACEMedical) then { //Medic equipment
-				_itemsBackpack pushBack ["ACE_elasticBandage",15];
-				_itemsBackpack pushBack ["ACE_packingBandage",15];
-				_itemsBackpack pushBack ["ACE_tourniquet",5];
-				_itemsBackpack pushBack ["ACE_personalAidKit",1];
-				_itemsBackpack pushBack ["ACE_adenosine", 10];
-				_itemsBackpack pushBack ["ACE_morphine", 10];
-				_itemsBackpack pushBack ["ACE_epinephrine", 10];
-		} else { //Vanilla Medikit for medic
-				_itemsBackpack pushBack ["Medikit",1];
-				_itemsBackpack pushBack ["FirstAidKit",1];
-			};
-		} else {
-		 		if(A3A_hasACEMedical) then {
-					_itemsBackpack pushBack ["ACE_fieldDressing",5];
-					_itemsBackpack pushBack ["ACE_packingBandage",5];
-					_itemsBackpack pushBack ["ACE_elasticBandage",5];
-					_itemsBackpack pushBack ["ACE_morphine",3];
-					_itemsBackpack pushBack ["ACE_epinephrine",2];
-					_itemsBackpack pushBack ["ACE_adenosine", 2];
-					_itemsBackpack pushBack ["ACE_tourniquet",2];
-					_itemsBackpack pushBack ["ACE_splint", 2];
-			} else { //Vanilla FAK for soldiers
-				_itemsBackpack pushBack ["FirstAidKit",5];
-			};
-		};
-
-		if(player call A3A_fnc_isEngineer) then {
-					_itemsBackpack pushback ["ToolKit",1];
-					if(A3A_hasACE) then {
-						_itemsbackpack pushback ["ACE_Clacker",1];
-						_itemsbackpack pushback ["ACE_SpraypaintRed",4];
-					};
-		};
-
-
-		//check items that already exist
-		{
-			_itemsBackpack = [_itemsBackpack,_x] call jn_fnc_arsenal_removeFromArray;
-		} forEach (backpackitems player);
-
-		//add non existing items
-		{
-			_item = _x select 0;
-			_amount = _x select 1;
-			_amountAdded = 0;
-			while {(_amountAdded < _amount) && (player canAddItemToBackpack _x)}do{
-				_amountAdded = _amountAdded + 1;
-				player addItemToBackpack _item;
-			};
-
-			if(_amountAdded > 0)then{
-
-			};
-		} forEach _itemsBackpack;
-
-		/////////////////////////////////////////////////////////////////////////////////
-		//assigned items
-		{
-			_index = _x select 0;
-			_item = _x select 1;
-			_itemCurrent = ["ListCurSel",[_index]] call jn_fnc_arsenal;
-			if(_itemCurrent isEqualTo "")then{
-				player linkitem _item;
-
-				[_index, _item]call jn_fnc_arsenal_removeItem;
-			};
-		} forEach [
-			[IDC_RSCDISPLAYARSENAL_TAB_MAP,"ItemMap"],
-			[IDC_RSCDISPLAYARSENAL_TAB_RADIO,"ItemRadio"],
-			[IDC_RSCDISPLAYARSENAL_TAB_COMPASS,"ItemCompass"],
-			[IDC_RSCDISPLAYARSENAL_TAB_WATCH,"ItemWatch"]
-		];
-	};
-
 	///////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////
 	//LOAD AND SAVE BUTTON STUFF!
 	case "buttonLoad": {
 		_display = _this select 0;
-		['showTemplates',[_display]] call jn_fnc_arsenal;
+		['showTemplates',[_display]] call PMCA_fnc_arsenal;
 
 		_ctrlTemplate = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_TEMPLATE;
 		_ctrlTemplate ctrlsetfade 0;
@@ -3188,7 +3071,7 @@ switch _mode do {
 
 	case "buttonSave": {
 		_display = _this select 0;
-		['showTemplates',[_display]] call jn_fnc_arsenal;
+		['showTemplates',[_display]] call PMCA_fnc_arsenal;
 
 		_ctrlTemplate = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_TEMPLATE;
 		_ctrlTemplate ctrlsetfade 0;
@@ -3241,16 +3124,16 @@ switch _mode do {
 			_ctrlTemplateValue = _display displayctrl IDC_RSCDISPLAYARSENAL_TEMPLATE_VALUENAME;
 			if ((_ctrlTemplateValue lbvalue lnbcurselrow _ctrlTemplateValue) >= 0) then {
 				_inventory = _ctrlTemplateValue lnbtext [lnbcurselrow _ctrlTemplateValue,0];
-				_inventory call jn_fnc_arsenal_loadinventory;
+				_inventory call PMCA_fnc_arsenal_loadinventory;
 
 				{
 					_ctrlList = _display displayctrl (IDC_RSCDISPLAYARSENAL_LIST + _x);
 					if(ctrlenabled _ctrlList) exitWith {
-						["TabSelectLeft", [_display, _x]] call jn_fnc_arsenal;
+						["TabSelectLeft", [_display, _x]] call PMCA_fnc_arsenal;
 					};
 
 				} forEach [IDCS_LEFT];
-				["HighlightMissingIcons",[_display]] call jn_fnc_arsenal;
+				["HighlightMissingIcons",[_display]] call PMCA_fnc_arsenal;
 
 			} else {
 				_hideTemplate = false;
@@ -3273,10 +3156,10 @@ switch _mode do {
 		_cursel = lnbcurselrow _ctrlTemplateValue;
 		_name = _ctrlTemplateValue lnbtext [_cursel,0];
 		[_center,[profileNamespace,_name],nil,true] call bis_fnc_saveInventory;
-		['showTemplates',[_display]] call jn_fnc_arsenal;
+		['showTemplates',[_display]] call PMCA_fnc_arsenal;
 		_ctrlTemplateValue lnbsetcurselrow (_cursel max (lbsize _ctrlTemplateValue - 1));
 
-		["templateSelChanged",[_display]] call jn_fnc_arsenal;
+		["templateSelChanged",[_display]] call PMCA_fnc_arsenal;
 	};
 
 	case "showTemplates": {
@@ -3329,7 +3212,7 @@ switch _mode do {
 		};
 		_ctrlTemplateValue lnbsort [0,false];
 
-		["templateSelChanged",[_display]] call jn_fnc_arsenal;
+		["templateSelChanged",[_display]] call PMCA_fnc_arsenal;
 	};
 
 	case "templateSelChanged": {

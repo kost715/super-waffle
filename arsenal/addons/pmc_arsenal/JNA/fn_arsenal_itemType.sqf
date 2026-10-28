@@ -82,6 +82,11 @@
 private ["_item","_return","_data"];
 params ["_item"];
 
+// The server classifies every stock change; config lookups are cached per class.
+private _typeCache = missionNamespace getVariable ["PMCA_itemTypes", createHashMap];
+private _typeKey = toLowerANSI _item;
+if (_typeKey in _typeCache) exitWith {_typeCache get _typeKey};
+
 _return = -1;
 
 private ["_weaponType","_weaponTypeCategory"];
@@ -207,6 +212,8 @@ INITTYPES
 
 
 if(_return == -1)then{
+	// A dedicated server never opens the arsenal: build the class lists on first use.
+	if (isNil "bis_fnc_arsenal_data") then {["Preload"] call PMCA_fnc_arsenal};
 	private _data = (missionnamespace getvariable "bis_fnc_arsenal_data");
 	{
 		private _index = _x;
@@ -230,4 +237,6 @@ if(_return == -1)then{
 //if (_return == -1) then {diag_log format ["Index%1. Item:%2.Amount:%3",_item,1,1]};
 };
 
+_typeCache set [_typeKey, _return];
+PMCA_itemTypes = _typeCache;
 _return;

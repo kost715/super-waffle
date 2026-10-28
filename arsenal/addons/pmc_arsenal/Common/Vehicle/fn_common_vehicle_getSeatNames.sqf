@@ -12,7 +12,7 @@
 	Returns:
 		Array - array of turretId and names [[-1],["Driver"]]
 		
-	Usage: object call JN_fnc_common_vehicle_getSeatNames;
+	Usage: object call PMCA_fnc_common_vehicle_getSeatNames;
 	
 */
 

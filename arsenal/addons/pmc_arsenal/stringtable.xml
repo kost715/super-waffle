@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="A3-Antistasi">
+<Project name="PMC-Arsenal">
     <Package name="Arsenal">
         <Container name="Actions">
-            <Key ID="STR_JNC_ACT_SELECT">
+            <Key ID="STR_PMCAC_ACT_SELECT">
                 <Original>Select</Original>
                 <Russian>Выбрать</Russian>
                 <German>Auswählen</German>
@@ -11,7 +11,7 @@
                 <French>Sélectionner</French>
                 <Turkish>Seç</Turkish>
             </Key>
-            <Key ID="STR_JNC_ACT_CANCEL">
+            <Key ID="STR_PMCAC_ACT_CANCEL">
                 <Original>Cancel</Original>
                 <Russian>Отменить</Russian>
                 <German>Abbrechen</German>
@@ -20,7 +20,7 @@
                 <French>Annuler</French>
                 <Turkish>İptal</Turkish>
             </Key>
-            <Key ID="STR_JNC_ACT_SELECT_HINT">
+            <Key ID="STR_PMCAC_ACT_SELECT_HINT">
                 <Original>Select an object</Original>
                 <Russian>Выберите объект</Russian>
                 <German>Objekt auswählen</German>
@@ -29,7 +29,7 @@
                 <French>Sélectionner un objet</French>
                 <Turkish>Bir nesne seç</Turkish>
             </Key>
-            <Key ID="STR_JNC_ACT_SELECT_NO_OBJECT">
+            <Key ID="STR_PMCAC_ACT_SELECT_NO_OBJECT">
                 <Original>Not looking at anything</Original>
                 <Russian>Вы не смотрите на какой-либо объект</Russian>
                 <German>Nichts ausgewählt</German>
@@ -38,7 +38,7 @@
                 <French>Ne rien regarder</French>
                 <Turkish>Hiçbir şeye bakmıyorsun</Turkish>
             </Key>
-            <Key ID="STR_JNA_SORT_COLOR">
+            <Key ID="STR_PMCA_SORT_COLOR">
                 <Original>Sort by row color</Original>
                 <German>Nach Zeilenfarbe sortieren</German>
                 <Russian>Сортировка по цвету строки</Russian>
@@ -47,14 +47,14 @@
                 <French>Tri par couleur de ligne</French>
                 <Turkish>Satır rengine göre sırala</Turkish>
             </Key>
-            <Key ID="STR_JNA_SORT_MOD">
+            <Key ID="STR_PMCA_SORT_MOD">
                 <Original>Sort by mod/dlc</Original>
                 <Russian>Сортировка по моду/дополнению</Russian>
                 <Chinesesimp>按模组/DLC排序</Chinesesimp>
                 <Korean>모드/DLC 별로 정렬</Korean>
                 <Turkish>MOD/DLC göre sırala</Turkish>
             </Key>
-            <Key ID="STR_JNA_SORT_DEFAULT">
+            <Key ID="STR_PMCA_SORT_DEFAULT">
                 <Original>Default</Original>
                 <German>Standard</German>
                 <Russian>Сортировка по умолчанию</Russian>
@@ -63,7 +63,7 @@
                 <French>Standard</French>
                 <Turkish>Varsayılan</Turkish>
             </Key>
-            <Key ID="STR_JNA_SORT_BY_AMOUNT">
+            <Key ID="STR_PMCA_SORT_BY_AMOUNT">
                 <Original>Sort by amount</Original>
                 <German>Nach Menge sortieren</German>
                 <Russian>Сортировка по количеству</Russian>
@@ -72,7 +72,7 @@
                 <French>Trier par quantité</French>
                 <Turkish>Miktara göre sırala</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_OPEN">
+            <Key ID="STR_PMCA_ACT_OPEN">
                 <Original>Arsenal</Original>
                 <German>Arsenal</German>
                 <Chinesesimp>军火库</Chinesesimp>
@@ -81,7 +81,7 @@
                 <French>Arsenal</French>
                 <Turkish>Arsenal</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_CONTAINER_OPEN">
+            <Key ID="STR_PMCA_ACT_CONTAINER_OPEN">
                 <Original>Select vehicle to open arsenal for it</Original>
                 <Russian>Выбрать технику и открыть арсенал для неё</Russian>
                 <German>Fahrzeug auswählen, um Arsenal dafür zu öffnen</German>
@@ -90,7 +90,7 @@
                 <French>Sélectionner un véhicule pour ouvrir l'arsenal qui lui est destiné</French>
                 <Turkish>Araç için Arsenal'i aç</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_UNLOAD">
+            <Key ID="STR_PMCA_ACT_UNLOAD">
                 <Original>Unload from vehicle</Original>
                 <German>Fahrzeug entladen</German>
                 <Chinesesimp>从载具上卸载</Chinesesimp>
@@ -99,7 +99,7 @@
                 <French>Déchargement du véhicule</French>
                 <Turkish>Araçtan indir</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_CONTAINER_SELECTERROR1">
+            <Key ID="STR_PMCA_ACT_CONTAINER_SELECTERROR1">
                 <Original>You're not looking at an object.</Original>
                 <German>Sie betrachten kein Objekt.</German>
                 <Chinesesimp>你没有在看物体。</Chinesesimp>
@@ -108,7 +108,7 @@
                 <French>Vous ne regardez pas un objet.</French>
                 <Turkish>Bir objeye bakmıyorsunuz</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_CONTAINER_SELECTERROR2">
+            <Key ID="STR_PMCA_ACT_CONTAINER_SELECTERROR2">
                 <Original>Object is too far away.</Original>
                 <German>Objekt ist zu weit entfernt.</German>
                 <Chinesesimp>该对象太远</Chinesesimp>
@@ -117,7 +117,7 @@
                 <French>L'objet est trop éloigné.</French>
                 <Turkish>Obje çok uzakta</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_CONTAINER_SELECTERROR3">
+            <Key ID="STR_PMCA_ACT_CONTAINER_SELECTERROR3">
                 <Original>Object does not have any inventory.</Original>
                 <German>Objekt hat kein Inventar.</German>
                 <Chinesesimp>该对象没有任何库存</Chinesesimp>
@@ -126,7 +126,7 @@
                 <French>L'objet n'a pas d'inventaire.</French>
                 <Turkish>Objenin herhangi bir envanteri yok</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_ONLY_MEMBERS">
+            <Key ID="STR_PMCA_ACT_ONLY_MEMBERS">
                 <Original>We are low on this item, only members may use it.</Original>
                 <German>Dieser Artikel ist knapp, nur Mitglieder können ihn verwenden.</German>
                 <Chinesesimp>这样的有限物品只有服务器会员才能使用。</Chinesesimp>
@@ -135,7 +135,7 @@
                 <French>Cet article est en rupture de stock, seuls les membres peuvent l'utiliser.</French>
                 <Turkish>Bu eşyanın stokları azaldı, sadece üyeler kullanabilir</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_VEHICLE_INVENTORY">
+            <Key ID="STR_PMCA_ACT_VEHICLE_INVENTORY">
                 <Original>Vehicle Inventory</Original>
                 <German>Fahrzeugbestand</German>
                 <Chinesesimp>载具库存</Chinesesimp>
@@ -144,7 +144,7 @@
                 <French>Inventaire du véhicule</French>
                 <Turkish>Araç Envanteri</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_DEF_GEAR_BUTTON">
+            <Key ID="STR_PMCA_ACT_DEF_GEAR_BUTTON">
                 <Original>Default gear</Original>
                 <Russian>СНАРЯЖ. ПО УМОЛЧАНИЮ</Russian>
                 <German>Standardausrüstung</German>
@@ -153,7 +153,7 @@
                 <French>Équipement standard</French>
                 <Turkish>Varsayılan teçhizat</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_DEF_GEAR">
+            <Key ID="STR_PMCA_ACT_DEF_GEAR">
                 <Original>Add default items like radio and medical supplies</Original>
                 <Russian>Добавить предметы по умолчанию, такие как рации и медпакеты</Russian>
                 <German>Fügen Sie Standardartikel wie Radio und medizinische Versorgung hinzu</German>
@@ -162,16 +162,16 @@
                 <French>Ajouter des éléments par défaut tels que des radios et des fournitures médicales</French>
                 <Turkish>Radyo ve tıbbi malzeme gibi varsayılan eşyaları ekle</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_MOVE_FROM_CRATE_TO_ARSENAL_BUTTON">
-                <Original>To crate</Original>
-                <Russian>В ящик</Russian>
+            <Key ID="STR_PMCA_ACT_MOVE_FROM_CRATE_TO_ARSENAL_BUTTON">
+                <Original>From crate</Original>
+                <Russian>Из ящика</Russian>
                 <German>Kiste</German>
                 <Chinesesimp>到箱子</Chinesesimp>
                 <Korean>상자로</Korean>
                 <French>A mettre en caisse</French>
                 <Turkish>Kasaya</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_MOVE_FROM_CRATE_TO_ARSENAL">
+            <Key ID="STR_PMCA_ACT_MOVE_FROM_CRATE_TO_ARSENAL">
                 <Original>Move items from crate inventory to arsenal</Original>
                 <Russian>Переместить предметы из инвентаря ящика в арсенал</Russian>
                 <German>Verschiebe Gegenstände aus dem Kisteninventar ins Arsenal</German>
@@ -180,7 +180,7 @@
                 <French>Déplacer des objets de l'inventaire de la caisse vers l'arsenal</French>
                 <Turkish>Eşyaları kasa envanterinden arsenal'e taşı</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL_BUTTON">
+            <Key ID="STR_PMCA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL_BUTTON">
                 <Original>Unload Vehicle</Original>
                 <Russian>Разгрузить машину</Russian>
                 <German>Fahrzeug entladen</German>
@@ -189,7 +189,7 @@
                 <French>Décharger le véhicule</French>
                 <Turkish>Aracı Boşalt</Turkish>
             </Key>
-            <Key ID="STR_JNA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL">
+            <Key ID="STR_PMCA_ACT_MOVE_FROM_VEHICLE_TO_ARSENAL">
                 <Original>Move items from vehicle inventory to arsenal</Original>
                 <Russian>Переместить предметы из инвентаря транспортного средства в арсенал</Russian>
                 <German>Verschieben Sie Gegenstände aus dem Fahrzeuginventar in das Arsenal</German>
@@ -198,13 +198,129 @@
                 <French>Déplacer des objets de l'inventaire des véhicules vers l'arsenal</French>
                 <Turkish>Eşyaları araç envanterinden arsenal'e taşı</Turkish>
             </Key>
-            <Key ID="STR_JNA_OVERRIDE">
+            <Key ID="STR_PMCA_OVERRIDE">
                 <Original>Double-click an item in the list to save it into your custom loadout. Double-click again to unsave.</Original>
                 <Turkish>Bir eşyayı özel yüklemenize kaydetmek için listeden üzerine çift tıklayın. Kaldırmak için tekrar çift tıklayın.</Turkish>
             </Key>
-            <Key ID="STR_JNA_OVERRIDE_CARGO">
+            <Key ID="STR_PMCA_OVERRIDE_CARGO">
                 <Original>Double-click an item in the list to save it into your custom loadout. Double-click again to unsave. Note that saving a cargo container (Uniform, Vest, or Backpack) also saves all of the contents of that container.</Original>
                 <Turkish>Bir eşyayı özel yüklemenize kaydetmek için üzerine çift tıklayın. Kaldırmak için tekrar çift tıklayın. Bir taşıma konteynerini (Üniforma, Yelek veya Sırt Çantası) kaydetmenin, o konteynerin tüm içeriğini de kaydedeceğini unutmayın.</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_0">
+                <Original>Looks like I am the only one using this today</Original>
+                <Russian>Похоже, что я буду единственным, кто сможет использовать это сегодня</Russian>
+                <Chinesesimp>看来今天只有我在用这个了</Chinesesimp>
+                <Korean>오늘은 나만 이걸 사용할 것 같군</Korean>
+                <French>On dirait que je suis le seul à l'utiliser aujourd'hui.</French>
+               <Turkish>Görünüşe göre bugün bunu benden başka kullanan yok (Stok çok fazla)</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_1">
+                <Original>More than enough for a whole army</Original>
+                <Russian>Более чем достаточно для целой армии</Russian>
+                <Chinesesimp>对于武装整个军队来说绰绰有余</Chinesesimp>
+                <Korean>전군이 감당하기에 충분하다</Korean>
+                <French>Plus qu'il n'en faut pour toute une armée</French>
+                <Turkish>Koca bir orduya yetecek kadar var</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_2">
+                <Original>Many of these left</Original>
+                <Russian>Этого ещё много</Russian>
+                <Chinesesimp>还剩下很多</Chinesesimp>
+                <Korean>많이 남았다</Korean>
+                <French>Beaucoup d'entre eux ont quitté</French>
+                <Turkish>Bunlardan elimizde çokça kaldı</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_3">
+                <Original>Some of these left</Original>
+                <Russian>Что-то из этого ещё есть</Russian>
+                <Chinesesimp>还剩下一些</Chinesesimp>
+                <Korean>조금 남았다</Korean>
+                <French>Certains d'entre eux ont quitté</French>
+                <Turkish>Bunlardan biraz kaldı</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_4">
+                <Original>If I want one I need to take it before someone else does</Original>
+                <Russian>Если я хочу использовать это оружие, мне нужно взять его до того, как это сделает кто-то другой</Russian>
+                <Chinesesimp>如果你想拿到这些装备得趁早</Chinesesimp>
+                <Korean>만약 내가 뭘 원한다면 다른 사람이 가져가기 전에 내가 먼저 가져야 한다</Korean>
+                <French>Si j'en veux un, je dois le prendre avant que quelqu'un d'autre ne le fasse.</French>
+                <Turkish>Eğer bir tane istiyorsam, başkası almadan önce kapmalıyım</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_5">
+                <Original>The last one in the box</Original>
+                <Russian>Последний предмет в ящике</Russian>
+                <Chinesesimp>箱子里的最后一个</Chinesesimp>
+                <Korean>상자 안에 있는 마지막 물품이다</Korean>
+                <French>Le dernier dans la boîte</French>
+                <Turkish>Kutudaki sonuncusu</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_ammo_0">
+                <Original>, but there is no ammo for it</Original>
+                <Russian>, но нет подходящих боеприпасов.</Russian>
+                <Chinesesimp>，但是没有弹药</Chinesesimp>
+                <Korean>. 하지만 그걸 위한 탄약이 없다</Korean>
+                <French>mais il n'y a pas de munitions pour ça</French>
+                <Turkish>, ancak bunun için mühimmat yok</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_ammo_1">
+                <Original>, and there is enough ammo for it</Original>
+                <Russian>, и для оружия достаточно боеприпасов.</Russian>
+                <Chinesesimp>，有足够的弹药</Chinesesimp>
+                <Korean>. 그리고 탄약도 충분하다</Korean>
+                <French>et il y a assez de munitions pour cela</French>
+                <Turkish>, ve bunun için yeterli mühimmat var</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_ammo_2">
+                <Original>, and there is still some ammo for it</Original>
+                <Russian>, и есть некоторое количество подходящих боеприпасов.</Russian>
+                <Chinesesimp>，还剩点弹药</Chinesesimp>
+                <Korean>. 그래도 아직 탄약은 조금 남아 있다</Korean>
+                <French>et il y a encore des munitions pour ça</French>
+                <Turkish>, ve bunun için hala biraz mühimmat var</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_arsenal_scarcity_ammo_3">
+                <Original>, but there are only a few shots for it</Original>
+                <Russian>, но подходящих боеприпасов совсем немного.</Russian>
+                <Chinesesimp>，只有一点弹药</Chinesesimp>
+                <Korean>. 하지만 몇 번만 쏠 양 밖에 없다</Korean>
+                <French>mais il n'y a que peu de photos pour cela</French>
+                <Turkish>, ancak bunun için sadece birkaç atımlık mühimmat var</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_vehArsenal_header">
+                <Original>Vehicle Arsenal</Original>
+                <Russian>Арсенал (Техника)</Russian>
+                <Chinesesimp>载具库</Chinesesimp>
+                <Korean>차량 아스널</Korean>
+                <French>Arsenal du véhicule</French>
+                <Turkish>Araç Arsenali</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_vehArsenal_desc">
+                <Original>Select a vehicle to open the arsenal for it, allowing you to fill its inventory with any items from the arsenal.</Original>
+                <Russian>Выберите транспортное средство, чтобы открыть арсенал для него и заполнить инвентарь техники любыми предметами из арсенала.</Russian>
+                <Chinesesimp>选择车辆为其打开武器库，以便将其货物与武器库中的任何物品一起装满。</Chinesesimp>
+                <Korean>아스널의 모든 아이템으로 화물을 채울 수 있도록 아스널을 열 차량을 선택하십시오.</Korean>
+                <French>Sélectionnez un véhicule pour ouvrir son inventaire et remplissez-le avec les objets de l'arsenal.</French>
+                <Turkish>Arsenal'ini açmak için bir araç seçin; bu, aracın envanterini arsenaldeki herhangi bir eşya ile doldurmanıza olanak tanır.</Turkish>
+            </Key>
+            <Key ID="STR_PMCA_ERR_NO_STORAGE">
+                <Original>This object is not an arsenal storage.</Original>
+                <Russian>Этот объект не является складом арсенала.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_TOO_FAR">
+                <Original>Come closer to the arsenal, on foot.</Original>
+                <Russian>Подойдите к арсеналу пешком.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_NO_ACCESS">
+                <Original>You have no access to this arsenal.</Original>
+                <Russian>У вас нет доступа к этому арсеналу.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_CONTAINER">
+                <Original>This vehicle or crate cannot be used now: it is too far from the arsenal, has no inventory or is already open.</Original>
+                <Russian>Эту машину или ящик сейчас нельзя использовать: слишком далеко от арсенала, нет инвентаря или их уже открыл другой игрок.</Russian>
+            </Key>
+            <Key ID="STR_PMCA_ERR_STOCK">
+                <Original>Not enough in stock: %1. Your equipment was restored to how it was when you opened the arsenal.</Original>
+                <Russian>На складе не хватило: %1. Снаряжение возвращено к состоянию на момент открытия арсенала.</Russian>
             </Key>
         </Container>
     </Package>

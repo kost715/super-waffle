@@ -7,5 +7,5 @@ private _fuel = (_config >> "fuel");
 private _repair = (_config >> "repair");
 
 private _vehicle = _type createVehicle _location; 
-_vehicle setVariable ["jn_type",_jn_type];
+_vehicle setVariable ["pmca_ui_type",_jn_type];
 

@@ -10,7 +10,7 @@ private _actionId = _object addAction [
 		private _script = _arguments;
 		
 		_target removeAction _actionId;
-		_target setVariable ["jn_cancelAction_id",nil];
+		_target setVariable ["pmca_ui_cancelAction_id",nil];
 		
 		call _script;
 	},
@@ -23,6 +23,6 @@ private _actionId = _object addAction [
 
 ];
 
-_object setVariable ["jn_cancelAction_id",_actionId];
+_object setVariable ["pmca_ui_cancelAction_id",_actionId];
 
-[player,""] call JN_fnc_common_updateActionCancel;
+[player,""] call PMCA_fnc_common_updateActionCancel;

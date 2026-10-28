@@ -1,4 +1,4 @@
 #include "defineCommon.inc"
 
 params ["_object"];
-isNil {_object getVariable "jn_cancelAction_id"}
+isNil {_object getVariable "pmca_ui_cancelAction_id"}

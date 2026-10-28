@@ -7,7 +7,7 @@
 //STRINGS ACTIONS
 
 #define STR_ACTION_ICON_ARSENAL "\A3\ui_f\data\GUI\Rsc\RscDisplayArsenal\spaceArsenal_ca.paa"
-#define STR_ACTION_TEXT_ARSENAL localize "STR_JNA_ACT_OPEN"
+#define STR_ACTION_TEXT_ARSENAL localize "STR_PMCA_ACT_OPEN"
 
 #define INITTYPES\
 		private _types = [];\

@@ -2,7 +2,7 @@
 	Author: Jeroen Notenbomer
 
 	Description:
-	Return a array of all items that are in a inventory of a vehicle/crate in the form of the jna_datalist
+	Return a array of all items that are in a inventory of a vehicle/crate in the form of the pmca_datalist
 
 	Parameter(s):
 	VEHICLE with a inventory
@@ -29,7 +29,7 @@ _addToArray = {
 	_amount = _this select 3;
 
 	if!(_index == -1 || _item isEqualTo ""|| _amount == 0)then{
-		_array set [_index,[_array select _index,[_item,_amount]] call jn_fnc_arsenal_addToArray];
+		_array set [_index,[_array select _index,[_item,_amount]] call PMCA_fnc_arsenal_addToArray];
 	};
 };
 
@@ -42,22 +42,22 @@ _unloadContainer = {
 	{
 		_item = _x select 0;
 		_amount = _x select 1;
-		_index = _item call jn_fnc_arsenal_itemType;
+		_index = _item call PMCA_fnc_arsenal_itemType;
 		[_array,_index,_item,_amount]call _addToArray;
 	} forEach _mags;
 
 	//items
-	_items = [itemCargo _container_sub, (items _container_sub) + (assignedItems player)] select (_isPlayer);
+	_items = [itemCargo _container_sub, (items _container_sub) + (assignedItems _container_sub)] select (_isPlayer);
 	{
 		_item = _x;
-		_index = _item call jn_fnc_arsenal_itemType;
+		_index = _item call PMCA_fnc_arsenal_itemType;
 		[_array,_index,_item,1]call _addToArray;
 	} forEach _items;
 
 	//backpacks
 	_backpacks = [backpackCargo _container_sub, [backpack _container_sub]] select (_isPlayer);
 	{
-		_item = _x call A3A_fnc_basicBackpack;
+		_item = _x call BIS_fnc_basicBackpack;
 		_index = IDC_RSCDISPLAYARSENAL_TAB_BACKPACK;
 		[_array,_index,_item,1]call _addToArray;
 	} forEach _backpacks;
@@ -79,7 +79,7 @@ _unloadContainer = {
 				if!(_x isEqualTo "")then{
 					_item = _x;
 					_amount = 1;
-					_index = _item call jn_fnc_arsenal_itemType;
+					_index = _item call PMCA_fnc_arsenal_itemType;
 
 					if(_index in [IDC_RSCDISPLAYARSENAL_TAB_PRIMARYWEAPON, IDC_RSCDISPLAYARSENAL_TAB_SECONDARYWEAPON, IDC_RSCDISPLAYARSENAL_TAB_HANDGUN])then{
 						_item = _x call bis_fnc_baseWeapon;
@@ -101,7 +101,7 @@ _unloadContainer = {
 		{
 			_item = _x;
 			if (_x isNotEqualTo "") then {
-				_index = _item call jn_fnc_arsenal_itemType;
+				_index = _item call PMCA_fnc_arsenal_itemType;
 				[_array,_index,_item,1]call _addToArray;
 			};
 		} forEach [uniform _container_sub, vest _container_sub, headgear _container_sub, goggles _container_sub];

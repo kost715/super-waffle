@@ -1,0 +1,2 @@
+0328ec60963ba1f7710d62a50d0f730514c212d38c274789548e57c426eb57a8  PMC_Arsenal_0.1.0_alpha1.zip
+0090a74dc980d6e38d14b1ab150d7deaf9a0576220c24b7bbeec7c56cf7465c3  PMC_Arsenal_0.1.0_alpha1_sources.zip

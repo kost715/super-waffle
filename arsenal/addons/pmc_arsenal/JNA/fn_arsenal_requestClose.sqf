@@ -1,19 +1,17 @@
 /*
-	Author: Jeroen Notenbomer
+	Author: Jeroen Notenbomer; server-side sessions: LifeSim PMC project
 
 	Description:
-	Removes to client from the servers list so it doesnt get called when the arsenal gets updated. This command needs to be excuted on the server!
+	Server. The client closed the arsenal; settle its session with the state it
+	closed with (loadout, or the container's 27-tab list).
 
 	Parameter(s):
-	ID clientOwner
-
-	Returns:
-	NOTHING, well it sends a command which contains the JNA_datalist
+	[claim]
 */
-
-if(!isServer)exitWith{};
-params ["_clientOwner"];
-
-_temp = server getVariable ["jna_playersInArsenal",[]];
-_temp = _temp - [_clientOwner];
-server setVariable ["jna_playersInArsenal",_temp,true];
+if (!isServer || {isNil "PMCA_sessions"}) exitWith {};
+params [["_claim", [], [[]]]];
+private _owner = call PMCA_fnc_requestOwner;
+private _session = PMCA_sessions getOrDefault [_owner, createHashMap];
+if (count _session == 0 || {_session getOrDefault ["closing", false]}) exitWith {};
+_session set ["closing", true];
+[_owner, _claim] spawn PMCA_fnc_commit;
