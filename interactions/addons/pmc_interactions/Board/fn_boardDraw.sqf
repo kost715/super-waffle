@@ -25,6 +25,12 @@ private _visible = switch (_game) do {
     case "pressure": {_gauge + [PMCI_IDC_HOLD]};
     case "edges": {_progressOnly + [PMCI_IDC_HOLD]};
     case "clean": {_progressOnly + [PMCI_IDC_SCRUB] + ([[], [PMCI_IDC_HOLD]] select ((_state get "phase") == "cover"))};
+    case "iv": {_progressOnly + [PMCI_IDC_SCRUB]};
+    case "suture": {_progressOnly + [PMCI_IDC_SCRUB]};
+    case "splint": {_gauge + [PMCI_IDC_SCRUB]};
+    case "weld": {_progressOnly + [PMCI_IDC_SCRUB]};
+    case "diagnose": {if ((_state get "phase") == "fix") then {_gauge + [PMCI_IDC_HOLD]} else {_wheel - [PMCI_IDC_SWAP]}};
+    case "track": {_gauge + [PMCI_IDC_HOLD]};
     case "wheel": {if ((_state get "phase") == "swap") then {_wheel} else {_wheel - [PMCI_IDC_SWAP]}};
     default {[]};
 };
@@ -64,8 +70,14 @@ private _span = {
     (_idc call _ctrl) ctrlCommit 0;
 };
 private _title = localize ("STR_PMCI_GAME_" + _game);
-if (_type != "") then {
-    private _name = localize ("STR_PMCI_WOUND_" + _type);
+private _part = PMCI_board getOrDefault ["part", ""];
+private _subject = switch (true) do {
+    case (_type != ""): {"STR_PMCI_WOUND_" + _type};
+    case (_part != ""): {"STR_PMCI_PART_" + _part};
+    default {""};
+};
+if (_subject != "") then {
+    private _name = localize _subject;
     if (_name != "") then {_title = _title + " — " + _name};
 };
 (PMCI_IDC_TITLE call _ctrl) ctrlSetText _title;
@@ -124,6 +136,65 @@ switch (_game) do {
         } else {
             [PMCI_IDC_FILL, 0, _cleaned, 0.0125] call _span;
             _status = format [localize "STR_PMCI_STATUS_CLEAN", round (_cleaned * 100)];
+        };
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "iv": {
+        [PMCI_IDC_FILL, 0, _state get "depth", 0.0125] call _span;
+        _status = format [localize "STR_PMCI_STATUS_IV", round ((_state get "depth") * 100), (_state get "allowed") - (_state get "misses")];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "suture": {
+        private _count = count (_state get "points");
+        [PMCI_IDC_FILL, 0, (_state get "next") / _count, 0.0125] call _span;
+        _status = format [localize "STR_PMCI_STATUS_SUTURE", floor ((_state get "next") / 2), _count / 2, (_state get "allowed") - (_state get "misses")];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "splint": {
+        // The gauge is the angle, -45 to 45 degrees; the zone is the tolerance around straight.
+        private _tolerance = (_state get "tolerance") / 90;
+        [PMCI_IDC_BAND, 0.5 - _tolerance, 0.5 + _tolerance] call _span;
+        [PMCI_IDC_FILL, 0, (_state get "aligned") / (_state get "hold"), 0.0175] call _span;
+        private _at = 0.5 + (_state get "angle") / 90;
+        [PMCI_IDC_MARKER, _at - 0.014, _at + 0.014] call _span;
+        _status = format [localize "STR_PMCI_STATUS_SPLINT", round (_state get "angle"), round ((_state get "aligned") / (_state get "hold") * 100)];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "diagnose": {
+        private _busy = (_state get "t") < (_state get "busyUntil");
+        if ((_state get "phase") == "fix") then {
+            [PMCI_IDC_BAND, _state get "low", _state get "high"] call _span;
+            [PMCI_IDC_FILL, 0, _state get "progress", 0.0175] call _span;
+            [PMCI_IDC_MARKER, (_state get "needle") - 0.014, (_state get "needle") + 0.014] call _span;
+            _status = format [localize "STR_PMCI_STATUS_FIX", round ((_state get "progress") * 100), _state get "mistakes"];
+        } else {
+            {
+                (_x call _ctrl) ctrlEnable (!_busy && {!(_forEachIndex in (_state get "tested"))});
+            } forEach [PMCI_IDC_NUT0, PMCI_IDC_NUT1, PMCI_IDC_NUT2, PMCI_IDC_NUT3, PMCI_IDC_NUT4];
+            _status = format [localize "STR_PMCI_STATUS_DIAGNOSE", count (_state get "tested"), _state get "parts", _state get "mistakes"];
+        };
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "weld": {
+        [PMCI_IDC_FILL, 0, _state get "covered", 0.0125] call _span;
+        _status = format [localize "STR_PMCI_STATUS_WELD", round ((_state get "covered") * 100), round ((_state get "heat") * 100),
+            round (((_state get "good") / ((_state get "covered") max 0.001)) * 100)];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "track": {
+        if ((_state get "phase") == "align") then {
+            // The gauge is the link's swing; the zone is where the holes line up.
+            private _swing = 2 * (_state get "swing");
+            [PMCI_IDC_BAND, 0.5 - (_state get "tolerance") / _swing, 0.5 + (_state get "tolerance") / _swing] call _span;
+            [PMCI_IDC_FILL, 0, 0, 0.0175] call _span;
+            private _at = 0.5 + (_state get "offset") / _swing;
+            [PMCI_IDC_MARKER, _at - 0.014, _at + 0.014] call _span;
+            _status = format [localize "STR_PMCI_STATUS_ALIGN", (_state get "allowed") - (_state get "misses")];
+        } else {
+            [PMCI_IDC_BAND, _state get "low", _state get "high"] call _span;
+            [PMCI_IDC_FILL, 0, (_state get "done") / (_state get "hits"), 0.0175] call _span;
+            [PMCI_IDC_MARKER, (_state get "power") - 0.014, (_state get "power") + 0.014] call _span;
+            _status = format [localize "STR_PMCI_STATUS_PIN", _state get "done", _state get "hits", (_state get "allowed") - (_state get "misses")];
         };
         _time = (_state get "t") / (_state get "limit");
     };

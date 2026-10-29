@@ -3,6 +3,9 @@
 //   0 scene, 1 CPR hands, 2 heart, 3 windlass, 4 gauze, 5 wheel, 6-10 nuts,
 //   11 pressing hand, 12 blood seeping, 13 dressing pad, 14 swab, 15-22 wound stretches,
 //   23-30 dirt spots, 31 runner along the wound
+//   The later games reuse them: 11 track link, 12 splinted limb, 13 IV bruise / track pin,
+//   14 the tool at the mouse (swab, IV needle, suture needle, welding torch),
+//   6-10 diagnosis lights, 15-22 stitches / weld bead, 31 next stitch point
 //   depth: 0-1, how far the CPR hands are pushed down (PMCI_board "depth")
 //   hint: show which nut comes next (easy difficulty)
 //   wound type: ACE wound class of a bandaged wound ("" if unknown)
@@ -44,6 +47,43 @@ switch (_game) do {
         {_look set [23 + _forEachIndex, format ["dirt_%1", _forEachIndex % 3 + 1]]} forEach (_state get "spots");
         if ((_state get "phase") == "cover") then {_look set [13, "abrasion_pad"]};
         if (_scrubbing) then {_look set [14, "abrasion_swab"]};
+    };
+    case "iv": {
+        _look set [0, "iv_scene"];
+        _look set [14, "iv_needle"];
+        if ((_state get "lastMiss") isNotEqualTo []) then {_look set [13, "iv_bruise"]};
+    };
+    case "suture": {
+        _look set [0, "wound_cut"];
+        for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {_look set [15 + _k, "suture_stitch"]};
+        if ((_state get "status") == "running") then {_look set [31, "suture_point"]};
+        _look set [14, "suture_needle"];
+    };
+    case "splint": {
+        _look set [0, "splint_scene"];
+        // Seven frames of the broken part, -30 to 30 degrees in steps of 10.
+        _look set [12, format ["splint_limb_%1", 0 max ((round ((_state get "angle") / 10) + 3) min 6)]];
+    };
+    case "diagnose": {
+        _look set [0, "repair_engine"];
+        private _fix = (_state get "phase") == "fix";
+        {
+            _look set [6 + _x, switch (true) do {
+                case (_x != (_state get "faulty")): {"diag_ok"};
+                case (_fix): {"diag_bad"};
+                default {""};
+            }];
+        } forEach (_state get "tested");
+    };
+    case "weld": {
+        _look set [0, "weld_scene"];
+        for "_k" from 0 to 7 do {if ((_state get "covered") > _k / 8) then {_look set [15 + _k, "weld_bead"]}};
+        _look set [14, "weld_torch"];
+    };
+    case "track": {
+        _look set [0, "track_scene"];
+        _look set [11, "track_link"];
+        _look set [13, "track_pin"];
     };
     case "wheel": {
         private _phase = _state get "phase";

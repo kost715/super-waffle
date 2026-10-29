@@ -21,7 +21,9 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from texture_scenes import (abrasion_pad, abrasion_swab, bandage_scene, cpr_hands, cpr_scene, dirt, edges_runner, edges_strip,  # noqa: E402
                             edges_target, gauze_stage, nut, pressure_hand, pressure_seep, tq_scene, tq_windlass, wheel, wound_abrasion,
-                            wound_avulsion, wound_crush, wound_cut, wound_laceration, wound_puncture, wound_velocity)
+                            wound_avulsion, wound_crush, wound_cut, wound_laceration, wound_puncture, wound_velocity,
+                            iv_scene, iv_needle, iv_bruise, suture_point, suture_stitch, suture_needle, splint_scene, splint_limb,
+                            repair_engine, diag_light, weld_scene, weld_bead, weld_torch, track_scene, track_link, track_pin)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "textures"
@@ -262,6 +264,75 @@ def icon_clean():
     return finish(img, w, h)
 
 
+def icon_iv():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(s((34, 10, 82, 70)), radius=s(10), fill=(200, 40, 40, 255), outline=(120, 20, 20, 255), width=s(3))
+    d.rectangle(s((44, 22, 72, 30)), fill=(255, 255, 255, 200))
+    d.line(s((58, 70, 58, 92, 96, 110)), fill=(220, 220, 225, 255), width=s(4), joint="curve")
+    d.line(s((96, 110, 118, 120)), fill=(190, 190, 195, 255), width=s(3))
+    return finish(img, w, h)
+
+
+def icon_suture():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.line(s((10, 70, 118, 66)), fill=(170, 25, 30, 255), width=s(6))
+    for x in (30, 58, 86):
+        d.line(s((x - 4, 46, x + 4, 90)), fill=(40, 50, 110, 255), width=s(5))
+    d.arc(s((70, 10, 120, 60)), 180, 330, fill=(210, 210, 215, 255), width=s(5))
+    return finish(img, w, h)
+
+
+def icon_splint():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(s((8, 52, 120, 80)), radius=s(8), fill=(235, 125, 40, 255), outline=(150, 70, 20, 255), width=s(3))
+    d.line(s((16, 66, 60, 66)), fill=(240, 235, 225, 255), width=s(10))
+    d.line(s((66, 66, 112, 52)), fill=(240, 235, 225, 255), width=s(10))
+    for x in (34, 92):
+        d.rectangle(s((x - 6, 44, x + 6, 88)), fill=(60, 60, 64, 255))
+    return finish(img, w, h)
+
+
+def icon_diagnose():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(s((16, 40, 96, 110)), radius=s(10), fill=(120, 124, 132, 255), outline=(70, 72, 78, 255), width=s(3))
+    for x in (34, 56, 78):
+        d.rectangle(s((x - 6, 26, x + 6, 42)), fill=(90, 92, 98, 255))
+    d.ellipse(s((84, 10, 118, 44)), fill=(240, 70, 50, 255), outline=(255, 200, 190, 255), width=s(3))
+    d.line(s((40, 76, 52, 88, 76, 60)), fill=(80, 220, 110, 255), width=s(6), joint="curve")
+    return finish(img, w, h)
+
+
+def icon_weld():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rectangle(s((6, 70, 122, 110)), fill=(110, 114, 82, 255))
+    d.line(s((14, 90, 70, 88)), fill=(200, 120, 50, 255), width=s(8))
+    d.line(s((70, 88, 116, 92)), fill=(20, 20, 20, 255), width=s(3))
+    d.line(s((74, 84, 116, 30)), fill=(40, 40, 44, 255), width=s(10))
+    d.ellipse(s((62, 74, 84, 96)), fill=(255, 240, 200, 255))
+    return finish(img, w, h)
+
+
+def icon_track():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    for x in (8, 36, 74, 102):
+        d.rounded_rectangle(s((x, 34, x + 22, 94)), radius=s(4), fill=(110, 106, 98, 255), outline=(60, 58, 54, 255), width=s(2))
+    d.rounded_rectangle(s((52, 20, 74, 80)), radius=s(4), fill=(160, 150, 120, 255), outline=(90, 84, 70, 255), width=s(2))
+    d.line(s((70, 64, 122, 64)), fill=(200, 200, 205, 255), width=s(6))
+    return finish(img, w, h)
+
+
 # --- CPR metronome (the scenes are in texture_scenes.py) -----------------------------
 def cpr_beat(on):
     w = h = 128
@@ -309,7 +380,13 @@ TEXTURES = [
     ("icon_pressure_ca.png", icon_pressure, "Значок прижатия раны"),
     ("icon_edges_ca.png", icon_edges, "Значок сведения краёв раны"),
     ("icon_clean_ca.png", icon_clean, "Значок обработки ссадины"),
+    ("icon_iv_ca.png", icon_iv, "Значок капельницы"),
+    ("icon_suture_ca.png", icon_suture, "Значок зашивания"),
+    ("icon_splint_ca.png", icon_splint, "Значок шины"),
     ("icon_wheel_ca.png", icon_wheel, "Значок замены колеса"),
+    ("icon_diagnose_ca.png", icon_diagnose, "Значок ремонта узла"),
+    ("icon_weld_ca.png", icon_weld, "Значок заплатки корпуса"),
+    ("icon_track_ca.png", icon_track, "Значок ремонта гусеницы"),
     ("cpr_scene_ca.png", cpr_scene, "СЛР: пострадавший сверху, грудь крупно; место нажатия — (480, 256)"),
     ("cpr_hands_up_ca.png", lambda: cpr_hands(False), "СЛР: руки подняты (между нажатиями); точка нажатия — (128, 150)"),
     ("cpr_hands_down_ca.png", lambda: cpr_hands(True), "СЛР: руки нажимают"),
@@ -335,6 +412,23 @@ TEXTURES = [
     *[(f"dirt_{k}_ca.png", (lambda k=k: dirt(239 + k)), f"Обработка: грязь, вариант {k}") for k in range(1, 4)],
     ("abrasion_swab_ca.png", abrasion_swab, "Обработка: тампон (идёт за мышью)"),
     ("abrasion_pad_ca.png", abrasion_pad, "Обработка: повязка на очищенной ссадине"),
+    ("iv_scene_ca.png", iv_scene, "Капельница: рука с жгутом и веной (линия (300, 262)–(760, 238))"),
+    ("iv_needle_ca.png", iv_needle, "Капельница: катетер, кончик иглы в (20, 236)"),
+    ("iv_bruise_ca.png", iv_bruise, "Капельница: лопнувшая вена"),
+    ("suture_point_ca.png", suture_point, "Зашивание: следующая точка"),
+    ("suture_stitch_ca.png", suture_stitch, "Зашивание: готовый стежок"),
+    ("suture_needle_ca.png", suture_needle, "Зашивание: игла в иглодержателе, острие в (12, 116)"),
+    ("splint_scene_ca.png", splint_scene, "Шина: рука с переломом в (512, 256) и шина"),
+    *[(f"splint_limb_{k}_ca.png", (lambda k=k: splint_limb(k)), f"Шина: сломанная часть, угол {(k - 3) * 10}°") for k in range(7)],
+    ("repair_engine_ca.png", repair_engine, "Ремонт узла: моторный отсек, 5 деталей"),
+    ("diag_ok_ca.png", lambda: diag_light(True), "Ремонт узла: деталь исправна"),
+    ("diag_bad_ca.png", lambda: diag_light(False), "Ремонт узла: неисправность"),
+    ("weld_scene_ca.png", weld_scene, "Заплатка: лист корпуса с трещиной"),
+    ("weld_bead_ca.png", weld_bead, "Заплатка: кусок шва (растягивается)"),
+    ("weld_torch_ca.png", weld_torch, "Заплатка: горелка, дуга в (24, 232)"),
+    ("track_scene_ca.png", track_scene, "Гусеница: разрыв в x 512"),
+    ("track_link_ca.png", track_link, "Гусеница: болтающееся звено"),
+    ("track_pin_ca.png", track_pin, "Гусеница: палец"),
     ("wheel_old_ca.png", lambda: wheel(True), "Колесо: старое (пробитое)"),
     ("wheel_new_ca.png", lambda: wheel(False), "Колесо: новое"),
     ("wheel_nut_tight_ca.png", lambda: nut("tight"), "Гайка затянута"),

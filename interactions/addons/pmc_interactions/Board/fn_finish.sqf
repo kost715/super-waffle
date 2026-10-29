@@ -41,3 +41,8 @@ private _key = ["STR_PMCI_RESULT_FAIL", "STR_PMCI_RESULT_OK"] select _success;
 private _text = format [localize _key, localize ("STR_PMCI_GAME_" + _game), round (_quality * 100)];
 hint _text;
 PMCI_lastResult = [_game, _success, _quality];
+// Bring back ACE's medical menu if the treatment was started from it (PMCI_fnc_boardOpen).
+if (_board getOrDefault ["reopenMenu", false] && {missionNamespace getVariable ["ace_medical_gui_openAfterTreatment", false]}
+    && {!isNil "ace_medical_gui_fnc_openMenu"}) then {
+    [ace_medical_gui_fnc_openMenu, _args select 1] call CBA_fnc_execNextFrame;
+};

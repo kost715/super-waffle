@@ -48,8 +48,9 @@ def check_textures():
     look = (ADDON / "Board/fn_boardLook.sqf").read_text(encoding="utf-8")
     names |= {m + "_ca" for m in re.findall(r'"([a-z]+_[a-z0-9_]+)"', look)}
     names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
-    names |= {f"dirt_{k}_ca" for k in range(1, 4)}
-    names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "wheel")}
+    names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"splint_limb_{k}_ca" for k in range(7)}
+    names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "iv", "suture", "splint", "wheel",
+                                         "diagnose", "weld", "track")}
     missing = sorted(n for n in names if not (data / f"{n}.paa").is_file())
     if missing:
         raise SystemExit(f"Textures missing from {data}: {', '.join(missing)}")

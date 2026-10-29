@@ -236,6 +236,7 @@ TEST_fnc_inheritsFrom = {
 TEST_fnc_findDisplay = {if (TEST_zeusOpen && {_this == 312}) then {player} else {objNull}};
 TEST_fnc_closeDialog = {TEST_closed = TEST_closed + 1};
 TEST_fnc_speed = {_this getVariable ["TEST_speed", 0]};
+TEST_fnc_hitPoints = {_this getVariable ["TEST_hitPoints", [[], [], []]]};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -261,6 +262,7 @@ TEST_fnc_compatCode = {
             case "CALLUNARY finddisplay": {"TEST_fnc_findDisplay" call _compatCall};
             case "CALLUNARY closedialog": {"TEST_fnc_closeDialog" call _compatCall};
             case "CALLUNARY speed": {"TEST_fnc_speed" call _compatCall};
+            case "CALLUNARY getallhitpointsdamage": {"TEST_fnc_hitPoints" call _compatCall};
             case "CALLUNARY getplayeruid": {"TEST_fnc_uid" call _compatCall};
             case "CALLUNARY name": {"TEST_fnc_name" call _compatCall};
             case "CALLUNARY isplayer": {"TEST_fnc_isPlayer" call _compatCall};

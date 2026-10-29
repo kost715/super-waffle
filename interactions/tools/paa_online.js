@@ -3,15 +3,19 @@
 // in the browser; files are not uploaded.
 // Many files at once make some conversions fail, so files go in small batches, and a batch
 // that does not return every file is retried one file at a time.
-// Usage: node tools/paa_online.js [png folder] [paa folder]   (needs the playwright package)
+// Usage: node tools/paa_online.js [--missing] [png folder] [paa folder]   (needs the playwright package)
+// --missing converts only the PNGs that have no PAA yet; otherwise all are converted again.
 const { chromium } = require('playwright');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const folder = path.resolve(process.argv[2] || path.join(__dirname, '..', 'textures'));
-const out = path.resolve(process.argv[3] || path.join(__dirname, '..', 'addons', 'pmc_interactions', 'data'));
+const args = process.argv.slice(2);
+const missingOnly = args.includes('--missing');
+const [folderArg, outArg] = args.filter(a => a !== '--missing');
+const folder = path.resolve(folderArg || path.join(__dirname, '..', 'textures'));
+const out = path.resolve(outArg || path.join(__dirname, '..', 'addons', 'pmc_interactions', 'data'));
 const BATCH = 4;
 
 async function convert(browser, files) {
@@ -41,8 +45,9 @@ async function convert(browser, files) {
 }
 
 (async () => {
-  const files = fs.readdirSync(folder).filter(f => /_ca\.png$/.test(f)).sort();
+  const paaOf = f => path.join(out, f.replace(/\.png$/, '.paa'));
   fs.mkdirSync(out, { recursive: true });
+  const files = fs.readdirSync(folder).filter(f => /_ca\.png$/.test(f) && !(missingOnly && fs.existsSync(paaOf(f)))).sort();
   for (const f of files) fs.rmSync(path.join(out, f.replace(/\.png$/, '.paa')), { force: true });
   const browser = await chromium.launch();
   const failed = [];

@@ -1,4 +1,4 @@
-name = "PMC Interactions 0.3.0 alpha 1";
+name = "PMC Interactions 0.4.0 alpha 1";
 author = "LifeSim PMC project";
 description = "Hands-on CPR, tourniquet, bandaging and wheel change instead of ACE3 progress bars. The result goes through ACE3's own medical and repair functions.";
 tooltip = "PMC Interactions";

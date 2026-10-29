@@ -33,5 +33,69 @@ switch (_game) do {
         if ((_state get "phase") == "cover") then {_marks pushBack [13, [], 0.25 + 0.75 * (_state get "covered")]};
         if (count _mouse == 2) then {_marks pushBack [14, [(_mouse select 0) - 48, (_mouse select 1) - 48, 96, 96], 1]};
     };
+    case "iv": {
+        // The needle's tip is at (20, 236) of its 256 x 256 picture.
+        (_state get "tip") params ["_tx", "_ty"];
+        _marks pushBack [14, [_tx - 20, _ty - 236, 256, 256], 1];
+        (_state get "lastMiss") params [["_bx", -1], ["_by", -1]];
+        if (_bx >= 0) then {_marks pushBack [13, [_bx - 48, _by - 48, 96, 96], 0.9]};
+    };
+    case "suture": {
+        private _points = _state get "points";
+        for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {
+            private _cx = (((_points select (2 * _k)) select 0) + ((_points select (2 * _k + 1)) select 0)) / 2;
+            _marks pushBack [15 + _k, [_cx - 24, 200, 48, 112], 1];
+        };
+        if ((_state get "next") < count _points) then {
+            (_points select (_state get "next")) params ["_px", "_py"];
+            _marks pushBack [31, [_px - 20, _py - 20, 40, 40], 1];
+        };
+        // The needle's point is at (12, 116) of its 128 x 128 picture, drawn at 1.5 times.
+        (_state get "mouse") params ["_mx", "_my"];
+        _marks pushBack [14, [_mx - 18, _my - 174, 192, 192], 1];
+    };
+    case "splint": {
+        // The broken part turns about the break at (512, 256): its pictures start there.
+        _marks pushBack [12, [512, 0, 512, 512], 1];
+    };
+    case "diagnose": {
+        {
+            _x params ["_sx", "_sy"];
+            _marks pushBack [6 + _forEachIndex, [_sx - 24, _sy - 92, 48, 48], 1];
+        } forEach (_state get "spots");
+    };
+    case "weld": {
+        // Bead pieces: eighths of the seam, the last one cut where the bead ends.
+        private _seam = _state get "seam";
+        private _lengths = _state get "lengths";
+        private _total = _state get "total";
+        private _at = {
+            private _d = _this * _total;
+            private _i = _lengths findIf {_x >= _d};
+            if (_i < 0) then {_i = count _lengths - 1};
+            private _start = if (_i > 0) then {_lengths select (_i - 1)} else {0};
+            (_seam select _i) params ["_ax", "_ay"];
+            (_seam select (_i + 1)) params ["_bx", "_by"];
+            private _u = (_d - _start) / (((_lengths select _i) - _start) max 1e-6);
+            [_ax + _u * (_bx - _ax), _ay + _u * (_by - _ay)]
+        };
+        private _covered = _state get "covered";
+        for "_k" from 0 to 7 do {
+            if (_covered > _k / 8) then {
+                (((_k / 8) call _at)) params ["_x0", "_y0"];
+                ((((_k + 1) / 8) min _covered) call _at) params ["_x1", "_y1"];
+                _marks pushBack [15 + _k, [_x0 min _x1, ((_y0 min _y1) - 14), abs (_x1 - _x0) max 4, abs (_y1 - _y0) + 28], 1];
+            };
+        };
+        // The torch's flame is at (24, 232) of its 256 x 256 picture.
+        (_state get "mouse") params ["_mx", "_my"];
+        _marks pushBack [14, [_mx - 24, _my - 232, 256, 256], 1];
+    };
+    case "track": {
+        // The loose link swings across the gap at x 512; the pin goes in from the right.
+        _marks pushBack [11, [384, 128 + (_state get "offset"), 256, 256], 1];
+        private _driven = (_state get "done") / (_state get "hits");
+        _marks pushBack [13, [600 - 110 * _driven, 224, 256, 64], 1];
+    };
 };
 _marks

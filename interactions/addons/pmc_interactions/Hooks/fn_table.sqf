@@ -11,6 +11,14 @@ PMCI_hookTable = createHashMapFromArray [
     ["ApplyTourniquet", ["tourniquet", "ace_medical_treatment_treatmentTimeTourniquet", "ace_medical_treatment_treatmentTimeTrainedTourniquet",
         "ace_medical_treatment_fnc_tourniquet", ""]],
     ["CPR", ["cpr", "ace_medical_treatment_treatmentTimeCPR", "", "ace_medical_treatment_fnc_cprSuccess", "ace_medical_treatment_fnc_cprFailure"]],
-    ["ReplaceWheel", ["wheel", "ace_repair_wheelChangeTime", "", "ace_repair_fnc_doReplaceWheel", ""]]
+    ["BloodIV", ["iv", "ace_medical_treatment_treatmentTimeIV", "ace_medical_treatment_treatmentTimeTrainedIV", "ace_medical_treatment_fnc_ivBag", ""]],
+    ["Splint", ["splint", "ace_medical_treatment_treatmentTimeSplint", "ace_medical_treatment_treatmentTimeTrainedSplint", "ace_medical_treatment_fnc_splint", ""]],
+    // ACE stitches during its bar and has no success callback: PMCI_fnc_stitch does the stitching.
+    ["SurgicalKit", ["suture", "ace_medical_treatment_fnc_getStitchTime", "", "PMCI_fnc_stitch", ""]],
+    ["ReplaceWheel", ["wheel", "ace_repair_wheelChangeTime", "", "ace_repair_fnc_doReplaceWheel", ""]],
+    // A component repair is a diagnosis or, on the hull, a weld (PMCI_fnc_repairGame).
+    ["MiscRepair", ["repair", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doRepair", ""]],
+    ["RepairTrack", ["track", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doRepairTrack", ""]],
+    ["ReplaceTrack", ["track", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doReplaceTrack", ""]]
 ];
 PMCI_hookTable

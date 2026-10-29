@@ -809,3 +809,363 @@ def abrasion_pad():
     lit = lit * (1 - 0.35 * seep[:, :, None]) + lit * np.array([0.95, 0.55, 0.55], np.float32) * 0.35 * seep[:, :, None]
     c.put(np.clip(lit, 0, 1), pad)
     return c.image()
+
+
+# --- IV, suture, splint ------------------------------------------------------------------------------
+IV_VEIN = (300, 262, 760, 238)  # PMCI_fnc_boardOpen: the vein the needle must stay on
+
+
+def iv_scene():
+    """The inner forearm with a rubber tourniquet and a raised vein along IV_VEIN."""
+    c = Canvas(1024, 512)
+    ground_layer(c, seed=301, dark=0.6)
+    x, y = grid(c)
+    limb, mid, half = arm(c, 252, 92, 150, 302)
+    # Inner side: paler, a little pink.
+    tint(c, limb * np.clip(1 - np.abs((y - mid) / half), 0, 1), (0.95, 0.82, 0.76), 0.25)
+    x0, y0, x1, y1 = IV_VEIN
+    t = np.clip(((x - x0) * (x1 - x0) + (y - y0) * (y1 - y0)) / ((x1 - x0) ** 2 + (y1 - y0) ** 2), 0, 1)
+    vx, vy = x0 + t * (x1 - x0), y0 + t * (y1 - y0)
+    d = np.hypot(x - vx, y - vy + 3 * np.sin(t * 9))
+    vein = np.clip(1 - d / 9, 0, 1) * limb * np.clip(np.minimum(t, 1 - t) * 12, 0, 1)
+    tint(c, blur(vein, S(2)), (0.28, 0.34, 0.62), 0.75)
+    skin = skin_material(c, 303)
+    c.put(shade(skin, dome(vein, S(3)) * 0.5 + 0.4, strength=S(10), detail_strength=0.3, spec=0.35), vein * 0.4)
+    # Rubber tourniquet above the site.
+    band = ((np.abs(x - 230) < 16) & (np.abs(y - mid) < half * 1.06)).astype(np.float32)
+    c.shadow(blur(band, S(0.8)), S(4), S(6), S(5), 0.6)
+    rubber = flat(c.w, c.h, (70, 110, 170), rough=0.35)
+    v = np.clip((y - mid) / (half * 1.06), -1, 1)
+    c.put(shade(rubber, np.sqrt(1 - v ** 2) * band, strength=S(60), spec=0.4), blur(band, S(0.8)))
+    # Alcohol-wiped patch: slightly wet and glossy.
+    wipe = np.clip(1 - np.hypot((x - 530) / 150, (y - 250) / 45), 0, 1) ** 0.5 * limb
+    c.put(shade(flat(c.w, c.h, (215, 170, 150), rough=0.1), dome(wipe, S(10)) * 0.2 + 0.5, strength=S(20), spec=0.4), wipe * 0.12)
+    return c.image()
+
+
+def iv_needle():
+    """An IV cannula coming in from the upper right; the needle tip is at (20, 236)."""
+    c = Canvas(256, 256)
+    x, y = grid(c)
+    a = math.radians(40)
+    u = (x - 20) * math.cos(a) - (y - 236) * math.sin(a)  # along the needle, from the tip up and to the right
+    v = (x - 20) * math.sin(a) + (y - 236) * math.cos(a)
+    needle = ((u > 0) & (u < 110) & (np.abs(v) < 4 * np.clip(u / 14, 0.25, 1))).astype(np.float32)
+    sheath = ((u > 36) & (u < 116) & (np.abs(v) < 7.5)).astype(np.float32)
+    hub = ((u > 110) & (u < 212) & (np.abs(v) < 17)).astype(np.float32)
+    wings = ((u > 120) & (u < 150) & (np.abs(v) < 40)).astype(np.float32)
+    cap = ((u > 210) & (u < 252) & (np.abs(v) < 12)).astype(np.float32)
+    whole = np.maximum.reduce([needle, sheath, hub, wings, cap])
+    c.shadow(blur(whole, S(0.8)), S(6), S(9), S(5), 0.5)
+    steel = material("Metal046A", c.w, c.h, S(60))
+    c.put(shade(steel, np.sqrt(np.clip(1 - (v / 4) ** 2, 0, 1)) * needle, strength=S(5), metal=0.9, spec=0.8), blur(needle, S(0.5)))
+    c.put(shade(flat(c.w, c.h, (235, 235, 240), rough=0.1), np.sqrt(np.clip(1 - (v / 7.5) ** 2, 0, 1)) * sheath, strength=S(8), spec=0.8),
+          blur(sheath, S(0.5)) * 0.55)
+    plastic = flat(c.w, c.h, (90, 170, 90), rough=0.25)  # 18 G green
+    c.put(shade(plastic, np.sqrt(np.clip(1 - (v / 40) ** 2, 0, 1)) * wings * 0.3, strength=S(14), spec=0.6), blur(wings, S(0.5)))
+    c.put(shade(flat(c.w, c.h, (225, 225, 230), rough=0.15), np.sqrt(np.clip(1 - (v / 17) ** 2, 0, 1)) * hub, strength=S(16), spec=0.7),
+          blur(hub, S(0.5)) * 0.85)
+    c.put(shade(plastic, np.sqrt(np.clip(1 - (v / 12) ** 2, 0, 1)) * cap, strength=S(12), spec=0.6), blur(cap, S(0.5)))
+    return c.image()
+
+
+def iv_bruise():
+    """A blown vein: a small bruise with a drop of blood."""
+    c = Canvas(128, 128)
+    x, y = grid(c)
+    d = np.hypot(x - 64, y - 64) / (1 + noise(c.w, c.h, 311, S(6)) * 0.3)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([0.35, 0.12, 0.3], np.float32), np.clip(1 - d / 40, 0, 1) ** 1.2 * 0.75)
+    blood_layer(c, blobs(c, [(66, 62, 5)]), 312)
+    return c.image()
+
+
+def suture_point():
+    """The next stitch point: a soft glowing ring."""
+    c = Canvas(64, 64)
+    x, y = grid(c)
+    d = np.hypot(x - 32, y - 32)
+    ring = np.clip(1 - np.abs(d - 18) / 3, 0, 1)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([1.0, 0.85, 0.35], np.float32), blur(ring, S(2)) * 0.6 + ring)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([1.0, 0.95, 0.7], np.float32), np.clip(1 - d / 4, 0, 1))
+    return c.image()
+
+
+def suture_stitch():
+    """One finished stitch across the cut: dark nylon thread with a knot on top."""
+    c = Canvas(128, 256)
+    x, y = grid(c)
+    path = np.abs(x - 64 - (y - 128) * 0.12) < 6
+    loop = path & (y > 40) & (y < 216)
+    m = blur(loop.astype(np.float32), S(0.6))
+    knot = blobs(c, [(58, 48, 14), (72, 42, 11)])
+    tails = mask(c.w, c.h, lambda d: (d.line(S((64, 44, 100, 10)), fill=255, width=S(7)), d.line(S((60, 46, 26, 14)), fill=255, width=S(7))))
+    whole = np.maximum.reduce([m, knot, blur(tails, S(0.6))])
+    c.shadow(whole, S(2), S(3), S(2), 0.55)
+    thread = flat(c.w, c.h, (30, 40, 80), rough=0.3)
+    c.put(shade(thread, dome(whole, S(2)) * 0.6, strength=S(4), spec=0.6), whole)
+    # The thread dips into the skin at both ends.
+    c.put(np.ones((c.h, c.w, 3)) * np.array([0.45, 0.12, 0.12], np.float32), blobs(c, [(57, 40, 7), (71, 216, 7)]) * 0.7)
+    return c.image()
+
+
+def suture_needle():
+    """A curved suture needle in a needle driver; the needle point is at (12, 116)."""
+    c = Canvas(128, 128)
+    x, y = grid(c)
+    # Curved needle: an arc from the point up to the driver jaws.
+    d = np.hypot(x - 46, y - 116)
+    ang = np.degrees(np.arctan2(y - 116, x - 46))
+    arc = (np.abs(d - 34) < 3.2) & (ang > -180) & (ang < -60)
+    jaws = mask(c.w, c.h, lambda dr: dr.polygon(S([(56, 76), (70, 70), (124, 4), (112, 0)]), fill=255))
+    handle = blur(jaws, S(0.6))
+    needle = blur(arc.astype(np.float32), S(0.5))
+    c.shadow(np.maximum(needle, handle), S(4), S(6), S(4), 0.5)
+    steel = material("Metal046A", c.w, c.h, S(50))
+    c.put(shade(steel, dome(handle, S(3)) * 0.6, strength=S(6), metal=0.9, spec=0.7), handle)
+    c.put(shade(steel, dome(needle, S(1.5)) * 0.6, strength=S(3), metal=0.9, spec=0.9), needle)
+    return c.image()
+
+
+def splint_scene():
+    """A forearm broken at (512, 256): the upper part and an orange splint lying straight."""
+    c = Canvas(1024, 512)
+    ground_layer(c, seed=321, dark=0.6)
+    x, y = grid(c)
+    splint = blur(((x > 180) & (x < 980) & (np.abs(y - 256) < 50)).astype(np.float32), S(1))
+    c.shadow(splint, S(5), S(7), S(6), 0.6)
+    foam = material("Fabric030", c.w, c.h, S(60), tint=(230, 120, 40), tint_mix=0.9, contrast=1.0)
+    ridges_ = np.cos((y - 256) / 50 * math.pi * 1.5) * 0.15
+    c.put(shade(foam, (dome(splint, S(10)) * 0.3 + ridges_) * splint, strength=S(20), detail_strength=0.8, spec=0.1), splint)
+    # Upper part of the forearm, ending in a swollen, bruised break.
+    v = (y - 256) / 82
+    upper = blur(((np.abs(v) < 1) & (x < 520)).astype(np.float32), S(1)) * np.clip((540 - x) / 30, 0, 1)
+    c.shadow(upper, S(8), S(12), S(12), 0.65)
+    h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) + np.exp(-((x - 500) / 30) ** 2) * 0.25 * (np.abs(v) < 1)
+    skin = skin_material(c, 322)
+    c.put(shade(skin, h * upper, strength=S(70), detail_strength=0.35, spec=0.22, occlusion=0.5 + 0.5 * np.sqrt(np.clip(1 - v ** 2, 0, 1))), upper)
+    tint(c, upper * np.exp(-((x - 505) / 40) ** 2), (0.4, 0.15, 0.3), 0.5)
+    sv = (y - 256) / 100
+    sleeve = blur(((np.abs(sv) < 1) & (x < 200)).astype(np.float32), S(1))
+    c.shadow(sleeve, S(6), S(10), S(10), 0.6)
+    c.put(shade(fabric_olive(c), (np.sqrt(np.clip(1 - sv ** 2, 0, 1)) + ridges(c.w, c.h, 323, (S(16), S(6)), (1, 0.4)) * 0.3) * sleeve,
+                strength=S(80), spec=0.05), sleeve)
+    return c.image()
+
+
+def splint_limb(frame):
+    """The broken lower forearm and hand, turned by (frame - 3) x 10 degrees about (0, 256)."""
+    angle = (frame - 3) * 10
+    c = Canvas(512, 512)
+    x, y = grid(c)
+    a = math.radians(angle)
+    u = x * math.cos(a) + (y - 256) * math.sin(a)
+    v = -x * math.sin(a) + (y - 256) * math.cos(a)
+    half = 78 * (1 - 0.22 * np.clip(u / 330, 0, 1))
+    vv = v / half
+    fore = ((np.abs(vv) < 1) & (u > -6) & (u < 340)).astype(np.float32)
+    def capsule(u0, u1, vc, r):
+        return (np.hypot(np.maximum(np.maximum(u0 - u, 0), u - u1), v - vc) < r).astype(np.float32)
+
+    # Back of the hand, four fingers and the thumb, in the forearm's frame.
+    palm = (np.hypot((u - 385) / 62, v / 60) < 1).astype(np.float32)
+    fingers = np.maximum.reduce([capsule(420, 492 - abs(k) * 6, k * 26, 12) for k in (-1.5, -0.5, 0.5, 1.5)])
+    thumb = capsule(350, 410, -66, 14)
+    hand = np.maximum.reduce([palm, fingers, thumb])
+    whole = blur(np.maximum(fore, hand), S(1))
+    c.shadow(whole, S(8), S(12), S(12), 0.65)
+    h = (np.sqrt(np.clip(1 - vv ** 2, 0, 1)) * fore + dome(palm, S(26)) * 0.6 * palm + dome(fingers, S(8)) * 0.5
+         + dome(thumb, S(8)) * 0.5 + np.exp(-(u / 25) ** 2) * 0.25 * fore)
+    skin = skin_material(c, 331)
+    c.put(shade(skin, h * whole, strength=S(60), detail_strength=0.35, spec=0.22, occlusion=0.55 + 0.45 * np.clip(h, 0, 1)), whole)
+    tint(c, whole * np.exp(-(u / 40) ** 2), (0.4, 0.15, 0.3), 0.5)
+    return c.image()
+
+
+# --- repair -----------------------------------------------------------------------------------------
+DIAG_PARTS = [(230, 190), (420, 330), (560, 170), (720, 320), (860, 200)]  # PMCI_fnc_boardOpen
+
+
+def metal_part(c, m, base, metal=0.7, rough=0.0, height=0.6, seed=0, material_name="Metal041A"):
+    mat = material(material_name, c.w, c.h, S(200), rough_bias=rough)
+    mat["color"] = np.clip(mat["color"] * np.array(base, np.float32) / 128.0, 0, 1)
+    c.shadow(m, S(5), S(7), S(6), 0.6)
+    c.put(shade(mat, dome(m, S(6)) * height, strength=S(14), detail_strength=0.6, metal=metal, spec=0.5), m)
+
+
+def repair_engine():
+    """A vehicle's engine bay from above, five parts to test (DIAG_PARTS)."""
+    c = Canvas(1024, 512)
+    x, y = grid(c)
+    bay = material("Metal053C", c.w, c.h, S(300))
+    bay["color"] *= 0.35
+    c.put(shade(bay, noise(c.w, c.h, 401, S(40)) * 0.2, strength=S(10), metal=0.5, spec=0.3), np.ones((c.h, c.w)))
+    # Engine block in the middle with its valve cover.
+    block = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((300, 120, 700, 400)), radius=S(30), fill=255)), S(1))
+    metal_part(c, block, (110, 112, 118), height=0.7)
+    cover = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((340, 170, 660, 350)), radius=S(24), fill=255)), S(1))
+    metal_part(c, cover, (60, 64, 70), metal=0.4, height=0.5)
+    ribs = ((np.abs(((x - 340) % 40) - 20) < 3) & (cover > 0.5)).astype(np.float32)
+    c.put(np.ones((c.h, c.w, 3)) * 0.12, ribs * 0.5)
+    # Hoses and wiring between the parts.
+    hoses = mask(c.w, c.h, lambda d: [d.line(S(seg), fill=255, width=S(14)) for seg in
+                                     ((260, 230, 340, 260), (420, 300, 420, 260), (560, 200, 560, 230), (720, 290, 660, 270), (830, 220, 700, 200))])
+    metal_part(c, blur(hoses, S(1)), (25, 25, 27), metal=0.0, rough=0.3, height=0.5, material_name="Rubber004")
+    wires = mask(c.w, c.h, lambda d: [d.line(S(seg), fill=255, width=S(5)) for seg in ((230, 160, 560, 140), (560, 140, 860, 170), (420, 360, 720, 350))])
+    tint(c, blur(wires, S(0.6)), (0.6, 0.1, 0.08), 0.9)
+    # The five parts: battery, alternator, fuel filter, injection rail, cooling fan sensor.
+    shapes = [
+        lambda d: d.rounded_rectangle(S((170, 140, 290, 240)), radius=S(8), fill=255),
+        lambda d: d.ellipse(S((370, 285, 470, 375)), fill=255),
+        lambda d: d.rounded_rectangle(S((530, 115, 590, 225)), radius=S(25), fill=255),
+        lambda d: d.rounded_rectangle(S((640, 300, 800, 340)), radius=S(10), fill=255),
+        lambda d: d.ellipse(S((810, 150, 910, 250)), fill=255),
+    ]
+    colours = [(40, 40, 44), (175, 175, 180), (220, 170, 40), (150, 152, 160), (70, 72, 78)]
+    for k, (shape, colour) in enumerate(zip(shapes, colours)):
+        # The battery is a plastic box; the rest are metal.
+        metal_part(c, blur(mask(c.w, c.h, shape), S(1)), colour, metal=[0.1, 0.8, 0.5, 0.8, 0.6][k], height=0.7,
+                   material_name=["Plastic018B", "Metal041A", "Plastic018B", "Metal041A", "Metal041A"][k])
+    terminals = blobs(c, [(195, 158, 12), (265, 158, 12)])
+    c.put(np.ones((c.h, c.w, 3)) * np.array([0.75, 0.15, 0.1], np.float32), terminals * np.array(x < 230, np.float32))
+    c.put(np.ones((c.h, c.w, 3)) * 0.2, terminals * np.array(x >= 230, np.float32))
+    pulley = np.clip(1 - np.abs(np.hypot(x - 420, y - 330) - 24) / 4, 0, 1)
+    c.put(np.ones((c.h, c.w, 3)) * 0.15, pulley)
+    fan = (np.sin(np.arctan2(y - 200, x - 860) * 7) > 0.2) & (np.hypot(x - 860, y - 200) < 44) & (np.hypot(x - 860, y - 200) > 12)
+    c.put(np.ones((c.h, c.w, 3)) * 0.12, blur(fan.astype(np.float32), S(0.6)) * 0.7)
+    for k in range(4):  # injectors along the rail
+        c.put(np.ones((c.h, c.w, 3)) * 0.18, blobs(c, [(665 + 37 * k, 320, 8)]))
+    return vignette(c)
+
+
+def diag_light(ok):
+    """A tester's lamp over a part: green for good, red for the fault."""
+    c = Canvas(64, 64)
+    x, y = grid(c)
+    d = np.hypot(x - 32, y - 32)
+    col = np.array((0.3, 0.95, 0.4) if ok else (1.0, 0.25, 0.2), np.float32)
+    c.put(np.ones((c.h, c.w, 3)) * col, np.clip(1 - d / 30, 0, 1) ** 2 * 0.8)
+    c.put(np.ones((c.h, c.w, 3)) * (col * 0.5 + 0.5), np.clip(1 - d / 11, 0, 1) ** 0.5)
+    return c.image()
+
+
+WELD_SEAM = [(200, 262), (330, 250), (460, 268), (590, 248), (720, 264), (824, 252)]  # PMCI_fnc_boardOpen
+
+
+def weld_scene():
+    """A painted hull plate with rivets and a crack along WELD_SEAM."""
+    c = Canvas(1024, 512)
+    x, y = grid(c)
+    plate = material("Metal041A", c.w, c.h, S(400), tint=(110, 114, 82), tint_mix=0.85, contrast=0.6)
+    wear = np.clip(noise(c.w, c.h, 414, S(18)) * 2 - 0.9, 0, 1)  # paint worn to bare steel in places
+    plate["color"] = plate["color"] * (1 - wear[:, :, None]) + np.array([0.45, 0.43, 0.4], np.float32) * wear[:, :, None]
+    h = noise(c.w, c.h, 411, S(60)) * 0.1
+    c.put(shade(plate, h, strength=S(10), metal=0.3, spec=0.2), np.ones((c.h, c.w)))
+    for yy in (60, 452):  # seams and rivets of the plates
+        tint(c, (np.abs(y - yy) < 2).astype(np.float32), (0.1, 0.1, 0.08), 0.6)
+        rivets = blobs(c, [(px, yy + 22 * (1 if yy < 256 else -1), 7) for px in range(40, 1024, 70)])
+        metal_part(c, rivets, (100, 102, 78), metal=0.3, height=0.8)
+    # The crack: dark, jagged, scorched and rusty around it.
+    d = np.full((c.h, c.w), 1e9, np.float32)
+    for (ax, ay), (bx, by) in zip(WELD_SEAM, WELD_SEAM[1:]):
+        t = np.clip(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2), 0, 1)
+        d = np.minimum(d, np.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)))
+    jag = d + noise(c.w, c.h, 412, S(3)) * 3
+    tint(c, np.clip(1 - jag / 40, 0, 1) * np.clip(noise(c.w, c.h, 413, S(10)) + 0.6, 0, 1), (0.42, 0.22, 0.1), 0.55)
+    crack = (jag < 6).astype(np.float32)
+    tint(c, blur(crack, S(0.6)), (0.03, 0.03, 0.03), 0.95)
+    tint(c, np.clip(1 - np.abs(jag - 7) / 2, 0, 1), (0.85, 0.85, 0.75), 0.25)
+    return vignette(c)
+
+
+def weld_bead():
+    """A piece of weld bead (stretched along the seam): rippled, cooling from orange."""
+    c = Canvas(256, 64)
+    x, y = grid(c)
+    v = (y - 32) / 22
+    m = blur((np.abs(v) < 1).astype(np.float32), S(1))
+    ripples = np.sin(x * 0.35 - np.abs(v) * 2.5) * 0.08
+    h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) * 0.6 + ripples
+    steel = material("Metal046A", c.w, c.h, S(80))
+    steel["color"] = steel["color"] * 0.7 + np.array([0.08, 0.05, 0.02], np.float32)
+    lit = shade(steel, h * m, strength=S(10), metal=0.8, spec=0.6)
+    heat = np.clip(1 - np.abs(v) * 1.2, 0, 1) * 0.35
+    lit = lit * (1 - heat[:, :, None]) + np.array([1.0, 0.45, 0.1], np.float32) * heat[:, :, None]
+    c.put(np.clip(lit, 0, 1), m)
+    return c.image()
+
+
+def weld_torch():
+    """A welding torch coming in from the upper right; the arc is at (24, 232)."""
+    c = Canvas(256, 256)
+    x, y = grid(c)
+    a = math.radians(40)
+    u = (x - 24) * math.cos(a) - (y - 232) * math.sin(a)
+    v = (x - 24) * math.sin(a) + (y - 232) * math.cos(a)
+    nozzle = ((u > 14) & (u < 80) & (np.abs(v) < 6 + u * 0.12)).astype(np.float32)
+    neck = ((u > 80) & (u < 140) & (np.abs(v) < 10)).astype(np.float32)
+    grip = ((u > 140) & (u < 260) & (np.abs(v) < 17)).astype(np.float32)
+    whole = blur(np.maximum.reduce([nozzle, neck, grip]), S(0.8))
+    c.shadow(whole, S(8), S(10), S(6), 0.5)
+    copper = material("Metal046A", c.w, c.h, S(60))
+    copper["color"] = np.clip(copper["color"] * np.array([1.2, 0.75, 0.45], np.float32), 0, 1)
+    c.put(shade(copper, np.sqrt(np.clip(1 - (v / 14) ** 2, 0, 1)) * nozzle, strength=S(8), metal=0.9, spec=0.7), blur(nozzle, S(0.6)))
+    steel = material("Metal046A", c.w, c.h, S(60))
+    c.put(shade(steel, np.sqrt(np.clip(1 - (v / 10) ** 2, 0, 1)) * neck, strength=S(8), metal=0.9, spec=0.7), blur(neck, S(0.6)))
+    c.put(shade(flat(c.w, c.h, (30, 30, 34), rough=0.6), np.sqrt(np.clip(1 - (v / 17) ** 2, 0, 1)) * grip + np.sin(u * 0.5) * 0.04 * grip,
+                strength=S(14), spec=0.2), blur(grip, S(0.6)))
+    d = np.hypot(x - 24, y - 232)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([1.0, 0.75, 0.4], np.float32), np.clip(1 - d / 44, 0, 1) ** 2 * 0.8)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([0.85, 0.9, 1.0], np.float32), np.clip(1 - d / 12, 0, 1) ** 0.6)
+    return c.image()
+
+
+def track_links(c, x0, x1, seed):
+    """Track shoes side by side from x0 to x1 (scene pixels), centred on y 256."""
+    x, y = grid(c)
+    for k, lx in enumerate(range(x0, x1, 64)):
+        shoe = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((lx + 2, 150, lx + 62, 362)), radius=S(8), fill=255)), S(0.8))
+        metal_part(c, shoe, (78, 76, 70), metal=0.6, rough=0.15, height=0.4, seed=seed + k, material_name="Metal053C")
+        grouser = blur(((np.abs(x - lx - 32) < 9) & (np.abs(y - 256) < 100)).astype(np.float32) * shoe, S(0.6))
+        metal_part(c, grouser, (70, 68, 62), metal=0.6, height=0.6)
+        for py in (176, 336):  # end connectors
+            metal_part(c, blobs(c, [(lx + 32, py, 12)]), (60, 60, 62), metal=0.8, height=0.8)
+
+
+def track_scene():
+    """A broken tank track on the ground with a gap at x 512 where a link is missing."""
+    c = Canvas(1024, 512)
+    ground_layer(c, seed=421, dark=0.6)
+    track_links(c, -40, 448, 422)
+    track_links(c, 576, 1080, 440)
+    x, y = grid(c)
+    for px in (448, 576):  # empty pin holes at the gap
+        c.put(np.ones((c.h, c.w, 3)) * 0.05, blobs(c, [(px, 256, 8)]))
+    return c.image()
+
+
+def track_link():
+    """The loose track link that goes into the gap (centre of the picture = centre of the gap)."""
+    c = Canvas(256, 256)
+    x, y = grid(c)
+    shoe = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((66, 22, 190, 234)), radius=S(10), fill=255)), S(0.8))
+    metal_part(c, shoe, (96, 92, 84), metal=0.6, rough=0.15, height=0.4, material_name="Metal053C")
+    grouser = blur(((np.abs(x - 128) < 12) & (np.abs(y - 128) < 100)).astype(np.float32) * shoe, S(0.6))
+    metal_part(c, grouser, (74, 72, 66), metal=0.6, height=0.6)
+    for px in (64, 192):  # its pin holes, on the line of the track's holes
+        c.put(np.ones((c.h, c.w, 3)) * 0.05, blobs(c, [(px + (8 if px < 128 else -8), 128, 9)]))
+    return c.image()
+
+
+def track_pin():
+    """A track pin, driven in from the right."""
+    c = Canvas(256, 64)
+    x, y = grid(c)
+    v = (y - 32) / 9
+    pin = ((np.abs(v) < 1) & (x > 4) & (x < 236)).astype(np.float32)
+    head = (np.hypot(x - 236, y - 32) < 16).astype(np.float32) * (x > 228)
+    whole = blur(np.maximum(pin, head), S(0.6))
+    c.shadow(whole, S(3), S(4), S(3), 0.5)
+    steel = material("Metal046A", c.w, c.h, S(60))
+    h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) * pin + dome(head, S(4)) * head
+    c.put(shade(steel, h * whole, strength=S(8), metal=0.9, spec=0.7), whole)
+    return c.image()

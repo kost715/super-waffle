@@ -1,7 +1,7 @@
 #include "..\ui_defines.hpp"
 // [event, value] -> handled. Client. Input from the board: keys (Space presses or holds,
 // Enter fixes, Esc gives up), the hold button, the fix button, nut and swap buttons, and
-// the mouse on the scene (scrubbing an abrasion).
+// the mouse on the scene (scrubbing, aiming, stitching, setting a bone, welding).
 params ["_event", ["_value", 0]];
 if (isNil "PMCI_board") exitWith {false};
 private _game = PMCI_board get "game";
@@ -19,14 +19,18 @@ switch (_event) do {
     case "onLoad": {uiNamespace setVariable ["PMCI_display", _value]; [_value] call PMCI_fnc_boardLayout; call PMCI_fnc_boardDraw};
     case "onUnload": {
         uiNamespace setVariable ["PMCI_display", displayNull];
-        // Closed by Esc or anything else while the game still ran: it is given up.
-        if ((_state get "status") == "running") then {[false] call PMCI_fnc_finish};
+        // Closed by Esc or anything else while the game still ran: it is given up. The RPT
+        // line tells a player's Esc apart from another window closing the board.
+        if ((_state get "status") == "running") then {
+            diag_log text format ["[PMCI] board %1 closed while running (Esc, Cancel or another window)", _game];
+            [false] call PMCI_fnc_finish;
+        };
     };
     case "keyDown": {
         _value params ["", "_key"];
         if (_key == 57) exitWith {
             // Holding Space repeats keyDown; a tapping game only counts the first.
-            if !(_game in ["cpr", "edges"] && {PMCI_board getOrDefault ["spaceDown", false]}) then {call _press};
+            if !(_game in ["cpr", "edges", "track"] && {PMCI_board getOrDefault ["spaceDown", false]}) then {call _press};
             PMCI_board set ["spaceDown", true];
             true
         };
@@ -41,11 +45,14 @@ switch (_event) do {
     case "holdDown": {call _press};
     case "holdUp": {["release", _state] call _model};
     case "fix": {["fix", _state] call _model};
-    case "nut": {["nut", _state, _value] call _model};
+    case "nut": {[["nut", "test"] select (_game == "diagnose"), _state, _value] call _model};
     case "swap": {["swap", _state] call _model};
     case "scrubDown": {
+        private _mouse = call PMCI_fnc_boardMouse;
+        // Stitching is clicking; the other mouse games hold the button.
+        if (_game == "suture") exitWith {["click", _state, _mouse] call _model};
         PMCI_board set ["scrubbing", true];
-        PMCI_board set ["mouse", call PMCI_fnc_boardMouse];
+        PMCI_board set ["mouse", _mouse];
     };
     case "scrubUp": {PMCI_board set ["scrubbing", false]};
     case "cancel": {closeDialog 2};

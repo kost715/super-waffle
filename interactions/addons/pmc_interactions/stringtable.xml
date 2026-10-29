@@ -254,6 +254,114 @@
                 <Original>burn</Original>
                 <Russian>ожог</Russian>
             </Key>
+            <Key ID="STR_PMCI_GAME_iv">
+                <Original>IV access</Original>
+                <Russian>Постановка капельницы</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_suture">
+                <Original>Suturing</Original>
+                <Russian>Зашивание раны</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_splint">
+                <Original>Splinting</Original>
+                <Russian>Наложение шины</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_diagnose">
+                <Original>Component repair</Original>
+                <Russian>Ремонт узла</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_weld">
+                <Original>Hull patch</Original>
+                <Russian>Заплатка корпуса</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_track">
+                <Original>Track repair</Original>
+                <Russian>Ремонт гусеницы</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_iv">
+                <Original>Aim the needle at the vein with the mouse and hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; to push it in. Your hand trembles: keep the tip on the vein, or the vein is blown.</Original>
+                <Russian>Наведите иглу мышью на вену и держите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt;, чтобы ввести её. Рука дрожит: держите кончик на вене, иначе вена лопнет.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_suture">
+                <Original>&lt;t color='#ffd27f'&gt;Click&lt;/t&gt; the glowing point to pass the needle there, point by point across the wound. The closer to the point, the neater the stitch.</Original>
+                <Russian>&lt;t color='#ffd27f'&gt;Щёлкайте&lt;/t&gt; по светящейся точке, чтобы провести через неё иглу, точка за точкой поперёк раны. Чем точнее, тем ровнее шов.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_splint">
+                <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and drag sideways to turn the broken part straight. Muscle spasm pushes it away: keep it in the green zone until the gauge fills.</Original>
+                <Russian>Зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите в сторону, чтобы выпрямить сломанную часть. Мышцы тянут её обратно: держите в зелёной зоне, пока шкала не заполнится.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_diagnose">
+                <Original>Find the fault: &lt;t color='#ffd27f'&gt;click&lt;/t&gt; a part to test it (a good part costs time). Then hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to keep the working force in the green zone until the repair is done.</Original>
+                <Russian>Найдите неисправность: &lt;t color='#ffd27f'&gt;щёлкните&lt;/t&gt; по детали, чтобы проверить её (исправная — потеря времени). Потом держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, удерживая усилие в зелёной зоне, пока ремонт не закончится.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_weld">
+                <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and lead the torch along the crack from left to right. Too fast leaves a weak seam, too slow burns through the plate.</Original>
+                <Russian>Зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите горелку вдоль трещины слева направо. Слишком быстро — слабый шов, слишком медленно — прожжёте лист.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_track">
+                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; when the loose link lines up with the track. Then drive the pin in: press when the marker is in the green zone.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, когда болтающееся звено совпадёт с гусеницей. Потом забейте палец: жмите, когда стрелка в зелёной зоне.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_IV">
+                <Original>Needle in: %1%. Misses left: %2</Original>
+                <Russian>Игла введена: %1%. Промахов в запасе: %2</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_SUTURE">
+                <Original>Stitches: %1 of %2. Misses left: %3</Original>
+                <Russian>Стежков: %1 из %2. Промахов в запасе: %3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_SPLINT">
+                <Original>Angle: %1°. Held straight: %2%</Original>
+                <Russian>Угол: %1°. Удержано ровно: %2%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_DIAGNOSE">
+                <Original>Tested: %1 of %2. Wrong parts: %3</Original>
+                <Russian>Проверено: %1 из %2. Неверных: %3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_FIX">
+                <Original>Fault found. Repair: %1%. Wrong parts: %2</Original>
+                <Russian>Неисправность найдена. Ремонт: %1%. Неверных: %2</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_WELD">
+                <Original>Seam: %1%. Heat: %2%. Quality: %3%</Original>
+                <Russian>Шов: %1%. Нагрев: %2%. Качество: %3%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_ALIGN">
+                <Original>Line up the link. Misses left: %1</Original>
+                <Russian>Совместите звено. Промахов в запасе: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_PIN">
+                <Original>Pin: %1 of %2 hits. Misses left: %3</Original>
+                <Russian>Палец: %1 из %2 ударов. Промахов в запасе: %3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STRIKE">
+                <Original>Strike</Original>
+                <Russian>Ударить</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_engine">
+                <Original>engine</Original>
+                <Russian>двигатель</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_fuel">
+                <Original>fuel system</Original>
+                <Russian>топливная система</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_turret">
+                <Original>turret</Original>
+                <Russian>башня</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_gun">
+                <Original>gun</Original>
+                <Russian>орудие</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_hull">
+                <Original>hull</Original>
+                <Russian>корпус</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PART_other">
+                <Original>component</Original>
+                <Russian>узел</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

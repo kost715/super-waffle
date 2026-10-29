@@ -22,5 +22,11 @@ private _general = [_category, localize "STR_PMCI_SET_GENERAL"];
     ["pressure", [["pressureLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]]]],
     ["edges", [["edgesLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]]]],
     ["clean", [["cleanLimit", "STR_PMCI_SET_LIMIT", [5, 120, 40, 0]]]],
-    ["wheel", [["nutTime", "STR_PMCI_SET_NUT_TIME", [0.2, 3, 0.8, 1]], ["swapTime", "STR_PMCI_SET_SWAP_TIME", [0.5, 10, 3, 1]]]]
+    ["iv", [["ivLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]]]],
+    ["suture", [["sutureLimit", "STR_PMCI_SET_LIMIT", [5, 120, 40, 0]]]],
+    ["splint", [["splintLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]]]],
+    ["wheel", [["nutTime", "STR_PMCI_SET_NUT_TIME", [0.2, 3, 0.8, 1]], ["swapTime", "STR_PMCI_SET_SWAP_TIME", [0.5, 10, 3, 1]]]],
+    ["diagnose", [["diagnoseLimit", "STR_PMCI_SET_LIMIT", [5, 120, 40, 0]]]],
+    ["weld", [["weldLimit", "STR_PMCI_SET_LIMIT", [5, 120, 40, 0]]]],
+    ["track", [["trackLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]]]]
 ];

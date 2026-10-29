@@ -8,7 +8,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "cba_settings", "cba_events", "ace_common", "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
-        version = "0.3.0";
+        version = "0.4.0";
     };
 };
 
@@ -34,6 +34,10 @@ class CfgFunctions {
             class repairSuccess {};
             class woundOf {};
             class woundGame {};
+            class repairGame {};
+            class partOf {};
+            class stitch {};
+            class stitchProgress {};
             class check {postInit = 1;};
         };
         class Games {
@@ -45,6 +49,12 @@ class CfgFunctions {
             class pressureModel {};
             class edgesModel {};
             class cleanModel {};
+            class ivModel {};
+            class sutureModel {};
+            class splintModel {};
+            class diagnoseModel {};
+            class weldModel {};
+            class trackModel {};
         };
         class Board {
             file = "\pmc_interactions\Board";
@@ -92,6 +102,23 @@ class ace_medical_treatment_actions {
         treatmentTime = "PMCI_fnc_timeNormal";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
+    class Splint: BasicBandage {
+        treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
+        callbackSuccess = "PMCI_fnc_treatmentSuccess";
+    };
+    // The 500 and 250 ml bags, plasma and saline inherit these from BloodIV.
+    class BloodIV: BasicBandage {
+        treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
+        callbackSuccess = "PMCI_fnc_treatmentSuccess";
+    };
+    // ACE stitches during its bar: the progress callback holds that back while a game will follow.
+    class SurgicalKit: FieldDressing {
+        treatmentTime = "PMCI_fnc_timeNormal";
+        callbackSuccess = "PMCI_fnc_treatmentSuccess";
+        callbackProgress = "PMCI_fnc_stitchProgress";
+    };
 };
 // A rib broken by too fast CPR compressions (PMCI_fnc_cprRibs): one bruise on the chest,
 // no bleeding, a little more pain than an ordinary bruise.
@@ -112,6 +139,18 @@ class ACE_Repair {
     class Actions {
         class ReplaceWheel {
             repairingTime = "PMCI_fnc_repairTime";
+            callbackSuccess = "PMCI_fnc_repairSuccess";
+        };
+        // RemoveTrack and FullRepair are ACE's own: PMCI_fnc_repairTime gives them ACE's time.
+        class MiscRepair: ReplaceWheel {
+            repairingTime = "PMCI_fnc_repairTime";
+            callbackSuccess = "PMCI_fnc_repairSuccess";
+        };
+        class RepairTrack: MiscRepair {
+            callbackSuccess = "PMCI_fnc_repairSuccess";
+        };
+        class RemoveTrack: MiscRepair {};
+        class ReplaceTrack: RemoveTrack {
             callbackSuccess = "PMCI_fnc_repairSuccess";
         };
     };

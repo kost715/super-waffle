@@ -40,6 +40,13 @@ for "_k" from 0 to 4 do {
     _places pushBack [PMCI_IDC_NUTPIC0 + _k, _cx - 64, _cy - 64, 128, 128];
     _places pushBack [PMCI_IDC_NUT0 + _k, _cx - 48, _cy - 48, 96, 96];
 };
+// Diagnosis: the same five click areas cover the parts of the engine bay.
+if (_game == "diagnose") then {
+    {
+        _x params ["_sx", "_sy"];
+        _places pushBack [PMCI_IDC_NUT0 + _forEachIndex, _sx - 64, _sy - 64, 128, 128];
+    } forEach ((PMCI_board get "state") get "spots");
+};
 {
     _x params ["_idc", "_px", "_py", "_pw", "_ph"];
     private _ctrl = _group controlsGroupCtrl _idc;
@@ -52,6 +59,7 @@ _scrub ctrlCommit 0;
 (_display displayCtrl PMCI_IDC_HOLD) ctrlSetText localize (switch (_game) do {
     case "edges": {"STR_PMCI_PLACE"};
     case "clean": {"STR_PMCI_COVER"};
+    case "track": {"STR_PMCI_STRIKE"};
     default {"STR_PMCI_HOLD"};
 });
 (_display displayCtrl PMCI_IDC_ICON) ctrlSetText format ["\pmc_interactions\data\icon_%1_ca.paa", _game];
@@ -60,5 +68,11 @@ _scrub ctrlCommit 0;
     case "bandage": {[0.45, 0.7, 0.95, 0.95]};
     case "clean": {[0.45, 0.7, 0.95, 0.95]};
     case "edges": {[0.9, 0.9, 0.85, 0.95]};
+    case "suture": {[0.9, 0.9, 0.85, 0.95]};
+    case "iv": {[0.45, 0.7, 0.95, 0.95]};
+    case "splint": {[0.45, 0.7, 0.95, 0.95]};
+    case "weld": {[1, 0.75, 0.3, 0.95]};
+    case "diagnose": {[0.95, 0.55, 0.2, 0.95]};
+    case "track": {[0.95, 0.55, 0.2, 0.95]};
     default {[0.9, 0.3, 0.25, 0.95]};
 });
