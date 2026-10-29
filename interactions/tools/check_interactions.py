@@ -46,9 +46,10 @@ def check_textures():
             text = path.read_text(encoding="utf-8")
             names |= {m for m in re.findall(r"\\pmc_interactions\\data\\([a-z0-9_]+_ca)\.paa", text)}
     look = (ADDON / "Board/fn_boardLook.sqf").read_text(encoding="utf-8")
-    names |= {m + "_ca" for m in re.findall(r'"((?:cpr|tq|bandage|wheel)_[a-z_]+)"', look)}
+    names |= {m + "_ca" for m in re.findall(r'"([a-z]+_[a-z0-9_]+)"', look)}
     names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
-    names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "wheel")}
+    names |= {f"dirt_{k}_ca" for k in range(1, 4)}
+    names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "wheel")}
     missing = sorted(n for n in names if not (data / f"{n}.paa").is_file())
     if missing:
         raise SystemExit(f"Textures missing from {data}: {', '.join(missing)}")
@@ -59,8 +60,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--vm", type=Path, required=True)
     p.add_argument("--report", type=Path, help="write a JSON summary here")
+    p.add_argument("--no-texture-check", action="store_true", help="skip the texture check (while drawing new ones)")
     args = p.parse_args()
-    report = {"syntax": [], "arma_runtime_tested": False, "textures": check_textures()}
+    report = {"syntax": [], "arma_runtime_tested": False, "textures": 0 if args.no_texture_check else check_textures()}
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp)
         stage(tree)
@@ -84,7 +86,7 @@ def main():
     if not ok or not match:
         raise SystemExit("Interactions checks failed or did not complete")
     print(f"Parsed {len(report['syntax'])} SQF files; {match[1]} interaction assertions passed; "
-          f"{report['textures']} textures referenced, all present.")
+          + (f"{report['textures']} textures referenced, all present." if report["textures"] else "texture check skipped."))
 
 
 if __name__ == "__main__":

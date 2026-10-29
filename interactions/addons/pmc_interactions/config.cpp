@@ -7,8 +7,8 @@ class CfgPatches {
         units[] = {};
         weapons[] = {};
         requiredVersion = 2.14;
-        requiredAddons[] = {"A3_Ui_F", "cba_settings", "ace_common", "ace_medical_treatment", "ace_repair"};
-        version = "0.2.0";
+        requiredAddons[] = {"A3_Ui_F", "cba_settings", "cba_events", "ace_common", "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
+        version = "0.3.0";
     };
 };
 
@@ -18,6 +18,7 @@ class CfgFunctions {
         class Init {
             file = "\pmc_interactions\Init";
             class settings {preInit = 1;};
+            class events {postInit = 1;};
         };
         class Hooks {
             file = "\pmc_interactions\Hooks";
@@ -31,6 +32,8 @@ class CfgFunctions {
             class treatmentSuccess {};
             class repairTime {};
             class repairSuccess {};
+            class woundOf {};
+            class woundGame {};
             class check {postInit = 1;};
         };
         class Games {
@@ -39,6 +42,9 @@ class CfgFunctions {
             class tourniquetModel {};
             class bandageModel {};
             class wheelModel {};
+            class pressureModel {};
+            class edgesModel {};
+            class cleanModel {};
         };
         class Board {
             file = "\pmc_interactions\Board";
@@ -47,6 +53,9 @@ class CfgFunctions {
             class boardTick {};
             class boardLayout {};
             class boardLook {};
+            class boardMarks {};
+            class boardMouse {};
+            class cprRibs {};
             class boardDraw {};
             class boardValid {};
             class finish {};
@@ -82,6 +91,21 @@ class ace_medical_treatment_actions {
     class CPR: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
+    };
+};
+// A rib broken by too fast CPR compressions (PMCI_fnc_cprRibs): one bruise on the chest,
+// no bleeding, a little more pain than an ordinary bruise.
+class ACE_Medical_Injuries {
+    class damageTypes {
+        class pmci_ribs {
+            thresholds[] = {{0, 1}};
+            selectionSpecific = 1;
+            noBlood = 1;
+            class Contusion {
+                weighting[] = {{0, 1}};
+                painMultiplier = 1.5;
+            };
+        };
     };
 };
 class ACE_Repair {

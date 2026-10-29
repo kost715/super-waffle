@@ -50,6 +50,7 @@ class PMCI_RscBoard {
     onUnload = "['onUnload'] call PMCI_fnc_boardEvent";
     onKeyDown = "['keyDown', _this] call PMCI_fnc_boardEvent";
     onKeyUp = "['keyUp', _this] call PMCI_fnc_boardEvent";
+    onMouseButtonUp = "['scrubUp'] call PMCI_fnc_boardEvent";
     class controlsBackground {
         class Back: PMCI_Picture {
             PMCI_BOX(0, 0, 0.58, 0.8);
@@ -83,8 +84,8 @@ class PMCI_RscBoard {
             size = safezoneH * 0.022;
             text = "";
         };
-        // Layers bottom to top; PMCI_fnc_boardLayout places them, PMCI_fnc_boardDraw picks
-        // the pictures (PMCI_fnc_boardLook).
+        // Layers bottom to top; PMCI_fnc_boardLayout places the fixed ones, PMCI_fnc_boardDraw
+        // picks the pictures (PMCI_fnc_boardLook) and moves the others (PMCI_fnc_boardMarks).
         class Scene: RscControlsGroupNoScrollbars {
             idc = PMCI_IDC_SCENE;
             PMCI_BOX(PMCI_SCENE_X, PMCI_SCENE_Y, PMCI_SCENE_W, PMCI_SCENE_H);
@@ -92,7 +93,28 @@ class PMCI_RscBoard {
                 class ScenePicture: PMCI_Picture {idc = PMCI_IDC_SCENE_PIC;};
                 class Wheel: PMCI_Picture {idc = PMCI_IDC_WHEEL;};
                 class Gauze: PMCI_Picture {idc = PMCI_IDC_GAUZE;};
+                class Seep: PMCI_Picture {idc = PMCI_IDC_SEEP;};
+                class PressHand: PMCI_Picture {idc = PMCI_IDC_PRESS_HAND;};
                 class Windlass: PMCI_Picture {idc = PMCI_IDC_WINDLASS;};
+                class Stretch0: PMCI_Picture {idc = PMCI_IDC_SEG0;};
+                class Stretch1: PMCI_Picture {idc = PMCI_IDC_SEG1;};
+                class Stretch2: PMCI_Picture {idc = PMCI_IDC_SEG2;};
+                class Stretch3: PMCI_Picture {idc = PMCI_IDC_SEG3;};
+                class Stretch4: PMCI_Picture {idc = PMCI_IDC_SEG4;};
+                class Stretch5: PMCI_Picture {idc = PMCI_IDC_SEG5;};
+                class Stretch6: PMCI_Picture {idc = PMCI_IDC_SEG6;};
+                class Stretch7: PMCI_Picture {idc = PMCI_IDC_SEG7;};
+                class Runner: PMCI_Picture {idc = PMCI_IDC_RUNNER;};
+                class Dirt0: PMCI_Picture {idc = PMCI_IDC_DIRT0;};
+                class Dirt1: PMCI_Picture {idc = PMCI_IDC_DIRT1;};
+                class Dirt2: PMCI_Picture {idc = PMCI_IDC_DIRT2;};
+                class Dirt3: PMCI_Picture {idc = PMCI_IDC_DIRT3;};
+                class Dirt4: PMCI_Picture {idc = PMCI_IDC_DIRT4;};
+                class Dirt5: PMCI_Picture {idc = PMCI_IDC_DIRT5;};
+                class Dirt6: PMCI_Picture {idc = PMCI_IDC_DIRT6;};
+                class Dirt7: PMCI_Picture {idc = PMCI_IDC_DIRT7;};
+                class Pad: PMCI_Picture {idc = PMCI_IDC_PAD;};
+                class Swab: PMCI_Picture {idc = PMCI_IDC_SWAB;};
                 class Hands: PMCI_Picture {idc = PMCI_IDC_HANDS;};
                 class Beat: PMCI_Picture {idc = PMCI_IDC_BEAT;};
                 class NutPicture0: PMCI_Picture {idc = PMCI_IDC_NUTPIC0;};
@@ -128,6 +150,13 @@ class PMCI_RscBoard {
                     h = 0.05;
                     text = "$STR_PMCI_WHEEL_SWAP_BUTTON";
                     onButtonClick = "['swap'] call PMCI_fnc_boardEvent";
+                };
+                // Covers the whole scene while an abrasion is cleaned: held mouse = scrubbing.
+                class Scrub: PMCI_HitButton {
+                    idc = PMCI_IDC_SCRUB;
+                    colorBackgroundActive[] = {0, 0, 0, 0};
+                    onMouseButtonDown = "['scrubDown'] call PMCI_fnc_boardEvent";
+                    onMouseButtonUp = "['scrubUp'] call PMCI_fnc_boardEvent";
                 };
             };
         };

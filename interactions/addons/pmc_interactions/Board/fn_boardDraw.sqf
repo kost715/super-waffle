@@ -1,12 +1,14 @@
 #include "..\ui_defines.hpp"
 // Client: shows the running game. The scene layers take their pictures from
-// PMCI_fnc_boardLook; one gauge (zone, fill, marker) serves the medical games; the wheel
-// uses five click areas over the nut pictures.
+// PMCI_fnc_boardLook and their moving positions and opacity from PMCI_fnc_boardMarks; one
+// gauge (zone, fill, marker) serves the medical games; the wheel uses five click areas
+// over the nut pictures, the abrasion one area over the whole scene.
 if (isNil "PMCI_board") exitWith {};
 private _display = uiNamespace getVariable ["PMCI_display", displayNull];
 if (isNull _display) exitWith {};
 private _game = PMCI_board get "game";
 private _state = PMCI_board get "state";
+(PMCI_board getOrDefault ["wound", ["", 0]]) params ["_type"];
 private _group = _display displayCtrl PMCI_IDC_SCENE;
 private _ctrl = {
     private _found = _display displayCtrl _this;
@@ -14,28 +16,44 @@ private _ctrl = {
     _found
 };
 private _gauge = [PMCI_IDC_GAUGE, PMCI_IDC_BAND, PMCI_IDC_FILL, PMCI_IDC_FRAME, PMCI_IDC_MARKER];
+private _progressOnly = [PMCI_IDC_GAUGE, PMCI_IDC_FILL, PMCI_IDC_FRAME];
 private _wheel = [PMCI_IDC_NUT0, PMCI_IDC_NUT1, PMCI_IDC_NUT2, PMCI_IDC_NUT3, PMCI_IDC_NUT4, PMCI_IDC_SWAP];
 private _visible = switch (_game) do {
     case "cpr": {(_gauge - [PMCI_IDC_MARKER]) + [PMCI_IDC_HOLD]};
     case "tourniquet": {_gauge + [PMCI_IDC_HOLD, PMCI_IDC_FIX]};
     case "bandage": {_gauge + [PMCI_IDC_HOLD]};
+    case "pressure": {_gauge + [PMCI_IDC_HOLD]};
+    case "edges": {_progressOnly + [PMCI_IDC_HOLD]};
+    case "clean": {_progressOnly + [PMCI_IDC_SCRUB] + ([[], [PMCI_IDC_HOLD]] select ((_state get "phase") == "cover"))};
     case "wheel": {if ((_state get "phase") == "swap") then {_wheel} else {_wheel - [PMCI_IDC_SWAP]}};
     default {[]};
 };
-{(_x call _ctrl) ctrlShow (_x in _visible)} forEach (_gauge + _wheel + [PMCI_IDC_HOLD, PMCI_IDC_FIX]);
+{(_x call _ctrl) ctrlShow (_x in _visible)} forEach (_gauge + _wheel + [PMCI_IDC_HOLD, PMCI_IDC_FIX, PMCI_IDC_SCRUB]);
 // Pictures: only layers whose picture changed are touched.
 private _hint = (PMCI_board get "ease") > 1.3;
-private _look = [_game, _state, PMCI_board get "depth", _hint] call PMCI_fnc_boardLook;
+private _scrubbing = PMCI_board getOrDefault ["scrubbing", false];
+private _look = [_game, _state, PMCI_board get "depth", _hint, _type, _scrubbing] call PMCI_fnc_boardLook;
 private _shown = PMCI_board getOrDefault ["look", []];
 {
     if !(_x isEqualTo (_shown param [_forEachIndex, "?"])) then {
-        private _layer = ([PMCI_IDC_SCENE_PIC, PMCI_IDC_HANDS, PMCI_IDC_BEAT, PMCI_IDC_WINDLASS, PMCI_IDC_GAUZE, PMCI_IDC_WHEEL,
-            PMCI_IDC_NUTPIC0, PMCI_IDC_NUTPIC1, PMCI_IDC_NUTPIC2, PMCI_IDC_NUTPIC3, PMCI_IDC_NUTPIC4] select _forEachIndex) call _ctrl;
+        private _layer = (PMCI_IDC_LAYER + _forEachIndex) call _ctrl;
         _layer ctrlSetText _x;
         _layer ctrlShow (_x != "");
     };
 } forEach _look;
 PMCI_board set ["look", _look];
+// Moving and fading layers, in scene pixels on the scene rectangle.
+(PMCI_board getOrDefault ["scene", [0, 0, 1, 1]]) params ["_x0", "_y0", "_w", "_h"];
+{
+    _x params ["_index", "_rect", "_alpha"];
+    private _layer = (PMCI_IDC_LAYER + _index) call _ctrl;
+    if (count _rect == 4) then {
+        _rect params ["_px", "_py", "_pw", "_ph"];
+        _layer ctrlSetPosition [_x0 + _w * _px / 1024, _y0 + _h * _py / 512, _w * _pw / 1024, _h * _ph / 512];
+        _layer ctrlCommit 0;
+    };
+    _layer ctrlSetTextColor [1, 1, 1, _alpha];
+} forEach ([_game, _state, [[], PMCI_board getOrDefault ["mouse", []]] select _scrubbing] call PMCI_fnc_boardMarks);
 // Place a horizontal span [from, to] (0..1 of the gauge) on one of the gauge controls.
 private _span = {
     params ["_idc", "_from", "_to", ["_inset", 0]];
@@ -45,7 +63,12 @@ private _span = {
         safezoneW * PMCI_GAUGE_W * (_to - _from), safezoneH * (PMCI_GAUGE_H - 2 * _inset)];
     (_idc call _ctrl) ctrlCommit 0;
 };
-(PMCI_IDC_TITLE call _ctrl) ctrlSetText (localize ("STR_PMCI_GAME_" + _game));
+private _title = localize ("STR_PMCI_GAME_" + _game);
+if (_type != "") then {
+    private _name = localize ("STR_PMCI_WOUND_" + _type);
+    if (_name != "") then {_title = _title + " — " + _name};
+};
+(PMCI_IDC_TITLE call _ctrl) ctrlSetText _title;
 (PMCI_IDC_TEXT call _ctrl) ctrlSetStructuredText parseText localize ("STR_PMCI_HELP_" + _game);
 private _status = "";
 private _time = 0;
@@ -55,6 +78,12 @@ switch (_game) do {
         [PMCI_IDC_BAND, 0.75, 1] call _span;
         [PMCI_IDC_FILL, 0, PMCI_board get "depth", 0.0125] call _span;
         _status = format [localize "STR_PMCI_STATUS_CPR", _state get "good", round (_state get "expected"), round ((_state get "quality") * 100)];
+        private _ribs = PMCI_board getOrDefault ["ribs", 0];
+        if (_ribs > 0) then {
+            private _fresh = ((_state get "t") - (PMCI_board getOrDefault ["crackAt", -10])) < 3;
+            _status = _status + format ["  <t color='%1'>%2</t>", ["#ff9a7a", "#ff4a3a"] select _fresh,
+                format [localize (["STR_PMCI_STATUS_RIBS", "STR_PMCI_STATUS_RIB_CRACK"] select _fresh), _ribs]];
+        };
         _time = (_state get "t") / (_state get "duration");
     };
     case "tourniquet": {
@@ -70,6 +99,32 @@ switch (_game) do {
         [PMCI_IDC_FILL, 0, _state get "progress", 0.0175] call _span;
         [PMCI_IDC_MARKER, (_state get "needle") - 0.014, (_state get "needle") + 0.014] call _span;
         _status = format [localize "STR_PMCI_STATUS_BANDAGE", round ((_state get "progress") * 100), round ((_state get "quality") * 100)];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "pressure": {
+        [PMCI_IDC_BAND, _state get "low", _state get "high"] call _span;
+        [PMCI_IDC_FILL, 0, _state get "progress", 0.0175] call _span;
+        [PMCI_IDC_MARKER, (_state get "needle") - 0.014, (_state get "needle") + 0.014] call _span;
+        _status = format [localize "STR_PMCI_STATUS_PRESSURE", round ((_state get "progress") * 100), round ((_state get "quality") * 100)];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "edges": {
+        private _count = count (_state get "stretches");
+        [PMCI_IDC_FILL, 0, count (_state get "closed") / _count, 0.0125] call _span;
+        _status = format [localize "STR_PMCI_STATUS_EDGES", count (_state get "closed"), _count, (_state get "allowed") - (_state get "misses")];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "clean": {
+        private _sum = 0;
+        {_sum = _sum + _x} forEach (_state get "dirt");
+        private _cleaned = 1 - _sum / (1 max count (_state get "dirt"));
+        if ((_state get "phase") == "cover") then {
+            [PMCI_IDC_FILL, 0, _state get "covered", 0.0125] call _span;
+            _status = localize "STR_PMCI_STATUS_COVER";
+        } else {
+            [PMCI_IDC_FILL, 0, _cleaned, 0.0125] call _span;
+            _status = format [localize "STR_PMCI_STATUS_CLEAN", round (_cleaned * 100)];
+        };
         _time = (_state get "t") / (_state get "limit");
     };
     case "wheel": {

@@ -1,6 +1,6 @@
 // [success] -> nothing. Client. Ends the board and applies the result the ACE way.
-// Success: ACE's own success callback (a bandage with an effectiveness from the play
-// quality). Failure or giving up: the used item comes back, as on ACE's own failure,
+// Success: ACE's own success callback (a bandage, whatever the wound's game, with an
+// effectiveness from the play quality). Failure or giving up: the used item comes back, as on ACE's own failure,
 // and ACE's failure callback runs (CPR stops). A spare wheel is released either way.
 params ["_success"];
 if (isNil "PMCI_board") exitWith {};
@@ -18,7 +18,7 @@ private _root = [configFile >> "ACE_Repair" >> "Actions", configFile >> "ace_med
 if ((_board get "kind") == "medical") then {
     _args params ["", "", "", "", "_itemUser", "_usedItem"];
     if (_success) then {
-        if (_game == "bandage") then {
+        if ((_board getOrDefault ["action", _game]) == "bandage") then {
             private _effect = missionNamespace getVariable ["PMCI_bandageEffect", 0.4];
             _args set [7, 0.1 max (((1 - _effect) + _effect * 1.5 * _quality) min 1.5)];
         };

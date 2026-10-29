@@ -19,7 +19,9 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from texture_scenes import bandage_scene, cpr_hands, cpr_scene, gauze_stage, nut, tq_scene, tq_windlass, wheel  # noqa: E402
+from texture_scenes import (abrasion_pad, abrasion_swab, bandage_scene, cpr_hands, cpr_scene, dirt, edges_runner, edges_strip,  # noqa: E402
+                            edges_target, gauze_stage, nut, pressure_hand, pressure_seep, tq_scene, tq_windlass, wheel, wound_abrasion,
+                            wound_avulsion, wound_crush, wound_cut, wound_laceration, wound_puncture, wound_velocity)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "textures"
@@ -224,6 +226,42 @@ def icon_wheel():
     return finish(img, w, h)
 
 
+def icon_pressure():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(s((22, 70, 106, 114)), radius=s(6), fill=(240, 240, 234, 255), outline=(170, 170, 160, 255), width=s(3))
+    d.ellipse(s((48, 80, 80, 104)), fill=(200, 40, 40, 255))
+    for x in (40, 64, 88):  # pressing down
+        d.line(s((x, 14, x, 48)), fill=(255, 255, 255, 255), width=s(6))
+        d.polygon(s([(x - 11, 44), (x + 11, 44), (x, 60)]), fill=(255, 255, 255, 255))
+    return finish(img, w, h)
+
+
+def icon_edges():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.line(s((10, 66, 118, 62)), fill=(170, 25, 30, 255), width=s(8))
+    for x in (32, 64, 96):
+        d.rounded_rectangle(s((x - 8, 26, x + 8, 102)), radius=s(4), fill=(245, 242, 232, 255), outline=(150, 150, 140, 255), width=s(2))
+    return finish(img, w, h)
+
+
+def icon_clean():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.ellipse(s((10, 50, 100, 112)), fill=(220, 90, 85, 255))
+    for x, y in ((34, 76), (52, 92), (70, 70), (44, 64)):
+        d.ellipse(s((x - 4, y - 4, x + 4, y + 4)), fill=(90, 70, 50, 255))
+    d.ellipse(s((64, 18, 118, 66)), fill=(245, 245, 240, 255), outline=(170, 170, 160, 255), width=s(3))
+    for x, y in ((26, 30), (44, 16)):  # sparkle
+        d.line(s((x - 7, y, x + 7, y)), fill=(255, 255, 255, 255), width=s(3))
+        d.line(s((x, y - 7, x, y + 7)), fill=(255, 255, 255, 255), width=s(3))
+    return finish(img, w, h)
+
+
 # --- CPR metronome (the scenes are in texture_scenes.py) -----------------------------
 def cpr_beat(on):
     w = h = 128
@@ -268,6 +306,9 @@ TEXTURES = [
     ("icon_cpr_ca.png", icon_cpr, "Значок СЛР в заголовке"),
     ("icon_tourniquet_ca.png", icon_tourniquet, "Значок жгута"),
     ("icon_bandage_ca.png", icon_bandage, "Значок перевязки"),
+    ("icon_pressure_ca.png", icon_pressure, "Значок прижатия раны"),
+    ("icon_edges_ca.png", icon_edges, "Значок сведения краёв раны"),
+    ("icon_clean_ca.png", icon_clean, "Значок обработки ссадины"),
     ("icon_wheel_ca.png", icon_wheel, "Значок замены колеса"),
     ("cpr_scene_ca.png", cpr_scene, "СЛР: пострадавший сверху, грудь крупно; место нажатия — (480, 256)"),
     ("cpr_hands_up_ca.png", lambda: cpr_hands(False), "СЛР: руки подняты (между нажатиями); точка нажатия — (128, 150)"),
@@ -278,6 +319,22 @@ TEXTURES = [
     *[(f"tq_windlass_{k}_ca.png", (lambda k=k: tq_windlass(k * 22.5)), f"Жгут: вороток, кадр {k} ({k * 22.5:g}°)") for k in range(8)],
     ("bandage_scene_ca.png", bandage_scene, "Перевязка: рана крупно, центр раны (512, 250)"),
     *[(f"bandage_gauze_{k}_ca.png", (lambda k=k: gauze_stage(k)), f"Перевязка: марля в ране, стадия {k} из 4 (центр картинки на центр раны)") for k in range(1, 5)],
+    ("wound_velocity_ca.png", wound_velocity, "Тампонада: огнестрельное ранение (центр (512, 248))"),
+    ("wound_puncture_ca.png", wound_puncture, "Тампонада: колотая рана"),
+    ("wound_avulsion_ca.png", wound_avulsion, "Прижатие: авульсия (сорванный участок кожи)"),
+    ("wound_crush_ca.png", wound_crush, "Прижатие: размозжение"),
+    ("pressure_hand_light_ca.png", lambda: pressure_hand(False), "Прижатие: рука на салфетке, давит слабо (центр на центр раны)"),
+    ("pressure_hand_firm_ca.png", lambda: pressure_hand(True), "Прижатие: рука давит в зоне"),
+    ("pressure_seep_ca.png", pressure_seep, "Прижатие: кровь из-под салфетки (прозрачность — от недожима)"),
+    ("wound_cut_ca.png", wound_cut, "Сведение краёв: порез по линии x 232–792, y 256"),
+    ("wound_laceration_ca.png", wound_laceration, "Сведение краёв: рваная рана по той же линии"),
+    ("edges_strip_ca.png", edges_strip, "Сведение краёв: наложенная полоска"),
+    ("edges_target_ca.png", edges_target, "Сведение краёв: подсветка открытого участка (растягивается)"),
+    ("edges_runner_ca.png", edges_runner, "Сведение краёв: бегунок"),
+    ("wound_abrasion_ca.png", wound_abrasion, "Обработка: ссадина"),
+    *[(f"dirt_{k}_ca.png", (lambda k=k: dirt(239 + k)), f"Обработка: грязь, вариант {k}") for k in range(1, 4)],
+    ("abrasion_swab_ca.png", abrasion_swab, "Обработка: тампон (идёт за мышью)"),
+    ("abrasion_pad_ca.png", abrasion_pad, "Обработка: повязка на очищенной ссадине"),
     ("wheel_old_ca.png", lambda: wheel(True), "Колесо: старое (пробитое)"),
     ("wheel_new_ca.png", lambda: wheel(False), "Колесо: новое"),
     ("wheel_nut_tight_ca.png", lambda: nut("tight"), "Гайка затянута"),
@@ -314,7 +371,7 @@ def assembled():
     def img(name):
         return Image.open(OUT / name).convert("RGBA")
 
-    sheet = Image.new("RGBA", (2048, 1024), (24, 24, 24, 255))
+    sheet = Image.new("RGBA", (2048, 2048), (24, 24, 24, 255))
     cpr = img("cpr_scene_ca.png")
     cpr.alpha_composite(img("cpr_hands_down_ca.png"), (480 - 128, 256 - 150))
     tq = img("tq_scene_ca.png")
@@ -327,7 +384,24 @@ def assembled():
         a = math.radians(-90 + 72 * k)
         state = ["wheel_nut_done_ca.png", "wheel_nut_done_ca.png", "wheel_nut_next_ca.png", "wheel_nut_tight_ca.png", "wheel_nut_loose_ca.png"][k]
         wheel_img.alpha_composite(img(state), (int(512 + 150 * math.cos(a)) - 64, int(256 + 150 * math.sin(a)) - 64))
-    for i, part in enumerate([cpr, tq, band, wheel_img]):
+    pressure = img("wound_avulsion_ca.png")
+    pressure.alpha_composite(img("pressure_seep_ca.png"), (256, 128))
+    pressure.alpha_composite(img("pressure_hand_firm_ca.png"), (256, 0))
+    edges = img("wound_laceration_ca.png")
+    for k, (lo, hi) in enumerate([(0.08, 0.17), (0.25, 0.31), (0.38, 0.46), (0.5, 0.56), (0.62, 0.69), (0.74, 0.8), (0.86, 0.94)]):
+        if k < 3:
+            centre = 232 + 560 * (lo + hi) / 2
+            edges.alpha_composite(img("edges_strip_ca.png").resize((72, 212)), (round(centre - 36), 150))
+        else:
+            edges.alpha_composite(img("edges_target_ca.png").resize((round(560 * (hi - lo)), 120)), (round(232 + 560 * lo), 196))
+    edges.alpha_composite(img("edges_runner_ca.png").resize((40, 212)), (round(232 + 560 * 0.48 - 20), 150))
+    clean = img("wound_abrasion_ca.png")
+    for k, (x, y) in enumerate([(372, 208), (528, 196), (672, 222), (330, 304), (480, 292), (622, 318)]):
+        clean.alpha_composite(img(f"dirt_{k % 3 + 1}_ca.png").resize((130, 130)), (x - 65, y - 65))
+    clean.alpha_composite(img("abrasion_swab_ca.png").resize((96, 96)), (440, 250))
+    gunshot = img("wound_velocity_ca.png")
+    gunshot.alpha_composite(img("bandage_gauze_1_ca.png"), (512 - 256, 250 - 128))
+    for i, part in enumerate([cpr, tq, band, wheel_img, pressure, edges, clean, gunshot]):
         sheet.alpha_composite(part, ((i % 2) * 1024, (i // 2) * 512))
     return sheet.convert("RGB")
 

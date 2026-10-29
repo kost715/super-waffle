@@ -5,7 +5,7 @@ import math
 
 import numpy as np
 
-from texture_render import (S, Canvas, blobs, blood_layer, blur, dome, fabric_olive, flat, grid, ground_layer, mask,
+from texture_render import (S, Canvas, _box, blobs, blood_layer, blur, dome, fabric_olive, flat, grid, ground_layer, mask,
                             material, noise, ridges, shade, skin_material, wrinkles)
 
 STUD_RADIUS = 150  # wheel: studs at this radius from the centre of the 512 px image, at -90 + 72*k degrees
@@ -435,3 +435,377 @@ def gauze_stage(stage):
         c.put(np.clip(lit * (1 - a) + lit * col * 1.4 * a, 0, 1), m)
     return c.image()
 
+
+
+# --- wound types (bandaging games) ------------------------------------------------------------
+def skin_close(seed):
+    """Close-up of skin filling a 1024 x 512 board: a gently rounded limb with fine hair."""
+    c = Canvas(1024, 512)
+    x, y = grid(c)
+    skin = skin_material(c, seed, tile=320)
+    v = (y - 256) / 330
+    h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) + noise(c.w, c.h, seed + 1, S(60)) * 0.05
+    c.put(shade(skin, h, strength=S(330), detail_strength=0.45, spec=0.2, occlusion=0.6 + 0.4 * np.sqrt(np.clip(1 - v ** 2, 0, 1))),
+          np.ones((c.h, c.w)))
+    rng = np.random.default_rng(seed + 2)
+    hair = mask(c.w, c.h, lambda d: [d.line(S((px, py, px + 10 * math.cos(a), py + 10 * math.sin(a))), fill=255, width=S(1))
+                                     for px, py, a in zip(rng.uniform(0, 1024, 260), rng.uniform(0, 512, 260), rng.uniform(-0.5, 0.5, 260))])
+    c.put(np.ones((c.h, c.w, 3)) * np.array([0.28, 0.19, 0.14]), hair * 0.4)
+    return c
+
+
+def vignette(c):
+    x, y = grid(c)
+    c.put(np.zeros((c.h, c.w, 3)), np.clip(((x / 1024 - 0.5) ** 2 + (y / 512 - 0.5) ** 2) * 1.6, 0, 0.5))
+    return c.image()
+
+
+def tint(c, m, rgb, alpha):
+    c.put(np.ones((c.h, c.w, 3)) * np.array(rgb, np.float32), np.clip(m, 0, 1) * alpha)
+
+
+def raw_tissue(c, m, seed, depth, scale, pale_edge=True):
+    """Open tissue inside mask m: dark red, wet, a pale torn margin, deeper towards the middle."""
+    inner = blur(m, S(scale * 0.35))
+    tissue = material("Leather035D", c.w, c.h, S(60), tint=(150, 34, 34), tint_mix=0.95, contrast=1.8, rough_bias=-0.35)
+    if pale_edge:
+        margin = np.clip((0.75 - inner) / 0.35, 0, 1) * m
+        tissue["color"] = tissue["color"] * (1 - margin[:, :, None]) + np.array([0.82, 0.62, 0.5], np.float32) * margin[:, :, None]
+    tissue["color"] *= (1 - 0.45 * inner)[:, :, None]
+    h = -inner ** 0.7 * depth + noise(c.w, c.h, seed, S(4)) * 0.06
+    c.put(shade(tissue, h * m, strength=S(scale) * 0.6, detail_strength=0.8, spec=0.6, ambient=0.45), blur(m, S(0.8)))
+
+
+def wound_velocity():
+    """Gunshot entry wound: a round hole with a dark abrasion collar, bruising, blood run down."""
+    c = skin_close(101)
+    x, y = grid(c)
+    cx, cy = 512, 248
+    d = np.hypot(x - cx, y - cy) / (1 + noise(c.w, c.h, 102, S(3)) * 0.12)
+    tint(c, np.clip(1 - (d - 45) / 120, 0, 1) ** 1.5, (0.45, 0.16, 0.2), 0.55)
+    smear = np.clip(noise(c.w, c.h, 103, S(9)) * 1.6 + 0.2, 0, 1) * np.clip(1 - (d - 36) / 80, 0, 1)
+    tint(c, smear, (0.32, 0.03, 0.04), 0.55)
+    collar = np.clip(1 - np.abs(d - 50) / 12, 0, 1)
+    tint(c, collar, (0.36, 0.12, 0.1), 0.85)
+    hole = (d < 40).astype(np.float32)
+    raw_tissue(c, hole, 104, 1.6, 40, pale_edge=False)
+    tint(c, blur(hole, S(2)) * np.clip(1 - d / 32, 0, 1), (0.05, 0.0, 0.0), 0.9)
+    blood_layer(c, blur((np.hypot(x - cx, y - cy - 14) < 22).astype(np.float32), S(1)) * 0.7, 107)
+    blood_layer(c, drips(c, [(cx - 14, cy + 34, 8, 150), (cx + 18, cy + 32, 6, 100), (cx - 34, cy + 22, 5, 60)], 105), 106)
+    return vignette(c)
+
+
+def wound_puncture():
+    """Stab wound: a short slit, slightly gaping, with a little blood running from it."""
+    c = skin_close(111)
+    x, y = grid(c)
+    cx, cy, ang = 512, 250, math.radians(-12)
+    u = (x - cx) * math.cos(ang) + (y - cy) * math.sin(ang)
+    v = -(x - cx) * math.sin(ang) + (y - cy) * math.cos(ang)
+    d = np.hypot(u / 95, v / 15) / (1 + noise(c.w, c.h, 115, S(3)) * 0.1)
+    tint(c, np.clip(1 - np.hypot(u / 180, v / 90), 0, 1) ** 1.5, (0.5, 0.16, 0.2), 0.45)
+    slit = (d < 1).astype(np.float32)
+    raw_tissue(c, slit, 112, 1.2, 15, pale_edge=False)
+    tint(c, blur(slit, S(1)) * np.clip(1 - d, 0, 1), (0.08, 0.0, 0.0), 0.8)
+    lips = np.clip(1 - np.abs(d - 1.05) / 0.12, 0, 1)
+    tint(c, lips, (0.62, 0.32, 0.3), 0.45)
+    blood_layer(c, drips(c, [(cx - 30, cy + 14, 7, 140), (cx + 20, cy + 8, 5, 90), (cx + 60, cy, 4, 50)], 113), 114)
+    return vignette(c)
+
+
+def wound_avulsion():
+    """Avulsion: a large patch of skin torn away: raw tissue, yellow fat at the torn margin, blood."""
+    c = skin_close(121)
+    x, y = grid(c)
+    cx, cy = 500, 250
+    edge = 1 + noise(c.w, c.h, 122, S(14)) * 0.35 + noise(c.w, c.h, 123, S(4)) * 0.08
+    d = np.hypot((x - cx) / 210, (y - cy) / 120) / edge
+    tint(c, np.clip(1 - (d - 1) / 0.7, 0, 1) ** 2, (0.55, 0.16, 0.16), 0.45)
+    smear = np.clip(noise(c.w, c.h, 124, S(12)) * 1.6 + 0.2, 0, 1) * np.clip(1 - (d - 0.9) / 0.6, 0, 1)
+    tint(c, smear, (0.3, 0.03, 0.04), 0.6)
+    hole = (d < 1).astype(np.float32)
+    raw_tissue(c, hole, 125, 1.4, 110)
+    # Yellow fat lobules exposed along the torn margin, glistening.
+    lobes = (noise(c.w, c.h, 126, S(6)) > 0.25).astype(np.float32) * np.clip((d - 0.55) / 0.3, 0, 1) * hole
+    lobes = blur(lobes, S(1))
+    c.put(shade(flat(c.w, c.h, (226, 186, 96), rough=0.25), dome(lobes, S(5)) * 0.6, strength=S(8), spec=0.6, ambient=0.5), lobes * 0.9)
+    pool = blur((np.hypot((x - cx + 20) / 110, (y - cy - 40) / 45) / (1 + noise(c.w, c.h, 127, S(12)) * 0.4) < 1).astype(np.float32), S(1))
+    blood_layer(c, pool * np.clip(blur(pool, S(14)) * 1.2, 0.3, 0.85), 128)
+    blood_layer(c, drips(c, [(cx - 150, cy + 80, 6, 90), (cx - 40, cy + 110, 7, 120), (cx + 60, cy + 115, 5, 80)], 131), 132)
+    return vignette(c)
+
+
+def wound_crush():
+    """Crush wound: a wide swollen bruise, the skin split and abraded in the middle."""
+    c = skin_close(141)
+    x, y = grid(c)
+    cx, cy = 512, 250
+    d = np.hypot((x - cx) / 280, (y - cy) / 170) / (1 + noise(c.w, c.h, 142, S(30)) * 0.3)
+    swell = np.clip(1 - d, 0, 1)
+    bruise = swell ** 0.8 * np.clip(noise(c.w, c.h, 143, S(25)) * 0.6 + 0.8, 0, 1)
+    tint(c, bruise, (0.32, 0.14, 0.32), 0.7)
+    tint(c, np.clip(1 - d * 1.7, 0, 1) * np.clip(noise(c.w, c.h, 144, S(15)) + 0.5, 0, 1), (0.2, 0.06, 0.18), 0.6)
+    tint(c, np.clip(1 - np.abs(d - 0.92) / 0.2, 0, 1) * np.clip(noise(c.w, c.h, 151, S(20)) + 0.4, 0, 1), (0.45, 0.45, 0.2), 0.15)  # yellowish rim
+    scrape = np.clip(noise(c.w, c.h, 145, S(6)) * 2 + 0.2, 0, 1) * np.clip(1 - d * 1.8, 0, 1)
+    tint(c, scrape, (0.6, 0.12, 0.12), 0.6)
+    u, v = x - cx, y - cy
+    split_d = np.hypot(u / 150, (v - 12 * np.sin(u / 40)) / 16) / (1 + noise(c.w, c.h, 146, S(4)) * 0.4)
+    split = (split_d < 1).astype(np.float32)
+    raw_tissue(c, split, 147, 1.3, 16)
+    blood_layer(c, blur((split_d < 0.6).astype(np.float32), S(0.8)) * 0.85, 148)
+    blood_layer(c, drips(c, [(cx - 60, cy + 24, 6, 100), (cx + 40, cy + 26, 5, 70), (cx + 110, cy + 18, 4, 50)], 149), 150)
+    return vignette(c)
+
+
+WOUND_LINE = (232, 792, 256)  # cut and laceration: x from, x to, y (PMCI_fnc_boardMarks)
+
+
+def wound_cut():
+    """A clean straight cut along the wound line: thin, gaping in the middle, beads of blood."""
+    c = skin_close(161)
+    x, y = grid(c)
+    x0, x1, cy = WOUND_LINE
+    t = np.clip((x - x0) / (x1 - x0), 0, 1)
+    inside = (x > x0) & (x < x1)
+    half = 12 * np.sqrt(np.clip(t * (1 - t) * 4, 0, 1)) + 0.5
+    line = cy + 4 * np.sin(t * math.pi * 1.3)
+    v = (y - line) / half
+    gap = ((np.abs(v) < 1) & inside).astype(np.float32)
+    tint(c, np.clip(1 - np.abs(y - line) / 30, 0, 1) * inside, (0.6, 0.2, 0.2), 0.3)
+    raw_tissue(c, gap, 162, 1.0, 12, pale_edge=False)
+    tint(c, blur(gap, S(1)) * np.clip(1 - np.abs(v), 0, 1), (0.1, 0.0, 0.0), 0.6)
+    lips = np.clip(1 - np.abs(np.abs(y - line) - half - 1.5) / 2.5, 0, 1) * inside
+    tint(c, lips, (0.72, 0.42, 0.38), 0.5)
+    rng = np.random.default_rng(163)
+    beads = [(px, cy + 4 * math.sin((px - x0) / (x1 - x0) * math.pi * 1.3) + rng.uniform(4, 10), rng.uniform(3, 5)) for px in rng.uniform(x0 + 40, x1 - 40, 9)]
+    blood_layer(c, blobs(c, beads), 164)
+    blood_layer(c, drips(c, [(330, 266, 4, 70), (520, 268, 5, 110), (680, 266, 4, 60)], 165), 166)
+    return vignette(c)
+
+
+def wound_laceration():
+    """A laceration along the wound line: torn, ragged and gaping, bruised edges, more blood."""
+    c = skin_close(171)
+    x, y = grid(c)
+    x0, x1, cy = WOUND_LINE
+    t = np.clip((x - x0) / (x1 - x0), 0, 1)
+    inside = (x > x0 - 10) & (x < x1 + 10)
+    soft = np.clip(np.minimum(x - x0 + 60, x1 + 60 - x) / 80, 0, 1)
+    rag = noise(c.w, c.h, 172, S(6)) * 0.5 + noise(c.w, c.h, 173, S(2)) * 0.25
+    half = (26 * np.sqrt(np.clip(t * (1 - t) * 4, 0, 1)) + 2) * (1 + rag)
+    line = cy + 10 * np.sin(t * math.pi * 2.1) + 6 * noise(c.w, c.h, 174, S(30))
+    v = (y - line) / np.maximum(half, 1)
+    tint(c, np.clip(1 - np.abs(y - line) / 80, 0, 1) * soft * np.clip(noise(c.w, c.h, 175, S(20)) + 0.6, 0, 1), (0.4, 0.13, 0.2), 0.55)
+    smear = np.clip(noise(c.w, c.h, 176, S(10)) * 1.6, 0, 1) * np.clip(1 - np.abs(y - line) / 60, 0, 1) * soft
+    tint(c, smear, (0.3, 0.03, 0.04), 0.55)
+    gap = ((np.abs(v) < 1) & inside).astype(np.float32)
+    raw_tissue(c, gap, 177, 1.3, 26)
+    pooled = ((np.abs(v - 0.25) < 0.4) & inside).astype(np.float32) * np.clip(noise(c.w, c.h, 181, S(14)) * 2 + 0.6, 0, 1)
+    blood_layer(c, blur(pooled, S(0.8)) * 0.75, 178)
+    blood_layer(c, drips(c, [(300, 280, 6, 90), (420, 290, 7, 130), (560, 292, 6, 100), (700, 280, 5, 80)], 179), 180)
+    return vignette(c)
+
+
+ABRASION_SPOTS = [(372, 208), (528, 196), (672, 222), (330, 304), (480, 292), (622, 318), (740, 296), (430, 352)]  # PMCI_fnc_boardOpen
+
+
+def wound_abrasion():
+    """A wide scrape: skin rubbed off in patches and streaks, raw and wet, pinpoint bleeding, grit."""
+    c = skin_close(181)
+    x, y = grid(c)
+    cx, cy = 535, 275
+    d = np.hypot((x - cx) / 280, (y - cy) / 135) / (1 + noise(c.w, c.h, 182, S(12)) * 0.45 + noise(c.w, c.h, 188, S(4)) * 0.12)
+    area = blur((d < 1).astype(np.float32), S(2))
+    tint(c, np.clip(1 - (d - 1) / 0.45, 0, 1), (0.62, 0.22, 0.2), 0.35)
+    # How deep the scrape went: raw where the skin is gone, paler where some is left.
+    rng0 = np.random.default_rng(183)
+    raw_n = rng0.random((c.h, c.w)).astype(np.float32)
+    streaks = _box(_box(_box(_box(raw_n, S(30), 1), S(30), 1), S(5), 0), S(5), 0)
+    streaks = np.clip((streaks - streaks.mean()) / (streaks.std() + 1e-6) * 0.3 + 0.5, 0, 1)
+    depth = np.clip(noise(c.w, c.h, 184, S(16)) * 1.2 + 0.75 + (streaks - 0.5) * 0.6, 0, 1) * np.clip((1 - d) * 3, 0, 1)
+    raw = material("Leather035D", c.w, c.h, S(70), tint=(215, 72, 66), tint_mix=0.9, contrast=1.3, rough_bias=-0.3)
+    pale = np.array([0.86, 0.5, 0.44], np.float32)
+    raw["color"] = raw["color"] * depth[:, :, None] + pale * (1 - depth[:, :, None])
+    raw["color"] *= (0.92 + 0.16 * streaks)[:, :, None]
+    h = (-depth * 0.08 + streaks * 0.02) * area
+    c.put(shade(raw, h, strength=S(14), detail_strength=0.6, spec=0.5, ambient=0.5), area * 0.95)
+    rng = np.random.default_rng(185)
+    centres = rng.normal([cx, cy], [110, 45], (6, 2))
+    dots = []
+    for px, py in centres:
+        dots += [(qx, qy, rng.uniform(1.2, 2.6)) for qx, qy in zip(rng.normal(px, 28, 14), rng.normal(py, 14, 14))]
+    blood_layer(c, blobs(c, dots) * area * depth * 0.85, 186)
+    grit = blur(((noise(c.w, c.h, 187, 0) > 0.95) * area).astype(np.float32), S(0.6))
+    tint(c, grit, (0.2, 0.17, 0.12), 0.8)
+    return vignette(c)
+
+
+# --- sprites of the wound games -------------------------------------------------------------------
+def gauze_pad_layer(c, m, seed, soak):
+    """A folded gauze pad on mask m, blood soaked into its middle by `soak` (0-1)."""
+    x, y = grid(c)
+    gauze = material("Fabric061", c.w, c.h, S(36), tint=(246, 244, 238), tint_mix=0.85, contrast=1.1)
+    crumple = ridges(c.w, c.h, seed, (S(16), S(6)), (1.0, 0.5))
+    h = dome(m, S(10)) * 0.5 + crumple * 0.25
+    lit = shade(gauze, h * m, strength=S(10), detail_strength=1.0, spec=0.04, ambient=0.6)
+    centre = blur(m, S(30))
+    stain = np.clip((centre - 0.35) * 2.2 * soak + noise(c.w, c.h, seed + 1, S(8)) * 0.25 * soak, 0, 1)
+    col = np.array([0.5, 0.03, 0.05], np.float32) * stain[:, :, None] + np.array([0.9, 0.5, 0.5], np.float32) * (1 - stain[:, :, None])
+    a = np.clip(stain * 1.8, 0, 1)[:, :, None]
+    c.put(np.clip(lit * (1 - a) + lit * col * 1.4 * a, 0, 1), m)
+
+
+def pressure_hand(firm):
+    """A gloveless hand pressing a gauze pad onto the wound (wound centre = sprite centre)."""
+    c = Canvas(512, 512)
+    x, y = grid(c)
+    k = 0.96 if firm else 1.0
+    cx, cy = 256, 250
+
+    def T(pts):
+        return [(cx + (px - cx) * k, cy + (py - cy) * k) for px, py in pts]
+
+    def capsule(x0, y0, x1, y1, r0, r1=None):
+        (a, b), (e, f) = T([(x0, y0), (x1, y1)])
+        r1 = r0 if r1 is None else r1
+        return blobs(c, [(a + (e - a) * t, b + (f - b) * t, (r0 + (r1 - r0) * t) * k) for t in np.linspace(0, 1, 40)])
+
+    pad = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((150, 160, 362, 342)), radius=S(14), fill=255)), S(1))
+    pad *= np.clip(1 + noise(c.w, c.h, 201, S(3)) * 0.3, 0, 1)
+    c.shadow(pad, S(4), S(5), S(6), 0.45)
+    gauze_pad_layer(c, pad, 202, 0.9 if firm else 0.5)
+    skin = skin_material(c, 203, tone=(205, 158, 128), tile=200)
+    if firm:  # pressing hard whitens the knuckles and fingertips
+        skin["color"] = np.clip(skin["color"] * np.array([1.06, 1.0, 0.98]), 0, 1)
+    arm = capsule(258, 360, 300, 600, 52, 62)
+    back = blur(mask(c.w, c.h, lambda d: d.polygon(S(T([(200, 380), (318, 380), (340, 300), (336, 220), (184, 220), (178, 300)])), fill=255)), S(1))
+    thumb = capsule(190, 320, 140, 262, 22, 18)
+    fingers = np.maximum.reduce([capsule(200 + 44 * i, 226, 196 + 46 * i - 4, tip, 21, 19) for i, tip in enumerate((126, 108, 112, 136))])
+    whole = np.maximum.reduce([arm, back, thumb, fingers])
+    lift = 0.3 if firm else 1.0
+    c.shadow(whole, S(6 + 14 * lift), S(8 + 18 * lift), S(8 + 10 * lift), 0.7 - 0.2 * lift)
+
+    def lay(m, radius, strength):
+        h = dome(m, S(radius))
+        c.put(shade(skin, h * m, strength=S(strength), detail_strength=0.3, spec=0.2, occlusion=0.7 + 0.3 * h), m)
+
+    lay(arm, 34, 40)
+    lay(thumb, 12, 16)
+    lay(back, 40, 12)
+    knuckle_y = cy + (226 - cy) * k
+    knuckles = sum(np.exp(-(((x - cx - (200 + 44 * i - cx) * k) / 16) ** 2 + ((y - knuckle_y) / 12) ** 2)) for i in range(4))
+    hf = dome(fingers, S(10))
+    joints = sum(np.exp(-((y - cy - (yy - cy) * k) / 2.2) ** 2) for yy in (186, 152)) * fingers
+    c.put(shade(skin, (hf + knuckles * 0.25) * fingers, strength=S(18), detail_strength=0.3, spec=0.22, occlusion=(0.75 + 0.25 * hf) * (1 - 0.2 * joints)), fingers)
+    nails = np.maximum.reduce([capsule(196 + 46 * i - 4, tip + 14, 196 + 46 * i - 4, tip + 4, 11) for i, tip in enumerate((126, 108, 112, 136))])
+    c.put(shade(flat(c.w, c.h, (236, 200, 188) if firm else (225, 180, 168), rough=0.2), dome(nails, S(4)) * 0.4, strength=S(6), spec=0.5), nails * 0.85)
+    sleeve = np.clip(capsule(258, 470, 300, 640, 68, 72), 0, 1) * (y > 455)
+    sleeve = blur(sleeve.astype(np.float32), S(0.8))
+    c.shadow(sleeve, S(3), S(5), S(5), 0.5)
+    folds = ridges(c.w, c.h, 204, (S(14), S(5)), (1.0, 0.4))
+    c.put(shade(fabric_olive(c, tile=130), (dome(sleeve, S(18)) + folds * 0.3) * sleeve, strength=S(20), spec=0.05), sleeve)
+    return c.image()
+
+
+def pressure_seep():
+    """Blood squeezing out from under the pad (pad = 200 x 180 in the middle of 512 x 256)."""
+    c = Canvas(512, 256)
+    x, y = grid(c)
+    u = np.maximum(np.abs(x - 256) - 100, 0)
+    v = np.maximum(np.abs(y - 128) - 90, 0)
+    out = np.hypot(u, v)
+    # Uneven: more on the lower side (it runs down), in tongues rather than an even rim.
+    reach = 8 + np.clip(noise(c.w, c.h, 211, S(9)) * 1.4 + 0.3, 0, 1) * 34 + np.clip((y - 128) / 100, 0, 1) * 18
+    m = ((out < reach) & ((u > 0) | (v > 0))).astype(np.float32)
+    m = blur(m, S(1))
+    streams = drips(c, [(170, 214, 6, 40), (280, 220, 7, 34), (360, 210, 5, 44)], 212)
+    blood_layer(c, np.clip(np.maximum(m, streams), 0, 1), 213)
+    return c.image()
+
+
+def edges_strip():
+    """An adhesive skin-closure strip lying across the wound."""
+    c = Canvas(128, 256)
+    m = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((42, 14, 86, 242)), radius=S(5), fill=255)), S(0.6))
+    c.shadow(m, S(2), S(3), S(3), 0.5)
+    tape = material("Fabric061", c.w, c.h, S(20), tint=(255, 250, 236), tint_mix=0.9, contrast=0.6)
+    x, y = grid(c)
+    h = dome(m, S(3)) * 0.3 + np.sin(y * 0.6) * 0.01
+    tape["color"] *= (1 - 0.18 * np.exp(-((y - 128) / 14) ** 2))[:, :, None]  # the wound shows through a little
+    c.put(np.clip(shade(tape, h, strength=S(8), detail_strength=0.6, spec=0.15, ambient=0.75) * 1.35, 0, 1), m * 0.96)
+    return c.image()
+
+
+def edges_target():
+    """A soft highlight around a still open stretch of the wound (stretched to its width)."""
+    c = Canvas(128, 256)
+    x, y = grid(c)
+    box = mask(c.w, c.h, lambda d: d.rounded_rectangle(S((8, 8, 120, 248)), radius=S(18), fill=255))
+    ring = np.clip(blur(box, S(3)) * (1 - blur(box, S(3))) * 4, 0, 1)
+    glow = np.ones((c.h, c.w, 3)) * np.array([1.0, 0.85, 0.35], np.float32)
+    c.put(glow, box * 0.12 + ring * 0.9)
+    return c.image()
+
+
+def edges_runner():
+    """The runner moving along the wound: a bright line with pointers at both ends."""
+    c = Canvas(64, 256)
+    x, y = grid(c)
+    m = mask(c.w, c.h, lambda d: (d.rectangle(S((29, 18, 35, 238)), fill=255),
+                                  d.polygon(S([(14, 0), (50, 0), (32, 22)]), fill=255),
+                                  d.polygon(S([(14, 255), (50, 255), (32, 233)]), fill=255)))
+    c.put(np.zeros((c.h, c.w, 3)), blur(m, S(3)) * 0.6)
+    c.put(np.ones((c.h, c.w, 3)) * np.array([1.0, 0.95, 0.75], np.float32), blur(m, S(0.6)))
+    return c.image()
+
+
+def dirt(seed):
+    """A patch of grit and soil stuck in a scrape."""
+    c = Canvas(128, 128)
+    x, y = grid(c)
+    d = np.hypot(x - 64, y - 64) / (40 * (1 + noise(c.w, c.h, seed, S(8)) * 0.4))
+    soil = np.clip(1 - d, 0, 1) ** 0.6
+    ground = material("Ground110", c.w, c.h, S(90))
+    ground["color"] *= np.array([0.95, 0.75, 0.52], np.float32)
+    c.put(shade(ground, soil * 0.3 + noise(c.w, c.h, seed + 1, S(2)) * 0.1, strength=S(10), detail_strength=1.5, ambient=0.45), soil * 0.85)
+    rng = np.random.default_rng(seed)
+    stones = blobs(c, [(px, py, rng.uniform(2, 5.5)) for px, py in zip(rng.normal(64, 18, 16), rng.normal(64, 18, 16))]) * np.clip(1.2 - d, 0, 1)
+    rock = material("Ground110", c.w, c.h, S(40))
+    rock["color"] = rock["color"] * np.array([0.7, 0.62, 0.5], np.float32) + 0.18
+    c.put(shade(rock, dome(stones, S(2)), strength=S(4), spec=0.3), stones)
+    return c.image()
+
+
+def abrasion_swab():
+    """A wet gauze swab, bunched up for scrubbing."""
+    c = Canvas(128, 128)
+    x, y = grid(c)
+    d = np.hypot(x - 64, y - 64) / (42 * (1 + noise(c.w, c.h, 221, S(6)) * 0.25))
+    m = blur((d < 1).astype(np.float32), S(1))
+    c.shadow(m, S(4), S(6), S(5), 0.5)
+    gauze = material("Fabric061", c.w, c.h, S(30), tint=(246, 244, 238), tint_mix=0.85, contrast=1.1)
+    crumple = ridges(c.w, c.h, 222, (S(10), S(4)), (1.0, 0.6))
+    h = dome(m, S(12)) * 0.6 + crumple * 0.5
+    lit = shade(gauze, h * m, strength=S(10), detail_strength=1.0, spec=0.25, ambient=0.55)
+    wet = np.clip((d - 0.6) / 0.4, 0, 1)[:, :, None]
+    lit = lit * (1 - 0.25 * wet) + lit * np.array([0.95, 0.65, 0.62], np.float32) * 0.25 * wet
+    c.put(np.clip(lit, 0, 1), m)
+    return c.image()
+
+
+def abrasion_pad():
+    """A sterile non-adherent dressing with an adhesive border, laid over the cleaned scrape."""
+    c = Canvas(512, 256)
+    x, y = grid(c)
+    border = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((40, 22, 472, 234)), radius=S(22), fill=255)), S(0.8))
+    c.shadow(border, S(3), S(5), S(6), 0.45)
+    tape = material("Fabric061", c.w, c.h, S(24), tint=(255, 250, 240), tint_mix=0.9, contrast=0.6)
+    c.put(np.clip(shade(tape, dome(border, S(4)) * 0.2, strength=S(6), detail_strength=0.5, spec=0.1, ambient=0.75) * 1.3, 0, 1), border * 0.97)
+    pad = blur(mask(c.w, c.h, lambda d: d.rounded_rectangle(S((86, 52, 426, 204)), radius=S(10), fill=255)), S(0.8))
+    quilt = (np.sin(x * 0.35) * np.sin(y * 0.35)) * 0.03
+    cotton = material("Fabric061", c.w, c.h, S(40), tint=(250, 248, 244), tint_mix=0.9, contrast=1.0)
+    lit = shade(cotton, (dome(pad, S(10)) * 0.4 + quilt) * pad, strength=S(10), detail_strength=1.0, spec=0.04, ambient=0.6)
+    seep = np.clip(blur(pad, S(40)) * 1.2 - 0.6, 0, 1) * np.clip(noise(c.w, c.h, 231, S(14)) + 0.6, 0, 1)
+    lit = lit * (1 - 0.35 * seep[:, :, None]) + lit * np.array([0.95, 0.55, 0.55], np.float32) * 0.35 * seep[:, :, None]
+    c.put(np.clip(lit, 0, 1), pad)
+    return c.image()

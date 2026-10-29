@@ -15,7 +15,9 @@ TEST_fnc_assert = {
 } forEach [["Init", "settings"], ["Hooks", "table"], ["Hooks", "hookOf"], ["Hooks", "original"], ["Hooks", "plays"], ["Hooks", "treatmentTime"],
     ["Hooks", "timeNormal"], ["Hooks", "timeTrained"], ["Hooks", "treatmentSuccess"], ["Hooks", "repairTime"], ["Hooks", "repairSuccess"],
     ["Games", "cprModel"], ["Games", "tourniquetModel"], ["Games", "bandageModel"], ["Games", "wheelModel"],
-    ["Board", "boardOpen"], ["Board", "boardEvent"], ["Board", "boardTick"], ["Board", "boardValid"], ["Board", "finish"], ["Board", "boardLook"]];
+    ["Games", "pressureModel"], ["Games", "edgesModel"], ["Games", "cleanModel"], ["Hooks", "woundOf"], ["Hooks", "woundGame"],
+    ["Board", "boardOpen"], ["Board", "boardEvent"], ["Board", "boardTick"], ["Board", "boardValid"], ["Board", "finish"], ["Board", "boardLook"],
+    ["Board", "boardMarks"], ["Board", "cprRibs"], ["Init", "events"]];
 PMCI_fnc_boardDraw = {};
 PMCI_fnc_boardLayout = {};
 
@@ -25,7 +27,8 @@ TEST_calls = [];
     missionNamespace setVariable [_x, compile format ["TEST_calls pushBack ['%1', +_this]; 0", _x]];
 } forEach ["ace_medical_treatment_fnc_bandage", "ace_medical_treatment_fnc_tourniquet", "ace_medical_treatment_fnc_cprSuccess",
     "ace_medical_treatment_fnc_cprFailure", "ace_repair_fnc_doReplaceWheel", "ace_repair_fnc_doRemoveWheel", "ace_common_fnc_claim",
-    "ace_common_fnc_addToInventory", "ace_common_fnc_adjustMagazineAmmo", "CBA_fnc_removePerFrameHandler"];
+    "ace_common_fnc_addToInventory", "ace_common_fnc_adjustMagazineAmmo", "CBA_fnc_removePerFrameHandler", "CBA_fnc_targetEvent",
+    "ace_medical_fnc_addDamageToUnit"];
 ace_medical_treatment_fnc_getBandageTime = {TEST_calls pushBack ["getBandageTime", +_this]; 7.5};
 ace_medical_treatment_treatmentTimeTourniquet = 7;
 ace_medical_treatment_treatmentTimeTrainedTourniquet = 4;
@@ -68,7 +71,8 @@ call TEST_fnc_fresh;
 
 // --- Settings -----------------------------------------------------------------------
 private _names = TEST_settings apply {_x select 0};
-[count TEST_settings == 13 && {"PMCI_enable_wheel" in _names} && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
+[count TEST_settings == 21 && {"PMCI_enable_wheel" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
+    && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
     "settings: difficulty, preparation bar, and for each game on/off plus its tuning, forced by the server"] call TEST_fnc_assert;
 [PMCI_difficulty == 1 && {PMCI_prepTime == 1} && {PMCI_cprDuration == 15} && {PMCI_enable_bandage}, "defaults: normal, 1 s preparation, 15 s CPR, all games on"] call TEST_fnc_assert;
 
@@ -276,13 +280,20 @@ TEST_calls = [];
 [count ("ace_repair_fnc_doReplaceWheel" call TEST_called) == 1 && {isNil "PMCI_board"}, "removing a wheel keeps ACE's behaviour"] call TEST_fnc_assert;
 
 // --- Board pictures ---------------------------------------------------------------------------------
-// Layers: scene, hands, beat, windlass, gauze, wheel, nut 0-4.
+// Layers: scene, hands, beat, windlass, gauze, wheel, nut 0-4, then the wound games' 21.
 TEST_tex = {if (_this == "") then {""} else {format ["\pmc_interactions\data\%1_ca.paa", _this]}};
-TEST_look = {params ["_game", "_state", ["_depth", 0], ["_hint", false]]; [_game, _state, _depth, _hint] call PMCI_fnc_boardLook};
-TEST_none = ["", "", "", "", "", "", "", "", "", "", ""];
+TEST_look = {params ["_game", "_state", ["_depth", 0], ["_hint", false], ["_type", ""], ["_scrub", false]]; [_game, _state, _depth, _hint, _type, _scrub] call PMCI_fnc_boardLook};
+TEST_near = {
+    params ["_got", "_want"];
+    private _ok = count _got == count _want;
+    {if (abs (_x - (_want select _forEachIndex)) > 0.001) then {_ok = false}} forEach _got;
+    _ok
+};
+TEST_full = {private _all = +_this; while {count _all < 32} do {_all pushBack ""}; _all};
+TEST_none = [] call TEST_full;
 private _c = ["init", nil, [15, 0.05, 0.5]] call PMCI_fnc_cprModel;
 private _look = ["cpr", _c, 1] call TEST_look;
-[_look isEqualTo (["cpr_scene", "cpr_hands_down", "cpr_beat_on", "", "", "", "", "", "", "", ""] apply {_x call TEST_tex}),
+[_look isEqualTo ((["cpr_scene", "cpr_hands_down", "cpr_beat_on"] call TEST_full) apply {_x call TEST_tex}),
     "CPR shows the casualty, pressed hands and the lit heart at the start of a beat"] call TEST_fnc_assert;
 _c set ["t", 0.3];
 _look = ["cpr", _c, 0.4] call TEST_look;
@@ -302,7 +313,7 @@ private _stages = [0, 0.01, 0.25, 0.26, 0.5, 0.75, 1] apply {_b set ["progress",
 private _w = ["init", nil, [0.8, 3]] call PMCI_fnc_wheelModel;
 private _wait = {params ["_state", "_s"]; for "_i" from 1 to round (_s / 0.1) do {["tick", _state, 0.1] call PMCI_fnc_wheelModel}};
 private _nuts = {params ["_hint"]; (["wheel", _w, 0, _hint] call TEST_look) select [6, 5]};
-[(["wheel", _w] call TEST_look) isEqualTo (["", "", "", "", "", "wheel_old", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] apply {_x call TEST_tex}),
+[(["wheel", _w] call TEST_look) isEqualTo ((["", "", "", "", "", "wheel_old", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] call TEST_full) apply {_x call TEST_tex}),
     "the wheel starts as the old wheel with five tight nuts, no scene picture"] call TEST_fnc_assert;
 [([true] call _nuts) isEqualTo ((["wheel_nut_tight"] call {_this + _this + _this + _this + _this}) apply {_x call TEST_tex}),
     "no hint before the first nut: any nut may start the star"] call TEST_fnc_assert;
@@ -325,9 +336,211 @@ private _tightLook = ["wheel", _w, 0, true] call TEST_look;
     && {(_tightLook select [6, 5]) isEqualTo (["wheel_nut_loose", "wheel_nut_loose", "wheel_nut_done", "wheel_nut_loose", "wheel_nut_next"] apply {_x call TEST_tex})},
     "after the swap the new wheel shows; tightened nuts are marked done"] call TEST_fnc_assert;
 {["nut", _w, _x] call PMCI_fnc_wheelModel; [_w, 0.9] call _wait} forEach [4, 1, 3, 0];
-[(_w get "status") == "success" && {(["wheel", _w] call TEST_look) isEqualTo (["", "", "", "", "", "wheel_new", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] apply {_x call TEST_tex})},
+[(_w get "status") == "success" && {(["wheel", _w] call TEST_look) isEqualTo ((["", "", "", "", "", "wheel_new", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] call TEST_full) apply {_x call TEST_tex})},
     "a finished change shows the new wheel with all nuts tight"] call TEST_fnc_assert;
 [(["unknown", _w] call TEST_look) isEqualTo TEST_none, "an unknown game shows no pictures"] call TEST_fnc_assert;
+
+// --- Wounds: which one, which game ------------------------------------------------------------
+// ACE's wound classes in config order; a class ID is 10 x index + size.
+ace_medical_damage_woundClassNames = ["Abrasion", "Avulsion", "Contusion", "Crush", "Cut", "Laceration", "VelocityWound", "PunctureWound", "ThermalBurn"];
+private _names = ace_medical_damage_woundClassNames;
+[([[[61, 1, 0.02, 0.3], [41, 2, 0.008, 0.1], [22, 1, 0, 0.5]], _names] call PMCI_fnc_woundOf) isEqualTo ["VelocityWound", 1]
+    && {([[[61, 1, 0.02, 0.3], [41, 3, 0.008, 0.1]], _names] call PMCI_fnc_woundOf) isEqualTo ["Cut", 1]},
+    "the wound treated first is the one losing most blood (amount x bleeding), with its size"] call TEST_fnc_assert;
+[([[[22, 3, 0, 0.5], [82, 1, 0, 0.2]], _names] call PMCI_fnc_woundOf) isEqualTo ["", 0] && {([[], _names] call PMCI_fnc_woundOf) isEqualTo ["", 0]},
+    "bruises and burns do not bleed: no wound to bandage"] call TEST_fnc_assert;
+private _games = ["VelocityWound", "PunctureWound", "Avulsion", "Crush", "Cut", "Laceration", "Abrasion", ""] apply {[_x] call PMCI_fnc_woundGame};
+[_games isEqualTo ["bandage", "bandage", "pressure", "pressure", "edges", "edges", "clean", "bandage"],
+    "gunshot and puncture: packing; avulsion and crush: pressure; cut and laceration: edges; abrasion: cleaning"] call TEST_fnc_assert;
+PMCI_enable_edges = false;
+[(["Cut"] call PMCI_fnc_woundGame) == "bandage" && {(["Abrasion"] call PMCI_fnc_woundGame) == "clean"}, "a wound game switched off falls back to packing"] call TEST_fnc_assert;
+PMCI_enable_edges = true;
+
+// --- Pressure -------------------------------------------------------------------------------------
+TEST_fnc_pressure = {
+    params ["_mode"];
+    private _state = ["init", nil, [0.58, 0.78, 6, 30, 100, 0.1]] call PMCI_fnc_pressureModel;
+    while {(_state get "status") == "running"} do {
+        private _hold = switch (_mode) do {case "steer": {(_state get "needle") < 0.68}; case "always": {true}; default {false}};
+        ["release", "press"] select _hold call {[_this, _state] call PMCI_fnc_pressureModel};
+        ["tick", _state, 0.02] call PMCI_fnc_pressureModel;
+    };
+    _state
+};
+private _held = ["steer"] call TEST_fnc_pressure;
+[(_held get "status") == "success" && {(_held get "quality") > 0.6} && {(_held get "t") < 12}, "answering each pulse keeps the pressure in the zone and stops the bleeding"] call TEST_fnc_assert;
+private _crushed = ["always"] call TEST_fnc_pressure;
+[(_crushed get "status") == "fail" && {(_crushed get "needle") > 0.9}, "pressing all the time overshoots the zone and runs out of time"] call TEST_fnc_assert;
+[((["idle"] call TEST_fnc_pressure) get "status") == "fail", "doing nothing runs out of time"] call TEST_fnc_assert;
+private _beats = [0, 0.1] apply {
+    private _state = ["init", nil, [0.58, 0.78, 6, 30, 100, _x]] call PMCI_fnc_pressureModel;
+    ["press", _state] call PMCI_fnc_pressureModel;
+    for "_i" from 1 to 61 do {["tick", _state, 0.01] call PMCI_fnc_pressureModel};
+    _state get "needle"
+};
+[abs ((_beats select 0) - 0.505) < 0.001 && {abs (((_beats select 0) - (_beats select 1)) - 0.1) < 0.001},
+    "holding raises the pressure by half the gauge per second; one pulse beat (100 per minute, after 0.6 s) knocks it down by the kick"] call TEST_fnc_assert;
+
+// --- Closing the edges ------------------------------------------------------------------------------
+private _e = ["init", nil, [[[0.1, 0.2], [0.5, 0.6]], 0.5, 30, 1]] call PMCI_fnc_edgesModel;
+for "_i" from 1 to 300 do {["tick", _e, 0.01] call PMCI_fnc_edgesModel};
+[abs ((_e get "pos") - 0.5) < 0.001 && {(_e get "dir") == -1}, "the runner goes to the end of the wound and comes back"] call TEST_fnc_assert;
+_e = ["init", nil, [[[0.1, 0.2], [0.5, 0.6]], 0.5, 30, 1]] call PMCI_fnc_edgesModel;
+while {(_e get "status") == "running"} do {
+    private _pos = _e get "pos";
+    private _open = (_e get "stretches") findIf {_pos >= (_x select 0) + 0.02 && {_pos <= (_x select 1) - 0.02}};
+    if (_open >= 0 && {!(_open in (_e get "closed"))}) then {["press", _e] call PMCI_fnc_edgesModel};
+    ["tick", _e, 0.01] call PMCI_fnc_edgesModel;
+};
+[(_e get "status") == "success" && {(_e get "quality") == 1} && {(_e get "closed") isEqualTo [0, 1]}, "a strip on every stretch with no miss closes the wound at full quality"] call TEST_fnc_assert;
+_e = ["init", nil, [[[0.1, 0.2], [0.5, 0.6]], 0.5, 30, 1]] call PMCI_fnc_edgesModel;
+_e set ["pos", 0.15];
+["press", _e] call PMCI_fnc_edgesModel;
+["press", _e] call PMCI_fnc_edgesModel;
+[(_e get "closed") isEqualTo [0] && {(_e get "misses") == 1} && {(_e get "status") == "running"}, "a second strip on a closed stretch is a miss"] call TEST_fnc_assert;
+_e set ["pos", 0.35];
+["press", _e] call PMCI_fnc_edgesModel;
+[(_e get "status") == "fail", "one miss more than allowed fails"] call TEST_fnc_assert;
+_e = ["init", nil, [[[0.1, 0.2], [0.5, 0.6]], 0.5, 30, 3]] call PMCI_fnc_edgesModel;
+{_e set ["pos", _x]; ["press", _e] call PMCI_fnc_edgesModel} forEach [0.3, 0.15, 0.55];
+[(_e get "status") == "success" && {abs ((_e get "quality") - 0.8) < 0.001}, "each miss costs a fifth of the quality"] call TEST_fnc_assert;
+
+// --- Cleaning -------------------------------------------------------------------------------------
+private _c = ["init", nil, [[[100, 100, 50], [300, 100, 50]], 0.01, 20, 1]] call PMCI_fnc_cleanModel;
+["scrub", _c, [110, 90, 60]] call PMCI_fnc_cleanModel;
+["scrub", _c, [200, 100, 500]] call PMCI_fnc_cleanModel;
+[abs (((_c get "dirt") select 0) - 0.4) < 0.0001 && {((_c get "dirt") select 1) == 1}, "scrubbing wears only the dirt under the mouse, by the distance scrubbed"] call TEST_fnc_assert;
+["press", _c] call PMCI_fnc_cleanModel;
+for "_i" from 1 to 20 do {["tick", _c, 0.1] call PMCI_fnc_cleanModel};
+[(_c get "covered") == 0 && {(_c get "phase") == "clean"}, "the dressing cannot go on a dirty wound"] call TEST_fnc_assert;
+["scrub", _c, [100, 100, 40]] call PMCI_fnc_cleanModel;
+["scrub", _c, [300, 110, 93]] call PMCI_fnc_cleanModel;
+[(_c get "phase") == "clean", "a spot with 7% of its dirt left still needs scrubbing"] call TEST_fnc_assert;
+["scrub", _c, [300, 110, 3]] call PMCI_fnc_cleanModel;
+[(_c get "phase") == "cover" && {(_c get "dirt") isEqualTo [0, 0]}, "almost clean (under 5% left) counts as clean: then the dressing"] call TEST_fnc_assert;
+for "_i" from 1 to 11 do {["tick", _c, 0.1] call PMCI_fnc_cleanModel};
+[(_c get "status") == "success" && {(_c get "quality") == 1}, "holding covers the wound; done early is full quality"] call TEST_fnc_assert;
+_c = ["init", nil, [[[100, 100, 50]], 0.01, 20, 1]] call PMCI_fnc_cleanModel;
+for "_i" from 1 to 150 do {["tick", _c, 0.1] call PMCI_fnc_cleanModel};
+[abs ((_c get "quality") - 0.72) < 0.01 && {(_c get "status") == "running"}, "quality falls after 40% of the time limit"] call TEST_fnc_assert;
+for "_i" from 1 to 51 do {["tick", _c, 0.1] call PMCI_fnc_cleanModel};
+[(_c get "status") == "fail", "the time limit fails"] call TEST_fnc_assert;
+
+// --- CPR: a broken rib -----------------------------------------------------------------------------
+[(([0.3] call TEST_fnc_cpr) get "fast") > 10 && {(([0.545] call TEST_fnc_cpr) get "fast") == 0}, "compressions faster than the accepted rhythm are counted"] call TEST_fnc_assert;
+call TEST_fnc_fresh;
+TEST_patient setVariable ["ACE_isUnconscious", true];
+TEST_patient setVariable ["ace_medical_CPR_provider", TEST_medic];
+PMCI_ribChance = 1;
+PMCI_ribMax = 1;
+[TEST_medic, TEST_patient, "Body", "CPR", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
+private _cprState = PMCI_board get "state";
+TEST_fnc_tap = {params ["_at"]; _cprState set ["t", _at]; ["keyDown", [0, 57]] call PMCI_fnc_boardEvent; ["keyUp", [0, 57]] call PMCI_fnc_boardEvent};
+{[_x] call TEST_fnc_tap} forEach [1, 1.55, 2.1];
+[("CBA_fnc_targetEvent" call TEST_called) isEqualTo [] && {([PMCI_board, ["ribs", 0]] call TEST_fnc_getDefault) == 0}, "compressions in rhythm break nothing"] call TEST_fnc_assert;
+{[_x] call TEST_fnc_tap} forEach [2.3, 2.5, 2.7];
+[("CBA_fnc_targetEvent" call TEST_called) isEqualTo [["CBA_fnc_targetEvent", ["PMCI_ribFracture", [TEST_patient, TEST_medic], TEST_patient]]]
+    && {(PMCI_board get "ribs") == 1} && {(PMCI_board get "crackAt") == 2.3},
+    "a too fast compression breaks a rib on the patient's machine, at most the set number per CPR"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+call TEST_fnc_fresh;
+TEST_patient setVariable ["ACE_isUnconscious", true];
+TEST_patient setVariable ["ace_medical_CPR_provider", TEST_medic];
+PMCI_ribChance = 0;
+[TEST_medic, TEST_patient, "Body", "CPR", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
+_cprState = PMCI_board get "state";
+{[_x] call TEST_fnc_tap} forEach [1, 1.1, 1.2, 1.3];
+[("CBA_fnc_targetEvent" call TEST_called) isEqualTo [], "with no chance set, no rib breaks"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ACE_isUnconscious", false];
+TEST_events = [];
+CBA_fnc_addEventHandler = {TEST_events pushBack _this; 0};
+call PMCI_fnc_events;
+TEST_calls = [];
+[TEST_patient, TEST_medic] call ((TEST_events select 0) select 1);
+[(TEST_events select 0 select 0) == "PMCI_ribFracture"
+    && {("ace_medical_fnc_addDamageToUnit" call TEST_called) isEqualTo [["ace_medical_fnc_addDamageToUnit", [TEST_patient, 0.2, "Body", "pmci_ribs", TEST_medic]]]},
+    "the rib becomes an ACE wound of the mod's damage type on the chest"] call TEST_fnc_assert;
+
+// --- Bandaging picks the wound's game -----------------------------------------------------------------
+TEST_fnc_bandageOn = {
+    params ["_wounds"];
+    call TEST_fnc_fresh;
+    TEST_patient setVariable ["ace_medical_openWounds", createHashMapFromArray [["leftarm", _wounds]]];
+    [TEST_medic, TEST_patient, "LeftArm", "FieldDressing", TEST_medic, "ACE_fieldDressing", true] call PMCI_fnc_treatmentSuccess;
+    [PMCI_board get "game", PMCI_board get "wound", PMCI_board get "state"]
+};
+private _opened = [[[41, 1, 0.01, 0.1]]] call TEST_fnc_bandageOn;
+[(_opened select 0) == "edges" && {(_opened select 1) isEqualTo ["Cut", 1]} && {count ((_opened select 2) get "stretches") == 4},
+    "a medium cut opens closing the edges with four stretches"] call TEST_fnc_assert;
+(PMCI_board get "state") set ["quality", 1];
+(PMCI_board get "state") set ["status", "success"];
+call PMCI_fnc_boardTick;
+private _bandaged = "ace_medical_treatment_fnc_bandage" call TEST_called;
+[count _bandaged == 1 && {((_bandaged select 0) select 1) select 7 == 1.2}, "a wound game's quality sets the bandage's effectiveness like packing does"] call TEST_fnc_assert;
+// Held Space repeats keyDown: only the first places a strip (the repeat would be a miss).
+[[[41, 1, 0.01, 0.1]]] call TEST_fnc_bandageOn;
+(PMCI_board get "state") set ["pos", (((PMCI_board get "state") get "stretches") select 1) call {((_this select 0) + (_this select 1)) / 2}];
+["keyDown", [0, 57]] call PMCI_fnc_boardEvent;
+["keyDown", [0, 57]] call PMCI_fnc_boardEvent;
+[((PMCI_board get "state") get "closed") isEqualTo [1] && {((PMCI_board get "state") get "misses") == 0}, "holding Space places one strip, not a miss after it"] call TEST_fnc_assert;
+["keyUp", [0, 57]] call PMCI_fnc_boardEvent;
+[false] call PMCI_fnc_finish;
+_opened = [[[52, 1, 0.05, 0.2], [12, 1, 0.1, 0.4]]] call TEST_fnc_bandageOn;
+[(_opened select 0) == "pressure" && {(_opened select 1) isEqualTo ["Avulsion", 2]} && {((_opened select 2) get "hold") == 8}
+    && {((_opened select 2) get "rate") == 100}, "a large avulsion opens direct pressure, the longest hold and the faster pulse"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+_opened = [[[0, 1, 0.001, 0.1]]] call TEST_fnc_bandageOn;
+[(_opened select 0) == "clean" && {count ((_opened select 2) get "spots") == 4}, "a minor abrasion opens cleaning with four dirt spots"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+_opened = [[[52, 1, 0.05, 0.2]]] call TEST_fnc_bandageOn;
+private _lacerated = (_opened select 2) get "stretches";
+[(_opened select 0) == "edges" && {count _lacerated == 7} && {(((_lacerated select 1) select 1) - ((_lacerated select 1) select 0)) < (((_lacerated select 0) select 1) - ((_lacerated select 0) select 0))},
+    "a large laceration has seven stretches of uneven width"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+_opened = [[[71, 1, 0.05, 0.2]]] call TEST_fnc_bandageOn;
+[(_opened select 0) == "bandage" && {(_opened select 1) isEqualTo ["PunctureWound", 1]}, "a puncture wound is packed"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ace_medical_openWounds", nil];
+
+// --- Wound games: pictures and moving layers ----------------------------------------------------------
+private _p = ["init", nil, [0.58, 0.78, 6, 30, 100, 0.1]] call PMCI_fnc_pressureModel;
+_p set ["needle", 0.2];
+private _pLook = ["pressure", _p, 0, false, "Crush"] call TEST_look;
+private _pMarks = ["pressure", _p] call PMCI_fnc_boardMarks;
+[(_pLook select 0) == ("wound_crush" call TEST_tex) && {(_pLook select 11) == ("pressure_hand_light" call TEST_tex)}
+    && {((_pMarks select 0) select 2) > 0.9}, "too little pressure: a light hand and blood seeping out"] call TEST_fnc_assert;
+_p set ["needle", 0.65];
+_pMarks = ["pressure", _p] call PMCI_fnc_boardMarks;
+[((["pressure", _p, 0, false, "Avulsion"] call TEST_look) select 11) == ("pressure_hand_firm" call TEST_tex) && {((_pMarks select 0) select 2) == 0}
+    && {((["pressure", _p, 0, false, "Avulsion"] call TEST_look) select 0) == ("wound_avulsion" call TEST_tex)}, "enough pressure: a firm hand, no seeping"] call TEST_fnc_assert;
+private _ed = ["init", nil, [[[0.1, 0.2], [0.5, 0.6]], 0.5, 30, 1]] call PMCI_fnc_edgesModel;
+_ed set ["pos", 0.15];
+["press", _ed] call PMCI_fnc_edgesModel;
+private _edLook = ["edges", _ed, 0, false, "Laceration"] call TEST_look;
+private _edMarks = ["edges", _ed] call PMCI_fnc_boardMarks;
+[(_edLook select 0) == ("wound_laceration" call TEST_tex) && {(_edLook select 15) == ("edges_strip" call TEST_tex)} && {(_edLook select 16) == ("edges_target" call TEST_tex)}
+    && {(_edLook select 17) == ""} && {(_edLook select 31) == ("edges_runner" call TEST_tex)}
+    && {[(_edMarks select 0) select 1, [232 + 560 * 0.15 - 36, 150, 72, 212]] call TEST_near}
+    && {[(_edMarks select 1) select 1, [232 + 560 * 0.5, 196, 560 * 0.1, 120]] call TEST_near}
+    && {[(_edMarks select 2) select 1, [232 + 560 * 0.15 - 20, 150, 40, 212]] call TEST_near},
+    "a placed strip covers its stretch, open stretches are highlighted, the runner follows the marker"] call TEST_fnc_assert;
+private _cl = ["init", nil, [[[100, 100, 50], [300, 100, 50]], 0.01, 20, 1]] call PMCI_fnc_cleanModel;
+["scrub", _cl, [100, 100, 30]] call PMCI_fnc_cleanModel;
+private _clLook = ["clean", _cl, 0, false, "Abrasion", true] call TEST_look;
+private _clMarks = ["clean", _cl, [120, 140]] call PMCI_fnc_boardMarks;
+[(_clLook select 0) == ("wound_abrasion" call TEST_tex) && {(_clLook select 23) == ("dirt_1" call TEST_tex)} && {(_clLook select 24) == ("dirt_2" call TEST_tex)}
+    && {(_clLook select 25) == ""} && {(_clLook select 14) == ("abrasion_swab" call TEST_tex)} && {(_clLook select 13) == ""}
+    && {abs (((_clMarks select 0) select 2) - 0.7) < 0.001} && {[(_clMarks select 2) select 1, [72, 92, 96, 96]] call TEST_near},
+    "dirt fades as it is scrubbed; the swab follows the mouse while scrubbing"] call TEST_fnc_assert;
+_cl set ["phase", "cover"];
+[((["clean", _cl] call TEST_look) select 13) == ("abrasion_pad" call TEST_tex) && {((["clean", _cl] call TEST_look) select 14) == ""},
+    "once clean, the dressing pad appears"] call TEST_fnc_assert;
+private _pk = ["init", nil, [0.3, 30, 6, 0.25]] call PMCI_fnc_bandageModel;
+[((["bandage", _pk, 0, false, "VelocityWound"] call TEST_look) select 0) == ("wound_velocity" call TEST_tex)
+    && {((["bandage", _pk, 0, false, "PunctureWound"] call TEST_look) select 0) == ("wound_puncture" call TEST_tex)}
+    && {((["bandage", _pk] call TEST_look) select 0) == ("bandage_scene" call TEST_tex)},
+    "packing shows the gunshot or puncture wound, or the general wound when the type is unknown"] call TEST_fnc_assert;
 
 // --- Difficulty -----------------------------------------------------------------------------------
 call TEST_fnc_fresh;

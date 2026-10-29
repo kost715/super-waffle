@@ -1,9 +1,15 @@
-// [game, state, depth, hint] -> [scene, hands, beat, windlass, gauze, wheel, nut 0-4]:
-// the picture each layer of the board shows now, "" for a hidden layer. Pure.
+// [game, state, depth, hint, wound type, scrubbing] -> 32 pictures, one per scene layer
+// (IDC PMCI_IDC_LAYER + index), "" for a hidden layer. Pure.
+//   0 scene, 1 CPR hands, 2 heart, 3 windlass, 4 gauze, 5 wheel, 6-10 nuts,
+//   11 pressing hand, 12 blood seeping, 13 dressing pad, 14 swab, 15-22 wound stretches,
+//   23-30 dirt spots, 31 runner along the wound
 //   depth: 0-1, how far the CPR hands are pushed down (PMCI_board "depth")
 //   hint: show which nut comes next (easy difficulty)
-params ["_game", "_state", ["_depth", 0], ["_hint", false]];
-private _look = ["", "", "", "", "", "", "", "", "", "", ""];
+//   wound type: ACE wound class of a bandaged wound ("" if unknown)
+//   scrubbing: the mouse is held on an abrasion
+params ["_game", "_state", ["_depth", 0], ["_hint", false], ["_type", ""], ["_scrubbing", false]];
+private _look = [];
+for "_i" from 1 to 32 do {_look pushBack ""};
 switch (_game) do {
     case "cpr": {
         _look set [0, "cpr_scene"];
@@ -18,9 +24,26 @@ switch (_game) do {
         _look set [3, format ["tq_windlass_%1", 0 max (floor ((_state get "p") * 8) min 7)]];
     };
     case "bandage": {
-        _look set [0, "bandage_scene"];
+        _look set [0, switch (_type) do {case "VelocityWound": {"wound_velocity"}; case "PunctureWound": {"wound_puncture"}; default {"bandage_scene"}}];
         private _stage = 0 max (ceil ((_state get "progress") * 4) min 4);
         if (_stage > 0) then {_look set [4, format ["bandage_gauze_%1", _stage]]};
+    };
+    case "pressure": {
+        _look set [0, ["wound_avulsion", "wound_crush"] select (_type == "Crush")];
+        _look set [11, ["pressure_hand_light", "pressure_hand_firm"] select ((_state get "needle") >= (_state get "low"))];
+        _look set [12, "pressure_seep"];
+    };
+    case "edges": {
+        _look set [0, ["wound_cut", "wound_laceration"] select (_type == "Laceration")];
+        private _closed = _state get "closed";
+        {_look set [15 + _forEachIndex, ["edges_target", "edges_strip"] select (_forEachIndex in _closed)]} forEach (_state get "stretches");
+        _look set [31, "edges_runner"];
+    };
+    case "clean": {
+        _look set [0, "wound_abrasion"];
+        {_look set [23 + _forEachIndex, format ["dirt_%1", _forEachIndex % 3 + 1]]} forEach (_state get "spots");
+        if ((_state get "phase") == "cover") then {_look set [13, "abrasion_pad"]};
+        if (_scrubbing) then {_look set [14, "abrasion_swab"]};
     };
     case "wheel": {
         private _phase = _state get "phase";

@@ -83,8 +83,8 @@
                 <Russian>Замена колеса</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_cpr">
-                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The heart shows the pace.</Original>
-                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Сердце показывает темп.</Russian>
+                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The heart shows the pace. Much faster can break a rib.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Сердце показывает темп. Сильно чаще — можно сломать ребро.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_tourniquet">
                 <Original>Hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to tighten. Stop in the green zone and press &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt; to fix it. Past the end it slips.</Original>
@@ -153,6 +153,106 @@
             <Key ID="STR_PMCI_RESULT_FAIL">
                 <Original>%1: failed.</Original>
                 <Russian>%1: не получилось.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_pressure">
+                <Original>Direct pressure</Original>
+                <Russian>Прижатие раны</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_edges">
+                <Original>Closing the wound</Original>
+                <Russian>Сведение краёв раны</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_clean">
+                <Original>Abrasion care</Original>
+                <Russian>Обработка ссадины</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_pressure">
+                <Original>Press the wound: hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to push harder. Every pulse beat knocks the pressure down: keep the needle in the green zone until the gauge is full.</Original>
+                <Russian>Прижмите рану: держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы давить сильнее. Каждый удар пульса сбивает давление: держите стрелку в зелёной зоне, пока шкала не заполнится.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_edges">
+                <Original>Close the wound with strips: press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; when the runner is over a highlighted stretch. A press elsewhere is a miss.</Original>
+                <Russian>Сведите края раны полосками: жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, когда бегунок над подсвеченным участком. Нажатие мимо — промах.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_clean">
+                <Original>Clean the abrasion: hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and scrub the dirt away. When it is clean, hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to put on the dressing.</Original>
+                <Russian>Очистите ссадину: зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и стирайте грязь. Когда станет чисто, держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы наложить повязку.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_PRESSURE">
+                <Original>Held: %1%. Quality: %2%</Original>
+                <Russian>Прижато: %1%. Качество: %2%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_EDGES">
+                <Original>Closed: %1 of %2. Misses left: %3</Original>
+                <Russian>Сведено: %1 из %2. Промахов в запасе: %3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_CLEAN">
+                <Original>Cleaned: %1%</Original>
+                <Russian>Очищено: %1%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_COVER">
+                <Original>Clean. Hold Space to put on the dressing</Original>
+                <Russian>Чисто. Держите Пробел, чтобы наложить повязку</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_RIBS">
+                <Original>Ribs broken: %1</Original>
+                <Russian>Сломано рёбер: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_RIB_CRACK">
+                <Original>Crack! A rib broke (%1)</Original>
+                <Russian>Хруст! Сломано ребро (%1)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PLACE">
+                <Original>Place strip</Original>
+                <Russian>Наложить полоску</Russian>
+            </Key>
+            <Key ID="STR_PMCI_COVER">
+                <Original>Put on dressing</Original>
+                <Russian>Наложить повязку</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_RIB_CHANCE">
+                <Original>Chance of a broken rib per too fast compression</Original>
+                <Russian>Шанс сломать ребро за слишком частое нажатие</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_RIB_MAX">
+                <Original>Broken ribs per CPR, at most (0: never)</Original>
+                <Russian>Сломанных рёбер за одну СЛР, не больше (0 — никогда)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Abrasion">
+                <Original>abrasion</Original>
+                <Russian>ссадина</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Avulsion">
+                <Original>avulsion</Original>
+                <Russian>авульсия</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Contusion">
+                <Original>contusion</Original>
+                <Russian>ушиб</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Crush">
+                <Original>crush wound</Original>
+                <Russian>размозжение</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Cut">
+                <Original>cut</Original>
+                <Russian>порез</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_Laceration">
+                <Original>laceration</Original>
+                <Russian>рваная рана</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_VelocityWound">
+                <Original>gunshot wound</Original>
+                <Russian>огнестрельное ранение</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_PunctureWound">
+                <Original>puncture wound</Original>
+                <Russian>колотая рана</Russian>
+            </Key>
+            <Key ID="STR_PMCI_WOUND_ThermalBurn">
+                <Original>burn</Original>
+                <Russian>ожог</Russian>
             </Key>
         </Container>
     </Package>
