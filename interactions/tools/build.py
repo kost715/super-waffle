@@ -9,7 +9,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.4.1_alpha1"
+VERSION = "0.5.0_alpha1"
 MOD = "@PMC_Interactions"
 PREFIX = "pmc_interactions"
 STAMP = (2026, 10, 30, 12, 0, 0)

@@ -1,6 +1,6 @@
 #include "..\ui_defines.hpp"
-// [event, value] -> handled. Client. Input from the board: keys (Space presses or holds,
-// Enter fixes, Esc gives up), the hold button, the fix button, nut and swap buttons, and
+// [event, value] -> handled. Client. Input from the board: keys (the "press" key presses
+// or holds, the "fix" key fixes, both set in CBA's controls; Esc gives up), the hold button, the fix button, nut and swap buttons, and
 // the mouse on the scene (scrubbing, aiming, stitching, setting a bone, welding).
 params ["_event", ["_value", 0]];
 if (isNil "PMCI_board") exitWith {false};
@@ -27,19 +27,19 @@ switch (_event) do {
         };
     };
     case "keyDown": {
-        _value params ["", "_key"];
-        if (_key == 57) exitWith {
-            // Holding Space repeats keyDown; a tapping game only counts the first.
+        _value params ["", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
+        if (["press", _key, [_shift, _ctrl, _alt]] call PMCI_fnc_keyIs) exitWith {
+            // Holding the key repeats keyDown; a tapping game only counts the first.
             if !(_game in ["cpr", "edges", "track"] && {PMCI_board getOrDefault ["spaceDown", false]}) then {call _press};
             PMCI_board set ["spaceDown", true];
             true
         };
-        if (_key in [28, 156] && {_game == "tourniquet"}) exitWith {["fix", _state] call _model; true};
+        if (_game == "tourniquet" && {["fix", _key, [_shift, _ctrl, _alt]] call PMCI_fnc_keyIs}) exitWith {["fix", _state] call _model; true};
         false
     };
     case "keyUp": {
         _value params ["", "_key"];
-        if (_key == 57) exitWith {PMCI_board set ["spaceDown", false]; ["release", _state] call _model; true};
+        if (["press", _key] call PMCI_fnc_keyIs) exitWith {PMCI_board set ["spaceDown", false]; ["release", _state] call _model; true};
         false
     };
     case "holdDown": {call _press};

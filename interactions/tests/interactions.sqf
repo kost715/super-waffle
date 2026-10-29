@@ -19,7 +19,8 @@ TEST_fnc_assert = {
     ["Board", "boardOpen"], ["Board", "boardEvent"], ["Board", "boardTick"], ["Board", "boardValid"], ["Board", "finish"], ["Board", "boardLook"],
     ["Board", "boardMarks"], ["Board", "cprRibs"], ["Init", "events"],
     ["Games", "ivModel"], ["Games", "sutureModel"], ["Games", "splintModel"], ["Games", "diagnoseModel"], ["Games", "weldModel"], ["Games", "trackModel"],
-    ["Hooks", "repairGame"], ["Hooks", "partOf"], ["Hooks", "stitch"], ["Hooks", "stitchProgress"]];
+    ["Hooks", "repairGame"], ["Hooks", "partOf"], ["Hooks", "stitch"], ["Hooks", "stitchProgress"],
+    ["Board", "keysOf"], ["Board", "keyIs"], ["Board", "keyName"]];
 TEST_mouse = [0, 0];
 PMCI_fnc_boardMouse = {+TEST_mouse};
 PMCI_fnc_boardDraw = {};
@@ -34,7 +35,7 @@ TEST_calls = [];
     "ace_common_fnc_addToInventory", "ace_common_fnc_adjustMagazineAmmo", "CBA_fnc_removePerFrameHandler", "CBA_fnc_targetEvent",
     "ace_medical_fnc_addDamageToUnit", "ace_medical_treatment_fnc_ivBag", "ace_medical_treatment_fnc_splint", "ace_medical_treatment_fnc_surgicalKitProgress",
     "ace_repair_fnc_doRepair", "ace_repair_fnc_doRepairTrack", "ace_repair_fnc_doReplaceTrack", "ace_repair_fnc_doRemoveTrack",
-    "ace_medical_gui_fnc_openMenu", "CBA_fnc_execNextFrame"];
+    "ace_medical_gui_fnc_openMenu", "CBA_fnc_execNextFrame", "CBA_fnc_addKeybind"];
 ace_medical_treatment_treatmentTimeIV = 12;
 ace_medical_treatment_treatmentTimeTrainedIV = 8;
 ace_medical_treatment_treatmentTimeSplint = 7;
@@ -90,7 +91,7 @@ call TEST_fnc_fresh;
 
 // --- Settings -----------------------------------------------------------------------
 private _names = TEST_settings apply {_x select 0};
-[count TEST_settings == 33 && {"PMCI_enable_wheel" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
+[count TEST_settings == 70 && {"PMCI_enable_wheel" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
     && {"PMCI_enable_track" in _names} && {"PMCI_ivLimit" in _names}
     && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
     "settings: difficulty, preparation bar, and for each game on/off plus its tuning, forced by the server"] call TEST_fnc_assert;
@@ -883,6 +884,101 @@ _tr set ["done", 2];
 private _trMarks = ["track", _tr] call PMCI_fnc_boardMarks;
 [((_trMarks select 0) select 1) isEqualTo [384, 140, 256, 256] && {((_trMarks select 1) select 1) isEqualTo [545, 224, 256, 64]},
     "the loose link swings with its offset; the pin goes in with the hits"] call TEST_fnc_assert;
+
+// --- Balance and keys from CBA ------------------------------------------------------------------------------
+call TEST_fnc_fresh;
+private _keybinds = ("CBA_fnc_addKeybind" call TEST_called) apply {[(_x select 1) select 1, (_x select 1) select 5]};
+[_keybinds isEqualTo [["pmci_press", [57, [false, false, false]]], ["pmci_fix", [28, [false, false, false]]]],
+    "two keys in CBA's controls: press/hold on Space, fix on Enter"] call TEST_fnc_assert;
+PMCI_ivTolerance = 20;
+PMCI_ivMisses = 4;
+[TEST_medic, TEST_patient, "LeftArm", "BloodIV", TEST_medic, "ACE_bloodIV", true] call PMCI_fnc_treatmentSuccess;
+[((PMCI_board get "state") get "tolerance") == 20 && {((PMCI_board get "state") get "allowed") == 4}, "the IV takes its vein tolerance and misses from the settings"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+call TEST_fnc_fresh;
+PMCI_trackHits = 7;
+PMCI_trackZone = 0.3;
+[TEST_medic, _tank, "HitLTrack", "RepairTrack", [], [], [_track]] call PMCI_fnc_repairSuccess;
+private _trSet = PMCI_board get "state";
+[(_trSet get "hits") == 7 && {abs ((_trSet get "high") - (_trSet get "low") - 0.3) < 0.0001}, "the track takes its strikes and zone from the settings"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+private _opened2 = [[[12, 1, 0.1, 0.4]]] call TEST_fnc_bandageOn;
+private _kickDefault = (_opened2 select 2) get "kick";
+[false] call PMCI_fnc_finish;
+call TEST_fnc_fresh;
+PMCI_pressurePulse = 2;
+PMCI_pressureHold = 9;
+TEST_patient setVariable ["ace_medical_openWounds", createHashMapFromArray [["leftarm", [[12, 1, 0.1, 0.4]]]]];
+[TEST_medic, TEST_patient, "LeftArm", "FieldDressing", TEST_medic, "ACE_fieldDressing", true] call PMCI_fnc_treatmentSuccess;
+[abs (((PMCI_board get "state") get "kick") - 2 * _kickDefault) < 0.0001 && {((PMCI_board get "state") get "hold") == 12},
+    "pressure: pulse strength scales the kick; a large wound holds 4/3 of the set time"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ace_medical_openWounds", nil];
+call TEST_fnc_fresh;
+PMCI_bandageFill = 9;
+PMCI_edgesMisses = 5;
+PMCI_cleanScrub = 900;
+TEST_patient setVariable ["ace_medical_openWounds", createHashMapFromArray [["leftarm", [[62, 1, 0.2, 0.5]]]]];
+[TEST_medic, TEST_patient, "LeftArm", "FieldDressing", TEST_medic, "ACE_fieldDressing", true] call PMCI_fnc_treatmentSuccess;
+private _fill = (PMCI_board get "state") get "fill";
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ace_medical_openWounds", createHashMapFromArray [["leftarm", [[41, 1, 0.01, 0.1]]]]];
+[TEST_medic, TEST_patient, "LeftArm", "FieldDressing", TEST_medic, "ACE_fieldDressing", true] call PMCI_fnc_treatmentSuccess;
+private _cutMisses = (PMCI_board get "state") get "allowed";
+[false] call PMCI_fnc_finish;
+PMCI_cleanScrub = 900;
+TEST_patient setVariable ["ace_medical_openWounds", createHashMapFromArray [["leftarm", [[0, 1, 0.001, 0.1]]]]];
+[TEST_medic, TEST_patient, "LeftArm", "FieldDressing", TEST_medic, "ACE_fieldDressing", true] call PMCI_fnc_treatmentSuccess;
+private _scrubRate = (PMCI_board get "state") get "rate";
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ace_medical_openWounds", nil];
+[_fill == 12 && {_cutMisses == 5} && {abs (_scrubRate - 1 / 900) < 1e-9},
+    "packing time (a large wound 4/3 of it), misses on the edges and scrubbing come from the settings"] call TEST_fnc_assert;
+call TEST_fnc_fresh;
+PMCI_difficulty = 0;
+TEST_patient setVariable ["ace_medical_openWounds", nil];
+[TEST_medic, TEST_patient, "LeftArm", "ApplyTourniquet", TEST_medic, "ACE_tourniquet", true] call PMCI_fnc_treatmentSuccess;
+[((PMCI_board get "state") get "allowed") == 2, "on easy the tourniquet allows one slip more than set"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+call TEST_fnc_fresh;
+PMCI_difficulty = 0;
+PMCI_ivTolerance = 10;
+[TEST_medic, TEST_patient, "LeftArm", "BloodIV", TEST_medic, "ACE_bloodIV", true] call PMCI_fnc_treatmentSuccess;
+[abs (((PMCI_board get "state") get "tolerance") - 13.5) < 0.0001, "the set value is the normal difficulty's; easy scales it up"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+// Keys: defaults without CBA's keybinds, then a player's own.
+[(["press", 57, [false, false, false]] call PMCI_fnc_keyIs) && {!(["press", 28] call PMCI_fnc_keyIs)}
+    && {["fix", 28] call PMCI_fnc_keyIs} && {["fix", 156] call PMCI_fnc_keyIs}, "by default Space presses, Enter (or numpad Enter) fixes"] call TEST_fnc_assert;
+TEST_binds = [["pmci_press", [[30, [false, true, false]]]], ["pmci_fix", []]];
+CBA_fnc_getKeybind = {
+    params ["", "_action"];
+    private _i = TEST_binds findIf {(_x select 0) == _action};
+    if (_i < 0) exitWith {nil};
+    private _binds = (TEST_binds select _i) select 1;
+    ["PMC Interactions", _action, "", {}, {}, _binds param [0, [-1, [false, false, false]]], false, 0, _binds]
+};
+[(["press", 30, [false, true, false]] call PMCI_fnc_keyIs) && {!(["press", 30, [false, false, false]] call PMCI_fnc_keyIs)}
+    && {["press", 30] call PMCI_fnc_keyIs} && {!(["press", 57, [false, false, false]] call PMCI_fnc_keyIs)},
+    "a key set in CBA (Ctrl+A) needs its modifiers to press; letting go counts without them; Space no longer presses"] call TEST_fnc_assert;
+[!(["fix", 28] call PMCI_fnc_keyIs) && {(["fix"] call PMCI_fnc_keysOf) isEqualTo []}, "a removed key does nothing (the buttons still work)"] call TEST_fnc_assert;
+TEST_binds = [["pmci_press", [[-1, [false, false, false]]]]];
+[(["press"] call PMCI_fnc_keysOf) isEqualTo [] && {["fix", 28] call PMCI_fnc_keyIs},
+    "CBA's empty key slot is no key; an action CBA does not know keeps its default"] call TEST_fnc_assert;
+TEST_binds = [["pmci_press", [[30, [false, true, false]]]], ["pmci_fix", []]];
+CBA_fnc_localizeKey = {format ["K%1", _this select 0]};
+[(["press"] call PMCI_fnc_keyName) == "K30", "the hints name the key set in CBA"] call TEST_fnc_assert;
+call TEST_fnc_fresh;
+TEST_patient setVariable ["ACE_isUnconscious", true];
+TEST_patient setVariable ["ace_medical_CPR_provider", TEST_medic];
+[TEST_medic, TEST_patient, "Body", "CPR", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+private _before = (PMCI_board get "state") get "presses";
+["keyDown", [0, 30, false, true, false]] call PMCI_fnc_boardEvent;
+[_before == 0 && {((PMCI_board get "state") get "presses") == 1}, "on the board the rebound key compresses and Space does not"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+TEST_patient setVariable ["ACE_isUnconscious", false];
+CBA_fnc_getKeybind = nil;
+CBA_fnc_localizeKey = nil;
 
 // --- Difficulty -----------------------------------------------------------------------------------
 call TEST_fnc_fresh;

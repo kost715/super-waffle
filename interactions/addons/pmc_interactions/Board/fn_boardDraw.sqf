@@ -81,7 +81,8 @@ if (_subject != "") then {
     if (_name != "") then {_title = _title + " — " + _name};
 };
 (PMCI_IDC_TITLE call _ctrl) ctrlSetText _title;
-(PMCI_IDC_TEXT call _ctrl) ctrlSetStructuredText parseText localize ("STR_PMCI_HELP_" + _game);
+(PMCI_board getOrDefault ["keys", ["Space", "Enter"]]) params ["_pressKey", "_fixKey"];
+(PMCI_IDC_TEXT call _ctrl) ctrlSetStructuredText parseText format [localize ("STR_PMCI_HELP_" + _game), _pressKey, _fixKey];
 private _status = "";
 private _time = 0;
 switch (_game) do {
@@ -132,7 +133,7 @@ switch (_game) do {
         private _cleaned = 1 - _sum / (1 max count (_state get "dirt"));
         if ((_state get "phase") == "cover") then {
             [PMCI_IDC_FILL, 0, _state get "covered", 0.0125] call _span;
-            _status = localize "STR_PMCI_STATUS_COVER";
+            _status = format [localize "STR_PMCI_STATUS_COVER", _pressKey];
         } else {
             [PMCI_IDC_FILL, 0, _cleaned, 0.0125] call _span;
             _status = format [localize "STR_PMCI_STATUS_CLEAN", round (_cleaned * 100)];

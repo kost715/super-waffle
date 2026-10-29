@@ -83,16 +83,16 @@
                 <Russian>Замена колеса</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_cpr">
-                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The heart shows the pace. Much faster can break a rib.</Original>
-                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Сердце показывает темп. Сильно чаще — можно сломать ребро.</Russian>
+                <Original>Press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The heart shows the pace. Much faster can break a rib.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Сердце показывает темп. Сильно чаще — можно сломать ребро.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_tourniquet">
-                <Original>Hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to tighten. Stop in the green zone and press &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt; to fix it. Past the end it slips.</Original>
-                <Russian>Держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы затягивать. Остановитесь в зелёной зоне и нажмите &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt;, чтобы зафиксировать. Перетянете — соскользнёт.</Russian>
+                <Original>Hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to tighten. Stop in the green zone and press &lt;t color='#ffd27f'&gt;%2&lt;/t&gt; to fix it. Past the end it slips.</Original>
+                <Russian>Держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, чтобы затягивать. Остановитесь в зелёной зоне и нажмите &lt;t color='#ffd27f'&gt;%2&lt;/t&gt;, чтобы зафиксировать. Перетянете — соскользнёт.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_bandage">
-                <Original>Keep the white needle in the moving green zone: hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to press harder, release to ease off.</Original>
-                <Russian>Держите белую стрелку в движущейся зелёной зоне: &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; — давить сильнее, отпустить — ослабить.</Russian>
+                <Original>Keep the white needle in the moving green zone: hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to press harder, release to ease off.</Original>
+                <Russian>Держите белую стрелку в движущейся зелёной зоне: &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; — давить сильнее, отпустить — ослабить.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_wheel">
                 <Original>Click the nuts: loosen them in a star (every second nut, start anywhere), swap the wheel, then tighten them in a star.</Original>
@@ -167,16 +167,16 @@
                 <Russian>Обработка ссадины</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_pressure">
-                <Original>Press the wound: hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to push harder. Every pulse beat knocks the pressure down: keep the needle in the green zone until the gauge is full.</Original>
-                <Russian>Прижмите рану: держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы давить сильнее. Каждый удар пульса сбивает давление: держите стрелку в зелёной зоне, пока шкала не заполнится.</Russian>
+                <Original>Press the wound: hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to push harder. Every pulse beat knocks the pressure down: keep the needle in the green zone until the gauge is full.</Original>
+                <Russian>Прижмите рану: держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, чтобы давить сильнее. Каждый удар пульса сбивает давление: держите стрелку в зелёной зоне, пока шкала не заполнится.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_edges">
-                <Original>Close the wound with strips: press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; when the runner is over a highlighted stretch. A press elsewhere is a miss.</Original>
-                <Russian>Сведите края раны полосками: жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, когда бегунок над подсвеченным участком. Нажатие мимо — промах.</Russian>
+                <Original>Close the wound with strips: press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; when the runner is over a highlighted stretch. A press elsewhere is a miss.</Original>
+                <Russian>Сведите края раны полосками: жмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, когда бегунок над подсвеченным участком. Нажатие мимо — промах.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_clean">
-                <Original>Clean the abrasion: hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and scrub the dirt away. When it is clean, hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to put on the dressing.</Original>
-                <Russian>Очистите ссадину: зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и стирайте грязь. Когда станет чисто, держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, чтобы наложить повязку.</Russian>
+                <Original>Clean the abrasion: hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and scrub the dirt away. When it is clean, hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to put on the dressing.</Original>
+                <Russian>Очистите ссадину: зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и стирайте грязь. Когда станет чисто, держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, чтобы наложить повязку.</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_PRESSURE">
                 <Original>Held: %1%. Quality: %2%</Original>
@@ -191,8 +191,8 @@
                 <Russian>Очищено: %1%</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_COVER">
-                <Original>Clean. Hold Space to put on the dressing</Original>
-                <Russian>Чисто. Держите Пробел, чтобы наложить повязку</Russian>
+                <Original>Clean. Hold %1 to put on the dressing</Original>
+                <Russian>Чисто. Держите %1, чтобы наложить повязку</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_RIBS">
                 <Original>Ribs broken: %1</Original>
@@ -291,16 +291,16 @@
                 <Russian>Зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите в сторону, чтобы выпрямить сломанную часть. Мышцы тянут её обратно: держите в зелёной зоне, пока шкала не заполнится.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_diagnose">
-                <Original>Find the fault: &lt;t color='#ffd27f'&gt;click&lt;/t&gt; a part to test it (a good part costs time). Then hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to keep the working force in the green zone until the repair is done.</Original>
-                <Russian>Найдите неисправность: &lt;t color='#ffd27f'&gt;щёлкните&lt;/t&gt; по детали, чтобы проверить её (исправная — потеря времени). Потом держите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, удерживая усилие в зелёной зоне, пока ремонт не закончится.</Russian>
+                <Original>Find the fault: &lt;t color='#ffd27f'&gt;click&lt;/t&gt; a part to test it (a good part costs time). Then hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to keep the working force in the green zone until the repair is done.</Original>
+                <Russian>Найдите неисправность: &lt;t color='#ffd27f'&gt;щёлкните&lt;/t&gt; по детали, чтобы проверить её (исправная — потеря времени). Потом держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, удерживая усилие в зелёной зоне, пока ремонт не закончится.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_weld">
                 <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and lead the torch along the crack from left to right. Too fast leaves a weak seam, too slow burns through the plate.</Original>
                 <Russian>Зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите горелку вдоль трещины слева направо. Слишком быстро — слабый шов, слишком медленно — прожжёте лист.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_track">
-                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; when the loose link lines up with the track. Then drive the pin in: press when the marker is in the green zone.</Original>
-                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt;, когда болтающееся звено совпадёт с гусеницей. Потом забейте палец: жмите, когда стрелка в зелёной зоне.</Russian>
+                <Original>Press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; when the loose link lines up with the track. Then drive the pin in: press when the marker is in the green zone.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, когда болтающееся звено совпадёт с гусеницей. Потом забейте палец: жмите, когда стрелка в зелёной зоне.</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_IV">
                 <Original>Needle in: %1%. Misses left: %2</Original>
@@ -361,6 +361,142 @@
             <Key ID="STR_PMCI_PART_other">
                 <Original>component</Original>
                 <Russian>узел</Russian>
+            </Key>
+            <Key ID="STR_PMCI_KEY_PRESS">
+                <Original>Press / hold (games)</Original>
+                <Russian>Нажать / держать (мини-игры)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_KEY_PRESS_TIP">
+                <Original>Compressions, pressure, strips, strikes: the main key of the hands-on games.</Original>
+                <Russian>Нажатия СЛР, давление, полоски, удары: основная клавиша мини-игр.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_KEY_FIX">
+                <Original>Fix (tourniquet)</Original>
+                <Russian>Зафиксировать (жгут)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_KEY_FIX_TIP">
+                <Original>Fixes the tourniquet at the current pressure.</Original>
+                <Russian>Фиксирует жгут на текущем давлении.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_NO_KEY">
+                <Original>the on-screen button</Original>
+                <Russian>кнопку на экране</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_CPR_TOLERANCE">
+                <Original>Rhythm tolerance (s)</Original>
+                <Russian>Допуск ритма (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_ZONE">
+                <Original>Green zone width (share of the gauge)</Original>
+                <Russian>Ширина зелёной зоны (доля шкалы)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TQ_SPEED">
+                <Original>Tightening speed (gauge per s)</Original>
+                <Russian>Скорость затягивания (шкалы в секунду)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SLIPS">
+                <Original>Slips allowed</Original>
+                <Russian>Допустимых срывов</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_BANDAGE_FILL">
+                <Original>Packing time of a medium wound (s)</Original>
+                <Russian>Время набивки средней раны (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_BANDAGE_DRIFT">
+                <Original>Needle jitter</Original>
+                <Russian>Дрожание стрелки</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_PRESSURE_HOLD">
+                <Original>Pressure time of a medium wound (s)</Original>
+                <Russian>Время прижатия средней раны (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_PRESSURE_PULSE">
+                <Original>Pulse strength (1 = standard)</Original>
+                <Russian>Сила пульса (1 — стандарт)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_EDGES_SPEED">
+                <Original>Runner speed (1 = standard)</Original>
+                <Russian>Скорость бегунка (1 — стандарт)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_EDGES_WIDTH">
+                <Original>Stretch width (share of its place)</Original>
+                <Russian>Ширина участков (доля своего места)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_MISSES">
+                <Original>Misses allowed</Original>
+                <Russian>Промахов в запасе</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_CLEAN_SCRUB">
+                <Original>Scrubbing per dirt spot (pixels of mouse path)</Original>
+                <Russian>Сколько тереть одно пятно (пикселей пути мыши)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_CLEAN_COVER">
+                <Original>Dressing time (s)</Original>
+                <Russian>Время наложения повязки (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_IV_TOLERANCE">
+                <Original>Vein tolerance (pixels)</Original>
+                <Russian>Допуск попадания в вену (пиксели)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_IV_INSERT">
+                <Original>Needle insertion time (s)</Original>
+                <Russian>Время ввода иглы (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_IV_TREMOR">
+                <Original>Hand tremor (pixels)</Original>
+                <Russian>Дрожь руки (пиксели)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LINE_WIDTH">
+                <Original>Line tolerance (pixels)</Original>
+                <Russian>Допуск от линии (пиксели)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_FAST">
+                <Original>Top speed (pixels per s)</Original>
+                <Russian>Предельная скорость (пикселей в секунду)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SLOW">
+                <Original>Lowest speed before overheating (pixels per s)</Original>
+                <Russian>Минимальная скорость без перегрева (пикселей в секунду)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_WELD_HEAT">
+                <Original>Heating when too slow (0: never burns through)</Original>
+                <Russian>Нагрев при медленной сварке (0 — не прожигает)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SPLINT_TOLERANCE">
+                <Original>Angle tolerance (degrees)</Original>
+                <Russian>Допуск угла (градусы)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SPLINT_HOLD">
+                <Original>Hold straight for (s)</Original>
+                <Russian>Сколько держать ровно (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SPLINT_SPASM">
+                <Original>Muscle spasm (degrees per s)</Original>
+                <Russian>Спазм мышц (градусов в секунду)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_DIAGNOSE_TEST">
+                <Original>Time to test a part (s)</Original>
+                <Russian>Время проверки детали (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_DIAGNOSE_FIX">
+                <Original>Repair time (s)</Original>
+                <Russian>Время ремонта (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TRACK_TOLERANCE">
+                <Original>Link alignment tolerance (pixels)</Original>
+                <Russian>Допуск совмещения звена (пиксели)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TRACK_SWING">
+                <Original>Link swings per s</Original>
+                <Russian>Качаний звена в секунду</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TRACK_HITS">
+                <Original>Strikes to drive the pin</Original>
+                <Russian>Ударов, чтобы забить палец</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TRACK_SPEED">
+                <Original>Strike marker speed (runs per s)</Original>
+                <Russian>Скорость стрелки удара (проходов в секунду)</Russian>
             </Key>
         </Container>
     </Package>

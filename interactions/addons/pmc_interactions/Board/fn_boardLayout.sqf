@@ -62,6 +62,8 @@ _scrub ctrlCommit 0;
     case "track": {"STR_PMCI_STRIKE"};
     default {"STR_PMCI_HOLD"};
 });
+// Names of the keys set in CBA's controls, for the hints.
+PMCI_board set ["keys", [["press"] call PMCI_fnc_keyName, ["fix"] call PMCI_fnc_keyName]];
 (_display displayCtrl PMCI_IDC_ICON) ctrlSetText format ["\pmc_interactions\data\icon_%1_ca.paa", _game];
 (_display displayCtrl PMCI_IDC_FILL) ctrlSetTextColor (switch (_game) do {
     case "tourniquet": {[0.95, 0.55, 0.2, 0.95]};
