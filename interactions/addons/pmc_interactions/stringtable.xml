@@ -83,8 +83,8 @@
                 <Russian>Замена колеса</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_cpr">
-                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The light shows the pace.</Original>
-                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Лампа показывает темп.</Russian>
+                <Original>Press &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; (or the button) for each compression, about twice a second: 100–120 per minute. The heart shows the pace.</Original>
+                <Russian>Жмите &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; (или кнопку) на каждое нажатие, примерно два раза в секунду: 100–120 в минуту. Сердце показывает темп.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_tourniquet">
                 <Original>Hold &lt;t color='#ffd27f'&gt;Space&lt;/t&gt; to tighten. Stop in the green zone and press &lt;t color='#ffd27f'&gt;Enter&lt;/t&gt; to fix it. Past the end it slips.</Original>
@@ -95,8 +95,8 @@
                 <Russian>Держите белую стрелку в движущейся зелёной зоне: &lt;t color='#ffd27f'&gt;Пробел&lt;/t&gt; — давить сильнее, отпустить — ослабить.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_wheel">
-                <Original>Loosen the nuts in a star (every second nut, start anywhere), swap the wheel, then tighten them in a star.</Original>
-                <Russian>Ослабьте гайки «звездой» (через одну, с любой), смените колесо, затем затяните гайки «звездой».</Russian>
+                <Original>Click the nuts: loosen them in a star (every second nut, start anywhere), swap the wheel, then tighten them in a star.</Original>
+                <Russian>Щёлкайте по гайкам: ослабьте их «звездой» (через одну, с любой), смените колесо, затем затяните «звездой».</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_CPR">
                 <Original>Good compressions: %1 of ~%2. Quality: %3%</Original>

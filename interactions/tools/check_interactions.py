@@ -37,12 +37,30 @@ def stage(tree):
             path.write_text(text, encoding="utf-8")
 
 
+def check_textures():
+    """Every picture the addon names must be in data/ (Arma only shows an empty control)."""
+    data = ADDON / "data"
+    names = set()
+    for path in ADDON.rglob("*"):
+        if path.suffix in (".sqf", ".hpp", ".cpp"):
+            text = path.read_text(encoding="utf-8")
+            names |= {m for m in re.findall(r"\\pmc_interactions\\data\\([a-z0-9_]+_ca)\.paa", text)}
+    look = (ADDON / "Board/fn_boardLook.sqf").read_text(encoding="utf-8")
+    names |= {m + "_ca" for m in re.findall(r'"((?:cpr|tq|bandage|wheel)_[a-z_]+)"', look)}
+    names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
+    names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "wheel")}
+    missing = sorted(n for n in names if not (data / f"{n}.paa").is_file())
+    if missing:
+        raise SystemExit(f"Textures missing from {data}: {', '.join(missing)}")
+    return len(names)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--vm", type=Path, required=True)
     p.add_argument("--report", type=Path, help="write a JSON summary here")
     args = p.parse_args()
-    report = {"syntax": [], "arma_runtime_tested": False}
+    report = {"syntax": [], "arma_runtime_tested": False, "textures": check_textures()}
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp)
         stage(tree)
@@ -65,7 +83,8 @@ def main():
         args.report.write_text(json.dumps(report, indent=2) + "\n")
     if not ok or not match:
         raise SystemExit("Interactions checks failed or did not complete")
-    print(f"Parsed {len(report['syntax'])} SQF files; {match[1]} interaction assertions passed.")
+    print(f"Parsed {len(report['syntax'])} SQF files; {match[1]} interaction assertions passed; "
+          f"{report['textures']} textures referenced, all present.")
 
 
 if __name__ == "__main__":

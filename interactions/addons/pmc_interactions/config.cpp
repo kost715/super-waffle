@@ -8,7 +8,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "cba_settings", "ace_common", "ace_medical_treatment", "ace_repair"};
-        version = "0.1.0";
+        version = "0.2.0";
     };
 };
 
@@ -45,6 +45,8 @@ class CfgFunctions {
             class boardOpen {};
             class boardEvent {};
             class boardTick {};
+            class boardLayout {};
+            class boardLook {};
             class boardDraw {};
             class boardValid {};
             class finish {};

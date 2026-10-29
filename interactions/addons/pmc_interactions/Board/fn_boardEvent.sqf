@@ -7,7 +7,7 @@ private _game = PMCI_board get "game";
 private _model = missionNamespace getVariable format ["PMCI_fnc_%1Model", _game];
 private _state = PMCI_board get "state";
 switch (_event) do {
-    case "onLoad": {uiNamespace setVariable ["PMCI_display", _value]; call PMCI_fnc_boardDraw};
+    case "onLoad": {uiNamespace setVariable ["PMCI_display", _value]; [_value] call PMCI_fnc_boardLayout; call PMCI_fnc_boardDraw};
     case "onUnload": {
         uiNamespace setVariable ["PMCI_display", displayNull];
         // Closed by Esc or anything else while the game still ran: it is given up.

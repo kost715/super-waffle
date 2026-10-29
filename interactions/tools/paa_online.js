@@ -1,8 +1,9 @@
-// Converts textures/*_ca.png to .paa with the Gruppe Adler converter (https://paa.gruppe-adler.de),
-// driving it in headless Chromium. The site converts in the browser; files are not uploaded.
+// Converts textures/*_ca.png to addons/pmc_interactions/data/*_ca.paa with the Gruppe Adler
+// converter (https://paa.gruppe-adler.de), driving it in headless Chromium. The site converts
+// in the browser; files are not uploaded.
 // Many files at once make some conversions fail, so files go in small batches, and a batch
 // that does not return every file is retried one file at a time.
-// Usage: node tools/paa_online.js [folder]   (needs the playwright package)
+// Usage: node tools/paa_online.js [png folder] [paa folder]   (needs the playwright package)
 const { chromium } = require('playwright');
 const fs = require('fs');
 const os = require('os');
@@ -10,6 +11,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const folder = path.resolve(process.argv[2] || path.join(__dirname, '..', 'textures'));
+const out = path.resolve(process.argv[3] || path.join(__dirname, '..', 'addons', 'pmc_interactions', 'data'));
 const BATCH = 4;
 
 async function convert(browser, files) {
@@ -29,18 +31,19 @@ async function convert(browser, files) {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'paa-'));
     const saved = path.join(temp, download.suggestedFilename());
     await download.saveAs(saved);
-    if (saved.endsWith('.zip')) execFileSync('unzip', ['-o', '-q', saved, '-d', folder]);
-    else fs.copyFileSync(saved, path.join(folder, path.basename(saved)));
+    if (saved.endsWith('.zip')) execFileSync('unzip', ['-o', '-q', saved, '-d', out]);
+    else fs.copyFileSync(saved, path.join(out, path.basename(saved)));
     fs.rmSync(temp, { recursive: true, force: true });
   } finally {
     await context.close();
   }
-  return files.filter(f => !fs.existsSync(path.join(folder, f.replace(/\.png$/, '.paa'))));
+  return files.filter(f => !fs.existsSync(path.join(out, f.replace(/\.png$/, '.paa'))));
 }
 
 (async () => {
   const files = fs.readdirSync(folder).filter(f => /_ca\.png$/.test(f)).sort();
-  for (const f of files) fs.rmSync(path.join(folder, f.replace(/\.png$/, '.paa')), { force: true });
+  fs.mkdirSync(out, { recursive: true });
+  for (const f of files) fs.rmSync(path.join(out, f.replace(/\.png$/, '.paa')), { force: true });
   const browser = await chromium.launch();
   const failed = [];
   for (let i = 0; i < files.length; i += BATCH) {
@@ -49,6 +52,6 @@ async function convert(browser, files) {
     }
   }
   await browser.close();
-  console.log(`${files.length - failed.length} of ${files.length} converted in ${folder}`);
+  console.log(`${files.length - failed.length} of ${files.length} converted into ${out}`);
   if (failed.length) { console.log('failed:', failed.join(', ')); process.exit(1); }
 })().catch(e => { console.error(e); process.exit(1); });

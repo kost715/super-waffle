@@ -1,6 +1,7 @@
 // PMC Interactions checks in SQF-VM: the four game models, the ACE hooks (time and
 // success callbacks, with ACE replaced by recording stand-ins), the board's input,
-// watchdog and results. The board window itself is not exercised.
+// watchdog and results, and which pictures the board shows. The window itself (layout,
+// controls) is not exercised.
 call compile preprocessFileLineNumbers "tests/vm_compat.sqf";
 TEST_count = 0;
 TEST_fnc_assert = {
@@ -14,8 +15,9 @@ TEST_fnc_assert = {
 } forEach [["Init", "settings"], ["Hooks", "table"], ["Hooks", "hookOf"], ["Hooks", "original"], ["Hooks", "plays"], ["Hooks", "treatmentTime"],
     ["Hooks", "timeNormal"], ["Hooks", "timeTrained"], ["Hooks", "treatmentSuccess"], ["Hooks", "repairTime"], ["Hooks", "repairSuccess"],
     ["Games", "cprModel"], ["Games", "tourniquetModel"], ["Games", "bandageModel"], ["Games", "wheelModel"],
-    ["Board", "boardOpen"], ["Board", "boardEvent"], ["Board", "boardTick"], ["Board", "boardValid"], ["Board", "finish"]];
+    ["Board", "boardOpen"], ["Board", "boardEvent"], ["Board", "boardTick"], ["Board", "boardValid"], ["Board", "finish"], ["Board", "boardLook"]];
 PMCI_fnc_boardDraw = {};
+PMCI_fnc_boardLayout = {};
 
 // ACE stand-ins: record every call.
 TEST_calls = [];
@@ -272,6 +274,60 @@ TEST_calls = [];
 TEST_calls = [];
 [TEST_medic, _car, "HitLFWheel", "RemoveWheel", [], [], []] call PMCI_fnc_repairSuccess;
 [count ("ace_repair_fnc_doReplaceWheel" call TEST_called) == 1 && {isNil "PMCI_board"}, "removing a wheel keeps ACE's behaviour"] call TEST_fnc_assert;
+
+// --- Board pictures ---------------------------------------------------------------------------------
+// Layers: scene, hands, beat, windlass, gauze, wheel, nut 0-4.
+TEST_tex = {if (_this == "") then {""} else {format ["\pmc_interactions\data\%1_ca.paa", _this]}};
+TEST_look = {params ["_game", "_state", ["_depth", 0], ["_hint", false]]; [_game, _state, _depth, _hint] call PMCI_fnc_boardLook};
+TEST_none = ["", "", "", "", "", "", "", "", "", "", ""];
+private _c = ["init", nil, [15, 0.05, 0.5]] call PMCI_fnc_cprModel;
+private _look = ["cpr", _c, 1] call TEST_look;
+[_look isEqualTo (["cpr_scene", "cpr_hands_down", "cpr_beat_on", "", "", "", "", "", "", "", ""] apply {_x call TEST_tex}),
+    "CPR shows the casualty, pressed hands and the lit heart at the start of a beat"] call TEST_fnc_assert;
+_c set ["t", 0.3];
+_look = ["cpr", _c, 0.4] call TEST_look;
+[(_look select 1) == ("cpr_hands_up" call TEST_tex) && {(_look select 2) == ("cpr_beat_off" call TEST_tex)},
+    "between compressions the hands are up and the heart is dark between beats"] call TEST_fnc_assert;
+_c set ["t", 60 / 110 * 3 + 0.05];
+[((["cpr", _c] call TEST_look) select 2) == ("cpr_beat_on" call TEST_tex), "the heart lights again on every beat at 110 per minute"] call TEST_fnc_assert;
+private _t = ["init", nil, [0.6, 0.8, 0.32, 25, 2]] call PMCI_fnc_tourniquetModel;
+private _frames = [-0.1, 0, 0.124, 0.13, 0.5, 0.99, 1.2] apply {_t set ["p", _x]; (["tourniquet", _t] call TEST_look) select 3};
+[_frames isEqualTo ([0, 0, 0, 1, 4, 7, 7] apply {format ["tq_windlass_%1", _x] call TEST_tex})
+    && {((["tourniquet", _t] call TEST_look) select 0) == ("tq_scene" call TEST_tex)},
+    "the windlass turns one frame per eighth of the pressure and stays within the eight frames"] call TEST_fnc_assert;
+private _b = ["init", nil, [0.3, 30, 6, 0.25]] call PMCI_fnc_bandageModel;
+private _stages = [0, 0.01, 0.25, 0.26, 0.5, 0.75, 1] apply {_b set ["progress", _x]; (["bandage", _b] call TEST_look) select 4};
+[_stages isEqualTo (["", "bandage_gauze_1", "bandage_gauze_1", "bandage_gauze_2", "bandage_gauze_2", "bandage_gauze_3", "bandage_gauze_4"] apply {_x call TEST_tex}),
+    "no gauze before packing starts, then one stage per quarter of the packing"] call TEST_fnc_assert;
+private _w = ["init", nil, [0.8, 3]] call PMCI_fnc_wheelModel;
+private _wait = {params ["_state", "_s"]; for "_i" from 1 to round (_s / 0.1) do {["tick", _state, 0.1] call PMCI_fnc_wheelModel}};
+private _nuts = {params ["_hint"]; (["wheel", _w, 0, _hint] call TEST_look) select [6, 5]};
+[(["wheel", _w] call TEST_look) isEqualTo (["", "", "", "", "", "wheel_old", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] apply {_x call TEST_tex}),
+    "the wheel starts as the old wheel with five tight nuts, no scene picture"] call TEST_fnc_assert;
+[([true] call _nuts) isEqualTo ((["wheel_nut_tight"] call {_this + _this + _this + _this + _this}) apply {_x call TEST_tex}),
+    "no hint before the first nut: any nut may start the star"] call TEST_fnc_assert;
+["nut", _w, 1] call PMCI_fnc_wheelModel;
+[_w, 0.9] call _wait;
+[([true] call _nuts) isEqualTo (["wheel_nut_tight", "wheel_nut_loose", "wheel_nut_tight", "wheel_nut_next", "wheel_nut_tight"] apply {_x call TEST_tex})
+    && {([false] call _nuts) isEqualTo (["wheel_nut_tight", "wheel_nut_loose", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] apply {_x call TEST_tex})},
+    "a loosened nut shows loose; the hint marks every second nut only on easy"] call TEST_fnc_assert;
+{["nut", _w, _x] call PMCI_fnc_wheelModel; [_w, 0.9] call _wait} forEach [3, 0, 2, 4];
+private _swapLook = ["wheel", _w, 0, true] call TEST_look;
+[(_w get "phase") == "swap" && {(_swapLook select 5) == ("wheel_old" call TEST_tex)}
+    && {(_swapLook select [6, 5]) isEqualTo ((["wheel_nut_loose"] call {_this + _this + _this + _this + _this}) apply {_x call TEST_tex})},
+    "with all nuts loose the old wheel waits for the swap"] call TEST_fnc_assert;
+["swap", _w] call PMCI_fnc_wheelModel;
+[_w, 3.1] call _wait;
+["nut", _w, 2] call PMCI_fnc_wheelModel;
+[_w, 0.9] call _wait;
+private _tightLook = ["wheel", _w, 0, true] call TEST_look;
+[(_tightLook select 5) == ("wheel_new" call TEST_tex)
+    && {(_tightLook select [6, 5]) isEqualTo (["wheel_nut_loose", "wheel_nut_loose", "wheel_nut_done", "wheel_nut_loose", "wheel_nut_next"] apply {_x call TEST_tex})},
+    "after the swap the new wheel shows; tightened nuts are marked done"] call TEST_fnc_assert;
+{["nut", _w, _x] call PMCI_fnc_wheelModel; [_w, 0.9] call _wait} forEach [4, 1, 3, 0];
+[(_w get "status") == "success" && {(["wheel", _w] call TEST_look) isEqualTo (["", "", "", "", "", "wheel_new", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight", "wheel_nut_tight"] apply {_x call TEST_tex})},
+    "a finished change shows the new wheel with all nuts tight"] call TEST_fnc_assert;
+[(["unknown", _w] call TEST_look) isEqualTo TEST_none, "an unknown game shows no pictures"] call TEST_fnc_assert;
 
 // --- Difficulty -----------------------------------------------------------------------------------
 call TEST_fnc_fresh;
