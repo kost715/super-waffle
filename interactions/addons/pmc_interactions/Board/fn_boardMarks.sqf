@@ -50,6 +50,12 @@ switch (_game) do {
             (_points select (_state get "next")) params ["_px", "_py"];
             _marks pushBack [31, [_px - 20, _py - 20, 40, 40], 1];
         };
+        for "_k" from 1 to 8 do {
+            if ((_state get "next") + _k < count _points) then {
+                (_points select ((_state get "next") + _k)) params ["_px", "_py"];
+                _marks pushBack [22 + _k, [_px - 14, _py - 14, 28, 28], 0.45];
+            };
+        };
         // The needle's point is at (12, 116) of its 128 x 128 picture, drawn at 1.5 times.
         (_state get "mouse") params ["_mx", "_my"];
         _marks pushBack [14, [_mx - 18, _my - 174, 192, 192], 1];

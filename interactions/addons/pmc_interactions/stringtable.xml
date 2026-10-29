@@ -283,8 +283,8 @@
                 <Russian>Наведите иглу мышью на вену и держите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt;, чтобы ввести её. Рука дрожит: держите кончик на вене, иначе вена лопнет.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_suture">
-                <Original>&lt;t color='#ffd27f'&gt;Click&lt;/t&gt; the glowing point to pass the needle there, point by point across the wound. The closer to the point, the neater the stitch.</Original>
-                <Russian>&lt;t color='#ffd27f'&gt;Щёлкайте&lt;/t&gt; по светящейся точке, чтобы провести через неё иглу, точка за точкой поперёк раны. Чем точнее, тем ровнее шов.</Russian>
+                <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and lead the needle through the glowing points: above the wound, below it, on to the next. Too fast pulls the stitches loose.</Original>
+                <Russian>Зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите иглу через светящиеся точки: над раной, под раной, к следующему стежку. Слишком быстро — стежки слабые.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_splint">
                 <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and drag sideways to turn the broken part straight. Muscle spasm pushes it away: keep it in the green zone until the gauge fills.</Original>
@@ -307,8 +307,8 @@
                 <Russian>Игла введена: %1%. Промахов в запасе: %2</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_SUTURE">
-                <Original>Stitches: %1 of %2. Misses left: %3</Original>
-                <Russian>Стежков: %1 из %2. Промахов в запасе: %3</Russian>
+                <Original>Stitches: %1 of %2. Evenness: %3%</Original>
+                <Russian>Стежков: %1 из %2. Ровность: %3%</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_SPLINT">
                 <Original>Angle: %1°. Held straight: %2%</Original>

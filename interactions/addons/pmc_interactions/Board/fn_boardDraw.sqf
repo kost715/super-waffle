@@ -145,9 +145,9 @@ switch (_game) do {
         _time = (_state get "t") / (_state get "limit");
     };
     case "suture": {
-        private _count = count (_state get "points");
-        [PMCI_IDC_FILL, 0, (_state get "next") / _count, 0.0125] call _span;
-        _status = format [localize "STR_PMCI_STATUS_SUTURE", floor ((_state get "next") / 2), _count / 2, (_state get "allowed") - (_state get "misses")];
+        [PMCI_IDC_FILL, 0, _state get "covered", 0.0125] call _span;
+        _status = format [localize "STR_PMCI_STATUS_SUTURE", floor ((_state get "next") / 2), count (_state get "points") / 2,
+            round (((_state get "good") / ((_state get "covered") max 0.001)) * 100)];
         _time = (_state get "t") / (_state get "limit");
     };
     case "splint": {

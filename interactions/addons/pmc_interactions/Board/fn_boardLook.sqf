@@ -57,6 +57,10 @@ switch (_game) do {
         _look set [0, "wound_cut"];
         for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {_look set [15 + _k, "suture_stitch"]};
         if ((_state get "status") == "running") then {_look set [31, "suture_point"]};
+        // The points after the next one, faint: the way the needle goes.
+        for "_k" from 1 to 8 do {
+            if ((_state get "next") + _k < count (_state get "points")) then {_look set [22 + _k, "suture_point"]};
+        };
         _look set [14, "suture_needle"];
     };
     case "splint": {

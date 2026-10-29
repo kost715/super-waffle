@@ -610,16 +610,51 @@ _iv = ["init", nil, [[0, 100, 400, 100], 10, 1, 20, 1, 6]] call PMCI_fnc_ivModel
 [_iv, 0.5] call TEST_ivTicks;
 [[_iv get "tip", [200 + 6 * sin (0.5 * 317), 100 + 6 * cos (0.5 * 241)]] call TEST_near, "the tip trembles around the mouse"] call TEST_fnc_assert;
 
-// --- Suture ----------------------------------------------------------------------------------------------
-private _su = ["init", nil, [[[100, 100], [100, 150]], 10, 30, 1]] call PMCI_fnc_sutureModel;
-["click", _su, [103, 100]] call PMCI_fnc_sutureModel;
-["click", _su, [300, 300]] call PMCI_fnc_sutureModel;
-[(_su get "next") == 1 && {(_su get "misses") == 1} && {(_su get "status") == "running"}, "a click near the point passes the needle; far from it is a miss"] call TEST_fnc_assert;
-["click", _su, [100, 150]] call PMCI_fnc_sutureModel;
-[(_su get "status") == "success" && {abs ((_su get "quality") - 0.775) < 0.001}, "quality: half from accuracy, minus 15% per miss"] call TEST_fnc_assert;
-_su = ["init", nil, [[[100, 100], [100, 150]], 10, 30, 0]] call PMCI_fnc_sutureModel;
-["click", _su, [0, 0]] call PMCI_fnc_sutureModel;
-[(_su get "status") == "fail", "one miss more than allowed fails"] call TEST_fnc_assert;
+// --- Suture (led like a weld along the zigzag of stitch points) ------------------------------------------
+TEST_zigzag = [[100, 100], [110, 150], [200, 100], [210, 150]];
+// The point at distance _d along a polyline.
+TEST_fnc_along = {
+    params ["_points", "_d"];
+    private _at = +(_points select (count _points - 1));
+    for "_i" from 1 to count _points - 1 do {
+        (_points select (_i - 1)) params ["_ax", "_ay"];
+        (_points select _i) params ["_bx", "_by"];
+        private _len = sqrt ((_bx - _ax) ^ 2 + (_by - _ay) ^ 2);
+        if (_d <= _len) exitWith {_at = [_ax + (_bx - _ax) * _d / _len, _ay + (_by - _ay) * _d / _len]};
+        _d = _d - _len;
+    };
+    _at
+};
+TEST_fnc_stitch = {
+    params ["_speed", ["_until", 1e9], ["_dy", 0]];
+    private _state = ["init", nil, [TEST_zigzag, 10, 20, 140, 60]] call PMCI_fnc_sutureModel;
+    private _d = 0;
+    while {(_state get "status") == "running" && {_d <= (_until min 240)}} do {
+        (([TEST_zigzag, _d] call TEST_fnc_along)) params ["_x0", "_y0"];
+        ["mouse", _state, [_x0, _y0 + _dy, _speed * 0.02, true, 0.02]] call PMCI_fnc_sutureModel;
+        ["tick", _state, 0.02] call PMCI_fnc_sutureModel;
+        _d = _d + _speed * 0.02;
+    };
+    _state
+};
+private _su = [80] call TEST_fnc_stitch;
+[(_su get "status") == "success" && {(_su get "quality") > 0.95} && {(_su get "next") == 4}, "leading the needle steadily through all points stitches the wound"] call TEST_fnc_assert;
+_su = [300] call TEST_fnc_stitch;
+[(_su get "status") == "success" && {(_su get "quality") == 0.2}, "too fast pulls the stitches loose: the lowest quality"] call TEST_fnc_assert;
+_su = [80, 60] call TEST_fnc_stitch;
+[(_su get "next") == 2 && {(_su get "status") == "running"}, "passing the second point finishes the first stitch"] call TEST_fnc_assert;
+private _suLook = ["suture", _su] call TEST_look;
+private _suMarks = ["suture", _su] call PMCI_fnc_boardMarks;
+private _faint = _suMarks select {(_x select 0) == 23};
+[(_suLook select 15) == ("suture_stitch" call TEST_tex) && {(_suLook select 16) == ""} && {(_suLook select 31) == ("suture_point" call TEST_tex)}
+    && {(_suLook select 23) == ("suture_point" call TEST_tex)} && {(_suLook select 24) == ""}
+    && {count _faint == 1} && {((_faint select 0) select 2) == 0.45} && {[(_faint select 0) select 1, [196, 136, 28, 28]] call TEST_near},
+    "a finished stitch is drawn, the next point glows, the points after it show faintly"] call TEST_fnc_assert;
+_su = [80, 1e9, 40] call TEST_fnc_stitch;
+[(_su get "covered") == 0 && {(_su get "next") == 0}, "away from the points nothing is stitched"] call TEST_fnc_assert;
+_su = ["init", nil, [TEST_zigzag, 10, 20, 140, 60]] call PMCI_fnc_sutureModel;
+for "_i" from 1 to 60 do {["mouse", _su, [100, 100, 0, true, 0.05]] call PMCI_fnc_sutureModel; ["tick", _su, 0.05] call PMCI_fnc_sutureModel};
+[(_su get "status") == "running" && {(_su get "heat") == 0}, "the thread does not overheat: going slowly is fine"] call TEST_fnc_assert;
 
 // --- Splint ----------------------------------------------------------------------------------------------
 private _sp = ["init", nil, [20, 4, 1, 30, 5, 0.25]] call PMCI_fnc_splintModel;
@@ -761,7 +796,9 @@ call PMCI_fnc_boardTick;
 call TEST_fnc_fresh;
 TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1], [61, 1, 0, 0.3], [11, 1, 0, 0.4]]]]];
 [TEST_medic, TEST_patient, "LeftArm", "SurgicalKit", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
-[(PMCI_board get "game") == "suture" && {count ((PMCI_board get "state") get "points") == 10}, "three bandaged wounds: five stitches to place"] call TEST_fnc_assert;
+[(PMCI_board get "game") == "suture" && {count ((PMCI_board get "state") get "points") == 10}
+    && {((PMCI_board get "state") get "fast") == 140} && {((PMCI_board get "state") get "slow") == 20} && {((PMCI_board get "state") get "tolerance") == 14},
+    "three bandaged wounds: five stitches to lead the needle through, normal speed limits"] call TEST_fnc_assert;
 TEST_stitchable = 3;
 (PMCI_board get "state") set ["quality", 1];
 (PMCI_board get "state") set ["status", "success"];
@@ -802,10 +839,15 @@ call PMCI_fnc_boardTick;
 call TEST_fnc_fresh;
 TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1]]]]];
 [TEST_medic, TEST_patient, "LeftArm", "SurgicalKit", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
-private _first = ((PMCI_board get "state") get "points") select 0;
-TEST_mouse = +_first;
+private _points = (PMCI_board get "state") get "points";
+TEST_mouse = +(_points select 0);
 ["scrubDown"] call PMCI_fnc_boardEvent;
-[((PMCI_board get "state") get "next") == 1, "a click on the scene passes the needle at the mouse"] call TEST_fnc_assert;
+TEST_realTime = TEST_realTime + 0.1;
+call PMCI_fnc_boardTick;
+TEST_mouse = [_points, 8] call TEST_fnc_along;
+TEST_realTime = TEST_realTime + 0.1;
+call PMCI_fnc_boardTick;
+[((PMCI_board get "state") get "covered") > 0 && {((PMCI_board get "state") get "next") == 1}, "holding the button and moving along lays the thread"] call TEST_fnc_assert;
 [false] call PMCI_fnc_finish;
 TEST_patient setVariable ["ace_medical_bandagedWounds", nil];
 

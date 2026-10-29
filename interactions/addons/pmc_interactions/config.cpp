@@ -8,7 +8,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "cba_settings", "cba_events", "ace_common", "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
-        version = "0.4.0";
+        version = "0.4.1";
     };
 };
 

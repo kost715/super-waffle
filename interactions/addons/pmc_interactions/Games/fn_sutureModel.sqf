@@ -1,38 +1,25 @@
-// [mode, state, value] -> state. Stitching: the needle follows the mouse; a click near the
-// highlighted stitch point passes the needle there and the next point lights up. Points go
-// across the wound in pairs, one stitch per pair. A click far from the point is a miss.
-// Quality: half from how close the clicks were, minus 15% per miss.
-//   "init" value [points [[x, y], ...] in scene pixels, radius px, time limit s, misses allowed]
-//   "tick" value seconds;  "mouse" value [x, y, ...];  "click" value [x, y]
+// [mode, state, value] -> state. Stitching, led like a weld seam: with the mouse button
+// held, the needle is led along the zigzag through the stitch points (in above the wound,
+// out below it, on to the next stitch); the thread follows where the needle is on the
+// line and at the end of the thread laid so far. Too fast pulls the stitches loose and
+// lowers the quality; the thread does not overheat, so slow is fine. "next" counts the
+// points passed, a stitch per pair. Uses the weld model without heating.
+//   "init" value [points [[x, y], ...] in scene pixels, tolerance px, speed min px/s,
+//                 speed max px/s, time limit s]
+//   "tick" value seconds;  "mouse" value [x, y, distance, held, seconds]
 params ["_mode", "_state", "_value"];
-switch (_mode) do {
-    case "init": {
-        _value params ["_points", "_radius", "_limit", "_allowed"];
-        _state = createHashMapFromArray [["t", 0], ["points", _points], ["radius", _radius], ["limit", _limit], ["allowed", _allowed],
-            ["next", 0], ["accuracy", 0], ["misses", 0], ["mouse", [0, 0]], ["status", "running"], ["quality", 0]];
-    };
-    case "mouse": {_state set ["mouse", [_value select 0, _value select 1]]};
-    case "tick": {
-        if ((_state get "status") != "running") exitWith {};
-        _state set ["t", (_state get "t") + _value];
-        if ((_state get "t") >= (_state get "limit")) then {_state set ["status", "fail"]};
-    };
-    case "click": {
-        if ((_state get "status") != "running") exitWith {};
-        _value params ["_x0", "_y0"];
-        private _points = _state get "points";
-        ((_points select (_state get "next"))) params ["_px", "_py"];
-        private _distance = sqrt ((_x0 - _px) ^ 2 + (_y0 - _py) ^ 2);
-        if (_distance > (_state get "radius")) exitWith {
-            _state set ["misses", (_state get "misses") + 1];
-            if ((_state get "misses") > (_state get "allowed")) then {_state set ["status", "fail"]};
-        };
-        _state set ["accuracy", (_state get "accuracy") + 1 - _distance / (_state get "radius")];
-        _state set ["next", (_state get "next") + 1];
-        if ((_state get "next") == count _points) then {
-            _state set ["status", "success"];
-            _state set ["quality", 0.2 max ((0.5 + 0.5 * (_state get "accuracy") / count _points - 0.15 * (_state get "misses")) min 1)];
-        };
-    };
+if (_mode == "init") exitWith {
+    _value params ["_points", "_tolerance", "_slow", "_fast", "_limit"];
+    _state = ["init", nil, [_points, _tolerance, _slow, _fast, _limit, 0]] call PMCI_fnc_weldModel;
+    _state set ["points", _points];
+    _state set ["next", 0];
+    _state
 };
+[_mode, _state, _value] call PMCI_fnc_weldModel;
+// Points passed: every point whose place along the zigzag the thread has reached.
+private _covered = _state get "covered";
+private _total = _state get "total";
+private _next = if (_covered > 0) then {1 + ({_x / _total <= _covered + 1e-6} count (_state get "lengths"))} else {0};
+if ((_state get "status") == "success") then {_next = count (_state get "points")};
+_state set ["next", _next];
 _state

@@ -49,8 +49,6 @@ switch (_event) do {
     case "swap": {["swap", _state] call _model};
     case "scrubDown": {
         private _mouse = call PMCI_fnc_boardMouse;
-        // Stitching is clicking; the other mouse games hold the button.
-        if (_game == "suture") exitWith {["click", _state, _mouse] call _model};
         PMCI_board set ["scrubbing", true];
         PMCI_board set ["mouse", _mouse];
     };

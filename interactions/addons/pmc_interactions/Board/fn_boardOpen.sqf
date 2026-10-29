@@ -65,7 +65,8 @@ private _state = switch (_game) do {
     };
     case "suture": {
         // One stitch per bandaged wound and two more, 3 to 8, across the cut of the wound scene
-        // (x 232-792, y 256): the needle goes in above the line and out below it.
+        // (x 232-792, y 256): the needle goes in above the line and out below it, and the
+        // points make the zigzag the needle is led along.
         private _bandaged = (_target getVariable ["ace_medical_bandagedWounds", createHashMap]);
         if !(_bandaged isEqualType createHashMap) then {_bandaged = createHashMap};
         private _stitches = 3 max ((2 + count (_bandaged getOrDefault [toLower _part, []])) min 8);
@@ -74,7 +75,7 @@ private _state = switch (_game) do {
             private _cx = 232 + 560 * (_k + 0.5) / _stitches;
             _points append [[_cx - 6, 230], [_cx + 6, 282]];
         };
-        ["init", nil, [_points, 16 * _ease, missionNamespace getVariable ["PMCI_sutureLimit", 40], round (3 * _ease)]] call PMCI_fnc_sutureModel
+        ["init", nil, [_points, 14 * _ease, 20, 140 * _ease, missionNamespace getVariable ["PMCI_sutureLimit", 40]]] call PMCI_fnc_sutureModel
     };
     case "splint": {
         ["init", nil, [(20 + random 12) * selectRandom [-1, 1], 4 * _ease, 2.5, missionNamespace getVariable ["PMCI_splintLimit", 30], 5 / _ease, 0.25]] call PMCI_fnc_splintModel
