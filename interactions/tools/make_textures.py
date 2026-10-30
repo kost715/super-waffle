@@ -24,6 +24,7 @@ from texture_scenes import (abrasion_pad, abrasion_swab, bandage_scene, cpr_hand
                             wound_avulsion, wound_crush, wound_cut, wound_laceration, wound_puncture, wound_velocity,
                             iv_scene, iv_needle, iv_bruise, suture_point, suture_stitch, suture_needle, splint_scene, splint_limb,
                             repair_engine, diag_light, weld_scene, weld_bead, weld_torch, track_scene, track_link, track_pin)
+from texture_locks import TEXTURES as LOCK_TEXTURES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "textures"
@@ -435,7 +436,7 @@ TEXTURES = [
     ("wheel_nut_loose_ca.png", lambda: nut("loose"), "Гайка ослаблена"),
     ("wheel_nut_next_ca.png", lambda: nut("next"), "Гайка: следующая по «звезде» (подсказка)"),
     ("wheel_nut_done_ca.png", lambda: nut("done"), "Гайка: готова"),
-]
+] + LOCK_TEXTURES
 
 
 def preview(files):

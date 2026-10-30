@@ -72,3 +72,21 @@
 #define PMCI_GAUGE_Y (PMCI_WIN_Y + 0.64)
 #define PMCI_GAUGE_W 0.5
 #define PMCI_GAUGE_H 0.05
+// Terminal game: the memory dump and the terminal's answers, inside the scene group.
+#define PMCI_IDC_TERM_LIST 87660
+#define PMCI_IDC_TERM_LOG 87661
+// Zeus lock window.
+#define PMCI_IDD_LOCK 87800
+#define PMCI_IDC_LOCK_TITLE 87801
+#define PMCI_IDC_LOCK_TYPE 87802
+#define PMCI_IDC_LOCK_LEVEL 87803
+#define PMCI_IDC_LOCK_KEY 87804
+#define PMCI_IDC_LOCK_CODE 87805
+#define PMCI_IDC_LOCK_RANDOM 87806
+#define PMCI_IDC_LOCK_STATUS 87807
+// Code entry window.
+#define PMCI_IDD_KEYPAD 87820
+#define PMCI_IDC_KEYPAD_CODE 87821
+// Lock windows: 0.3 x 0.44 and 0.2 x 0.46 of the safe zone, centred.
+#define PMCI_LOCK_BOX(px,py,pw,ph) x = safezoneX + safezoneW * (0.35 + (px)); y = safezoneY + safezoneH * (0.28 + (py)); w = safezoneW * (pw); h = safezoneH * (ph)
+#define PMCI_PAD_BOX(px,py,pw,ph) x = safezoneX + safezoneW * (0.4 + (px)); y = safezoneY + safezoneH * (0.27 + (py)); w = safezoneW * (pw); h = safezoneH * (ph)

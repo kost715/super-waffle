@@ -4,11 +4,12 @@ class CfgPatches {
     class pmc_interactions {
         name = "PMC Interactions";
         author = "LifeSim PMC project";
-        units[] = {};
+        units[] = {"PMCI_ModuleLock"};
         weapons[] = {};
         requiredVersion = 2.14;
-        requiredAddons[] = {"A3_Ui_F", "cba_settings", "cba_events", "ace_common", "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
-        version = "0.5.0";
+        requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
+            "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
+        version = "0.6.0";
     };
 };
 
@@ -55,6 +56,29 @@ class CfgFunctions {
             class diagnoseModel {};
             class weldModel {};
             class trackModel {};
+            class lockpickModel {};
+            class terminalModel {};
+            class safeModel {};
+        };
+        class Lock {
+            file = "\pmc_interactions\Lock";
+            class moduleLock {};
+            class lockSetup {};
+            class lockSet {};
+            class lockClear {};
+            class lockApply {};
+            class lockActions {};
+            class lockOpen {};
+            class lockHack {};
+            class lockKeypad {};
+            class lockNotify {};
+            class lockKeys {};
+            class lockTool {};
+            class codeValid {};
+            class itemCount {};
+            class itemName {};
+            class itemTake {};
+            class terminalDump {};
         };
         class Board {
             file = "\pmc_interactions\Board";
@@ -156,6 +180,41 @@ class ACE_Repair {
         class ReplaceTrack: RemoveTrack {
             callbackSuccess = "PMCI_fnc_repairSuccess";
         };
+    };
+};
+
+// Effective when the mission whitelists remote execution (CfgRemoteExec mode 1).
+class CfgRemoteExec {
+    class Functions {
+        class PMCI_fnc_lockSet {allowedTargets = 2; jip = 0;};
+        class PMCI_fnc_lockOpen {allowedTargets = 2; jip = 0;};
+        class PMCI_fnc_lockApply {allowedTargets = 0; jip = 1;};
+        class PMCI_fnc_lockNotify {allowedTargets = 1; jip = 0;};
+    };
+};
+class CfgFactionClasses {
+    class PMCI_Modules {
+        displayName = "PMC Interactions";
+        priority = 2;
+        side = 7;
+    };
+};
+class CfgVehicles {
+    class Logic;
+    class Module_F: Logic {};
+    // Zeus: place on a box to lock it (PMCI_fnc_moduleLock), or to change or remove its lock.
+    class PMCI_ModuleLock: Module_F {
+        scope = 1;
+        scopeCurator = 2;
+        displayName = "$STR_PMCI_MODULE_LOCK";
+        category = "PMCI_Modules";
+        icon = "\pmc_interactions\data\icon_lock_ca.paa";
+        portrait = "\pmc_interactions\data\icon_lock_ca.paa";
+        function = "PMCI_fnc_moduleLock";
+        functionPriority = 1;
+        isGlobal = 1;
+        isTriggerActivated = 0;
+        curatorCanAttach = 1;
     };
 };
 

@@ -50,7 +50,8 @@ def check_textures():
     names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
     names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"splint_limb_{k}_ca" for k in range(7)}
     names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "iv", "suture", "splint", "wheel",
-                                         "diagnose", "weld", "track")}
+                                         "diagnose", "weld", "track", "lockpick", "terminal", "safe")}
+    names |= {f"icon_{a}_ca" for a in ("lock", "key", "keypad")}  # ACE actions of a locked box
     missing = sorted(n for n in names if not (data / f"{n}.paa").is_file())
     if missing:
         raise SystemExit(f"Textures missing from {data}: {', '.join(missing)}")

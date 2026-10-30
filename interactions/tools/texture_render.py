@@ -23,7 +23,7 @@ LIGHT /= np.linalg.norm(LIGHT)
 HALF = LIGHT + np.array([0, 0, 1], np.float32)
 HALF /= np.linalg.norm(HALF)
 MATERIALS = ["Fabric066", "Fabric061", "Fabric030", "Rubber004", "Metal041A", "Metal053C", "Metal046A", "Ground110",
-             "Leather035D", "Plastic018B"]
+             "Leather035D", "Plastic018B", "Wood066"]
 
 
 # --- materials ---------------------------------------------------------------------

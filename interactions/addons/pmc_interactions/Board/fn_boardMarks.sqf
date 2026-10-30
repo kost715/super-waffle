@@ -1,6 +1,7 @@
-// [game, state, mouse] -> [[layer, rectangle, opacity], ...]: the scene layers that move or
-// fade with the game. Pure. A rectangle is [x, y, w, h] in scene pixels (1024 x 512);
-// [] keeps the layer where PMCI_fnc_boardLayout put it. Layers as in PMCI_fnc_boardLook.
+// [game, state, mouse] -> [[layer, rectangle, opacity, (angle)], ...]: the scene layers that
+// move, fade or turn with the game. Pure. A rectangle is [x, y, w, h] in scene pixels
+// (1024 x 512); [] keeps the layer where PMCI_fnc_boardLayout put it. An angle (degrees,
+// clockwise) turns the picture about its centre. Layers as in PMCI_fnc_boardLook.
 //   mouse: [x, y] in scene pixels while scrubbing, [] otherwise
 // The wound line of the cut and laceration scenes runs from x 232 to 792 at y 256.
 params ["_game", "_state", ["_mouse", []]];
@@ -102,6 +103,21 @@ switch (_game) do {
         _marks pushBack [11, [384, 128 + (_state get "offset"), 256, 256], 1];
         private _driven = (_state get "done") / (_state get "hits");
         _marks pushBack [13, [600 - 110 * _driven, 224, 256, 64], 1];
+    };
+    case "lockpick": {
+        // Plug and pick turn about the keyhole at (512, 300). The pick's picture points up
+        // from its centre; it shakes while strained and is gone for a moment when it breaks.
+        private _turn = (_state get "turn") * 90;
+        _marks pushBack [11, [400, 188, 224, 224], 1, _turn];
+        private _shake = [0, 2.5 * sin ((_state get "t") * 4000)] select (_state get "strained");
+        private _broken = ((_state get "t") - (_state get "brokeAt")) < 0.6;
+        _marks pushBack [14, [288, 76, 448, 448], [1, 0] select _broken, 90 - (_state get "angle") + _turn + _shake];
+    };
+    case "safe": {
+        // The dial (centre (400, 256)) turns so the number set is under the mark at its top;
+        // the lamp of the listening device glows with the signal.
+        _marks pushBack [5, [224, 80, 352, 352], 1, (_state get "dial") * 3.6];
+        _marks pushBack [13, [808, 120, 64, 64], 0.15 + 0.85 * (_state get "signal")];
     };
 };
 _marks

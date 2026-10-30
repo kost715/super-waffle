@@ -20,7 +20,10 @@ TEST_fnc_assert = {
     ["Board", "boardMarks"], ["Board", "cprRibs"], ["Init", "events"],
     ["Games", "ivModel"], ["Games", "sutureModel"], ["Games", "splintModel"], ["Games", "diagnoseModel"], ["Games", "weldModel"], ["Games", "trackModel"],
     ["Hooks", "repairGame"], ["Hooks", "partOf"], ["Hooks", "stitch"], ["Hooks", "stitchProgress"],
-    ["Board", "keysOf"], ["Board", "keyIs"], ["Board", "keyName"]];
+    ["Board", "keysOf"], ["Board", "keyIs"], ["Board", "keyName"],
+    ["Games", "lockpickModel"], ["Games", "terminalModel"], ["Games", "safeModel"], ["Lock", "lockSet"], ["Lock", "lockClear"], ["Lock", "lockApply"],
+    ["Lock", "lockActions"], ["Lock", "lockOpen"], ["Lock", "lockHack"], ["Lock", "lockNotify"], ["Lock", "lockKeys"], ["Lock", "lockTool"],
+    ["Lock", "codeValid"], ["Lock", "itemCount"], ["Lock", "itemName"], ["Lock", "itemTake"], ["Lock", "terminalDump"]];
 TEST_mouse = [0, 0];
 PMCI_fnc_boardMouse = {+TEST_mouse};
 PMCI_fnc_boardDraw = {};
@@ -91,10 +94,10 @@ call TEST_fnc_fresh;
 
 // --- Settings -----------------------------------------------------------------------
 private _names = TEST_settings apply {_x select 0};
-[count TEST_settings == 70 && {"PMCI_enable_wheel" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
+[count TEST_settings == 87 && {"PMCI_enable_wheel" in _names} && {"PMCI_lockKey5" in _names} && {"PMCI_safeItem" in _names} && {"PMCI_terminalAttempts" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
     && {"PMCI_enable_track" in _names} && {"PMCI_ivLimit" in _names}
     && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
-    "settings: difficulty, preparation bar, and for each game on/off plus its tuning, forced by the server"] call TEST_fnc_assert;
+    "settings: difficulty, preparation bar, each game on/off plus its tuning, the locks' keys, tools and tuning, forced by the server"] call TEST_fnc_assert;
 [PMCI_difficulty == 1 && {PMCI_prepTime == 1} && {PMCI_cprDuration == 15} && {PMCI_enable_bandage}, "defaults: normal, 1 s preparation, 15 s CPR, all games on"] call TEST_fnc_assert;
 
 // --- CPR rhythm ---------------------------------------------------------------------
@@ -993,5 +996,312 @@ PMCI_difficulty = 2;
 private _narrow = (PMCI_board get "state") get "width";
 [false] call PMCI_fnc_finish;
 [_wide > 0.45 && {_narrow < 0.15}, "an easy QuikClot by a trained medic is much easier than a hard packing bandage"] call TEST_fnc_assert;
+
+// --- Lock picking -------------------------------------------------------------------------------
+// [sweet, zone, falloff, turn/s, life, picks, limit]
+TEST_fnc_pick = {
+    params ["_angleX", "_angleY", ["_seconds", 2], ["_picks", 3]];
+    private _p = ["init", nil, [60, 5, 45, 1.2, 1, _picks, 90]] call PMCI_fnc_lockpickModel;
+    ["mouse", _p, [_angleX, _angleY, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+    ["press", _p] call PMCI_fnc_lockpickModel;
+    for "_i" from 1 to round (_seconds / 0.05) do {["tick", _p, 0.05] call PMCI_fnc_lockpickModel};
+    _p
+};
+// 60 degrees (right of up): the mouse at (512 + 100 cos 60, 300 - 100 sin 60).
+private _open = [562, 300 - 86.6025] call TEST_fnc_pick;
+[(_open get "status") == "success" && {(_open get "quality") == 1} && {(_open get "broken") == 0} && {abs ((_open get "angle") - 60) < 0.01},
+    "the pick at the sweet spot turns the plug all the way and opens the lock"] call TEST_fnc_assert;
+// 90 degrees: 25 past the zone of 5 with a falloff of 45 -> the plug stops at 1 - 25/45.
+private _half = [512, 200, 0.5] call TEST_fnc_pick;
+[(_half get "status") == "running" && {abs ((_half get "turn") - (1 - 25 / 45)) < 0.001} && {_half get "strained"} && {(_half get "broken") == 0},
+    "further from the spot the plug stops early and the pick strains"] call TEST_fnc_assert;
+private _snap = [512, 200, 1.6] call TEST_fnc_pick;
+[(_snap get "broken") == 1 && {(_snap get "picks") == 2} && {(_snap get "turn") == 0} && {!(_snap get "turning")} && {(_snap get "status") == "running"},
+    "forcing it too long breaks a pick: one pick less, the plug springs back, a new press is needed"] call TEST_fnc_assert;
+private _last = [512, 200, 1.6, 1] call TEST_fnc_pick;
+[(_last get "status") == "fail", "the last pick broken fails"] call TEST_fnc_assert;
+private _any = [512, 200, 1.6, -1] call TEST_fnc_pick;
+[(_any get "status") == "running" && {(_any get "picks") == -1}, "without a lockpick class the picks never run out"] call TEST_fnc_assert;
+["mouse", _any, [900, 250, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+private _right = _any get "angle";
+["mouse", _any, [100, 400, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+private _below = _any get "angle";
+["press", _any] call PMCI_fnc_lockpickModel;
+["mouse", _any, [512, 100, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+[_right < 10 && {_below == 180} && {(_any get "angle") == 180}, "the pick follows the mouse around the keyhole, stays at an end below it and holds still while turning"] call TEST_fnc_assert;
+private _back = [562, 300 - 86.6025, 0.4] call TEST_fnc_pick;
+private _was = _back get "turn";
+["release", _back] call PMCI_fnc_lockpickModel;
+["tick", _back, 0.1] call PMCI_fnc_lockpickModel;
+[_was > 0.4 && {abs ((_back get "turn") - (_was - 0.24)) < 0.001}, "released, the plug springs back"] call TEST_fnc_assert;
+private _slow = ["init", nil, [60, 5, 45, 1.2, 1, 3, 2]] call PMCI_fnc_lockpickModel;
+for "_i" from 1 to 50 do {["tick", _slow, 0.05] call PMCI_fnc_lockpickModel};
+[(_slow get "status") == "fail", "the time limit fails"] call TEST_fnc_assert;
+
+// --- Safe -----------------------------------------------------------------------------------------
+// [numbers, tolerance, range, gain, limit, mistakes allowed]; the mouse drags 1 number per px.
+TEST_fnc_dial = {
+    params ["_s", "_px"];
+    private _from = 500;
+    ["mouse", _s, [_from, 0, 0, true, 0.02]] call PMCI_fnc_safeModel;
+    ["mouse", _s, [_from + _px, 0, 0, true, 0.02]] call PMCI_fnc_safeModel;
+    ["mouse", _s, [_from + _px, 0, 0, false, 0.02]] call PMCI_fnc_safeModel;
+    ["tick", _s, 0.05] call PMCI_fnc_safeModel;
+};
+private _safe = ["init", nil, [[30, 10, 5], 2, 12, 1, 90, 1]] call PMCI_fnc_safeModel;
+[_safe, 24] call TEST_fnc_dial;
+private _near = _safe get "signal";
+[_safe, 6] call TEST_fnc_dial;
+[abs (_near - 0.5) < 0.001 && {(_safe get "signal") == 1} && {(_safe get "dial") == 30}, "turning up, the needle rises towards the first number"] call TEST_fnc_assert;
+["press", _safe] call PMCI_fnc_safeModel;
+[_safe, -15] call TEST_fnc_dial;
+private _overshoot = _safe get "signal";
+[_safe, -5] call TEST_fnc_dial;
+["press", _safe] call PMCI_fnc_safeModel;
+[(_safe get "next") == 2 && {_overshoot > 0} && {(_safe get "mistakes") == 0}, "the second number is dialled turning down"] call TEST_fnc_assert;
+[_safe, -3] call TEST_fnc_dial;
+private _wrongWay = _safe get "signal";
+["press", _safe] call PMCI_fnc_safeModel;
+[_wrongWay == 0 && {(_safe get "mistakes") == 1} && {(_safe get "next") == 2}, "turning the wrong way the needle stays down, and setting the number is a mistake"] call TEST_fnc_assert;
+[_safe, 98] call TEST_fnc_dial;
+["press", _safe] call PMCI_fnc_safeModel;
+[(_safe get "status") == "success" && {abs ((_safe get "quality") - 0.85) < 0.001}, "all numbers set opens the safe, 15% off per mistake"] call TEST_fnc_assert;
+private _wrap = ["init", nil, [[99], 2, 12, 1, 90, 0]] call PMCI_fnc_safeModel;
+[_wrap, 97] call TEST_fnc_dial;
+[_wrap, 4] call TEST_fnc_dial;
+private _wrapped = _wrap get "dial";
+["press", _wrap] call PMCI_fnc_safeModel;
+[_wrapped == 1 && {(_wrap get "status") == "success"}, "the dial goes round past 99 and the tolerance counts across it"] call TEST_fnc_assert;
+private _miss = ["init", nil, [[50], 2, 12, 1, 90, 0]] call PMCI_fnc_safeModel;
+[_miss, 40] call TEST_fnc_dial;
+["press", _miss] call PMCI_fnc_safeModel;
+[(_miss get "status") == "fail", "one mistake too many fails"] call TEST_fnc_assert;
+
+// --- Terminal -----------------------------------------------------------------------------------
+// Codes 0-3, the answer is 2 ("4719"); rows: junk, codes, two brackets.
+TEST_fnc_term = {
+    ["init", nil, [["4711", "1719", "4719", "9999"], 2, [["junk", -1], ["code", 0], ["code", 1], ["code", 2], ["code", 3], ["bracket", 0], ["bracket", 1]],
+        3, ["dud", "reset"], 60]] call PMCI_fnc_terminalModel
+};
+private _term = call TEST_fnc_term;
+["pick", _term, 1] call PMCI_fnc_terminalModel;
+["pick", _term, 1] call PMCI_fnc_terminalModel;
+["pick", _term, 0] call PMCI_fnc_terminalModel;
+[((_term get "log") select 0) isEqualTo ["no", "4711", 3] && {(_term get "left") == 2} && {((_term get "log") select 1) isEqualTo ["junk"]} && {count (_term get "log") == 2},
+    "a wrong code costs an attempt and tells the likeness; it costs once; junk costs nothing"] call TEST_fnc_assert;
+["pick", _term, 5] call PMCI_fnc_terminalModel;
+["pick", _term, 5] call PMCI_fnc_terminalModel;
+[(_term get "removed") isEqualTo [1] && {((_term get "log") select 2) isEqualTo ["dud", "1719"]} && {count (_term get "log") == 3},
+    "a bracket removes a dud (not the answer, not a tried code), once"] call TEST_fnc_assert;
+["pick", _term, 2] call PMCI_fnc_terminalModel;
+[(_term get "left") == 2 && {count (_term get "log") == 3}, "a removed dud can no longer be tried"] call TEST_fnc_assert;
+["pick", _term, 4] call PMCI_fnc_terminalModel;
+["pick", _term, 6] call PMCI_fnc_terminalModel;
+[(_term get "left") == 3 && {((_term get "log") select 4) isEqualTo ["reset"]}, "the last bracket restores the attempts"] call TEST_fnc_assert;
+["pick", _term, 3] call PMCI_fnc_terminalModel;
+[(_term get "status") == "success" && {(_term get "quality") == 1}, "the right code opens the lock"] call TEST_fnc_assert;
+private _locked = call TEST_fnc_term;
+{["pick", _locked, _x] call PMCI_fnc_terminalModel} forEach [1, 2, 4];
+[(_locked get "status") == "fail" && {(_locked get "left") == 0}, "the last attempt used fails"] call TEST_fnc_assert;
+private _second = call TEST_fnc_term;
+{["pick", _second, _x] call PMCI_fnc_terminalModel} forEach [1, 3];
+[(_second get "status") == "success" && {abs ((_second get "quality") - 2 / 3) < 0.001}, "quality is the share of attempts left"] call TEST_fnc_assert;
+private _dump = [5, 9, 2] call PMCI_fnc_terminalDump;
+_dump params ["_codes", "_answer", "_rows", "_effects", "_texts"];
+private _like = true;
+{
+    private _code = _x;
+    if (count _code != 5 || {(toArray _code) findIf {_x < 48 || {_x > 57}} >= 0}) then {_like = false};
+} forEach _codes;
+private _junkDigits = false;
+{
+    _x params ["_address", "_before", "_middle", "_after"];
+    if (count (_before + _middle + _after) != 14 || {count _address != 6} || {(toArray (_before + _after)) findIf {_x >= 48 && {_x <= 57}} >= 0}) then {_junkDigits = true};
+} forEach _texts;
+[count _codes == 9 && {_like} && {count (_codes arrayIntersect _codes) == 9} && {(_codes select _answer) isEqualType ""}
+    && {count _rows == 16} && {({(_x select 0) == "code"} count _rows) == 9} && {({(_x select 0) == "bracket"} count _rows) == 2}
+    && {_effects isEqualTo ["dud", "reset"]} && {!_junkDigits} && {((_texts select 0) select 0) == "0xF4A0"}
+    && {((_texts select (_rows findIf {(_x select 0) == "code" && {(_x select 1) == _answer}})) select 2) == (_codes select _answer)},
+    "the dump: different codes of the lock's length, 16 rows of 14 junk characters without digits, the codes and brackets in them"] call TEST_fnc_assert;
+[(([4, 1, 1] call PMCI_fnc_terminalDump) select 3) isEqualTo ["dud"] && {[["1234"] call PMCI_fnc_codeValid, ["123456"] call PMCI_fnc_codeValid, ["123"] call PMCI_fnc_codeValid,
+    ["1234567"] call PMCI_fnc_codeValid, ["12a4"] call PMCI_fnc_codeValid] isEqualTo [true, true, false, false, false]},
+    "a single bracket removes a dud; a code has 4 to 6 digits"] call TEST_fnc_assert;
+
+// --- Locking a box (server) ---------------------------------------------------------------------------
+call TEST_fnc_fresh;
+TEST_messages = [];
+TEST_box = "Box_NATO_Wps_F" createVehicle [2, 0, 0];
+TEST_box setPos [2, 0, 0];
+TEST_lockMessages = {params ["_fn"]; TEST_messages select {((_x select 1) select 0) == _fn}};
+PMCI_lockKey2 = " pmc_key_red ";
+[(call PMCI_fnc_lockKeys) isEqualTo ["", "pmc_key_red", "", "", ""], "the five key slots come from CBA, trimmed"] call TEST_fnc_assert;
+[TEST_medic, TEST_box, "classic", 1, "pmc_key_red", ""] call PMCI_fnc_lockSet;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo [] && {TEST_messages isEqualTo []}, "only a Zeus can lock a box"] call TEST_fnc_assert;
+TEST_medic setVariable ["TEST_curator", TEST_ai];
+[TEST_medic, TEST_box, "classic", 2, "pmc_key_red", "1234"] call PMCI_fnc_lockSet;
+private _apply = "PMCI_fnc_lockApply" call TEST_lockMessages;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo ["classic", 2, "pmc_key_red", 0] && {(TEST_box getVariable ["PMCI_lockCode", "?"]) == ""}
+    && {count _apply == 1} && {(_apply select 0) isEqualTo [[TEST_box, ["classic", 2, "pmc_key_red", 0]], ["PMCI_fnc_lockApply", 0, TEST_box]]},
+    "a Zeus locks the box: every machine, players joining later too, gets the lock (a classic lock keeps no code)"] call TEST_fnc_assert;
+TEST_messages = [];
+[TEST_medic, TEST_box, "code", 1, "pmc_key_red", "12a4"] call PMCI_fnc_lockSet;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo ["classic", 2, "pmc_key_red", 0] && {((("PMCI_fnc_lockNotify" call TEST_lockMessages) select 0) select 0) isEqualTo ["STR_PMCI_LOCK_ERR_CODE"]},
+    "a code that is not 4-6 digits is refused"] call TEST_fnc_assert;
+[TEST_medic, TEST_box, "safe", 0, "pmc_key_red", "048213"] call PMCI_fnc_lockSet;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo ["safe", 0, "", 6] && {(TEST_box getVariable ["PMCI_lockCode", ""]) == "048213"},
+    "a safe keeps its code on the server; players see only its length"] call TEST_fnc_assert;
+[TEST_box, ["safe", 0, "", 6]] call PMCI_fnc_lockApply;
+private _shut = TEST_box getVariable ["TEST_locked", false];
+TEST_isRemoteExecuted = true;
+TEST_remoteOwner = 5;
+[TEST_box, []] call PMCI_fnc_lockApply;
+TEST_isRemoteExecuted = false;
+TEST_remoteOwner = 2;
+[_shut && {TEST_box getVariable ["TEST_locked", false]}, "the inventory is locked; a client cannot unlock it for others"] call TEST_fnc_assert;
+
+// --- Opening a box ------------------------------------------------------------------------------------
+TEST_messages = [];
+[TEST_medic, TEST_box, "code", "048210"] call PMCI_fnc_lockOpen;
+[TEST_medic, TEST_box, "key"] call PMCI_fnc_lockOpen;
+private _said = ("PMCI_fnc_lockNotify" call TEST_lockMessages) apply {(_x select 0) select 0};
+[_said isEqualTo ["STR_PMCI_LOCK_WRONG_CODE", "STR_PMCI_LOCK_NO_KEY"] && {(TEST_box getVariable ["PMCI_lock", []]) isNotEqualTo []}, "a wrong code or no key leaves the safe locked"] call TEST_fnc_assert;
+TEST_isRemoteExecuted = true;
+TEST_remoteOwner = 7;
+TEST_messages = [];
+[TEST_medic, TEST_box, "code", "048213"] call PMCI_fnc_lockOpen;
+TEST_isRemoteExecuted = false;
+TEST_remoteOwner = 2;
+[TEST_messages isEqualTo [] && {(TEST_box getVariable ["PMCI_lock", []]) isNotEqualTo []}, "a request sent for another player's unit is ignored"] call TEST_fnc_assert;
+player setPos [9, 0, 0];
+[TEST_medic, TEST_box, "code", "048213"] call PMCI_fnc_lockOpen;
+player setPos [0, 0, 0];
+[(TEST_box getVariable ["PMCI_lock", []]) isNotEqualTo [], "the code is entered at the box only"] call TEST_fnc_assert;
+[TEST_medic, TEST_box, "code", "048213"] call PMCI_fnc_lockOpen;
+_apply = "PMCI_fnc_lockApply" call TEST_lockMessages;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo [] && {(_apply select 0) isEqualTo [[TEST_box, []], ["PMCI_fnc_lockApply", 0, TEST_box]]}
+    && {((("PMCI_fnc_lockNotify" call TEST_lockMessages) select 0) select 0) isEqualTo ["STR_PMCI_LOCK_OPENED"]},
+    "the right code opens the safe for good, for everyone"] call TEST_fnc_assert;
+[TEST_medic, TEST_box, "classic", 1, "PMC_Key_Red", ""] call PMCI_fnc_lockSet;
+TEST_medic setVariable ["TEST_inv", ["pmc_key_red"]];
+[TEST_medic, TEST_box, "key"] call PMCI_fnc_lockOpen;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo [], "the key set for a classic lock opens it (class names in any case)"] call TEST_fnc_assert;
+TEST_medic setVariable ["TEST_inv", []];
+[TEST_medic, TEST_box, "classic", 1, "", ""] call PMCI_fnc_lockSet;
+[TEST_medic, TEST_box, "none", 1, "", ""] call PMCI_fnc_lockSet;
+[(TEST_box getVariable ["PMCI_lock", []]) isEqualTo [], "Zeus can take the lock off again"] call TEST_fnc_assert;
+
+// --- Hacking a box ------------------------------------------------------------------------------------
+call TEST_fnc_fresh;
+TEST_messages = [];
+PMCI_terminalItem = "pmc_hacker";
+[TEST_medic, TEST_box, "code", 2, "", "4821"] call PMCI_fnc_lockSet;
+[TEST_box, TEST_box getVariable "PMCI_lock"] call PMCI_fnc_lockApply;
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+[isNil "PMCI_board" && {("PMCI_fnc_lockOpen" call TEST_lockMessages) isEqualTo []}, "without the device the hack does not start"] call TEST_fnc_assert;
+TEST_medic setVariable ["TEST_inv", ["PMC_Hacker"]];
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+private _term = PMCI_board get "state";
+[(PMCI_board get "game") == "terminal" && {(PMCI_board get "kind") == "lock"} && {(PMCI_board get "ease") == 0.75} && {count ((_term get "codes") select 0) == 4}
+    && {count (_term get "codes") == round (8 / 0.75)} && {(_term get "effects") isEqualTo ["dud"]} && {count (_term get "texts") == 16}
+    && {(("PMCI_fnc_lockOpen" call TEST_lockMessages) select 0) isEqualTo [[TEST_medic, TEST_box, "begin"], ["PMCI_fnc_lockOpen", 2]]},
+    "with the device: the server hears the hack began; a hard code lock gives 4-digit codes, more candidates, one bracket"] call TEST_fnc_assert;
+TEST_messages = [];
+private _answerRow = (_term get "rows") findIf {(_x select 0) == "code" && {(_x select 1) == (_term get "answer")}};
+["select", _answerRow] call PMCI_fnc_boardEvent;
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+call PMCI_fnc_boardTick;
+[isNil "PMCI_board" && {(("PMCI_fnc_lockOpen" call TEST_lockMessages) select 0) isEqualTo [[TEST_medic, TEST_box, "hack"], ["PMCI_fnc_lockOpen", 2]]},
+    "picking the right row with the press key wins, and the server is asked to open the box"] call TEST_fnc_assert;
+// The server side of that: the hack must have begun at least 0.5 s before, with the device.
+TEST_messages = [];
+[TEST_medic, TEST_box, "begin"] call PMCI_fnc_lockOpen;
+[TEST_medic, TEST_box, "hack"] call PMCI_fnc_lockOpen;
+private _early = (TEST_box getVariable ["PMCI_lock", []]) isNotEqualTo [];
+TEST_realTime = TEST_realTime + 3;
+TEST_medic setVariable ["TEST_inv", []];
+[TEST_medic, TEST_box, "hack"] call PMCI_fnc_lockOpen;
+private _noTool = (TEST_box getVariable ["PMCI_lock", []]) isNotEqualTo [];
+TEST_medic setVariable ["TEST_inv", ["pmc_hacker"]];
+[TEST_medic, TEST_ai, "hack"] call PMCI_fnc_lockOpen;
+[TEST_medic, TEST_box, "hack"] call PMCI_fnc_lockOpen;
+[_early && {_noTool} && {(TEST_box getVariable ["PMCI_lock", []]) isEqualTo []}, "the server opens a hacked box only some time after the hack began, with the device"] call TEST_fnc_assert;
+TEST_medic setVariable ["TEST_inv", []];
+PMCI_terminalItem = "";
+// A double click picks a row too; a box opened by someone else ends the game.
+[TEST_medic, TEST_box, "code", 0, "", "48213"] call PMCI_fnc_lockSet;
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+_term = PMCI_board get "state";
+private _junkRow = (_term get "rows") findIf {(_x select 0) == "junk"};
+["pick", _junkRow] call PMCI_fnc_boardEvent;
+[(PMCI_board get "ease") == 1.35 && {count ((_term get "codes") select 0) == 5} && {((_term get "log") select 0) isEqualTo ["junk"]}
+    && {(_term get "effects") isEqualTo ["dud", "dud", "reset"]}, "an easy lock gives three brackets; a double click picks a row"] call TEST_fnc_assert;
+TEST_box setVariable ["PMCI_lock", []];
+TEST_messages = [];
+call PMCI_fnc_boardTick;
+[isNil "PMCI_board" && {("PMCI_fnc_lockOpen" call TEST_lockMessages) isEqualTo []}, "a box opened meanwhile ends the game without a request"] call TEST_fnc_assert;
+
+// Lock picking on the board: picks counted and used up as they break.
+PMCI_lockpickItem = "pmc_lockpick";
+TEST_medic setVariable ["TEST_inv", ["pmc_lockpick", "pmc_lockpick", "ACE_fieldDressing"]];
+[TEST_medic, TEST_box, "classic", 1, "", ""] call PMCI_fnc_lockSet;
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+private _pick = PMCI_board get "state";
+_pick set ["sweet", 150];
+TEST_mouse = [512, 100];
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+for "_i" from 1 to 40 do {TEST_realTime = TEST_realTime + 0.05; call PMCI_fnc_boardTick};
+[(_pick get "picks") == 1 && {(_pick get "broken") == 1} && {(TEST_medic getVariable ["TEST_inv", []]) isEqualTo ["pmc_lockpick", "ACE_fieldDressing"]} && {!isNil "PMCI_board"},
+    "two picks carried; one breaks and is gone from the inventory"] call TEST_fnc_assert;
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+[!(_pick get "turning"), "the held key's auto-repeat does not turn the plug again after a pick broke"] call TEST_fnc_assert;
+["keyUp", [0, 57]] call PMCI_fnc_boardEvent;
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+private _held = _pick get "turning";
+["keyUp", [0, 57]] call PMCI_fnc_boardEvent;
+["scrubDown"] call PMCI_fnc_boardEvent;
+private _mouseHeld = _pick get "turning";
+["scrubUp"] call PMCI_fnc_boardEvent;
+[_held && {_mouseHeld} && {!(_pick get "turning")}, "the plug turns with the press key or the mouse held on the lock"] call TEST_fnc_assert;
+TEST_mouse = [512 + 100 * cos 150, 300 - 100 * sin 150];
+call PMCI_fnc_boardTick;
+TEST_messages = [];
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+["keyUp", [0, 57]] call PMCI_fnc_boardEvent;
+["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
+for "_i" from 1 to 40 do {TEST_realTime = TEST_realTime + 0.05; call PMCI_fnc_boardTick};
+[isNil "PMCI_board" && {count ("PMCI_fnc_lockOpen" call TEST_lockMessages) == 1} && {(PMCI_lastResult select 2) == 0.8},
+    "at the spot the lock opens; quality 80% after one broken pick"] call TEST_fnc_assert;
+TEST_medic setVariable ["TEST_inv", []];
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+[isNil "PMCI_board", "no lockpick left: picking does not start"] call TEST_fnc_assert;
+PMCI_lockpickItem = "";
+// Safe on the board: dragging the dial, setting a number with the hold button.
+[TEST_medic, TEST_box, "safe", 1, "", "1234"] call PMCI_fnc_lockSet;
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+private _safeState = PMCI_board get "state";
+private _first = (_safeState get "numbers") select 0;
+TEST_mouse = [100, 200];
+["scrubDown"] call PMCI_fnc_boardEvent;
+call PMCI_fnc_boardTick;
+TEST_mouse = [100 + _first / 0.06, 200];
+call PMCI_fnc_boardTick;
+["scrubUp"] call PMCI_fnc_boardEvent;
+["holdDown"] call PMCI_fnc_boardEvent;
+[(PMCI_board get "game") == "safe" && {count (_safeState get "numbers") == 4} && {(_safeState get "next") == 1} && {(_safeState get "mistakes") == 0}
+    && {((_safeState get "numbers") findIf {_x < 0 || {_x > 99}}) < 0},
+    "a normal safe has 4 numbers; dragging the mouse to the first and setting it counts"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+
+// Pictures of the lock games: plug, pick and dial turn.
+private _pickMarks = ["lockpick", ["init", nil, [60, 5, 45, 1.2, 1, 3, 90]] call PMCI_fnc_lockpickModel] call PMCI_fnc_boardMarks;
+private _dialState = ["init", nil, [[30], 2, 12, 1, 90, 1]] call PMCI_fnc_safeModel;
+_dialState set ["dial", 25];
+private _dialMarks = ["safe", _dialState] call PMCI_fnc_boardMarks;
+[(["lockpick", _pick] call TEST_look) isEqualTo (["lock_scene", "", "", "", "", "", "", "", "", "", "", "lock_plug", "", "", "lock_pick"] apply {_x call TEST_tex} call TEST_full)
+    && {(["terminal", _term] call TEST_look) isEqualTo ([("terminal_scene" call TEST_tex)] call TEST_full)}
+    && {((["safe", _dialState] call TEST_look) select 5) == ("safe_dial" call TEST_tex)}
+    && {(_pickMarks select 0) isEqualTo [11, [400, 188, 224, 224], 1, 0]} && {(_pickMarks select 1) isEqualTo [14, [288, 76, 448, 448], 1, 0]}
+    && {abs (((_dialMarks select 0) select 3) - 90) < 0.001},
+    "the lock games show their scenes; the pick points up at the start, the dial turns 3.6 degrees per number"] call TEST_fnc_assert;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

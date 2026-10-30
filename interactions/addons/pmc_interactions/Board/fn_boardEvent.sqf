@@ -1,14 +1,17 @@
 #include "..\ui_defines.hpp"
 // [event, value] -> handled. Client. Input from the board: keys (the "press" key presses
-// or holds, the "fix" key fixes, both set in CBA's controls; Esc gives up), the hold button, the fix button, nut and swap buttons, and
-// the mouse on the scene (scrubbing, aiming, stitching, setting a bone, welding).
+// or holds, the "fix" key fixes, both set in CBA's controls; Esc gives up), the hold button, the fix button, nut and swap buttons,
+// the mouse on the scene (scrubbing, aiming, stitching, setting a bone, welding, turning a
+// lock's plug or a safe's dial) and the terminal's rows (picked by a double click or the press key).
 params ["_event", ["_value", 0]];
 if (isNil "PMCI_board") exitWith {false};
 private _game = PMCI_board get "game";
 private _model = missionNamespace getVariable format ["PMCI_fnc_%1Model", _game];
 private _state = PMCI_board get "state";
-// One press per key stroke for CPR compressions and placing strips; the others hold.
+// One press per key stroke for CPR compressions, placing strips, driving a pin and the
+// locks (a broken pick needs a new press); the others hold.
 private _press = {
+    if (_game == "terminal") exitWith {["pick", _state, PMCI_board getOrDefault ["selected", -1]] call _model};
     ["press", _state] call _model;
     if (_game == "cpr") then {
         PMCI_board set ["depth", 1];
@@ -30,7 +33,7 @@ switch (_event) do {
         _value params ["", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
         if (["press", _key, [_shift, _ctrl, _alt]] call PMCI_fnc_keyIs) exitWith {
             // Holding the key repeats keyDown; a tapping game only counts the first.
-            if !(_game in ["cpr", "edges", "track"] && {PMCI_board getOrDefault ["spaceDown", false]}) then {call _press};
+            if !(_game in ["cpr", "edges", "track", "lockpick", "terminal", "safe"] && {PMCI_board getOrDefault ["spaceDown", false]}) then {call _press};
             PMCI_board set ["spaceDown", true];
             true
         };
@@ -51,8 +54,18 @@ switch (_event) do {
         private _mouse = call PMCI_fnc_boardMouse;
         PMCI_board set ["scrubbing", true];
         PMCI_board set ["mouse", _mouse];
+        // The plug of a lock also turns while the mouse is held on the scene.
+        if (_game == "lockpick") then {["press", _state] call _model};
     };
-    case "scrubUp": {PMCI_board set ["scrubbing", false]};
+    case "scrubUp": {
+        if (_game == "lockpick" && {PMCI_board getOrDefault ["scrubbing", false]}) then {["release", _state] call _model};
+        PMCI_board set ["scrubbing", false];
+    };
+    case "select": {PMCI_board set ["selected", _value]};
+    case "pick": {
+        PMCI_board set ["selected", _value];
+        ["pick", _state, _value] call _model;
+    };
     case "cancel": {closeDialog 2};
 };
 true

@@ -1,15 +1,21 @@
-// [game, ACE callback args, "medical"|"repair"] -> nothing. Client. Starts a hands-on
+// [game, ACE callback args, "medical"|"repair"|"lock"] -> nothing. Client. Starts a hands-on
 // game in place of the rest of ACE's progress bar (repairs pass the game already chosen
-// for the part, PMCI_fnc_repairGame). Difficulty comes from the CBA
+// for the part, PMCI_fnc_repairGame), or the hacking game of a locked box (args
+// [unit, box, "", ""], PMCI_fnc_lockHack). Difficulty comes from the CBA
 // setting; a trained medic or engineer gets a 20% easier game. A bandage looks at the
 // wound ACE will treat on that body part and picks the game for its type; a bigger wound
 // makes a longer game.
 params ["_action", "_args", "_kind"];
 if (!isNil "PMCI_board") then {[false] call PMCI_fnc_finish};
 _args params ["_unit", "_target", "_part", "_class"];
-private _ease = [1.35, 1, 0.75] select ((missionNamespace getVariable ["PMCI_difficulty", 1]) min 2 max 0);
+// A lock's difficulty is the one its Zeus chose, the same for everyone.
+private _lock = [[], _target getVariable ["PMCI_lock", []]] select (_kind == "lock");
+private _level = if (_kind == "lock") then {_lock param [1, 1]} else {missionNamespace getVariable ["PMCI_difficulty", 1]};
+_level = _level min 2 max 0;
+private _ease = [1.35, 1, 0.75] select _level;
 private _trained = switch (_kind) do {
     case "medical": {!isNil "ace_medical_treatment_fnc_isMedic" && {[_unit, 1] call ace_medical_treatment_fnc_isMedic}};
+    case "lock": {false};
     default {!isNil "ace_repair_fnc_isEngineer" && {[_unit, 1] call ace_repair_fnc_isEngineer}};
 };
 if (_trained) then {_ease = _ease * 1.2};
@@ -111,6 +117,31 @@ private _state = switch (_game) do {
         ["init", nil, [40, (["trackTolerance", 6] call _set) * _ease, (["trackSwing", 0.5] call _set) / _ease, ["trackHits", 4] call _set,
             (0.78 - _half) max 0.05, (0.78 + _half) min 0.98, (["trackSpeed", 1.1] call _set) / _ease, ["trackLimit", 30] call _set,
             round ((["trackMisses", 3] call _set) * _ease)]] call PMCI_fnc_trackModel
+    };
+    case "lockpick": {
+        // The sweet spot is somewhere on the pick's half circle, away from its ends.
+        private _class = ["classic"] call PMCI_fnc_lockTool;
+        ["init", nil, [15 + random 150, (["lockpickZone", 5] call _set) * _ease, 45, 1.2, (["lockpickLife", 1.2] call _set) * _ease,
+            [[_unit, _class] call PMCI_fnc_itemCount, -1] select (_class == ""), ["lockpickLimit", 90] call _set]] call PMCI_fnc_lockpickModel
+    };
+    case "terminal": {
+        // As many digits as the lock's code; fewer candidates and more brackets when easy.
+        private _dump = [(_lock param [3, 4]) max 4 min 6, round ((["terminalCodes", 8] call _set) / _ease) max 3 min 12, [3, 2, 1] select _level] call PMCI_fnc_terminalDump;
+        _dump params ["_codes", "_answer", "_rows", "_effects", "_texts"];
+        private _state = ["init", nil, [_codes, _answer, _rows, ["terminalAttempts", 4] call _set, _effects, ["terminalLimit", 90] call _set]] call PMCI_fnc_terminalModel;
+        _state set ["texts", _texts];
+        _state
+    };
+    case "safe": {
+        // 3 to 5 numbers, each well away from the one before.
+        private _numbers = [];
+        private _last = 0;
+        for "_k" from 1 to ([3, 4, 5] select _level) do {
+            _last = (_last + 20 + floor random 60) % 100;
+            _numbers pushBack _last;
+        };
+        ["init", nil, [_numbers, (["safeTolerance", 2] call _set) * _ease, 12, 0.06, ["safeLimit", 90] call _set,
+            round ((["safeMistakes", 2] call _set) * _ease)]] call PMCI_fnc_safeModel
     };
 };
 PMCI_board = createHashMapFromArray [["game", _game], ["action", _action], ["wound", _wound], ["args", _args], ["kind", _kind], ["state", _state],

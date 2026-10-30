@@ -9,7 +9,7 @@ private _game = PMCI_board get "game";
 private _model = missionNamespace getVariable format ["PMCI_fnc_%1Model", _game];
 // Mouse games: where the mouse is, how far it moved since the last frame, whether the
 // button is held. Cleaning only counts the path while scrubbing.
-if (_game in ["clean", "iv", "suture", "splint", "weld"]) then {
+if (_game in ["clean", "iv", "suture", "splint", "weld", "lockpick", "safe"]) then {
     private _mouse = call PMCI_fnc_boardMouse;
     (PMCI_board getOrDefault ["mouse", _mouse]) params ["_fromX", "_fromY"];
     private _distance = sqrt (((_mouse select 0) - _fromX) ^ 2 + ((_mouse select 1) - _fromY) ^ 2);
@@ -22,6 +22,11 @@ if (_game in ["clean", "iv", "suture", "splint", "weld"]) then {
     PMCI_board set ["mouse", _mouse];
 };
 ["tick", _state, _dt] call _model;
+// A pick broken in the lock is gone from the inventory at once.
+if (_game == "lockpick" && {(_state get "broken") > (PMCI_board getOrDefault ["used", 0])}) then {
+    PMCI_board set ["used", _state get "broken"];
+    [(PMCI_board get "args") select 0, ["classic"] call PMCI_fnc_lockTool] call PMCI_fnc_itemTake;
+};
 PMCI_board set ["depth", 0 max ((PMCI_board get "depth") - _dt * 3)];
 if !(call PMCI_fnc_boardValid) exitWith {[false] call PMCI_fnc_finish};
 if ((_state get "status") != "running") exitWith {[(_state get "status") == "success"] call PMCI_fnc_finish};

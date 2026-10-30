@@ -48,6 +48,28 @@ private _general = [_category, localize "STR_PMCI_SET_GENERAL"];
         ["trackZone", "STR_PMCI_SET_ZONE", [0.05, 0.6, 0.16, 2]], ["trackSpeed", "STR_PMCI_SET_TRACK_SPEED", [0.2, 5, 1.1, 2]],
         ["trackMisses", "STR_PMCI_SET_MISSES", [0, 10, 3, 0]]]]
 ];
+// Locks (Zeus module "Lock"): the five key classes Zeus can give a classic lock, the tools
+// the hacking games need ("" = none needed; a lockpick is used up when it breaks) and the
+// games' tuning. A lock's difficulty is chosen by Zeus.
+private _locks = [_category, localize "STR_PMCI_SET_LOCKS"];
+for "_k" from 1 to 5 do {
+    [format ["PMCI_lockKey%1", _k], "EDITBOX", [format [localize "STR_PMCI_SET_LOCK_KEY", _k], localize "STR_PMCI_SET_LOCK_KEY_TIP"], _locks, "", 1] call CBA_fnc_addSetting;
+};
+{
+    _x params ["_name", "_title"];
+    [_name, "EDITBOX", [localize _title, localize "STR_PMCI_SET_TOOL_TIP"], _locks, "", 1] call CBA_fnc_addSetting;
+} forEach [["PMCI_lockpickItem", "STR_PMCI_SET_LOCKPICK_ITEM"], ["PMCI_terminalItem", "STR_PMCI_SET_TERMINAL_ITEM"], ["PMCI_safeItem", "STR_PMCI_SET_SAFE_ITEM"]];
+{
+    _x params ["_name", "_title", "_range"];
+    ["PMCI_" + _name, "SLIDER", localize _title, _locks, _range, 1] call CBA_fnc_addSetting;
+} forEach [
+    ["lockpickLimit", "STR_PMCI_SET_LOCKPICK_LIMIT", [10, 300, 90, 0]], ["lockpickZone", "STR_PMCI_SET_LOCKPICK_ZONE", [1, 30, 5, 1]],
+    ["lockpickLife", "STR_PMCI_SET_LOCKPICK_LIFE", [0.2, 5, 1.2, 1]],
+    ["terminalLimit", "STR_PMCI_SET_TERMINAL_LIMIT", [10, 300, 90, 0]], ["terminalCodes", "STR_PMCI_SET_TERMINAL_CODES", [3, 12, 8, 0]],
+    ["terminalAttempts", "STR_PMCI_SET_TERMINAL_ATTEMPTS", [1, 8, 4, 0]],
+    ["safeLimit", "STR_PMCI_SET_SAFE_LIMIT", [10, 300, 90, 0]], ["safeTolerance", "STR_PMCI_SET_SAFE_TOLERANCE", [0.5, 8, 2, 1]],
+    ["safeMistakes", "STR_PMCI_SET_SAFE_MISTAKES", [0, 10, 2, 0]]
+];
 // Keys of the boards, in CBA's controls (Configure Addons -> PMC Interactions). The board
 // reads them itself (PMCI_fnc_keyIs); outside a board they do nothing.
 ["PMC Interactions", "pmci_press", [localize "STR_PMCI_KEY_PRESS", localize "STR_PMCI_KEY_PRESS_TIP"], {false}, {false}, [57, [false, false, false]]] call CBA_fnc_addKeybind;

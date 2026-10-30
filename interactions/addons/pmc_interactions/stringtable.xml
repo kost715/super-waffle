@@ -498,6 +498,266 @@
                 <Original>Strike marker speed (runs per s)</Original>
                 <Russian>Скорость стрелки удара (проходов в секунду)</Russian>
             </Key>
+            <Key ID="STR_PMCI_GAME_lockpick">
+                <Original>Lock picking</Original>
+                <Russian>Взлом замка отмычкой</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_terminal">
+                <Original>Code lock hack</Original>
+                <Russian>Взлом кодового замка</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_safe">
+                <Original>Safe cracking</Original>
+                <Russian>Вскрытие сейфа</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_lockpick">
+                <Original>Move the mouse to place the pick, then hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; or the mouse button on the lock to turn the plug. The plug turns fully only at the right spot; do not force it, or the pick breaks.</Original>
+                <Russian>Мышью двигайте отмычку, затем держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; или кнопку мыши на замке, чтобы повернуть цилиндр. До конца он повернётся только в верном положении; не дожимайте — отмычка сломается.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_terminal">
+                <Original>One of the codes in the dump is the lock's code. Pick a row and press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (or double-click). A wrong code shows how many digits stand in the right place. Brackets remove a dud or restore the attempts.</Original>
+                <Russian>Один из кодов в дампе — код замка. Выберите строку и нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (или дважды щёлкните). Неверный код покажет, сколько цифр стоят на своих местах. Скобки убирают ложный код или восстанавливают попытки.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_safe">
+                <Original>Drag the mouse sideways with the button held to turn the dial, the way shown below. When the device's needle is in the green zone, press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to set the number.</Original>
+                <Russian>Тяните мышь вбок с зажатой кнопкой, чтобы крутить диск в указанную ниже сторону. Когда стрелка прибора в зелёной зоне, нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, чтобы зафиксировать число.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_LOCKPICK">
+                <Original>Plug: %1%. Picks: %2. Broken: %3</Original>
+                <Russian>Поворот: %1%. Отмычек: %2. Сломано: %3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_PICK_STRAIN">
+                <Original>The pick is bending!</Original>
+                <Russian>Отмычка гнётся!</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_PICK_BROKE">
+                <Original>The pick broke!</Original>
+                <Russian>Отмычка сломалась!</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_SAFE">
+                <Original>Number %1 of %2. Dial: %3. Turn %4. Mistakes left: %5</Original>
+                <Russian>Число %1 из %2. Диск: %3. Крутите %4. Ошибок осталось: %5</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SAFE_UP">
+                <Original>right (up)</Original>
+                <Russian>вправо (вверх)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SAFE_DOWN">
+                <Original>left (down)</Original>
+                <Russian>влево (вниз)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_TERMINAL">
+                <Original>Attempts: %1</Original>
+                <Russian>Попытки: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_DIAL_SET">
+                <Original>Set number</Original>
+                <Russian>Зафиксировать</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_ENTER">
+                <Original>Enter</Original>
+                <Russian>Ввести</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_HEADER">
+                <Original>LOCK SERVICE TERMINAL - MEMORY DUMP</Original>
+                <Russian>СЕРВИСНЫЙ ТЕРМИНАЛ ЗАМКА - ДАМП ПАМЯТИ</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_no">
+                <Original>%1: denied. Likeness %2/%3</Original>
+                <Russian>%1: отказ. Совпадение %2/%3</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_ok">
+                <Original>%1: access granted</Original>
+                <Russian>%1: доступ разрешён</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_dud">
+                <Original>Dud removed: %1</Original>
+                <Russian>Убран ложный код: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_reset">
+                <Original>Attempts restored</Original>
+                <Russian>Попытки восстановлены</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_junk">
+                <Original>Input error</Original>
+                <Russian>Ошибка ввода</Russian>
+            </Key>
+            <Key ID="STR_PMCI_MODULE_LOCK">
+                <Original>Lock a box</Original>
+                <Russian>Запереть ящик</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TITLE">
+                <Original>Lock: %1</Original>
+                <Russian>Замок: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TYPE">
+                <Original>Lock</Original>
+                <Russian>Замок</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_LEVEL">
+                <Original>Difficulty</Original>
+                <Russian>Сложность</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_KEY">
+                <Original>Key</Original>
+                <Russian>Ключ</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_CODE">
+                <Original>Code</Original>
+                <Russian>Код</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_RANDOM">
+                <Original>Random</Original>
+                <Russian>Случайный</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_DONE_BUTTON">
+                <Original>Done</Original>
+                <Russian>Готово</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TYPE_classic">
+                <Original>Classic (key, lockpick)</Original>
+                <Russian>Классический (ключ, отмычка)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TYPE_code">
+                <Original>Code lock (terminal)</Original>
+                <Russian>Кодовый (терминал)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TYPE_safe">
+                <Original>Safe lock (listening device)</Original>
+                <Russian>Сейфовый (прослушка)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_TYPE_none">
+                <Original>No lock (open the box)</Original>
+                <Russian>Без замка (открыть ящик)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_NO_KEY_FITS">
+                <Original>No key fits</Original>
+                <Russian>Ключа нет</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_NO_KEYS_SET">
+                <Original>No keys are set: CBA settings -&gt; PMC Interactions -&gt; Locks.</Original>
+                <Russian>Ключи не заданы: настройки CBA -&gt; PMC Interactions -&gt; Замки.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_ERR_CODE">
+                <Original>The code must have 4 to 6 digits.</Original>
+                <Russian>Код должен состоять из 4–6 цифр.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_ERR_OBJECT">
+                <Original>Place the module on an object with an inventory.</Original>
+                <Russian>Поставьте модуль на объект с инвентарём.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_DONE">
+                <Original>The box is locked.</Original>
+                <Russian>Ящик заперт.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_REMOVED">
+                <Original>The lock is removed, the box is open.</Original>
+                <Russian>Замок снят, ящик открыт.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_OPENED">
+                <Original>The lock is open.</Original>
+                <Russian>Замок открыт.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_NO_KEY">
+                <Original>You have no key that fits.</Original>
+                <Russian>У вас нет подходящего ключа.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_WRONG_CODE">
+                <Original>Wrong code.</Original>
+                <Russian>Неверный код.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_HACK_REFUSED">
+                <Original>The lock did not open.</Original>
+                <Russian>Замок не открылся.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_NEED_TOOL">
+                <Original>You need: %1</Original>
+                <Russian>Нужно: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_ACTION">
+                <Original>Lock</Original>
+                <Russian>Замок</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_USE_KEY">
+                <Original>Open with the key</Original>
+                <Russian>Открыть ключом</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_ENTER_CODE">
+                <Original>Enter the code</Original>
+                <Russian>Ввести код</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_ENTER">
+                <Original>Enter</Original>
+                <Russian>Ввод</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_HACK">
+                <Original>Pick / hack the lock</Original>
+                <Russian>Взломать замок</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKS">
+                <Original>Locks</Original>
+                <Russian>Замки</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCK_KEY">
+                <Original>Key %1 (class name)</Original>
+                <Russian>Ключ %1 (класснейм)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCK_KEY_TIP">
+                <Original>Class name of an item that Zeus can choose as the key of a classic lock. Empty: slot not used.</Original>
+                <Russian>Класснейм предмета, который Зевс может выбрать ключом классического замка. Пусто — слот не используется.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TOOL_TIP">
+                <Original>Class name of the item needed for the hack. Empty: no tool needed.</Original>
+                <Russian>Класснейм предмета, нужного для взлома. Пусто — инструмент не нужен.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_ITEM">
+                <Original>Lockpick (class name, used up when it breaks)</Original>
+                <Russian>Отмычка (класснейм, расходуется при поломке)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TERMINAL_ITEM">
+                <Original>Code lock hacking device (class name)</Original>
+                <Russian>Устройство взлома кодового замка (класснейм)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SAFE_ITEM">
+                <Original>Safe listening device (class name)</Original>
+                <Russian>Прослушивающее устройство для сейфа (класснейм)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_LIMIT">
+                <Original>Lock picking: time limit (s)</Original>
+                <Russian>Отмычка: лимит времени (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_ZONE">
+                <Original>Lock picking: sweet spot (± degrees)</Original>
+                <Russian>Отмычка: верная зона (± градусов)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_LIFE">
+                <Original>Lock picking: pick strength (s of forcing)</Original>
+                <Russian>Отмычка: прочность (с дожима)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TERMINAL_LIMIT">
+                <Original>Terminal: time limit (s)</Original>
+                <Russian>Терминал: лимит времени (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TERMINAL_CODES">
+                <Original>Terminal: candidate codes</Original>
+                <Russian>Терминал: кодов в дампе</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_TERMINAL_ATTEMPTS">
+                <Original>Terminal: attempts</Original>
+                <Russian>Терминал: попыток</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SAFE_LIMIT">
+                <Original>Safe: time limit (s)</Original>
+                <Russian>Сейф: лимит времени (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SAFE_TOLERANCE">
+                <Original>Safe: tolerance (dial numbers)</Original>
+                <Russian>Сейф: допуск (делений диска)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SAFE_MISTAKES">
+                <Original>Safe: mistakes allowed</Original>
+                <Russian>Сейф: допустимых ошибок</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

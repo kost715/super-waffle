@@ -31,7 +31,9 @@ private _places = [
     [PMCI_IDC_SWAP, 790, 220, 220, 72],
     [PMCI_IDC_PRESS_HAND, 256, 0, 512, 512],  // hand and pad over the wound centre (512, 256)
     [PMCI_IDC_SEEP, 256, 128, 512, 256],
-    [PMCI_IDC_PAD, 256, 128, 512, 256]
+    [PMCI_IDC_PAD, 256, 128, 512, 256],
+    [PMCI_IDC_TERM_LIST, 132, 64, 470, 392],  // inside the terminal's screen (112-912, 40-472)
+    [PMCI_IDC_TERM_LOG, 622, 64, 270, 392]
 ];
 for "_k" from 0 to 4 do {
     // Nuts on the wheel's studs: radius 150 px, -90 + 72 * k degrees, clockwise from the top.
@@ -60,8 +62,18 @@ _scrub ctrlCommit 0;
     case "edges": {"STR_PMCI_PLACE"};
     case "clean": {"STR_PMCI_COVER"};
     case "track": {"STR_PMCI_STRIKE"};
+    case "safe": {"STR_PMCI_DIAL_SET"};
+    case "terminal": {"STR_PMCI_TERM_ENTER"};
     default {"STR_PMCI_HOLD"};
 });
+// The terminal's memory rows; PMCI_fnc_boardDraw writes them.
+if (_game == "terminal") then {
+    private _list = _group controlsGroupCtrl PMCI_IDC_TERM_LIST;
+    lbClear _list;
+    {_list lbAdd ""} forEach ((PMCI_board get "state") get "rows");
+    PMCI_board set ["termShown", -1];
+    ctrlSetFocus _list;
+};
 // Names of the keys set in CBA's controls, for the hints.
 PMCI_board set ["keys", [["press"] call PMCI_fnc_keyName, ["fix"] call PMCI_fnc_keyName]];
 (_display displayCtrl PMCI_IDC_ICON) ctrlSetText format ["\pmc_interactions\data\icon_%1_ca.paa", _game];
@@ -76,5 +88,7 @@ PMCI_board set ["keys", [["press"] call PMCI_fnc_keyName, ["fix"] call PMCI_fnc_
     case "weld": {[1, 0.75, 0.3, 0.95]};
     case "diagnose": {[0.95, 0.55, 0.2, 0.95]};
     case "track": {[0.95, 0.55, 0.2, 0.95]};
+    case "lockpick": {[0.8, 0.82, 0.86, 0.95]};
+    case "safe": {[0.35, 0.85, 0.4, 0.95]};
     default {[0.9, 0.3, 0.25, 0.95]};
 });

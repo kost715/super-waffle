@@ -4,6 +4,9 @@ class RscButton;
 class RscProgress;
 class RscPicture;
 class RscControlsGroupNoScrollbars;
+class RscCombo;
+class RscEdit;
+class RscListBox;
 
 class PMCI_Text: RscText {
     sizeEx = safezoneH * 0.024;
@@ -151,6 +154,42 @@ class PMCI_RscBoard {
                     text = "$STR_PMCI_WHEEL_SWAP_BUTTON";
                     onButtonClick = "['swap'] call PMCI_fnc_boardEvent";
                 };
+                // Terminal game: the memory dump (a row is picked by a double click or the
+                // press key) and the terminal's answers, green on dark like an old screen.
+                class TermList: RscListBox {
+                    idc = PMCI_IDC_TERM_LIST;
+                    x = 0;
+                    y = 0;
+                    w = 0.1;
+                    h = 0.1;
+                    font = "EtelkaMonospacePro";
+                    sizeEx = safezoneH * 0.021;
+                    rowHeight = safezoneH * 0.022;
+                    colorBackground[] = {0, 0, 0, 0};
+                    colorText[] = {0.35, 1, 0.45, 1};
+                    colorSelect[] = {0.02, 0.1, 0.03, 1};
+                    colorSelect2[] = {0.02, 0.1, 0.03, 1};
+                    colorSelectBackground[] = {0.35, 1, 0.45, 0.9};
+                    colorSelectBackground2[] = {0.35, 1, 0.45, 0.9};
+                    colorDisabled[] = {0.2, 0.5, 0.25, 1};
+                    onLBSelChanged = "['select', _this select 1] call PMCI_fnc_boardEvent";
+                    onLBDblClick = "['pick', _this select 1] call PMCI_fnc_boardEvent";
+                };
+                class TermLog: RscStructuredText {
+                    idc = PMCI_IDC_TERM_LOG;
+                    x = 0;
+                    y = 0;
+                    w = 0.1;
+                    h = 0.1;
+                    size = safezoneH * 0.02;
+                    colorBackground[] = {0, 0, 0, 0};
+                    class Attributes {
+                        font = "EtelkaMonospacePro";
+                        color = "#5aff73";
+                        align = "left";
+                        shadow = 0;
+                    };
+                };
                 // Covers the whole scene while an abrasion is cleaned: held mouse = scrubbing.
                 class Scrub: PMCI_HitButton {
                     idc = PMCI_IDC_SCRUB;
@@ -220,6 +259,162 @@ class PMCI_RscBoard {
             PMCI_BOX(0.405, 0.74, 0.16, 0.045);
             text = "$STR_PMCI_CANCEL";
             onButtonClick = "['cancel'] call PMCI_fnc_boardEvent";
+        };
+    };
+};
+
+// Zeus module "Lock": lock type, difficulty, key or code (PMCI_fnc_lockSetup).
+class PMCI_Combo: RscCombo {
+    sizeEx = safezoneH * 0.022;
+};
+class PMCI_Edit: RscEdit {
+    sizeEx = safezoneH * 0.024;
+    colorBackground[] = {0, 0, 0, 0.6};
+};
+class PMCI_RscLockSetup {
+    idd = PMCI_IDD_LOCK;
+    movingEnable = 0;
+    onLoad = "['onLoad', _this select 0] call PMCI_fnc_lockSetup";
+    onUnload = "['onUnload'] call PMCI_fnc_lockSetup";
+    class controlsBackground {
+        class Back: PMCI_Text {
+            idc = -1;
+            PMCI_LOCK_BOX(0, 0, 0.3, 0.44);
+            colorBackground[] = {0.07, 0.08, 0.09, 0.94};
+        };
+    };
+    class controls {
+        class Title: PMCI_Text {
+            idc = PMCI_IDC_LOCK_TITLE;
+            PMCI_LOCK_BOX(0, 0, 0.3, 0.045);
+            colorBackground[] = {0.14, 0.26, 0.38, 0.95};
+            sizeEx = safezoneH * 0.026;
+            text = "";
+        };
+        class TypeLabel: PMCI_Text {
+            idc = -1;
+            PMCI_LOCK_BOX(0.01, 0.06, 0.1, 0.04);
+            text = "$STR_PMCI_LOCK_TYPE";
+        };
+        class Type: PMCI_Combo {
+            idc = PMCI_IDC_LOCK_TYPE;
+            PMCI_LOCK_BOX(0.11, 0.06, 0.18, 0.04);
+            onLBSelChanged = "['type'] call PMCI_fnc_lockSetup";
+        };
+        class LevelLabel: TypeLabel {
+            PMCI_LOCK_BOX(0.01, 0.11, 0.1, 0.04);
+            text = "$STR_PMCI_LOCK_LEVEL";
+        };
+        class Level: PMCI_Combo {
+            idc = PMCI_IDC_LOCK_LEVEL;
+            PMCI_LOCK_BOX(0.11, 0.11, 0.18, 0.04);
+        };
+        class KeyLabel: TypeLabel {
+            PMCI_LOCK_BOX(0.01, 0.16, 0.1, 0.04);
+            text = "$STR_PMCI_LOCK_KEY";
+        };
+        class Key: PMCI_Combo {
+            idc = PMCI_IDC_LOCK_KEY;
+            PMCI_LOCK_BOX(0.11, 0.16, 0.18, 0.04);
+        };
+        class CodeLabel: TypeLabel {
+            PMCI_LOCK_BOX(0.01, 0.21, 0.1, 0.04);
+            text = "$STR_PMCI_LOCK_CODE";
+        };
+        class Code: PMCI_Edit {
+            idc = PMCI_IDC_LOCK_CODE;
+            PMCI_LOCK_BOX(0.11, 0.21, 0.1, 0.04);
+            text = "";
+            maxChars = 6;
+        };
+        class Random: PMCI_Button {
+            idc = PMCI_IDC_LOCK_RANDOM;
+            PMCI_LOCK_BOX(0.215, 0.21, 0.075, 0.04);
+            text = "$STR_PMCI_LOCK_RANDOM";
+            onButtonClick = "['random'] call PMCI_fnc_lockSetup";
+        };
+        class Status: PMCI_Text {
+            idc = PMCI_IDC_LOCK_STATUS;
+            PMCI_LOCK_BOX(0.01, 0.27, 0.28, 0.1);
+            style = 16;
+            lineSpacing = 1;
+            colorText[] = {1, 0.75, 0.45, 1};
+            sizeEx = safezoneH * 0.02;
+            text = "";
+        };
+        // Not IDC 1: that would close the window before the code is checked.
+        class Done: PMCI_Button {
+            idc = -1;
+            PMCI_LOCK_BOX(0.01, 0.385, 0.135, 0.045);
+            text = "$STR_PMCI_LOCK_DONE_BUTTON";
+            onButtonClick = "['done'] call PMCI_fnc_lockSetup";
+        };
+        class Cancel: PMCI_Button {
+            idc = 2;
+            PMCI_LOCK_BOX(0.155, 0.385, 0.135, 0.045);
+            text = "$STR_PMCI_CANCEL";
+            onButtonClick = "closeDialog 2";
+        };
+    };
+};
+// Keypad of a code lock or safe (PMCI_fnc_lockKeypad).
+class PMCI_RscLockKeypad {
+    idd = PMCI_IDD_KEYPAD;
+    movingEnable = 0;
+    onLoad = "['onLoad', _this select 0] call PMCI_fnc_lockKeypad";
+    onUnload = "['onUnload'] call PMCI_fnc_lockKeypad";
+    class controlsBackground {
+        class Back: PMCI_Text {
+            idc = -1;
+            PMCI_PAD_BOX(0, 0, 0.2, 0.46);
+            colorBackground[] = {0.08, 0.09, 0.1, 0.95};
+        };
+    };
+    class controls {
+        class Title: PMCI_Text {
+            idc = -1;
+            PMCI_PAD_BOX(0, 0, 0.2, 0.04);
+            colorBackground[] = {0.14, 0.26, 0.38, 0.95};
+            text = "$STR_PMCI_LOCK_ENTER_CODE";
+        };
+        class Code: PMCI_Edit {
+            idc = PMCI_IDC_KEYPAD_CODE;
+            PMCI_PAD_BOX(0.01, 0.05, 0.18, 0.05);
+            font = "EtelkaMonospacePro";
+            sizeEx = safezoneH * 0.04;
+            colorText[] = {0.35, 1, 0.45, 1};
+            maxChars = 6;
+            text = "";
+        };
+        class Key1: PMCI_Button {
+            idc = -1;
+            PMCI_PAD_BOX(0.01, 0.11, 0.055, 0.06);
+            sizeEx = safezoneH * 0.032;
+            text = "1";
+            onButtonClick = "['digit', 1] call PMCI_fnc_lockKeypad";
+        };
+        class Key2: Key1 {PMCI_PAD_BOX(0.0725, 0.11, 0.055, 0.06); text = "2"; onButtonClick = "['digit', 2] call PMCI_fnc_lockKeypad";};
+        class Key3: Key1 {PMCI_PAD_BOX(0.135, 0.11, 0.055, 0.06); text = "3"; onButtonClick = "['digit', 3] call PMCI_fnc_lockKeypad";};
+        class Key4: Key1 {PMCI_PAD_BOX(0.01, 0.18, 0.055, 0.06); text = "4"; onButtonClick = "['digit', 4] call PMCI_fnc_lockKeypad";};
+        class Key5: Key1 {PMCI_PAD_BOX(0.0725, 0.18, 0.055, 0.06); text = "5"; onButtonClick = "['digit', 5] call PMCI_fnc_lockKeypad";};
+        class Key6: Key1 {PMCI_PAD_BOX(0.135, 0.18, 0.055, 0.06); text = "6"; onButtonClick = "['digit', 6] call PMCI_fnc_lockKeypad";};
+        class Key7: Key1 {PMCI_PAD_BOX(0.01, 0.25, 0.055, 0.06); text = "7"; onButtonClick = "['digit', 7] call PMCI_fnc_lockKeypad";};
+        class Key8: Key1 {PMCI_PAD_BOX(0.0725, 0.25, 0.055, 0.06); text = "8"; onButtonClick = "['digit', 8] call PMCI_fnc_lockKeypad";};
+        class Key9: Key1 {PMCI_PAD_BOX(0.135, 0.25, 0.055, 0.06); text = "9"; onButtonClick = "['digit', 9] call PMCI_fnc_lockKeypad";};
+        class KeyClear: Key1 {PMCI_PAD_BOX(0.01, 0.32, 0.055, 0.06); text = "C"; onButtonClick = "['clear'] call PMCI_fnc_lockKeypad";};
+        class Key0: Key1 {PMCI_PAD_BOX(0.0725, 0.32, 0.055, 0.06); text = "0"; onButtonClick = "['digit', 0] call PMCI_fnc_lockKeypad";};
+        class KeyBack: Key1 {PMCI_PAD_BOX(0.135, 0.32, 0.055, 0.06); text = "<"; onButtonClick = "['back'] call PMCI_fnc_lockKeypad";};
+        class Enter: PMCI_Button {
+            idc = -1;
+            PMCI_PAD_BOX(0.01, 0.395, 0.115, 0.05);
+            text = "$STR_PMCI_LOCK_ENTER";
+            onButtonClick = "['enter'] call PMCI_fnc_lockKeypad";
+        };
+        class Close: PMCI_Button {
+            idc = 2;
+            PMCI_PAD_BOX(0.13, 0.395, 0.06, 0.05);
+            text = "X";
+            onButtonClick = "closeDialog 2";
         };
     };
 };

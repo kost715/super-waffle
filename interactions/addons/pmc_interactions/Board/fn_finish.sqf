@@ -1,4 +1,5 @@
-// [success] -> nothing. Client. Ends the board and applies the result the ACE way.
+// [success] -> nothing. Client. Ends the board and applies the result the ACE way (a
+// lock: the server opens the box after a won hack).
 // Success: ACE's own success callback (a bandage, whatever the wound's game, with an
 // effectiveness from the play quality). Failure or giving up: the used item comes back, as on ACE's own failure,
 // and ACE's failure callback runs (CPR stops). A spare wheel is released either way.
@@ -15,27 +16,34 @@ private _game = _board get "game";
 private _quality = (_board get "state") get "quality";
 private _root = [configFile >> "ACE_Repair" >> "Actions", configFile >> "ace_medical_treatment_actions"] select ((_board get "kind") == "medical");
 (([_args select 3, _root] call PMCI_fnc_hookOf) param [1, []]) params ["", "", "", ["_successFn", ""], ["_failureFn", ""]];
-if ((_board get "kind") == "medical") then {
-    _args params ["", "", "", "", "_itemUser", "_usedItem"];
-    if (_success) then {
-        if ((_board getOrDefault ["action", _game]) == "bandage") then {
-            private _effect = missionNamespace getVariable ["PMCI_bandageEffect", 0.4];
-            _args set [7, 0.1 max (((1 - _effect) + _effect * 1.5 * _quality) min 1.5)];
-        };
-        [_successFn, _args] call PMCI_fnc_original;
-    } else {
-        if (!isNull _itemUser && {_usedItem != ""}) then {
-            if (isClass (configFile >> "CfgMagazines" >> _usedItem)) then {
-                [_itemUser, _usedItem, 1] call ace_common_fnc_adjustMagazineAmmo;
-            } else {
-                [_itemUser, _usedItem] call ace_common_fnc_addToInventory;
-            };
-        };
-        [_failureFn, _args] call PMCI_fnc_original;
+switch (_board get "kind") do {
+    case "lock": {
+        // A won hack asks the server to open the box; a lost one is only a failure.
+        if (_success) then {[_args select 0, _args select 1, "hack"] remoteExecCall ["PMCI_fnc_lockOpen", 2]};
     };
-} else {
-    if (_success) then {[_successFn, _args] call PMCI_fnc_original};
-    {[objNull, _x, false] call ace_common_fnc_claim} forEach (_args param [6, []]);
+    case "medical": {
+        _args params ["", "", "", "", "_itemUser", "_usedItem"];
+        if (_success) then {
+            if ((_board getOrDefault ["action", _game]) == "bandage") then {
+                private _effect = missionNamespace getVariable ["PMCI_bandageEffect", 0.4];
+                _args set [7, 0.1 max (((1 - _effect) + _effect * 1.5 * _quality) min 1.5)];
+            };
+            [_successFn, _args] call PMCI_fnc_original;
+        } else {
+            if (!isNull _itemUser && {_usedItem != ""}) then {
+                if (isClass (configFile >> "CfgMagazines" >> _usedItem)) then {
+                    [_itemUser, _usedItem, 1] call ace_common_fnc_adjustMagazineAmmo;
+                } else {
+                    [_itemUser, _usedItem] call ace_common_fnc_addToInventory;
+                };
+            };
+            [_failureFn, _args] call PMCI_fnc_original;
+        };
+    };
+    default {
+        if (_success) then {[_successFn, _args] call PMCI_fnc_original};
+        {[objNull, _x, false] call ace_common_fnc_claim} forEach (_args param [6, []]);
+    };
 };
 private _key = ["STR_PMCI_RESULT_FAIL", "STR_PMCI_RESULT_OK"] select _success;
 private _text = format [localize _key, localize ("STR_PMCI_GAME_" + _game), round (_quality * 100)];

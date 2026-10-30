@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mock-up of the four boards at 1920 x 1080 for review: board_preview.png.
+"""Mock-up of the boards at 1920 x 1080 for review: board_preview.png.
 
 Composites the PNG textures with the layout of ui.hpp / PMCI_fnc_boardLayout (safe zone
 taken as the whole screen). Fonts, buttons and the progress bar only approximate Arma's.
@@ -49,7 +49,7 @@ def button(d, rect, text, enabled=True):
     d.text((x + (w - tw) / 2, y + h / 2 - 12), text, font=font, fill=(255, 255, 255, 255) if enabled else (150, 150, 150, 255))
 
 
-def board(game, look, gauge, status, help_text, title, time, buttons):
+def board(game, look, gauge, status, help_text, title, time, buttons, texts=()):
     img = Image.new("RGBA", (SW, SH), (40, 44, 40, 255))
     d = ImageDraw.Draw(img)
     x, y, w, h = box(0, 0, 0.58, 0.8)
@@ -67,12 +67,17 @@ def board(game, look, gauge, status, help_text, title, time, buttons):
         sh, sw = ah, ah * 2
     ox, oy = ax + (aw - sw) / 2, ay + (ah - sh) / 2
     scene = Image.new("RGBA", (round(sw), round(sh)), (0, 0, 0, 0))
-    for name, (px, py, pw, ph) in look:
-        k = sw / 1024
+    k = sw / 1024
+    for name, (px, py, pw, ph), *turn in look:
         pic = tex(name).resize((round(pw * k), round(ph * k)), Image.LANCZOS)
+        if turn:  # ctrlSetAngle: clockwise about the centre, inside the control
+            pic = pic.rotate(-turn[0], resample=Image.BICUBIC)
         layer = Image.new("RGBA", scene.size, (0, 0, 0, 0))
         layer.paste(pic, (round(px * k), round(py * k)))  # paste clips, like the controls group
         scene.alpha_composite(layer)
+    mono = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", round(15 * k / 0.9))
+    for px, py, text, color in texts:  # the terminal's list and answers
+        ImageDraw.Draw(scene).text((round(px * k), round(py * k)), text, font=mono, fill=color)
     img.alpha_composite(scene, (round(ox), round(oy)))
     d.text(box(0.015, 0.598, 0, 0)[:2], status, font=ImageFont.truetype(FONT, 22), fill=(255, 255, 255, 255))
     gx, gy, gw, gh = box(0.04, 0.64, 0.5, 0.05)
@@ -169,6 +174,24 @@ BOARDS = [
           ((0.5 - 6 / 80, 0.5 + 6 / 80), 0.0, 0.0175, (0.95, 0.55, 0.2, 0.95), 0.78), "Совместите звено. Промахов в запасе: 3",
           "Жмите Пробел, когда болтающееся звено совпадёт с гусеницей. Потом забейте\nпалец: жмите, когда стрелка в зелёной зоне.",
           "Ремонт гусеницы", 0.2, [(HOLD, "Ударить", True), (CANCEL, "Прекратить", True)]),
+    board("lockpick", [("lock_scene", (0, 0, 1024, 512)), ("lock_plug", (400, 188, 224, 224), 27), ("lock_pick", (288, 76, 448, 448), 90 - 55 + 27 + 2)],
+          (None, 0.3, 0.0125, (0.8, 0.82, 0.86, 0.95), None), "Поворот: 30%. Отмычек: 4. Сломано: 1  Отмычка гнётся!",
+          "Мышью двигайте отмычку, затем держите Пробел или кнопку мыши на замке, чтобы\nповернуть цилиндр. До конца он повернётся только в верном положении.",
+          "Взлом замка отмычкой", 0.25, [(CANCEL, "Прекратить", True)]),
+    board("terminal", [("terminal_scene", (0, 0, 1024, 512))], None, "Попытки: ■ ■ □ □",
+          "Один из кодов в дампе — код замка. Выберите строку и нажмите Пробел (или дважды\nщёлкните). Неверный код покажет, сколько цифр стоят на своих местах.",
+          "Взлом кодового замка", 0.35, [(HOLD, "Ввести", True), (CANCEL, "Прекратить", True)],
+          [(132, 64 + 24 * k, row, (90, 255, 115, 255) if k != 5 else (240, 115, 75, 255)) for k, row in enumerate([
+              "0xF4A0  !@#$%^&*-+=?/\\|", "0xF4AC  :;.,4719'_~!@#$", "0xF4B8  %^&*-+=?/\\|:;.", "0xF4C4  ,'_~(!@#)$%^&*",
+              "0xF4D0  -+=?/\\|:;.,'_~", "0xF4DC  !@#4711$%^&*-+", "0xF4E8  =?/\\|:;.,'_~!@", "0xF4F4  #$%^&*-+=1719?/",
+              "0xF500  \\|:;.,'_~!@#$%", "0xF50C  ^&*-+=?/\\|:;.,", "0xF518  '_~!@#$%^&*....", "0xF524  -+=?/\\|:;.,'_~",
+              "0xF530  9911!@#$%^&*-+", "0xF53C  =?/\\|:;.,'_~!@", "0xF548  #$%^[&*-]+=?/\\", "0xF554  |:;.,'_~2719!@"])] +
+          [(622, 64, "СЕРВИСНЫЙ ТЕРМИНАЛ", (90, 255, 115, 255)), (622, 88, "> 4711: отказ.", (90, 255, 115, 255)),
+           (622, 112, "  Совпадение 3/4", (90, 255, 115, 255)), (622, 136, "> Убран ложный код", (90, 255, 115, 255))]),
+    board("safe", [("safe_scene", (0, 0, 1024, 512)), ("safe_dial", (224, 80, 352, 352), 37 * 3.6), ("safe_lamp", (808, 120, 64, 64))],
+          ((1 - 2 / 12, 1), 0.78, 0.0175, (0.35, 0.85, 0.4, 0.95), 0.78), "Число 2 из 4. Диск: 37. Крутите влево (вниз). Ошибок осталось: 2",
+          "Тяните мышь вбок с зажатой кнопкой, чтобы крутить диск в указанную ниже сторону.\nКогда стрелка прибора в зелёной зоне, нажмите Пробел, чтобы зафиксировать число.",
+          "Вскрытие сейфа", 0.4, [(HOLD, "Зафиксировать", True), (CANCEL, "Прекратить", True)]),
 ]
 
 

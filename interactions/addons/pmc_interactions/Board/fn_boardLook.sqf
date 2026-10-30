@@ -6,6 +6,8 @@
 //   The later games reuse them: 11 track link, 12 splinted limb, 13 IV bruise / track pin,
 //   14 the tool at the mouse (swab, IV needle, suture needle, welding torch),
 //   6-10 diagnosis lights, 15-22 stitches / weld bead, 31 next stitch point
+//   The locks: 11 lock plug, 14 pick (lockpick); 5 dial, 13 listening device's lamp (safe);
+//   the terminal only has its screen, the rows are a list box
 //   depth: 0-1, how far the CPR hands are pushed down (PMCI_board "depth")
 //   hint: show which nut comes next (easy difficulty)
 //   wound type: ACE wound class of a bandaged wound ("" if unknown)
@@ -89,6 +91,17 @@ switch (_game) do {
         _look set [11, "track_link"];
         _look set [13, "track_pin"];
     };
+    case "lockpick": {
+        _look set [0, "lock_scene"];
+        _look set [11, "lock_plug"];
+        _look set [14, "lock_pick"];
+    };
+    case "safe": {
+        _look set [0, "safe_scene"];
+        _look set [5, "safe_dial"];
+        _look set [13, "safe_lamp"];
+    };
+    case "terminal": {_look set [0, "terminal_scene"]};
     case "wheel": {
         private _phase = _state get "phase";
         private _done = _state get "done";

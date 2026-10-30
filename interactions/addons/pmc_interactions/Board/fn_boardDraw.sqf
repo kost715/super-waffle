@@ -2,7 +2,7 @@
 // Client: shows the running game. The scene layers take their pictures from
 // PMCI_fnc_boardLook and their moving positions and opacity from PMCI_fnc_boardMarks; one
 // gauge (zone, fill, marker) serves the medical games; the wheel uses five click areas
-// over the nut pictures, the abrasion one area over the whole scene.
+// over the nut pictures, the abrasion one area over the whole scene, the terminal a list.
 if (isNil "PMCI_board") exitWith {};
 private _display = uiNamespace getVariable ["PMCI_display", displayNull];
 if (isNull _display) exitWith {};
@@ -32,9 +32,12 @@ private _visible = switch (_game) do {
     case "diagnose": {if ((_state get "phase") == "fix") then {_gauge + [PMCI_IDC_HOLD]} else {_wheel - [PMCI_IDC_SWAP]}};
     case "track": {_gauge + [PMCI_IDC_HOLD]};
     case "wheel": {if ((_state get "phase") == "swap") then {_wheel} else {_wheel - [PMCI_IDC_SWAP]}};
+    case "lockpick": {_progressOnly + [PMCI_IDC_SCRUB]};
+    case "safe": {_gauge + [PMCI_IDC_SCRUB, PMCI_IDC_HOLD]};
+    case "terminal": {[PMCI_IDC_TERM_LIST, PMCI_IDC_TERM_LOG, PMCI_IDC_HOLD]};
     default {[]};
 };
-{(_x call _ctrl) ctrlShow (_x in _visible)} forEach (_gauge + _wheel + [PMCI_IDC_HOLD, PMCI_IDC_FIX, PMCI_IDC_SCRUB]);
+{(_x call _ctrl) ctrlShow (_x in _visible)} forEach (_gauge + _wheel + [PMCI_IDC_HOLD, PMCI_IDC_FIX, PMCI_IDC_SCRUB, PMCI_IDC_TERM_LIST, PMCI_IDC_TERM_LOG]);
 // Pictures: only layers whose picture changed are touched.
 private _hint = (PMCI_board get "ease") > 1.3;
 private _scrubbing = PMCI_board getOrDefault ["scrubbing", false];
@@ -59,6 +62,7 @@ PMCI_board set ["look", _look];
         _layer ctrlCommit 0;
     };
     _layer ctrlSetTextColor [1, 1, 1, _alpha];
+    if (count _x > 3) then {_layer ctrlSetAngle [_x select 3, 0.5, 0.5]};
 } forEach ([_game, _state, [[], PMCI_board getOrDefault ["mouse", []]] select _scrubbing] call PMCI_fnc_boardMarks);
 // Place a horizontal span [from, to] (0..1 of the gauge) on one of the gauge controls.
 private _span = {
@@ -197,6 +201,55 @@ switch (_game) do {
             [PMCI_IDC_MARKER, (_state get "power") - 0.014, (_state get "power") + 0.014] call _span;
             _status = format [localize "STR_PMCI_STATUS_PIN", _state get "done", _state get "hits", (_state get "allowed") - (_state get "misses")];
         };
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "lockpick": {
+        [PMCI_IDC_FILL, 0, _state get "turn", 0.0125] call _span;
+        private _picks = _state get "picks";
+        _status = format [localize "STR_PMCI_STATUS_LOCKPICK", round ((_state get "turn") * 100), [str _picks, "—"] select (_picks < 0), _state get "broken"];
+        switch (true) do {
+            case (((_state get "t") - (_state get "brokeAt")) < 2): {_status = _status + format ["  <t color='#ff4a3a'>%1</t>", localize "STR_PMCI_STATUS_PICK_BROKE"]};
+            case (_state get "strained"): {_status = _status + format ["  <t color='#ff9a7a'>%1</t>", localize "STR_PMCI_STATUS_PICK_STRAIN"]};
+        };
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "safe": {
+        // The gauge is the listening device's needle; the zone is where the number may be set.
+        [PMCI_IDC_BAND, 1 - (_state get "tolerance") / (_state get "range"), 1] call _span;
+        [PMCI_IDC_FILL, 0, _state get "signal", 0.0175] call _span;
+        [PMCI_IDC_MARKER, (_state get "signal") - 0.014, (_state get "signal") + 0.014] call _span;
+        _status = format [localize "STR_PMCI_STATUS_SAFE", (_state get "next") + 1, count (_state get "numbers"), floor (_state get "dial"),
+            localize (["STR_PMCI_SAFE_UP", "STR_PMCI_SAFE_DOWN"] select ((_state get "next") % 2)), (_state get "allowed") - (_state get "mistakes")];
+        _time = (_state get "t") / (_state get "limit");
+    };
+    case "terminal": {
+        // Rows change only when a code is tried or removed or a bracket used.
+        private _list = PMCI_IDC_TERM_LIST call _ctrl;
+        private _log = _state get "log";
+        if ((PMCI_board getOrDefault ["termShown", -1]) != count _log) then {
+            PMCI_board set ["termShown", count _log];
+            {
+                _x params ["_kind", "_index"];
+                ((_state get "texts") select _forEachIndex) params ["_address", "_before", "_middle", "_after"];
+                private _gone = (_kind == "code" && {_index in (_state get "removed")}) || {_kind == "bracket" && {_index in (_state get "used")}};
+                if (_gone) then {_middle = toString ((toArray _middle) apply {46})};
+                _list lbSetText [_forEachIndex, format ["%1  %2%3%4", _address, _before, _middle, _after]];
+                _list lbSetColor [_forEachIndex, switch (true) do {
+                    case (_gone): {[0.2, 0.5, 0.25, 1]};
+                    case (_kind == "code" && {_index in (_state get "tried")}): {[0.95, 0.45, 0.3, 1]};
+                    default {[0.35, 1, 0.45, 1]};
+                }];
+            } forEach (_state get "rows");
+            private _lines = [localize "STR_PMCI_TERM_HEADER"];
+            {
+                _x params ["_kind", ["_code", ""], ["_likeness", 0]];
+                _lines pushBack ("&gt; " + format [localize ("STR_PMCI_TERM_" + _kind), _code, _likeness, count _code]);
+            } forEach (_log select [0 max (count _log - 7)]);
+            (PMCI_IDC_TERM_LOG call _ctrl) ctrlSetStructuredText parseText (_lines joinString "<br/>");
+        };
+        private _left = "";
+        for "_k" from 1 to (_state get "attempts") do {_left = _left + (["□ ", "■ "] select (_k <= (_state get "left")))};
+        _status = format [localize "STR_PMCI_STATUS_TERMINAL", _left];
         _time = (_state get "t") / (_state get "limit");
     };
     case "wheel": {
