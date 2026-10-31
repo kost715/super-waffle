@@ -32,7 +32,7 @@ private _visible = switch (_game) do {
     case "diagnose": {if ((_state get "phase") == "fix") then {_gauge + [PMCI_IDC_HOLD]} else {_wheel - [PMCI_IDC_SWAP]}};
     case "track": {_gauge + [PMCI_IDC_HOLD]};
     case "wheel": {if ((_state get "phase") == "swap") then {_wheel} else {_wheel - [PMCI_IDC_SWAP]}};
-    case "lockpick": {_progressOnly + [PMCI_IDC_SCRUB]};
+    case "lockpick": {_progressOnly + [PMCI_IDC_SCRUB] + ([[], [PMCI_IDC_FIX]] select (count (_state get "sweets") > 1))};
     case "safe": {_gauge + [PMCI_IDC_SCRUB, PMCI_IDC_HOLD]};
     case "terminal": {[PMCI_IDC_TERM_LIST, PMCI_IDC_TERM_LOG, PMCI_IDC_HOLD]};
     default {[]};
@@ -73,7 +73,9 @@ private _span = {
         safezoneW * PMCI_GAUGE_W * (_to - _from), safezoneH * (PMCI_GAUGE_H - 2 * _inset)];
     (_idc call _ctrl) ctrlCommit 0;
 };
-private _title = localize ("STR_PMCI_GAME_" + _game);
+// A game may play under another name (removing a wheel), with its own title and help.
+private _name = PMCI_board getOrDefault ["name", _game];
+private _title = localize ("STR_PMCI_GAME_" + _name);
 private _part = PMCI_board getOrDefault ["part", ""];
 private _subject = switch (true) do {
     case (_type != ""): {"STR_PMCI_WOUND_" + _type};
@@ -86,7 +88,7 @@ if (_subject != "") then {
 };
 (PMCI_IDC_TITLE call _ctrl) ctrlSetText _title;
 (PMCI_board getOrDefault ["keys", ["Space", "Enter"]]) params ["_pressKey", "_fixKey"];
-(PMCI_IDC_TEXT call _ctrl) ctrlSetStructuredText parseText format [localize ("STR_PMCI_HELP_" + _game), _pressKey, _fixKey];
+(PMCI_IDC_TEXT call _ctrl) ctrlSetStructuredText parseText format [localize ("STR_PMCI_HELP_" + _name), _pressKey, _fixKey];
 private _status = "";
 private _time = 0;
 switch (_game) do {
@@ -207,6 +209,9 @@ switch (_game) do {
         [PMCI_IDC_FILL, 0, _state get "turn", 0.0125] call _span;
         private _picks = _state get "picks";
         _status = format [localize "STR_PMCI_STATUS_LOCKPICK", round ((_state get "turn") * 100), [str _picks, "—"] select (_picks < 0), _state get "broken"];
+        if (count (_state get "sweets") > 1) then {
+            _status = format [localize "STR_PMCI_STATUS_PICK_ACTIVE", (_state get "active") + 1, _fixKey] + "  " + _status;
+        };
         switch (true) do {
             case (((_state get "t") - (_state get "brokeAt")) < 2): {_status = _status + format ["  <t color='#ff4a3a'>%1</t>", localize "STR_PMCI_STATUS_PICK_BROKE"]};
             case (_state get "strained"): {_status = _status + format ["  <t color='#ff9a7a'>%1</t>", localize "STR_PMCI_STATUS_PICK_STRAIN"]};
@@ -220,6 +225,9 @@ switch (_game) do {
         [PMCI_IDC_MARKER, (_state get "signal") - 0.014, (_state get "signal") + 0.014] call _span;
         _status = format [localize "STR_PMCI_STATUS_SAFE", (_state get "next") + 1, count (_state get "numbers"), floor (_state get "dial"),
             localize (["STR_PMCI_SAFE_UP", "STR_PMCI_SAFE_DOWN"] select ((_state get "next") % 2)), (_state get "allowed") - (_state get "mistakes")];
+        if (((_state get "t") - (_state get "blockedAt")) < 1) then {
+            _status = _status + format ["  <t color='#ff9a7a'>%1</t>", localize "STR_PMCI_STATUS_SAFE_BLOCKED"];
+        };
         _time = (_state get "t") / (_state get "limit");
     };
     case "terminal": {
@@ -240,7 +248,7 @@ switch (_game) do {
                     default {[0.35, 1, 0.45, 1]};
                 }];
             } forEach (_state get "rows");
-            private _lines = [localize "STR_PMCI_TERM_HEADER"];
+            private _lines = [localize "STR_PMCI_TERM_HEADER", "&gt; " + localize "STR_PMCI_TERM_INTRO"];
             {
                 _x params ["_kind", ["_code", ""], ["_likeness", 0]];
                 _lines pushBack ("&gt; " + format [localize ("STR_PMCI_TERM_" + _kind), _code, _likeness, count _code]);
@@ -262,6 +270,12 @@ switch (_game) do {
         _status = format [localize "STR_PMCI_STATUS_WHEEL", localize ("STR_PMCI_WHEEL_" + _phase), _state get "mistakes"];
         _time = if (_busy) then {1 - ((_state get "busyUntil") - (_state get "t")) / ((_state get "nutTime") max (_state get "swapTime"))} else {0};
     };
+};
+// A lock game that ended stays on screen for a moment with its result (PMCI_fnc_boardTick).
+if ((PMCI_board get "kind") == "lock" && {(_state get "status") != "running"}) then {
+    private _won = (_state get "status") == "success";
+    _status = format ["<t size='1.4' color='%1'>%2</t>", ["#ff6a5a", "#7aff8a"] select _won,
+        localize (["STR_PMCI_LOCK_LOST", "STR_PMCI_LOCK_WON_" + _game] select _won)];
 };
 (PMCI_IDC_STATUS call _ctrl) ctrlSetStructuredText parseText _status;
 (PMCI_IDC_TIME call _ctrl) progressSetPosition (0 max (_time min 1));

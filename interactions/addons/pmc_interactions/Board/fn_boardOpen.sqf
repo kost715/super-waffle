@@ -73,26 +73,25 @@ private _state = switch (_game) do {
         ["init", nil, [_spots select [0, [4, 6, 8] select _size], _ease / (["cleanScrub", 450] call _set), ["cleanLimit", 40] call _set,
             ["cleanCover", 1.5] call _set]] call PMCI_fnc_cleanModel
     };
-    case "wheel": {["init", nil, [["nutTime", 0.8] call _set, ["swapTime", 3] call _set]] call PMCI_fnc_wheelModel};
+    case "wheel": {["init", nil, [["nutTime", 0.8] call _set, ["swapTime", 3] call _set, _class == "RemoveWheel"]] call PMCI_fnc_wheelModel};
     case "iv": {
         // The vein drawn on the IV scene (scene pixels).
         ["init", nil, [[300, 262, 760, 238], (["ivTolerance", 9] call _set) * _ease, ["ivInsert", 2.5] call _set, ["ivLimit", 30] call _set,
             round ((["ivMisses", 2] call _set) * _ease), (["ivTremor", 6] call _set) / _ease]] call PMCI_fnc_ivModel
     };
     case "suture": {
-        // One stitch per bandaged wound and two more, 3 to 8, across the cut of the wound scene
-        // (x 232-792, y 256): the needle goes in above the line and out below it, and the
-        // points make the zigzag the needle is led along.
-        private _bandaged = (_target getVariable ["ace_medical_bandagedWounds", createHashMap]);
-        if !(_bandaged isEqualType createHashMap) then {_bandaged = createHashMap};
-        private _stitches = 3 max ((2 + count (_bandaged getOrDefault [toLower _part, []])) min 8);
+        // One stitch per bandaged wound, up to the CBA limit (PMCI_fnc_stitchCount), across the
+        // cut of the wound scene (x 232-792, y 256): the needle goes in above the line and out
+        // below it, and the points make the zigzag the needle is led along. The time limit
+        // is set for 5 stitches and grows with more.
+        private _stitches = 1 max ([_target, _part] call PMCI_fnc_stitchCount);
         private _points = [];
         for "_k" from 0 to _stitches - 1 do {
             private _cx = 232 + 560 * (_k + 0.5) / _stitches;
             _points append [[_cx - 6, 230], [_cx + 6, 282]];
         };
         ["init", nil, [_points, (["sutureTolerance", 14] call _set) * _ease, 20, (["sutureFast", 140] call _set) * _ease,
-            ["sutureLimit", 40] call _set]] call PMCI_fnc_sutureModel
+            (["sutureLimit", 40] call _set) * (1 max (_stitches / 5))]] call PMCI_fnc_sutureModel
     };
     case "splint": {
         ["init", nil, [(20 + random 12) * selectRandom [-1, 1], (["splintTolerance", 4] call _set) * _ease, ["splintHold", 2.5] call _set,
@@ -107,10 +106,16 @@ private _state = switch (_game) do {
         _state
     };
     case "weld": {
-        // The crack drawn on the hull plate scene (scene pixels).
-        ["init", nil, [[[200, 262], [330, 250], [460, 268], [590, 248], [720, 264], [824, 252]], (["weldTolerance", 14] call _set) * _ease,
+        // One of the cracks, picked at random, with its hull plate picture. The time limit
+        // is set for a seam of 650 px and grows with the length of the crack.
+        private _seams = call PMCI_fnc_weldSeams;
+        private _variant = floor random count _seams;
+        private _state = ["init", nil, [_seams select _variant, (["weldTolerance", 14] call _set) * _ease,
             (["weldSlow", 35] call _set) / _ease, (["weldFast", 160] call _set) * _ease, ["weldLimit", 40] call _set,
-            (["weldHeat", 0.6] call _set) / _ease]] call PMCI_fnc_weldModel
+            (["weldHeat", 0.6] call _set) / _ease]] call PMCI_fnc_weldModel;
+        _state set ["limit", (_state get "limit") * (1 max ((_state get "total") / 650))];
+        _state set ["variant", _variant + 1];
+        _state
     };
     case "track": {
         private _half = (["trackZone", 0.16] call _set) / 2 * _ease;
@@ -119,10 +124,14 @@ private _state = switch (_game) do {
             round ((["trackMisses", 3] call _set) * _ease)]] call PMCI_fnc_trackModel
     };
     case "lockpick": {
-        // The sweet spot is somewhere on the pick's half circle, away from its ends.
+        // The sweet spots are somewhere on the picks' half circle, away from its ends; two
+        // picks have theirs well apart.
         private _class = ["classic"] call PMCI_fnc_lockTool;
-        ["init", nil, [15 + random 150, (["lockpickZone", 5] call _set) * _ease, 45, 1.2, (["lockpickLife", 1.2] call _set) * _ease,
-            [[_unit, _class] call PMCI_fnc_itemCount, -1] select (_class == ""), ["lockpickLimit", 90] call _set]] call PMCI_fnc_lockpickModel
+        private _sweets = [15 + random 150];
+        if (([_level] call PMCI_fnc_lockPins) > 1) then {_sweets pushBack (((_sweets select 0) - 15 + 40 + random 70) % 150 + 15)};
+        ["init", nil, [_sweets, (["lockpickZone", 5] call _set) * _ease, 45, (["lockpickSpeed", 0.6] call _set) * _ease,
+            (["lockpickLife", 1.2] call _set) * _ease, [[_unit, _class] call PMCI_fnc_itemCount, -1] select (_class == ""),
+            ["lockpickLimit", 90] call _set]] call PMCI_fnc_lockpickModel
     };
     case "terminal": {
         // As many digits as the lock's code; fewer candidates and more brackets when easy.
@@ -140,12 +149,13 @@ private _state = switch (_game) do {
             _last = (_last + 20 + floor random 60) % 100;
             _numbers pushBack _last;
         };
-        ["init", nil, [_numbers, (["safeTolerance", 2] call _set) * _ease, 12, 0.06, ["safeLimit", 90] call _set,
-            round ((["safeMistakes", 2] call _set) * _ease)]] call PMCI_fnc_safeModel
+        ["init", nil, [_numbers, (["safeTolerance", 2] call _set) * _ease, 12 * _ease, 0.06, ["safeLimit", 90] call _set,
+            round ((["safeMistakes", 2] call _set) * _ease), (["safeNoise", 0.12] call _set) / _ease]] call PMCI_fnc_safeModel
     };
 };
 PMCI_board = createHashMapFromArray [["game", _game], ["action", _action], ["wound", _wound], ["args", _args], ["kind", _kind], ["state", _state],
     ["ease", _ease], ["last", diag_tickTime], ["depth", 0], ["handler", -1]];
+if (_class == "RemoveWheel") then {PMCI_board set ["name", "wheelOff"]};
 if (_kind == "repair" && {_game in ["diagnose", "weld"]}) then {PMCI_board set ["part", [_target, _part] call PMCI_fnc_partOf]};
 // A treatment started from ACE's medical menu reopens the menu right after it (setting
 // "open after treatment"), which closes this board. Hold that back; PMCI_fnc_finish

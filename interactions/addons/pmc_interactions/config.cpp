@@ -9,7 +9,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
-        version = "0.6.0";
+        version = "0.7.0";
     };
 };
 
@@ -38,6 +38,7 @@ class CfgFunctions {
             class repairGame {};
             class partOf {};
             class stitch {};
+            class stitchCount {};
             class stitchProgress {};
             class check {postInit = 1;};
         };
@@ -55,6 +56,7 @@ class CfgFunctions {
             class splintModel {};
             class diagnoseModel {};
             class weldModel {};
+            class weldSeams {};
             class trackModel {};
             class lockpickModel {};
             class terminalModel {};
@@ -74,6 +76,7 @@ class CfgFunctions {
             class lockNotify {};
             class lockKeys {};
             class lockTool {};
+            class lockPins {};
             class codeValid {};
             class itemCount {};
             class itemName {};
@@ -101,23 +104,29 @@ class CfgFunctions {
 };
 
 // Taken-over ACE actions: a short preparation bar, then the game (PMCI_fnc_plays), or
-// ACE's own time and result. Inheritance is declared exactly as in ACE.
+// ACE's own time and result. Inheritance is declared exactly as in ACE. Both times are
+// set: ACE takes "treatmentTimeTrained" for a medic whenever the class has one (another
+// mod may add it), and its own time would come before the game.
 class ace_medical_treatment_actions {
     class BasicBandage;
     class FieldDressing: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
     class PackingBandage: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
     class ElasticBandage: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
     class QuikClot: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
     class ApplyTourniquet: BasicBandage {
@@ -127,6 +136,7 @@ class ace_medical_treatment_actions {
     };
     class CPR: BasicBandage {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
     };
     class Splint: BasicBandage {
@@ -143,6 +153,7 @@ class ace_medical_treatment_actions {
     // ACE stitches during its bar: the progress callback holds that back while a game will follow.
     class SurgicalKit: FieldDressing {
         treatmentTime = "PMCI_fnc_timeNormal";
+        treatmentTimeTrained = "PMCI_fnc_timeTrained";
         callbackSuccess = "PMCI_fnc_treatmentSuccess";
         callbackProgress = "PMCI_fnc_stitchProgress";
     };
@@ -166,6 +177,9 @@ class ACE_Repair {
     class Actions {
         class ReplaceWheel {
             repairingTime = "PMCI_fnc_repairTime";
+            callbackSuccess = "PMCI_fnc_repairSuccess";
+        };
+        class RemoveWheel: ReplaceWheel {
             callbackSuccess = "PMCI_fnc_repairSuccess";
         };
         // RemoveTrack and FullRepair are ACE's own: PMCI_fnc_repairTime gives them ACE's time.

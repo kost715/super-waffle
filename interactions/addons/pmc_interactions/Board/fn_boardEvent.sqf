@@ -37,7 +37,7 @@ switch (_event) do {
             PMCI_board set ["spaceDown", true];
             true
         };
-        if (_game == "tourniquet" && {["fix", _key, [_shift, _ctrl, _alt]] call PMCI_fnc_keyIs}) exitWith {["fix", _state] call _model; true};
+        if (_game in ["tourniquet", "lockpick"] && {["fix", _key, [_shift, _ctrl, _alt]] call PMCI_fnc_keyIs}) exitWith {["fix", _state] call _model; true};
         false
     };
     case "keyUp": {

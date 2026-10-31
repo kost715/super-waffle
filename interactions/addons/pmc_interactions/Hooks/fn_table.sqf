@@ -16,7 +16,9 @@ PMCI_hookTable = createHashMapFromArray [
     // ACE stitches during its bar and has no success callback: PMCI_fnc_stitch does the stitching.
     ["SurgicalKit", ["suture", "ace_medical_treatment_fnc_getStitchTime", "", "PMCI_fnc_stitch", ""]],
     ["ReplaceWheel", ["wheel", "ace_repair_wheelChangeTime", "", "ace_repair_fnc_doReplaceWheel", ""]],
-    // A component repair is a diagnosis or, on the hull, a weld (PMCI_fnc_repairGame).
+    // Removing a wheel is the same game, loosening the nuts only.
+    ["RemoveWheel", ["wheel", "ace_repair_wheelChangeTime", "", "ace_repair_fnc_doRemoveWheel", ""]],
+    // A component repair is, on the hull, a weld (PMCI_fnc_repairGame); elsewhere ACE's bar.
     ["MiscRepair", ["repair", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doRepair", ""]],
     ["RepairTrack", ["track", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doRepairTrack", ""]],
     ["ReplaceTrack", ["track", "ace_repair_miscRepairTime", "", "ace_repair_fnc_doReplaceTrack", ""]]

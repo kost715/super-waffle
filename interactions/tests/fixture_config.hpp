@@ -32,10 +32,7 @@ class ace_medical_treatment_actions {
 class ACE_Repair {
     class Actions {
         class ReplaceWheel {};
-        class RemoveWheel: ReplaceWheel {
-            TEST_parent = "ReplaceWheel";
-            callbackSuccess = "ace_repair_fnc_doRemoveWheel";
-        };
+        class RemoveWheel: ReplaceWheel {TEST_parent = "ReplaceWheel";};
         class MiscRepair: ReplaceWheel {TEST_parent = "ReplaceWheel";};
         class RepairTrack: MiscRepair {TEST_parent = "MiscRepair";};
         class RemoveTrack: MiscRepair {

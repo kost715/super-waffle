@@ -28,6 +28,13 @@ if (_game == "lockpick" && {(_state get "broken") > (PMCI_board getOrDefault ["u
     [(PMCI_board get "args") select 0, ["classic"] call PMCI_fnc_lockTool] call PMCI_fnc_itemTake;
 };
 PMCI_board set ["depth", 0 max ((PMCI_board get "depth") - _dt * 3)];
+// A lock game that ended stays open 1.5 s to show its result, whatever happens meanwhile.
+if ((PMCI_board get "kind") == "lock" && {(_state get "status") != "running"}) exitWith {
+    private _closeAt = PMCI_board getOrDefault ["closeAt", -1];
+    if (_closeAt < 0) then {PMCI_board set ["closeAt", _now + 1.5]};
+    if (_closeAt >= 0 && {_now >= _closeAt}) exitWith {[(_state get "status") == "success"] call PMCI_fnc_finish};
+    call PMCI_fnc_boardDraw;
+};
 if !(call PMCI_fnc_boardValid) exitWith {[false] call PMCI_fnc_finish};
 if ((_state get "status") != "running") exitWith {[(_state get "status") == "success"] call PMCI_fnc_finish};
 call PMCI_fnc_boardDraw;

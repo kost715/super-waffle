@@ -1,14 +1,15 @@
 // [mode, state, value] -> state. Changing a wheel: loosen the five nuts in a star (every
-// second nut, starting anywhere), swap the wheel, tighten them in a star again. Each nut
-// takes the nut time; a wrong nut costs the same time and counts as a mistake.
-//   "init" value [nut time s, swap time s]
+// second nut, starting anywhere), swap the wheel, tighten them in a star again. Removing
+// a wheel ends once the nuts are loose. Each nut takes the nut time; a wrong nut costs
+// the same time and counts as a mistake.
+//   "init" value [nut time s, swap time s, remove only]
 //   "tick" value seconds;  "nut" value index 0-4 around the hub;  "swap"
 params ["_mode", "_state", "_value"];
 private _busy = {(_state get "t") < (_state get "busyUntil")};
 switch (_mode) do {
     case "init": {
-        _value params ["_nutTime", "_swapTime"];
-        _state = createHashMapFromArray [["t", 0], ["nutTime", _nutTime], ["swapTime", _swapTime], ["phase", "loosen"], ["start", -1],
+        _value params ["_nutTime", "_swapTime", ["_remove", false]];
+        _state = createHashMapFromArray [["t", 0], ["nutTime", _nutTime], ["swapTime", _swapTime], ["remove", _remove], ["phase", "loosen"], ["start", -1],
             ["step", 0], ["mistakes", 0], ["busyUntil", 0], ["done", []], ["status", "running"], ["quality", 0]];
     };
     case "tick": {
@@ -27,7 +28,7 @@ switch (_mode) do {
         (_state get "done") pushBack _value;
         _state set ["step", (_state get "step") + 1];
         if ((_state get "step") == 5) then {
-            _state set ["phase", ["done", "swap"] select ((_state get "phase") == "loosen")];
+            _state set ["phase", ["done", "swap"] select ((_state get "phase") == "loosen" && {!(_state get "remove")})];
             _state set ["step", 0];
             _state set ["done", []];
         };

@@ -952,14 +952,13 @@ def splint_scene():
     return c.image()
 
 
-def splint_limb(frame):
-    """The broken lower forearm and hand, turned by (frame - 3) x 10 degrees about (0, 256)."""
-    angle = (frame - 3) * 10
-    c = Canvas(512, 512)
+def splint_limb():
+    """The broken lower forearm and hand, straight to the right of the break at the centre
+    (512, 512) of the picture; the board turns the picture about its centre."""
+    c = Canvas(1024, 1024)
     x, y = grid(c)
-    a = math.radians(angle)
-    u = x * math.cos(a) + (y - 256) * math.sin(a)
-    v = -x * math.sin(a) + (y - 256) * math.cos(a)
+    u = x - 512
+    v = y - 512
     half = 78 * (1 - 0.22 * np.clip(u / 330, 0, 1))
     vv = v / half
     fore = ((np.abs(vv) < 1) & (u > -6) & (u < 340)).astype(np.float32)
@@ -1048,11 +1047,20 @@ def diag_light(ok):
     return c.image()
 
 
-WELD_SEAM = [(200, 262), (330, 250), (460, 268), (590, 248), (720, 264), (824, 252)]  # PMCI_fnc_boardOpen
+# The cracks of the hull patch game, the same as PMCI_fnc_weldSeams (checked by check_interactions.py).
+WELD_SEAMS = [
+    [(170, 180), (260, 330), (350, 170), (440, 340), (530, 180), (620, 330), (710, 170), (800, 320), (860, 230)],
+    [(160, 330), (300, 330), (300, 180), (470, 180), (470, 350), (640, 350), (640, 200), (780, 200), (780, 320), (870, 320)],
+    [(190, 256), (198, 214), (222, 178), (258, 154), (300, 146), (342, 154), (378, 178), (402, 214), (410, 256), (418, 298), (442, 334),
+     (478, 358), (520, 366), (562, 358), (598, 334), (622, 298), (630, 256), (760, 256), (760, 140), (870, 140)],
+    [(170, 150), (420, 150), (420, 300), (428, 342), (452, 378), (488, 402), (530, 410), (572, 402), (608, 378), (632, 342), (640, 300),
+     (690, 190), (740, 320), (790, 190), (850, 300)],
+]
 
 
-def weld_scene():
-    """A painted hull plate with rivets and a crack along WELD_SEAM."""
+def weld_scene(variant):
+    """A painted hull plate with rivets and a crack along WELD_SEAMS[variant - 1]."""
+    seam = WELD_SEAMS[variant - 1]
     c = Canvas(1024, 512)
     x, y = grid(c)
     plate = material("Metal041A", c.w, c.h, S(400), tint=(110, 114, 82), tint_mix=0.85, contrast=0.6)
@@ -1066,7 +1074,7 @@ def weld_scene():
         metal_part(c, rivets, (100, 102, 78), metal=0.3, height=0.8)
     # The crack: dark, jagged, scorched and rusty around it.
     d = np.full((c.h, c.w), 1e9, np.float32)
-    for (ax, ay), (bx, by) in zip(WELD_SEAM, WELD_SEAM[1:]):
+    for (ax, ay), (bx, by) in zip(seam, seam[1:]):
         t = np.clip(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2), 0, 1)
         d = np.minimum(d, np.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)))
     jag = d + noise(c.w, c.h, 412, S(3)) * 3
@@ -1078,16 +1086,17 @@ def weld_scene():
 
 
 def weld_bead():
-    """A piece of weld bead (stretched along the seam): rippled, cooling from orange."""
-    c = Canvas(256, 64)
+    """A piece of weld bead across the middle of a square picture (turned along the seam):
+    rippled, cooling from orange."""
+    c = Canvas(128, 128)
     x, y = grid(c)
-    v = (y - 32) / 22
+    v = (y - 64) / 24
     m = blur((np.abs(v) < 1).astype(np.float32), S(1))
-    ripples = np.sin(x * 0.35 - np.abs(v) * 2.5) * 0.08
+    ripples = np.sin(x * 0.7 - np.abs(v) * 2.5) * 0.08
     h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) * 0.6 + ripples
-    steel = material("Metal046A", c.w, c.h, S(80))
+    steel = material("Metal046A", c.w, c.h, S(40))
     steel["color"] = steel["color"] * 0.7 + np.array([0.08, 0.05, 0.02], np.float32)
-    lit = shade(steel, h * m, strength=S(10), metal=0.8, spec=0.6)
+    lit = shade(steel, h * m, strength=S(8), metal=0.8, spec=0.6)
     heat = np.clip(1 - np.abs(v) * 1.2, 0, 1) * 0.35
     lit = lit * (1 - heat[:, :, None]) + np.array([1.0, 0.45, 0.1], np.float32) * heat[:, :, None]
     c.put(np.clip(lit, 0, 1), m)

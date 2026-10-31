@@ -6,7 +6,7 @@
 //   The later games reuse them: 11 track link, 12 splinted limb, 13 IV bruise / track pin,
 //   14 the tool at the mouse (swab, IV needle, suture needle, welding torch),
 //   6-10 diagnosis lights, 15-22 stitches / weld bead, 31 next stitch point
-//   The locks: 11 lock plug, 14 pick (lockpick); 5 dial, 13 listening device's lamp (safe);
+//   The locks: 11 lock plug, 14 and 13 picks (lockpick); 5 dial, 13 listening device's lamp (safe);
 //   the terminal only has its screen, the rows are a list box
 //   depth: 0-1, how far the CPR hands are pushed down (PMCI_board "depth")
 //   hint: show which nut comes next (easy difficulty)
@@ -57,7 +57,8 @@ switch (_game) do {
     };
     case "suture": {
         _look set [0, "wound_cut"];
-        for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {_look set [15 + _k, "suture_stitch"]};
+        // Stitches 1-8 on layers 15-22, 9 and 10 on the nut layers 6-7.
+        for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {_look set [[15 + _k, _k - 2] select (_k > 7), "suture_stitch"]};
         if ((_state get "status") == "running") then {_look set [31, "suture_point"]};
         // The points after the next one, faint: the way the needle goes.
         for "_k" from 1 to 8 do {
@@ -67,8 +68,7 @@ switch (_game) do {
     };
     case "splint": {
         _look set [0, "splint_scene"];
-        // Seven frames of the broken part, -30 to 30 degrees in steps of 10.
-        _look set [12, format ["splint_limb_%1", 0 max ((round ((_state get "angle") / 10) + 3) min 6)]];
+        _look set [12, "splint_limb"];
     };
     case "diagnose": {
         _look set [0, "repair_engine"];
@@ -82,8 +82,8 @@ switch (_game) do {
         } forEach (_state get "tested");
     };
     case "weld": {
-        _look set [0, "weld_scene"];
-        for "_k" from 0 to 7 do {if ((_state get "covered") > _k / 8) then {_look set [15 + _k, "weld_bead"]}};
+        _look set [0, format ["weld_scene_%1", _state getOrDefault ["variant", 1]]];
+        for "_k" from 0 to 15 do {if ((_state get "covered") >= (_k + 1) / 16) then {_look set [15 + _k, "weld_bead"]}};
         _look set [14, "weld_torch"];
     };
     case "track": {
@@ -95,6 +95,7 @@ switch (_game) do {
         _look set [0, "lock_scene"];
         _look set [11, "lock_plug"];
         _look set [14, "lock_pick"];
+        if (count (_state get "sweets") > 1) then {_look set [13, "lock_pick"]};
     };
     case "safe": {
         _look set [0, "safe_scene"];
@@ -107,10 +108,13 @@ switch (_game) do {
         private _done = _state get "done";
         private _next = ((_state get "start") + 2 * (_state get "step")) % 5;
         private _showNext = _hint && {_phase in ["loosen", "tighten"]} && {(_state get "step") > 0};
-        _look set [5, ["wheel_old", "wheel_new"] select (_phase in ["tighten", "done"])];
+        // Removing a wheel: the old one stays on, its nuts end up loose.
+        private _removed = (_state getOrDefault ["remove", false]) && {_phase == "done"};
+        _look set [5, ["wheel_old", "wheel_new"] select (_phase in ["tighten", "done"] && {!(_state getOrDefault ["remove", false])})];
         for "_i" from 0 to 4 do {
             _look set [6 + _i, switch (true) do {
                 case (_phase == "swap"): {"wheel_nut_loose"};
+                case (_removed): {"wheel_nut_loose"};
                 case (_phase == "done"): {"wheel_nut_tight"};
                 case (_i in _done): {["wheel_nut_loose", "wheel_nut_done"] select (_phase == "tighten")};
                 case (_showNext && {_i == _next}): {"wheel_nut_next"};

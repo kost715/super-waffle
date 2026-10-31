@@ -23,7 +23,8 @@ TEST_fnc_assert = {
     ["Board", "keysOf"], ["Board", "keyIs"], ["Board", "keyName"],
     ["Games", "lockpickModel"], ["Games", "terminalModel"], ["Games", "safeModel"], ["Lock", "lockSet"], ["Lock", "lockClear"], ["Lock", "lockApply"],
     ["Lock", "lockActions"], ["Lock", "lockOpen"], ["Lock", "lockHack"], ["Lock", "lockNotify"], ["Lock", "lockKeys"], ["Lock", "lockTool"],
-    ["Lock", "codeValid"], ["Lock", "itemCount"], ["Lock", "itemName"], ["Lock", "itemTake"], ["Lock", "terminalDump"]];
+    ["Lock", "codeValid"], ["Lock", "itemCount"], ["Lock", "itemName"], ["Lock", "itemTake"], ["Lock", "terminalDump"],
+    ["Games", "weldSeams"], ["Hooks", "stitchCount"], ["Lock", "lockPins"]];
 TEST_mouse = [0, 0];
 PMCI_fnc_boardMouse = {+TEST_mouse};
 PMCI_fnc_boardDraw = {};
@@ -46,9 +47,17 @@ ace_medical_treatment_treatmentTimeTrainedSplint = 5;
 ace_medical_treatment_fnc_getStitchTime = {10};
 ace_repair_miscRepairTime = 15;
 TEST_stitchable = 0;
+// As ACE: removes the given bandaged wound entry, or the last one, from the patient's list.
 ace_medical_treatment_fnc_stitchWound = {
+    params ["_patient", "_part", ["_wound", []]];
     TEST_calls pushBack ["stitchWound", +_this];
-    if (TEST_stitchable > 0) then {TEST_stitchable = TEST_stitchable - 1; true} else {false}
+    if (TEST_stitchable <= 0) exitWith {false};
+    private _list = [_patient getVariable ["ace_medical_bandagedWounds", createHashMap], [_part, []]] call TEST_fnc_getDefault;
+    private _at = if (_wound isEqualTo []) then {count _list - 1} else {_list find _wound};
+    if (_at < 0) exitWith {false};
+    _list deleteAt _at;
+    TEST_stitchable = TEST_stitchable - 1;
+    true
 };
 TEST_sutureUser = objNull;
 ace_medical_treatment_fnc_useItem = {TEST_calls pushBack ["useItem", +_this]; [TEST_sutureUser, "ACE_suture"]};
@@ -94,8 +103,9 @@ call TEST_fnc_fresh;
 
 // --- Settings -----------------------------------------------------------------------
 private _names = TEST_settings apply {_x select 0};
-[count TEST_settings == 87 && {"PMCI_enable_wheel" in _names} && {"PMCI_lockKey5" in _names} && {"PMCI_safeItem" in _names} && {"PMCI_terminalAttempts" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
-    && {"PMCI_enable_track" in _names} && {"PMCI_ivLimit" in _names}
+[count TEST_settings == 86 && {"PMCI_enable_wheel" in _names} && {"PMCI_lockKey5" in _names} && {"PMCI_safeItem" in _names} && {"PMCI_terminalAttempts" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
+    && {"PMCI_enable_track" in _names} && {"PMCI_ivLimit" in _names} && {!("PMCI_enable_diagnose" in _names)} && {"PMCI_sutureMax" in _names}
+    && {"PMCI_lockpickTwo" in _names} && {"PMCI_lockpickSpeed" in _names} && {"PMCI_safeNoise" in _names}
     && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
     "settings: difficulty, preparation bar, each game on/off plus its tuning, the locks' keys, tools and tuning, forced by the server"] call TEST_fnc_assert;
 [PMCI_difficulty == 1 && {PMCI_prepTime == 1} && {PMCI_cprDuration == 15} && {PMCI_enable_bandage}, "defaults: normal, 1 s preparation, 15 s CPR, all games on"] call TEST_fnc_assert;
@@ -196,9 +206,14 @@ private _turnTreat = [TEST_medic, TEST_patient, "LeftLeg", "ApplyTourniquet"];
 [(_turnTreat call PMCI_fnc_timeNormal) == 7 && {(_turnTreat call PMCI_fnc_timeTrained) == 4}, "ACE's normal and trained tourniquet times are kept apart"] call TEST_fnc_assert;
 PMCI_enable_tourniquet = true;
 [([TEST_medic, objNull, "HitLFWheel", "ReplaceWheel"] call PMCI_fnc_repairTime) == 1 && {
-    ([TEST_medic, objNull, "HitLFWheel", "RemoveWheel"] call PMCI_fnc_repairTime) == 10} && {
+    ([TEST_medic, objNull, "HitLFWheel", "RemoveWheel"] call PMCI_fnc_repairTime) == 1} && {
     ([TEST_ai, objNull, "HitLFWheel", "ReplaceWheel"] call PMCI_fnc_repairTime) == 10},
-    "wheel change: preparation bar for the player; removing a wheel and AI keep ACE's time"] call TEST_fnc_assert;
+    "wheel change and removal: preparation bar for the player; AI keeps ACE's time"] call TEST_fnc_assert;
+private _dressing = configFile >> "ace_medical_treatment_actions" >> "FieldDressing";
+[getText (_dressing >> "treatmentTimeTrained") == "PMCI_fnc_timeTrained"
+    && {getText (configFile >> "ace_medical_treatment_actions" >> "CPR" >> "treatmentTimeTrained") == "PMCI_fnc_timeTrained"}
+    && {([TEST_medic, TEST_patient, "LeftArm", "FieldDressing"] call PMCI_fnc_timeTrained) == 1},
+    "a trained medic's bandage gets the short preparation bar too (ACE takes the trained time then)"] call TEST_fnc_assert;
 
 // --- Treatment results ----------------------------------------------------------------------
 call TEST_fnc_fresh;
@@ -301,7 +316,12 @@ TEST_calls = [];
 [count ("ace_repair_fnc_doReplaceWheel" call TEST_called) == 1 && {("ace_common_fnc_claim" call TEST_called) isEqualTo []}, "an AI's wheel change is done by ACE at once"] call TEST_fnc_assert;
 TEST_calls = [];
 [TEST_medic, _car, "HitLFWheel", "RemoveWheel", [], [], []] call PMCI_fnc_repairSuccess;
-[count ("ace_repair_fnc_doReplaceWheel" call TEST_called) == 1 && {isNil "PMCI_board"}, "removing a wheel keeps ACE's behaviour"] call TEST_fnc_assert;
+private _off = PMCI_board get "state";
+private _offName = PMCI_board get "name";
+{["nut", _x] call PMCI_fnc_boardEvent; ["tick", _off, 1] call PMCI_fnc_wheelModel} forEach [0, 2, 4, 1, 3];
+call PMCI_fnc_boardTick;
+[(_off get "phase") == "done" && {_offName == "wheelOff"} && {count ("ace_repair_fnc_doRemoveWheel" call TEST_called) == 1} && {("ace_repair_fnc_doReplaceWheel" call TEST_called) isEqualTo []} && {isNil "PMCI_board"},
+    "removing a wheel: the nuts are loosened in a star, then ACE takes the wheel off"] call TEST_fnc_assert;
 
 // --- Board pictures ---------------------------------------------------------------------------------
 // Layers: scene, hands, beat, windlass, gauze, wheel, nut 0-4, then the wound games' 21.
@@ -610,6 +630,16 @@ _iv = ["init", nil, [[0, 100, 400, 100], 10, 1, 20, 0, 0]] call PMCI_fnc_ivModel
 [_iv, 0.05] call TEST_ivTicks;
 [(_iv get "status") == "fail", "one miss more than allowed fails"] call TEST_fnc_assert;
 _iv = ["init", nil, [[0, 100, 400, 100], 10, 1, 20, 1, 6]] call PMCI_fnc_ivModel;
+["mouse", _iv, [200, 104, 0, true]] call PMCI_fnc_ivModel;
+[_iv, 0.5] call TEST_ivTicks;
+private _inTip = _iv get "tip";
+(_iv get "entry") params [["_ex", -1], ["_ey", -1]];
+[abs (_ex - 200) <= 6 && {_ey == 100} && {[_inTip, [_ex - 30 * 0.5 * cos 40, 100 + 30 * 0.5 * sin 40]] call TEST_near},
+    "once the vein is pierced the needle stays there and slides in, without trembling"] call TEST_fnc_assert;
+["mouse", _iv, [215, 104, 0, true]] call PMCI_fnc_ivModel;
+[_iv, 0.05] call TEST_ivTicks;
+[(_iv get "misses") == 1 && {(_iv get "entry") isEqualTo []} && {(_iv get "depth") == 0}, "moving the hand while pushing blows the vein"] call TEST_fnc_assert;
+_iv = ["init", nil, [[0, 100, 400, 100], 10, 1, 20, 1, 6]] call PMCI_fnc_ivModel;
 ["mouse", _iv, [200, 100, 0, false]] call PMCI_fnc_ivModel;
 [_iv, 0.5] call TEST_ivTicks;
 [[_iv get "tip", [200 + 6 * sin (0.5 * 317), 100 + 6 * cos (0.5 * 241)]] call TEST_near, "the tip trembles around the mouse"] call TEST_fnc_assert;
@@ -742,28 +772,33 @@ private _tr = ["init", nil, [40, 6, 0.5, 2, 0.6, 0.9, 1, 30, 1]] call PMCI_fnc_t
 private _tank = "B_MBT_01_cannon_F" createVehicle [3, 3, 0];
 _tank setVariable ["TEST_class", "B_MBT_01_cannon_F"];
 _tank setVariable ["TEST_hitPoints", [["HitHull", "HitEngine", "HitFuel", "HitTurret", "HitLTrack"], [], [0.5, 0.5, 0.5, 0.5, 0.5]]];
-[([0, 1, 2, 3, 4] apply {[_tank, _x, "repair"] call PMCI_fnc_repairGame}) isEqualTo ["weld", "diagnose", "diagnose", "diagnose", "diagnose"]
+[([0, 1, 2, 3, 4] apply {[_tank, _x, "repair"] call PMCI_fnc_repairGame}) isEqualTo ["weld", "", "", "", ""]
     && {([_tank, "HitBody", "repair"] call PMCI_fnc_repairGame) == "weld"} && {([_tank, "HitLTrack", "track"] call PMCI_fnc_repairGame) == "track"},
-    "a component repair is a weld on the hull or body, a diagnosis elsewhere; tracks stay tracks"] call TEST_fnc_assert;
+    "a component repair is a weld on the hull or body, no game elsewhere (diagnosis off for now); tracks stay tracks"] call TEST_fnc_assert;
 [([0, 1, 2, 3, 4] apply {[_tank, _x] call PMCI_fnc_partOf}) isEqualTo ["hull", "engine", "fuel", "turret", "other"], "the part named in the title"] call TEST_fnc_assert;
 call TEST_fnc_fresh;
-[([TEST_medic, _tank, 1, "MiscRepair"] call PMCI_fnc_repairTime) == 1 && {([TEST_medic, _tank, 1, "RemoveTrack"] call PMCI_fnc_repairTime) == 15},
-    "a component repair gets the short bar; removing a track keeps ACE's time"] call TEST_fnc_assert;
-PMCI_enable_diagnose = false;
-[([TEST_medic, _tank, 1, "MiscRepair"] call PMCI_fnc_repairTime) == 15 && {([TEST_medic, _tank, 0, "MiscRepair"] call PMCI_fnc_repairTime) == 1},
-    "with diagnosis switched off the engine gets ACE's full time, the hull still the weld"] call TEST_fnc_assert;
-PMCI_enable_diagnose = true;
+[([TEST_medic, _tank, 0, "MiscRepair"] call PMCI_fnc_repairTime) == 1 && {([TEST_medic, _tank, 1, "MiscRepair"] call PMCI_fnc_repairTime) == 15}
+    && {([TEST_medic, _tank, 1, "RemoveTrack"] call PMCI_fnc_repairTime) == 15},
+    "a hull repair gets the short bar; the engine and removing a track keep ACE's time"] call TEST_fnc_assert;
 [TEST_medic, _tank, 0, "MiscRepair", [], [], []] call PMCI_fnc_repairSuccess;
 [(PMCI_board get "game") == "weld" && {(PMCI_board get "part") == "hull"}, "a hull repair opens the weld"] call TEST_fnc_assert;
 [false] call PMCI_fnc_finish;
 call TEST_fnc_fresh;
 [TEST_medic, _tank, 1, "MiscRepair", [], [], []] call PMCI_fnc_repairSuccess;
-[(PMCI_board get "game") == "diagnose" && {(PMCI_board get "part") == "engine"} && {count ((PMCI_board get "state") get "spots") == 5},
-    "an engine repair opens the diagnosis of five parts"] call TEST_fnc_assert;
+[isNil "PMCI_board" && {("ace_repair_fnc_doRepair" call TEST_called) isEqualTo [["ace_repair_fnc_doRepair", [TEST_medic, _tank, 1, "MiscRepair", [], [], []]]]},
+    "an engine repair is done by ACE at once after its own bar"] call TEST_fnc_assert;
+call TEST_fnc_fresh;
+[TEST_medic, _tank, 0, "MiscRepair", [], [], []] call PMCI_fnc_repairSuccess;
+private _weldState = PMCI_board get "state";
+private _variant = _weldState get "variant";
+[_variant in [1, 2, 3, 4] && {(_weldState get "seam") isEqualTo ((call PMCI_fnc_weldSeams) select (_variant - 1))}
+    && {abs ((_weldState get "limit") - 40 * (_weldState get "total") / 650) < 0.001}
+    && {((["weld", _weldState] call TEST_look) select 0) == (format ["weld_scene_%1", _variant] call TEST_tex)},
+    "a hull repair picks one of four cracks with its plate; the time limit grows with the crack"] call TEST_fnc_assert;
 (PMCI_board get "state") set ["quality", 1];
 (PMCI_board get "state") set ["status", "success"];
 call PMCI_fnc_boardTick;
-[("ace_repair_fnc_doRepair" call TEST_called) isEqualTo [["ace_repair_fnc_doRepair", [TEST_medic, _tank, 1, "MiscRepair", [], [], []]]], "a finished repair is done by ACE"] call TEST_fnc_assert;
+[("ace_repair_fnc_doRepair" call TEST_called) isEqualTo [["ace_repair_fnc_doRepair", [TEST_medic, _tank, 0, "MiscRepair", [], [], []]]], "a finished weld is repaired by ACE"] call TEST_fnc_assert;
 call TEST_fnc_fresh;
 private _track = "ACE_Track" createVehicle [2, 3, 0];
 [TEST_medic, _tank, "HitLTrack", "RepairTrack", [], [], [_track]] call PMCI_fnc_repairSuccess;
@@ -800,9 +835,9 @@ call PMCI_fnc_boardTick;
 call TEST_fnc_fresh;
 TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1], [61, 1, 0, 0.3], [11, 1, 0, 0.4]]]]];
 [TEST_medic, TEST_patient, "LeftArm", "SurgicalKit", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
-[(PMCI_board get "game") == "suture" && {count ((PMCI_board get "state") get "points") == 10}
+[(PMCI_board get "game") == "suture" && {count ((PMCI_board get "state") get "points") == 6} && {((PMCI_board get "state") get "limit") == 40}
     && {((PMCI_board get "state") get "fast") == 140} && {((PMCI_board get "state") get "slow") == 20} && {((PMCI_board get "state") get "tolerance") == 14},
-    "three bandaged wounds: five stitches to lead the needle through, normal speed limits"] call TEST_fnc_assert;
+    "three bandaged wounds: three stitches to lead the needle through, normal speed limits"] call TEST_fnc_assert;
 TEST_stitchable = 3;
 (PMCI_board get "state") set ["quality", 1];
 (PMCI_board get "state") set ["status", "success"];
@@ -810,15 +845,34 @@ call PMCI_fnc_boardTick;
 [count ("stitchWound" call TEST_called) == 3 && {("useItem" call TEST_called) isEqualTo []}, "a finished suture stitches every bandaged wound with ACE's stitchWound"] call TEST_fnc_assert;
 call TEST_fnc_fresh;
 ace_medical_treatment_consumeSurgicalKit = 2;
+TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1], [61, 1, 0, 0.3], [11, 1, 0, 0.4]]]]];
 TEST_stitchable = 3;
 [TEST_medic, TEST_patient, "leftarm"] call PMCI_fnc_stitch;
 [count ("stitchWound" call TEST_called) == 1 && {count ("useItem" call TEST_called) == 1}, "with sutures consumed and none left, stitching stops after the first wound"] call TEST_fnc_assert;
 TEST_calls = [];
 TEST_sutureUser = TEST_medic;
+TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1], [61, 1, 0, 0.3], [11, 1, 0, 0.4]]]]];
 TEST_stitchable = 3;
 [TEST_medic, TEST_patient, "leftarm"] call PMCI_fnc_stitch;
 [count ("stitchWound" call TEST_called) == 3 && {count ("useItem" call TEST_called) == 2}, "one suture for each further wound"] call TEST_fnc_assert;
 ace_medical_treatment_consumeSurgicalKit = 0;
+// Twelve wounds in three entries: ten stitches at most; the first entry is split.
+call TEST_fnc_fresh;
+TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 5, 0, 0.1], [61, 4, 0, 0.3], [11, 3, 0, 0.4]]]]];
+[TEST_medic, TEST_patient, "LeftArm", "SurgicalKit", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
+private _many = PMCI_board get "state";
+TEST_stitchable = 10;
+_many set ["quality", 1];
+_many set ["status", "success"];
+call PMCI_fnc_boardTick;
+private _rest = [TEST_patient getVariable ["ace_medical_bandagedWounds", createHashMap], ["leftarm", []]] call TEST_fnc_getDefault;
+private _stitched = ("stitchWound" call TEST_called) apply {(_x select 1) param [2, []]};
+[count (_many get "points") == 20 && {(_many get "limit") == 80} && {count _stitched == 3} && {(_stitched select 2) isEqualTo [41, 3, 0, 0.1]}
+    && {_rest isEqualTo [[41, 2, 0, 0.1]]},
+    "one stitch per wound, ten at most (more time for more): the wounds over that stay bandaged for the next kit"] call TEST_fnc_assert;
+PMCI_sutureMax = 4;
+[([TEST_patient, "LeftArm"] call PMCI_fnc_stitchCount) == 2 && {([TEST_patient, "Head"] call PMCI_fnc_stitchCount) == 0}, "the stitches per kit follow the CBA limit"] call TEST_fnc_assert;
+PMCI_sutureMax = 10;
 TEST_patient setVariable ["ace_medical_bandagedWounds", nil];
 TEST_calls = [];
 private _progress = [[TEST_medic, TEST_patient, "LeftArm"], 0.5, 1] call PMCI_fnc_stitchProgress;
@@ -841,7 +895,7 @@ call PMCI_fnc_boardTick;
 [!(_ivState get "held") && {(_ivState get "depth") == 0}, "letting go pulls the needle out"] call TEST_fnc_assert;
 [false] call PMCI_fnc_finish;
 call TEST_fnc_fresh;
-TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 1, 0, 0.1]]]]];
+TEST_patient setVariable ["ace_medical_bandagedWounds", createHashMapFromArray [["leftarm", [[41, 3, 0, 0.1]]]]];
 [TEST_medic, TEST_patient, "LeftArm", "SurgicalKit", TEST_medic, "", true] call PMCI_fnc_treatmentSuccess;
 private _points = (PMCI_board get "state") get "points";
 TEST_mouse = +(_points select 0);
@@ -862,11 +916,9 @@ private _ivLook = ["iv", _iv] call TEST_look;
     "the IV needle is drawn with its tip at the trembling tip"] call TEST_fnc_assert;
 _iv set ["lastMiss", [120, 140]];
 [((["iv", _iv] call TEST_look) select 13) == ("iv_bruise" call TEST_tex), "a blown vein leaves a bruise"] call TEST_fnc_assert;
-_sp set ["angle", -27];
-private _frame0 = ((["splint", _sp] call TEST_look) select 12);
-_sp set ["angle", 2];
-[_frame0 == ("splint_limb_0" call TEST_tex) && {((["splint", _sp] call TEST_look) select 12) == ("splint_limb_3" call TEST_tex)},
-    "the broken part is drawn at its angle, in steps of 10 degrees"] call TEST_fnc_assert;
+_sp set ["angle", -27.5];
+[((["splint", _sp] call TEST_look) select 12) == ("splint_limb" call TEST_tex) && {(["splint", _sp] call PMCI_fnc_boardMarks) isEqualTo [[12, [0, -256, 1024, 1024], 1, -27.5]]},
+    "the broken part is one picture turned smoothly to its angle about the break"] call TEST_fnc_assert;
 _dg = ["init", nil, [5, 2, 1, 2, 40, 0.55, 0.75]] call PMCI_fnc_diagnoseModel;
 _dg set ["spots", [[100, 100], [200, 100], [300, 100], [400, 100], [500, 100]]];
 _dg set ["tested", [0, 2]];
@@ -877,10 +929,17 @@ _dg set ["phase", "fix"];
     "tested good parts light up green, the found fault red, untested ones not at all"] call TEST_fnc_assert;
 _wd = [100] call TEST_fnc_weld;
 _wd set ["covered", 0.3];
-private _beads = (["weld", _wd] call TEST_look) select [15, 8];
-[(_beads select [0, 3]) isEqualTo ((["weld_bead", "weld_bead", "weld_bead"]) apply {_x call TEST_tex}) && {(_beads select 3) == ""}
-    && {[((["weld", _wd] call PMCI_fnc_boardMarks) select 2) select 1, [100, 86, 20, 28]] call TEST_near},
-    "the bead shows in eighths of the seam, the last one cut where the bead ends"] call TEST_fnc_assert;
+private _beads = (["weld", _wd] call TEST_look) select [15, 16];
+private _bend = +_wd;
+_bend set ["seam", [[0, 100], [200, 100], [200, 300]]];
+_bend set ["lengths", [200, 400]];
+_bend set ["covered", 1];
+private _turned = (["weld", _bend] call PMCI_fnc_boardMarks) select 12;
+[(_beads select [0, 4]) isEqualTo ((["weld_bead", "weld_bead", "weld_bead", "weld_bead"]) apply {_x call TEST_tex}) && {(_beads select 4) == ""}
+    && {((["weld", _wd] call TEST_look) select 0) == ("weld_scene_1" call TEST_tex)}
+    && {(((["weld", _wd] call PMCI_fnc_boardMarks) select 2) select [0, 2]) isEqualTo [17, [50, 87.5, 25, 25]]}
+    && {(_turned select 0) == 27} && {abs ((_turned select 3) - 90) < 0.001} && {[_turned select 1, [187.5, 200, 25, 25]] call TEST_near},
+    "the bead shows in sixteenths of the seam, each piece turned along it (down the crack after a corner)"] call TEST_fnc_assert;
 _tr = ["init", nil, [40, 6, 0.5, 4, 0.6, 0.9, 1, 30, 1]] call PMCI_fnc_trackModel;
 _tr set ["offset", 12];
 _tr set ["done", 2];
@@ -1001,19 +1060,19 @@ private _narrow = (PMCI_board get "state") get "width";
 // [sweet, zone, falloff, turn/s, life, picks, limit]
 TEST_fnc_pick = {
     params ["_angleX", "_angleY", ["_seconds", 2], ["_picks", 3]];
-    private _p = ["init", nil, [60, 5, 45, 1.2, 1, _picks, 90]] call PMCI_fnc_lockpickModel;
-    ["mouse", _p, [_angleX, _angleY, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+    private _p = ["init", nil, [[60], 5, 45, 1.2, 1, _picks, 90]] call PMCI_fnc_lockpickModel;
+    ["mouse", _p, [_angleX, _angleY, 1, false, 0.02]] call PMCI_fnc_lockpickModel;
     ["press", _p] call PMCI_fnc_lockpickModel;
     for "_i" from 1 to round (_seconds / 0.05) do {["tick", _p, 0.05] call PMCI_fnc_lockpickModel};
     _p
 };
 // 60 degrees (right of up): the mouse at (512 + 100 cos 60, 300 - 100 sin 60).
 private _open = [562, 300 - 86.6025] call TEST_fnc_pick;
-[(_open get "status") == "success" && {(_open get "quality") == 1} && {(_open get "broken") == 0} && {abs ((_open get "angle") - 60) < 0.01},
+[(_open get "status") == "success" && {(_open get "quality") == 1} && {(_open get "broken") == 0} && {abs (((_open get "angles") select 0) - 60) < 0.01},
     "the pick at the sweet spot turns the plug all the way and opens the lock"] call TEST_fnc_assert;
 // 90 degrees: 25 past the zone of 5 with a falloff of 45 -> the plug stops at 1 - 25/45.
 private _half = [512, 200, 0.5] call TEST_fnc_pick;
-[(_half get "status") == "running" && {abs ((_half get "turn") - (1 - 25 / 45)) < 0.001} && {_half get "strained"} && {(_half get "broken") == 0},
+[(_half get "status") == "running" && {abs ((_half get "turn") - (1 - 25 / 45)) < 0.001} && {(_half get "strained") == 0} && {(_half get "broken") == 0},
     "further from the spot the plug stops early and the pick strains"] call TEST_fnc_assert;
 private _snap = [512, 200, 1.6] call TEST_fnc_pick;
 [(_snap get "broken") == 1 && {(_snap get "picks") == 2} && {(_snap get "turn") == 0} && {!(_snap get "turning")} && {(_snap get "status") == "running"},
@@ -1022,21 +1081,54 @@ private _last = [512, 200, 1.6, 1] call TEST_fnc_pick;
 [(_last get "status") == "fail", "the last pick broken fails"] call TEST_fnc_assert;
 private _any = [512, 200, 1.6, -1] call TEST_fnc_pick;
 [(_any get "status") == "running" && {(_any get "picks") == -1}, "without a lockpick class the picks never run out"] call TEST_fnc_assert;
-["mouse", _any, [900, 250, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
-private _right = _any get "angle";
-["mouse", _any, [100, 400, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
-private _below = _any get "angle";
+["mouse", _any, [900, 250, 1, false, 0.02]] call PMCI_fnc_lockpickModel;
+private _right = (_any get "angles") select 0;
+["mouse", _any, [100, 400, 1, false, 0.02]] call PMCI_fnc_lockpickModel;
+private _below = (_any get "angles") select 0;
 ["press", _any] call PMCI_fnc_lockpickModel;
-["mouse", _any, [512, 100, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
-[_right < 10 && {_below == 180} && {(_any get "angle") == 180}, "the pick follows the mouse around the keyhole, stays at an end below it and holds still while turning"] call TEST_fnc_assert;
+["mouse", _any, [512, 100, 1, false, 0.02]] call PMCI_fnc_lockpickModel;
+[_right < 10 && {_below == 180} && {((_any get "angles") select 0) == 180}, "the pick follows the mouse around the keyhole, stays at an end below it and holds still while turning"] call TEST_fnc_assert;
 private _back = [562, 300 - 86.6025, 0.4] call TEST_fnc_pick;
 private _was = _back get "turn";
 ["release", _back] call PMCI_fnc_lockpickModel;
 ["tick", _back, 0.1] call PMCI_fnc_lockpickModel;
 [_was > 0.4 && {abs ((_back get "turn") - (_was - 0.24)) < 0.001}, "released, the plug springs back"] call TEST_fnc_assert;
-private _slow = ["init", nil, [60, 5, 45, 1.2, 1, 3, 2]] call PMCI_fnc_lockpickModel;
+private _slow = ["init", nil, [[60], 5, 45, 1.2, 1, 3, 2]] call PMCI_fnc_lockpickModel;
 for "_i" from 1 to 50 do {["tick", _slow, 0.05] call PMCI_fnc_lockpickModel};
 [(_slow get "status") == "fail", "the time limit fails"] call TEST_fnc_assert;
+
+// Two picks: both must be at their spots; the fix key switches the one the mouse moves.
+TEST_fnc_mouseAt = {params ["_p", "_deg"]; ["mouse", _p, [512 + 100 * cos _deg, 300 - 100 * sin _deg, 1, false, 0.02]] call PMCI_fnc_lockpickModel};
+private _duo = ["init", nil, [[40, 140], 5, 45, 1.2, 1, 3, 90]] call PMCI_fnc_lockpickModel;
+[_duo, 40] call TEST_fnc_mouseAt;
+["fix", _duo] call PMCI_fnc_lockpickModel;
+["mouse", _duo, [512 - 100, 300, 0, false, 0.02]] call PMCI_fnc_lockpickModel;
+private _still = ((_duo get "angles") select 1) == 120;
+[_duo, 100] call TEST_fnc_mouseAt;
+private _kept = _still && {[(_duo get "angles"), [40, 100]] call TEST_near};
+["press", _duo] call PMCI_fnc_lockpickModel;
+["fix", _duo] call PMCI_fnc_lockpickModel;
+for "_i" from 1 to 6 do {["tick", _duo, 0.05] call PMCI_fnc_lockpickModel};
+[_kept && {(_duo get "active") == 1} && {(_duo get "strained") == 1} && {abs ((_duo get "turn") - (1 - 35 / 45)) < 0.001},
+    "two picks: the fix key switches the moved pick (it waits for the mouse to move; not while turning); the one off its spot stops the plug and shakes"] call TEST_fnc_assert;
+["release", _duo] call PMCI_fnc_lockpickModel;
+[_duo, 140] call TEST_fnc_mouseAt;
+["press", _duo] call PMCI_fnc_lockpickModel;
+for "_i" from 1 to 20 do {["tick", _duo, 0.05] call PMCI_fnc_lockpickModel};
+[(_duo get "status") == "success", "both picks at their spots open the lock"] call TEST_fnc_assert;
+private _snapTwo = ["init", nil, [[40, 140], 5, 45, 1.2, 1, 2, 90]] call PMCI_fnc_lockpickModel;
+["press", _snapTwo] call PMCI_fnc_lockpickModel;
+for "_i" from 1 to 45 do {["tick", _snapTwo, 0.05] call PMCI_fnc_lockpickModel};
+private _duoMarks = ["lockpick", _duo] call PMCI_fnc_boardMarks;
+[(_snapTwo get "status") == "fail" && {(_snapTwo get "picks") == 1}
+    && {((_duoMarks select 1) select [0, 3]) isEqualTo [14, [288, 76, 448, 448], 0.55]} && {((_duoMarks select 2) select [0, 3]) isEqualTo [13, [288, 76, 448, 448], 1]}
+    && {((["lockpick", _duo] call TEST_look) select 13) == ("lock_pick" call TEST_tex)},
+    "a two-pick lock fails when fewer than two picks are left; the inactive pick is dimmed"] call TEST_fnc_assert;
+PMCI_lockpickTwo = 1;
+private _pinsNormal = [[0] call PMCI_fnc_lockPins, [1] call PMCI_fnc_lockPins, [2] call PMCI_fnc_lockPins];
+PMCI_lockpickTwo = 3;
+[_pinsNormal isEqualTo [1, 2, 2] && {([2] call PMCI_fnc_lockPins) == 1}, "the CBA setting chooses from which difficulty a lock takes two picks"] call TEST_fnc_assert;
+PMCI_lockpickTwo = 2;
 
 // --- Safe -----------------------------------------------------------------------------------------
 // [numbers, tolerance, range, gain, limit, mistakes allowed]; the mouse drags 1 number per px.
@@ -1056,16 +1148,24 @@ private _near = _safe get "signal";
 ["press", _safe] call PMCI_fnc_safeModel;
 [_safe, -15] call TEST_fnc_dial;
 private _overshoot = _safe get "signal";
+[_safe, 3] call TEST_fnc_dial;
+private _blocked = (_safe get "dial") == 15 && {(_safe get "blockedAt") == (_safe get "t") - 0.05};
 [_safe, -5] call TEST_fnc_dial;
 ["press", _safe] call PMCI_fnc_safeModel;
-[(_safe get "next") == 2 && {_overshoot > 0} && {(_safe get "mistakes") == 0}, "the second number is dialled turning down"] call TEST_fnc_assert;
-[_safe, -3] call TEST_fnc_dial;
-private _wrongWay = _safe get "signal";
+[(_safe get "next") == 2 && {_overshoot > 0} && {_blocked} && {(_safe get "mistakes") == 0},
+    "the second number is dialled turning down; the dial does not go back up"] call TEST_fnc_assert;
+[_safe, 99] call TEST_fnc_dial;
 ["press", _safe] call PMCI_fnc_safeModel;
-[_wrongWay == 0 && {(_safe get "mistakes") == 1} && {(_safe get "next") == 2}, "turning the wrong way the needle stays down, and setting the number is a mistake"] call TEST_fnc_assert;
-[_safe, 98] call TEST_fnc_dial;
+[(_safe get "dial") == 9 && {(_safe get "mistakes") == 1} && {(_safe get "next") == 2}, "a number passed by and set anyway is a mistake"] call TEST_fnc_assert;
+[_safe, -4] call TEST_fnc_dial;
+[_safe, 96] call TEST_fnc_dial;
 ["press", _safe] call PMCI_fnc_safeModel;
-[(_safe get "status") == "success" && {abs ((_safe get "quality") - 0.85) < 0.001}, "all numbers set opens the safe, 15% off per mistake"] call TEST_fnc_assert;
+[(_safe get "status") == "success" && {abs ((_safe get "quality") - 0.85) < 0.001}, "going round again reaches it; all numbers set opens the safe, 15% off per mistake"] call TEST_fnc_assert;
+private _noisy = ["init", nil, [[50], 2, 12, 1, 90, 0, 0.2]] call PMCI_fnc_safeModel;
+[_noisy, 50] call TEST_fnc_dial;
+private _peaks = [];
+for "_i" from 1 to 10 do {["tick", _noisy, 0.05] call PMCI_fnc_safeModel; _peaks pushBack (_noisy get "signal")};
+[(_peaks findIf {_x < 0.97}) >= 0 && {(_peaks findIf {_x > 1 || {_x < 0}}) < 0}, "the needle trembles, staying between 0 and 1"] call TEST_fnc_assert;
 private _wrap = ["init", nil, [[99], 2, 12, 1, 90, 0]] call PMCI_fnc_safeModel;
 [_wrap, 97] call TEST_fnc_dial;
 [_wrap, 4] call TEST_fnc_dial;
@@ -1081,14 +1181,14 @@ private _miss = ["init", nil, [[50], 2, 12, 1, 90, 0]] call PMCI_fnc_safeModel;
 // Codes 0-3, the answer is 2 ("4719"); rows: junk, codes, two brackets.
 TEST_fnc_term = {
     ["init", nil, [["4711", "1719", "4719", "9999"], 2, [["junk", -1], ["code", 0], ["code", 1], ["code", 2], ["code", 3], ["bracket", 0], ["bracket", 1]],
-        3, ["dud", "reset"], 60]] call PMCI_fnc_terminalModel
+        4, ["dud", "reset"], 60]] call PMCI_fnc_terminalModel
 };
 private _term = call TEST_fnc_term;
 ["pick", _term, 1] call PMCI_fnc_terminalModel;
 ["pick", _term, 1] call PMCI_fnc_terminalModel;
 ["pick", _term, 0] call PMCI_fnc_terminalModel;
 [((_term get "log") select 0) isEqualTo ["no", "4711", 3] && {(_term get "left") == 2} && {((_term get "log") select 1) isEqualTo ["junk"]} && {count (_term get "log") == 2},
-    "a wrong code costs an attempt and tells the likeness; it costs once; junk costs nothing"] call TEST_fnc_assert;
+    "a wrong code costs an attempt and tells the likeness, once; a row of junk costs an attempt too"] call TEST_fnc_assert;
 ["pick", _term, 5] call PMCI_fnc_terminalModel;
 ["pick", _term, 5] call PMCI_fnc_terminalModel;
 [(_term get "removed") isEqualTo [1] && {((_term get "log") select 2) isEqualTo ["dud", "1719"]} && {count (_term get "log") == 3},
@@ -1097,15 +1197,15 @@ private _term = call TEST_fnc_term;
 [(_term get "left") == 2 && {count (_term get "log") == 3}, "a removed dud can no longer be tried"] call TEST_fnc_assert;
 ["pick", _term, 4] call PMCI_fnc_terminalModel;
 ["pick", _term, 6] call PMCI_fnc_terminalModel;
-[(_term get "left") == 3 && {((_term get "log") select 4) isEqualTo ["reset"]}, "the last bracket restores the attempts"] call TEST_fnc_assert;
+[(_term get "left") == 4 && {((_term get "log") select 4) isEqualTo ["reset"]}, "the last bracket restores the attempts"] call TEST_fnc_assert;
 ["pick", _term, 3] call PMCI_fnc_terminalModel;
 [(_term get "status") == "success" && {(_term get "quality") == 1}, "the right code opens the lock"] call TEST_fnc_assert;
 private _locked = call TEST_fnc_term;
-{["pick", _locked, _x] call PMCI_fnc_terminalModel} forEach [1, 2, 4];
+{["pick", _locked, _x] call PMCI_fnc_terminalModel} forEach [1, 2, 4, 0];
 [(_locked get "status") == "fail" && {(_locked get "left") == 0}, "the last attempt used fails"] call TEST_fnc_assert;
 private _second = call TEST_fnc_term;
 {["pick", _second, _x] call PMCI_fnc_terminalModel} forEach [1, 3];
-[(_second get "status") == "success" && {abs ((_second get "quality") - 2 / 3) < 0.001}, "quality is the share of attempts left"] call TEST_fnc_assert;
+[(_second get "status") == "success" && {abs ((_second get "quality") - 3 / 4) < 0.001}, "quality is the share of attempts left"] call TEST_fnc_assert;
 private _dump = [5, 9, 2] call PMCI_fnc_terminalDump;
 _dump params ["_codes", "_answer", "_rows", "_effects", "_texts"];
 private _like = true;
@@ -1210,8 +1310,13 @@ private _answerRow = (_term get "rows") findIf {(_x select 0) == "code" && {(_x 
 ["select", _answerRow] call PMCI_fnc_boardEvent;
 ["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
 call PMCI_fnc_boardTick;
-[isNil "PMCI_board" && {(("PMCI_fnc_lockOpen" call TEST_lockMessages) select 0) isEqualTo [[TEST_medic, TEST_box, "hack"], ["PMCI_fnc_lockOpen", 2]]},
-    "picking the right row with the press key wins, and the server is asked to open the box"] call TEST_fnc_assert;
+TEST_realTime = TEST_realTime + 1;
+call PMCI_fnc_boardTick;
+private _shown = !isNil "PMCI_board" && {("PMCI_fnc_lockOpen" call TEST_lockMessages) isEqualTo []};
+TEST_realTime = TEST_realTime + 1;
+call PMCI_fnc_boardTick;
+[_shown && {isNil "PMCI_board"} && {(("PMCI_fnc_lockOpen" call TEST_lockMessages) select 0) isEqualTo [[TEST_medic, TEST_box, "hack"], ["PMCI_fnc_lockOpen", 2]]},
+    "the right row with the press key wins: the result stays on screen 1.5 s, then the server is asked to open the box"] call TEST_fnc_assert;
 // The server side of that: the hack must have begun at least 0.5 s before, with the device.
 TEST_messages = [];
 [TEST_medic, TEST_box, "begin"] call PMCI_fnc_lockOpen;
@@ -1246,7 +1351,7 @@ TEST_medic setVariable ["TEST_inv", ["pmc_lockpick", "pmc_lockpick", "ACE_fieldD
 [TEST_medic, TEST_box, "classic", 1, "", ""] call PMCI_fnc_lockSet;
 [TEST_medic, TEST_box] call PMCI_fnc_lockHack;
 private _pick = PMCI_board get "state";
-_pick set ["sweet", 150];
+_pick set ["sweets", [150]];
 TEST_mouse = [512, 100];
 ["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
 for "_i" from 1 to 40 do {TEST_realTime = TEST_realTime + 0.05; call PMCI_fnc_boardTick};
@@ -1268,12 +1373,25 @@ TEST_messages = [];
 ["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
 ["keyUp", [0, 57]] call PMCI_fnc_boardEvent;
 ["keyDown", [0, 57, false, false, false]] call PMCI_fnc_boardEvent;
-for "_i" from 1 to 40 do {TEST_realTime = TEST_realTime + 0.05; call PMCI_fnc_boardTick};
+for "_i" from 1 to 80 do {TEST_realTime = TEST_realTime + 0.05; call PMCI_fnc_boardTick};
 [isNil "PMCI_board" && {count ("PMCI_fnc_lockOpen" call TEST_lockMessages) == 1} && {(PMCI_lastResult select 2) == 0.8},
     "at the spot the lock opens; quality 80% after one broken pick"] call TEST_fnc_assert;
 TEST_medic setVariable ["TEST_inv", []];
 [TEST_medic, TEST_box] call PMCI_fnc_lockHack;
 [isNil "PMCI_board", "no lockpick left: picking does not start"] call TEST_fnc_assert;
+[TEST_medic, TEST_box, "classic", 2, "", ""] call PMCI_fnc_lockSet;
+TEST_medic setVariable ["TEST_inv", ["pmc_lockpick"]];
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+private _oneShort = isNil "PMCI_board";
+TEST_medic setVariable ["TEST_inv", ["pmc_lockpick", "pmc_lockpick"]];
+[TEST_medic, TEST_box] call PMCI_fnc_lockHack;
+private _hardPick = PMCI_board get "state";
+(_hardPick get "sweets") params ["_s1", "_s2"];
+[_oneShort && {count (_hardPick get "sweets") == 2} && {abs (_s1 - _s2) >= 40} && {_s2 >= 15 && {_s2 <= 165}} && {(_hardPick get "picks") == 2}
+    && {abs ((_hardPick get "speed") - 0.6 * 0.75) < 0.001},
+    "a hard classic lock takes two picks, needs two lockpicks, spots well apart; the plug turns slower"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+TEST_medic setVariable ["TEST_inv", []];
 PMCI_lockpickItem = "";
 // Safe on the board: dragging the dial, setting a number with the hold button.
 [TEST_medic, TEST_box, "safe", 1, "", "1234"] call PMCI_fnc_lockSet;
@@ -1293,7 +1411,7 @@ call PMCI_fnc_boardTick;
 [false] call PMCI_fnc_finish;
 
 // Pictures of the lock games: plug, pick and dial turn.
-private _pickMarks = ["lockpick", ["init", nil, [60, 5, 45, 1.2, 1, 3, 90]] call PMCI_fnc_lockpickModel] call PMCI_fnc_boardMarks;
+private _pickMarks = ["lockpick", ["init", nil, [[60], 5, 45, 1.2, 1, 3, 90]] call PMCI_fnc_lockpickModel] call PMCI_fnc_boardMarks;
 private _dialState = ["init", nil, [[30], 2, 12, 1, 90, 1]] call PMCI_fnc_safeModel;
 _dialState set ["dial", 25];
 private _dialMarks = ["safe", _dialState] call PMCI_fnc_boardMarks;

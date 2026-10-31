@@ -7,9 +7,11 @@ if (_lock isEqualTo [] || {!isNil "PMCI_board"}) exitWith {};
 private _type = _lock select 0;
 private _game = ["lockpick", "terminal", "safe"] param [["classic", "code", "safe"] find _type, ""];
 if (_game == "") exitWith {};
+// A classic lock takes one or two picks at once (PMCI_fnc_lockPins); a device is one.
 private _tool = [_type] call PMCI_fnc_lockTool;
-if (_tool != "" && {([_unit, _tool] call PMCI_fnc_itemCount) == 0}) exitWith {
-    ["STR_PMCI_LOCK_NEED_TOOL", [[_tool] call PMCI_fnc_itemName]] call PMCI_fnc_lockNotify;
+private _needed = if (_type == "classic") then {[_lock select 1] call PMCI_fnc_lockPins} else {1};
+if (_tool != "" && {([_unit, _tool] call PMCI_fnc_itemCount) < _needed}) exitWith {
+    ["STR_PMCI_LOCK_NEED_TOOL", [format ["%1 x%2", [_tool] call PMCI_fnc_itemName, _needed]]] call PMCI_fnc_lockNotify;
 };
 [_unit, _box, "begin"] remoteExecCall ["PMCI_fnc_lockOpen", 2];
 [_game, [_unit, _box, "", ""], "lock"] call PMCI_fnc_boardOpen;

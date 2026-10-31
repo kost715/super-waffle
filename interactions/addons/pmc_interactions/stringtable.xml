@@ -279,8 +279,8 @@
                 <Russian>Ремонт гусеницы</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_iv">
-                <Original>Aim the needle at the vein with the mouse and hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; to push it in. Your hand trembles: keep the tip on the vein, or the vein is blown.</Original>
-                <Russian>Наведите иглу мышью на вену и держите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt;, чтобы ввести её. Рука дрожит: держите кончик на вене, иначе вена лопнет.</Russian>
+                <Original>Aim the needle at the vein with the mouse and press and hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt;: the needle pierces the vein there and slides in. Your hand trembles: press when the tip is on the vein, and keep the mouse still while it goes in.</Original>
+                <Russian>Наведите иглу мышью на вену, нажмите и держите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt;: игла войдёт в вену в этом месте и пойдёт внутрь. Рука дрожит: жмите, когда кончик на вене, и не двигайте мышь, пока игла входит.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_suture">
                 <Original>Hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and lead the needle through the glowing points: above the wound, below it, on to the next. Too fast pulls the stitches loose.</Original>
@@ -511,16 +511,16 @@
                 <Russian>Вскрытие сейфа</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_lockpick">
-                <Original>Move the mouse to place the pick, then hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; or the mouse button on the lock to turn the plug. The plug turns fully only at the right spot; do not force it, or the pick breaks.</Original>
-                <Russian>Мышью двигайте отмычку, затем держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; или кнопку мыши на замке, чтобы повернуть цилиндр. До конца он повернётся только в верном положении; не дожимайте — отмычка сломается.</Russian>
+                <Original>Move the mouse to place the pick, then hold &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; or the mouse button on the lock to turn the plug. It turns fully only at the right spot; do not force it, or the pick breaks. A hard lock takes two picks: &lt;t color='#ffd27f'&gt;%2&lt;/t&gt; switches between them, the one that shakes is wrong.</Original>
+                <Russian>Мышью двигайте отмычку, затем держите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; или кнопку мыши на замке, чтобы повернуть цилиндр. До конца он повернётся только в верном положении; не дожимайте — отмычка сломается. В сложном замке две отмычки: &lt;t color='#ffd27f'&gt;%2&lt;/t&gt; переключает их, дрожит та, что стоит неверно.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_terminal">
-                <Original>One of the codes in the dump is the lock's code. Pick a row and press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (or double-click). A wrong code shows how many digits stand in the right place. Brackets remove a dud or restore the attempts.</Original>
-                <Russian>Один из кодов в дампе — код замка. Выберите строку и нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (или дважды щёлкните). Неверный код покажет, сколько цифр стоят на своих местах. Скобки убирают ложный код или восстанавливают попытки.</Russian>
+                <Original>The device shows the lock's memory; one of the codes in it is the lock's code. Pick a row with a code and press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (or double-click). A wrong code shows how many digits stand in the right place: use it to narrow down the next try. A row without a code costs an attempt too. A bracket pair removes a dud or restores the attempts.</Original>
+                <Russian>Прибор показывает память замка; один из кодов в ней — код замка. Выберите строку с кодом и нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; (или дважды щёлкните). Неверный код покажет, сколько цифр стоят на своих местах: по этому выбирайте следующий. Строка без кода тоже стоит попытку. Пара скобок убирает ложный код или восстанавливает попытки.</Russian>
             </Key>
             <Key ID="STR_PMCI_HELP_safe">
-                <Original>Drag the mouse sideways with the button held to turn the dial, the way shown below. When the device's needle is in the green zone, press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt; to set the number.</Original>
-                <Russian>Тяните мышь вбок с зажатой кнопкой, чтобы крутить диск в указанную ниже сторону. Когда стрелка прибора в зелёной зоне, нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;, чтобы зафиксировать число.</Russian>
+                <Original>Drag the mouse sideways with the button held to turn the dial, the way shown below; it does not turn back. Turn slowly and stop where the device's needle peaks in the green zone, then press &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;. Passed the number? Go round again.</Original>
+                <Russian>Тяните мышь вбок с зажатой кнопкой, чтобы крутить диск в указанную ниже сторону; назад он не идёт. Крутите медленно и остановитесь, где стрелка прибора выше всего в зелёной зоне, затем нажмите &lt;t color='#ffd27f'&gt;%1&lt;/t&gt;. Проскочили число — придётся сделать ещё круг.</Russian>
             </Key>
             <Key ID="STR_PMCI_STATUS_LOCKPICK">
                 <Original>Plug: %1%. Picks: %2. Broken: %3</Original>
@@ -579,8 +579,8 @@
                 <Russian>Попытки восстановлены</Russian>
             </Key>
             <Key ID="STR_PMCI_TERM_junk">
-                <Original>Input error</Original>
-                <Russian>Ошибка ввода</Russian>
+                <Original>Input error: one attempt lost</Original>
+                <Russian>Ошибка ввода: −1 попытка</Russian>
             </Key>
             <Key ID="STR_PMCI_MODULE_LOCK">
                 <Original>Lock a box</Original>
@@ -757,6 +757,82 @@
             <Key ID="STR_PMCI_SET_SAFE_MISTAKES">
                 <Original>Safe: mistakes allowed</Original>
                 <Russian>Сейф: допустимых ошибок</Russian>
+            </Key>
+            <Key ID="STR_PMCI_GAME_wheelOff">
+                <Original>Wheel removal</Original>
+                <Russian>Снятие колеса</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_wheelOff">
+                <Original>Click the nuts to loosen them in a star (every second nut, start anywhere); then the wheel comes off.</Original>
+                <Russian>Щёлкайте по гайкам, ослабляя их «звездой» (через одну, с любой); после этого колесо снимается.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SUTURE_LIMIT">
+                <Original>Time limit for 5 stitches (s)</Original>
+                <Russian>Лимит времени на 5 стежков (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SUTURE_MAX">
+                <Original>Stitches per use of the kit (one per wound; the rest wait)</Original>
+                <Russian>Стежков за один раз (по одному на рану, остальные — в следующий)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_PICK_SWITCH">
+                <Original>Switch pick</Original>
+                <Russian>Сменить отмычку</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_PICK_ACTIVE">
+                <Original>Pick %1 of 2 (%2 switches).</Original>
+                <Russian>Отмычка %1 из 2 (%2 — сменить).</Russian>
+            </Key>
+            <Key ID="STR_PMCI_STATUS_SAFE_BLOCKED">
+                <Original>The dial does not turn that way</Original>
+                <Russian>В эту сторону диск не идёт</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TERM_INTRO">
+                <Original>Pick the row holding the code (digits). Each wrong row costs an attempt.</Original>
+                <Russian>Выберите строку с кодом (цифры). Любая неверная строка стоит попытку.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_LOST">
+                <Original>Hack failed</Original>
+                <Russian>Взлом не удался</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_WON_lockpick">
+                <Original>The lock is picked!</Original>
+                <Russian>Замок вскрыт!</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_WON_terminal">
+                <Original>ACCESS GRANTED</Original>
+                <Russian>ДОСТУП РАЗРЕШЁН</Russian>
+            </Key>
+            <Key ID="STR_PMCI_LOCK_WON_safe">
+                <Original>The safe is open!</Original>
+                <Russian>Сейф открыт!</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_SPEED">
+                <Original>Lock picking: plug turn speed (per s)</Original>
+                <Russian>Отмычка: скорость поворота цилиндра (в с)</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_TWO">
+                <Original>Lock picking: two picks from difficulty</Original>
+                <Russian>Отмычка: две отмычки начиная со сложности</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_LOCKPICK_TWO_TIP">
+                <Original>From this lock difficulty a classic lock takes two picks at once, each set at its own spot; picking needs two lockpicks.</Original>
+                <Russian>С этой сложности классический замок берёт две отмычки сразу, каждую в своё положение; для взлома нужны две отмычки.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TWO_NORMAL">
+                <Original>Normal and hard</Original>
+                <Russian>Нормальная и сложная</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TWO_HARD">
+                <Original>Hard only</Original>
+                <Russian>Только сложная</Russian>
+            </Key>
+            <Key ID="STR_PMCI_TWO_NEVER">
+                <Original>Never</Original>
+                <Russian>Никогда</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_SAFE_NOISE">
+                <Original>Safe: needle tremble</Original>
+                <Russian>Сейф: дрожание стрелки</Russian>
             </Key>
         </Container>
     </Package>

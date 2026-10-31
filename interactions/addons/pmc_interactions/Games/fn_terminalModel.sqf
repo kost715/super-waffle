@@ -1,8 +1,9 @@
 // [mode, state, value] -> state. Hacking a code lock with a terminal device: the device
 // dumps the lock's memory, rows of junk with candidate codes in it, and one of them is
 // the code. A wrong code costs an attempt and tells how many of its digits stand in the
-// right place (likeness). A bracket pair in the junk, tried once each, removes a dud code
-// or restores the attempts. The right code succeeds; the last attempt used or the time
+// right place (likeness). A row of junk is an input error and costs an attempt too, so
+// rows cannot simply be clicked through. A bracket pair in the junk, tried once each,
+// removes a dud code or restores the attempts. The right code succeeds; the last attempt used or the time
 // limit fail. Quality is the share of attempts left.
 //   "init" value [codes, answer index, rows, attempts, bracket effects, time limit s]
 //       rows: one per memory row, ["code", code index] | ["bracket", bracket index] | ["junk", -1]
@@ -68,7 +69,11 @@ switch (_mode) do {
                     _log pushBack ["reset"];
                 };
             };
-            default {_log pushBack ["junk"]};
+            default {
+                _log pushBack ["junk"];
+                _state set ["left", (_state get "left") - 1];
+                if ((_state get "left") <= 0) then {_state set ["status", "fail"]};
+            };
         };
     };
 };

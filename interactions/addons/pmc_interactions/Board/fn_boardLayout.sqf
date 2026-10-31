@@ -66,6 +66,8 @@ _scrub ctrlCommit 0;
     case "terminal": {"STR_PMCI_TERM_ENTER"};
     default {"STR_PMCI_HOLD"};
 });
+// Two picks: the fix button switches between them.
+if (_game == "lockpick") then {(_display displayCtrl PMCI_IDC_FIX) ctrlSetText localize "STR_PMCI_PICK_SWITCH"};
 // The terminal's memory rows; PMCI_fnc_boardDraw writes them.
 if (_game == "terminal") then {
     private _list = _group controlsGroupCtrl PMCI_IDC_TERM_LIST;

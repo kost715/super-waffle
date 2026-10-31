@@ -45,7 +45,7 @@ switch (_game) do {
         private _points = _state get "points";
         for "_k" from 0 to floor ((_state get "next") / 2) - 1 do {
             private _cx = (((_points select (2 * _k)) select 0) + ((_points select (2 * _k + 1)) select 0)) / 2;
-            _marks pushBack [15 + _k, [_cx - 24, 200, 48, 112], 1];
+            _marks pushBack [[15 + _k, _k - 2] select (_k > 7), [_cx - 24, 200, 48, 112], 1];
         };
         if ((_state get "next") < count _points) then {
             (_points select (_state get "next")) params ["_px", "_py"];
@@ -62,8 +62,8 @@ switch (_game) do {
         _marks pushBack [14, [_mx - 18, _my - 174, 192, 192], 1];
     };
     case "splint": {
-        // The broken part turns about the break at (512, 256): its pictures start there.
-        _marks pushBack [12, [512, 0, 512, 512], 1];
+        // The broken part turns smoothly about the break at (512, 256), the centre of its picture.
+        _marks pushBack [12, [0, -256, 1024, 1024], 1, _state get "angle"];
     };
     case "diagnose": {
         {
@@ -72,7 +72,6 @@ switch (_game) do {
         } forEach (_state get "spots");
     };
     case "weld": {
-        // Bead pieces: eighths of the seam, the last one cut where the bead ends.
         private _seam = _state get "seam";
         private _lengths = _state get "lengths";
         private _total = _state get "total";
@@ -86,12 +85,16 @@ switch (_game) do {
             private _u = (_d - _start) / (((_lengths select _i) - _start) max 1e-6);
             [_ax + _u * (_bx - _ax), _ay + _u * (_by - _ay)]
         };
+        // Sixteen equal pieces along the seam, each laid when the bead passes its end: a
+        // square picture across the piece's chord, turned along it (the bead runs through
+        // the middle of the picture, so sharp corners and arcs stay on the line).
         private _covered = _state get "covered";
-        for "_k" from 0 to 7 do {
-            if (_covered > _k / 8) then {
-                (((_k / 8) call _at)) params ["_x0", "_y0"];
-                ((((_k + 1) / 8) min _covered) call _at) params ["_x1", "_y1"];
-                _marks pushBack [15 + _k, [_x0 min _x1, ((_y0 min _y1) - 14), abs (_x1 - _x0) max 4, abs (_y1 - _y0) + 28], 1];
+        private _size = _total / 16;
+        for "_k" from 0 to 15 do {
+            if (_covered >= (_k + 1) / 16) then {
+                ((_k / 16) call _at) params ["_x0", "_y0"];
+                (((_k + 1) / 16) call _at) params ["_x1", "_y1"];
+                _marks pushBack [15 + _k, [(_x0 + _x1) / 2 - _size / 2, (_y0 + _y1) / 2 - _size / 2, _size, _size], 1, (_y1 - _y0) atan2 (_x1 - _x0)];
             };
         };
         // The torch's flame is at (24, 232) of its 256 x 256 picture.
@@ -105,13 +108,22 @@ switch (_game) do {
         _marks pushBack [13, [600 - 110 * _driven, 224, 256, 64], 1];
     };
     case "lockpick": {
-        // Plug and pick turn about the keyhole at (512, 300). The pick's picture points up
-        // from its centre; it shakes while strained and is gone for a moment when it breaks.
+        // Plug and picks turn about the keyhole at (512, 300). A pick's picture points up
+        // from its centre; the one under strain shakes, the inactive one of two is dimmed, and
+        // they are gone for a moment when one breaks.
         private _turn = (_state get "turn") * 90;
         _marks pushBack [11, [400, 188, 224, 224], 1, _turn];
-        private _shake = [0, 2.5 * sin ((_state get "t") * 4000)] select (_state get "strained");
         private _broken = ((_state get "t") - (_state get "brokeAt")) < 0.6;
-        _marks pushBack [14, [288, 76, 448, 448], [1, 0] select _broken, 90 - (_state get "angle") + _turn + _shake];
+        private _two = count (_state get "sweets") > 1;
+        {
+            private _shake = [0, 2.5 * sin ((_state get "t") * 4000)] select ((_state get "strained") == _forEachIndex);
+            private _alpha = switch (true) do {
+                case (_broken): {0};
+                case (_two && {(_state get "active") != _forEachIndex}): {0.55};
+                default {1};
+            };
+            _marks pushBack [[14, 13] select _forEachIndex, [288, 76, 448, 448], _alpha, 90 - _x + _turn + _shake];
+        } forEach (_state get "angles");
     };
     case "safe": {
         // The dial (centre (400, 256)) turns so the number set is under the mark at its top;

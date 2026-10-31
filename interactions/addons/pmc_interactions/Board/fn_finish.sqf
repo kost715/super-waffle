@@ -46,7 +46,7 @@ switch (_board get "kind") do {
     };
 };
 private _key = ["STR_PMCI_RESULT_FAIL", "STR_PMCI_RESULT_OK"] select _success;
-private _text = format [localize _key, localize ("STR_PMCI_GAME_" + _game), round (_quality * 100)];
+private _text = format [localize _key, localize ("STR_PMCI_GAME_" + (_board getOrDefault ["name", _game])), round (_quality * 100)];
 hint _text;
 PMCI_lastResult = [_game, _success, _quality];
 // Bring back ACE's medical menu if the treatment was started from it (PMCI_fnc_boardOpen).

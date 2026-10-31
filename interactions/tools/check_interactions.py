@@ -48,7 +48,7 @@ def check_textures():
     look = (ADDON / "Board/fn_boardLook.sqf").read_text(encoding="utf-8")
     names |= {m + "_ca" for m in re.findall(r'"([a-z]+_[a-z0-9_]+)"', look)}
     names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
-    names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"splint_limb_{k}_ca" for k in range(7)}
+    names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"weld_scene_{k}_ca" for k in range(1, 5)}
     names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "iv", "suture", "splint", "wheel",
                                          "diagnose", "weld", "track", "lockpick", "terminal", "safe")}
     names |= {f"icon_{a}_ca" for a in ("lock", "key", "keypad")}  # ACE actions of a locked box
@@ -58,13 +58,28 @@ def check_textures():
     return len(names)
 
 
+def check_seams():
+    """The cracks drawn on the hull plates (texture_scenes.WELD_SEAMS) must be the ones the
+    game follows (PMCI_fnc_weldSeams)."""
+    import ast
+    source = (ROOT / "tools/texture_scenes.py").read_text(encoding="utf-8")
+    node = next(n for n in ast.parse(source).body if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", "") == "WELD_SEAMS")
+    drawn = [[list(p) for p in seam] for seam in ast.literal_eval(node.value)]
+    sqf = (ADDON / "Games/fn_weldSeams.sqf").read_text(encoding="utf-8")
+    played = json.loads("".join(line for line in sqf.splitlines() if not line.lstrip().startswith("//")))
+    if drawn != played:
+        raise SystemExit("The weld cracks in tools/texture_scenes.py and Games/fn_weldSeams.sqf differ")
+    return len(played)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--vm", type=Path, required=True)
     p.add_argument("--report", type=Path, help="write a JSON summary here")
     p.add_argument("--no-texture-check", action="store_true", help="skip the texture check (while drawing new ones)")
     args = p.parse_args()
-    report = {"syntax": [], "arma_runtime_tested": False, "textures": 0 if args.no_texture_check else check_textures()}
+    report = {"syntax": [], "arma_runtime_tested": False, "textures": 0 if args.no_texture_check else check_textures(),
+              "weld_seams": check_seams()}
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp)
         stage(tree)
