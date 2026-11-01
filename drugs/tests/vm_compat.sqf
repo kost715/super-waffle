@@ -237,6 +237,11 @@ TEST_fnc_findDisplay = {if (TEST_zeusOpen && {_this == 312}) then {player} else 
 TEST_fnc_closeDialog = {TEST_closed = TEST_closed + 1};
 TEST_fnc_speed = {_this getVariable ["TEST_speed", 0]};
 TEST_fnc_hitPoints = {_this getVariable ["TEST_hitPoints", [[], [], []]]};
+// Movement and aim state of a unit, for the drugs' debug panel.
+TEST_fnc_sprintAllowed = {!(_this getVariable ["TEST_blockSprint", false])};
+TEST_fnc_forcedWalk = {_this getVariable ["TEST_forceWalk", false]};
+TEST_fnc_animSpeed = {_this getVariable ["TEST_animSpeed", 1]};
+TEST_fnc_aimCoef = {_this getVariable ["TEST_aimCoef", 1]};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -262,6 +267,10 @@ TEST_fnc_compatCode = {
             case "CALLUNARY finddisplay": {"TEST_fnc_findDisplay" call _compatCall};
             case "CALLUNARY closedialog": {"TEST_fnc_closeDialog" call _compatCall};
             case "CALLUNARY speed": {"TEST_fnc_speed" call _compatCall};
+            case "CALLUNARY issprintallowed": {"TEST_fnc_sprintAllowed" call _compatCall};
+            case "CALLUNARY isforcedwalk": {"TEST_fnc_forcedWalk" call _compatCall};
+            case "CALLUNARY getanimspeedcoef": {"TEST_fnc_animSpeed" call _compatCall};
+            case "CALLUNARY getcustomaimcoef": {"TEST_fnc_aimCoef" call _compatCall};
             case "CALLUNARY getallhitpointsdamage": {"TEST_fnc_hitPoints" call _compatCall};
             case "CALLUNARY getplayeruid": {"TEST_fnc_uid" call _compatCall};
             case "CALLUNARY name": {"TEST_fnc_name" call _compatCall};

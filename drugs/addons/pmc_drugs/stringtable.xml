@@ -66,21 +66,9 @@
                 <Original>PMC Drugs</Original>
                 <Russian>PMC Препараты</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_FLOOR">
-                <Original>Debt payback floor (share of the sprint reserve)</Original>
-                <Russian>Порог выплаты долга (доля запаса для рывка)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_FLOOR_TIP">
-                <Original>Paying back drug debt never takes the anaerobic reserve below this share of its maximum.</Original>
-                <Russian>Выплата долга никогда не опускает анаэробный запас ниже этой доли от максимума.</Russian>
-            </Key>
             <Key ID="STR_PMCD_SET_STIM">
                 <Original>Stim1f</Original>
                 <Russian>Stim1f</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_STIM_DAMAGE">
-                <Original>Stim1f: muscle damage per dose</Original>
-                <Russian>Stim1f: урон мышцам за дозу</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_OVERDOSE">
                 <Original>Stim1f: overdose</Original>
@@ -93,26 +81,6 @@
             <Key ID="STR_PMCD_SET_STIM_DUTY">
                 <Original>Duty while active (lower = less effort)</Original>
                 <Russian>Нагрузка во время действия (меньше — легче)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_STIM_TIME20">
-                <Original>Duration at 20 kg load (min)</Original>
-                <Russian>Длительность при 20 кг (мин)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_STIM_TIME40">
-                <Original>Duration at 40 kg load (min)</Original>
-                <Russian>Длительность при 40 кг (мин)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_STIM_TIME70">
-                <Original>Duration at 70 kg load (min)</Original>
-                <Russian>Длительность при 70 кг (мин)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_LOAD_LIGHT">
-                <Original>Load counted as 20 kg up to (kg)</Original>
-                <Russian>Нагрузка считается «20 кг» до (кг)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_LOAD_HEAVY">
-                <Original>Load counted as 40 kg up to (kg), above: 70 kg</Original>
-                <Russian>Нагрузка считается «40 кг» до (кг), выше — «70 кг»</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_STIM_THIRST">
                 <Original>Thirst multiplier while active (ACE Field Rations)</Original>
@@ -155,64 +123,68 @@
                 <Russian>Базовая работа для долга (Вт)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_DEBT_FACTOR">
-                <Original>Debt factor (share of the saved work)</Original>
-                <Russian>Коэффициент долга (доля сэкономленной работы)</Russian>
+                <Original>Debt factor (share of the saved work; 1 = all of it)</Original>
+                <Russian>Коэффициент долга (доля сэкономленной работы; 1 — вся)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_PAY_STIM">
-                <Original>Stim1f debt payback (mmol/s)</Original>
-                <Russian>Выплата долга Stim1f (ммоль/с)</Russian>
+            <Key ID="STR_PMCD_SET_BASE_DAMAGE">
+                <Original>Muscle damage of a dose at the lightest load</Original>
+                <Russian>Урон мышцам дозы при самом лёгком снаряжении</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_PAY_FEN">
-                <Original>Fentropil debt payback (mmol/s)</Original>
-                <Russian>Выплата долга Фенотропила (ммоль/с)</Russian>
+            <Key ID="STR_PMCD_SET_POOL">
+                <Original>Action pool (equivalent seconds; drains by the weight coefficient)</Original>
+                <Russian>Запас действия (экв. секунд; тратится с коэффициентом веса)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG1_20">
-                <Original>Dose 1, 20 kg</Original>
-                <Russian>Доза 1, 20 кг</Russian>
+            <Key ID="STR_PMCD_SET_BEVEL_A">
+                <Original>Weight curve sharpness (a)</Original>
+                <Russian>Крутизна кривой веса (a)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG1_40">
-                <Original>Dose 1, 40 kg</Original>
-                <Russian>Доза 1, 40 кг</Russian>
+            <Key ID="STR_PMCD_SET_BEVEL_K">
+                <Original>Weight curve spread (k)</Original>
+                <Russian>Размах кривой веса (k)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG1_70">
-                <Original>Dose 1, 70 kg</Original>
-                <Russian>Доза 1, 70 кг</Russian>
+            <Key ID="STR_PMCD_SET_WEIGHT_MIN">
+                <Original>Weight curve from (kg)</Original>
+                <Russian>Кривая веса от (кг)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG2_20">
-                <Original>Dose 2, 20 kg</Original>
-                <Russian>Доза 2, 20 кг</Russian>
+            <Key ID="STR_PMCD_SET_WEIGHT_MAX">
+                <Original>Weight curve to (kg)</Original>
+                <Russian>Кривая веса до (кг)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG2_40">
-                <Original>Dose 2, 40 kg</Original>
-                <Russian>Доза 2, 40 кг</Russian>
+            <Key ID="STR_PMCD_SET_PAYBACK">
+                <Original>Debt payback (x ACE recovery factor, mmol/s from AE2)</Original>
+                <Russian>Выплата долга (× коэффициент восстановления ACE, ммоль/с из AE2)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG2_70">
-                <Original>Dose 2, 70 kg</Original>
-                <Russian>Доза 2, 70 кг</Russian>
+            <Key ID="STR_PMCD_SET_AE2_FLOOR">
+                <Original>AE2 floor for payback (share of the reserve)</Original>
+                <Russian>Порог AE2 для выплаты (доля запаса)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG3_20">
-                <Original>Dose 3, 20 kg</Original>
-                <Russian>Доза 3, 20 кг</Russian>
+            <Key ID="STR_PMCD_SET_HUD">
+                <Original>Interface (each player's own)</Original>
+                <Russian>Интерфейс (у каждого игрока свой)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG3_40">
-                <Original>Dose 3, 40 kg</Original>
-                <Russian>Доза 3, 40 кг</Russian>
+            <Key ID="STR_PMCD_SET_HUD_SHOW">
+                <Original>Show the muscle and debt icons</Original>
+                <Russian>Показывать иконки мышц и долга</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG3_70">
-                <Original>Dose 3, 70 kg</Original>
-                <Russian>Доза 3, 70 кг</Russian>
+            <Key ID="STR_PMCD_SET_HUD_X">
+                <Original>Icons: position across the screen (0 left - 1 right)</Original>
+                <Russian>Иконки: положение по горизонтали (0 слева — 1 справа)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG4_20">
-                <Original>Dose 4+, 20 kg</Original>
-                <Russian>Доза 4 и дальше, 20 кг</Russian>
+            <Key ID="STR_PMCD_SET_HUD_Y">
+                <Original>Icons: position down the screen (0 top - 1 bottom)</Original>
+                <Russian>Иконки: положение по вертикали (0 сверху — 1 снизу)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG4_40">
-                <Original>Dose 4+, 40 kg</Original>
-                <Russian>Доза 4 и дальше, 40 кг</Russian>
+            <Key ID="STR_PMCD_SET_HUD_SIZE">
+                <Original>Icons: size (share of the screen height)</Original>
+                <Russian>Иконки: размер (доля высоты экрана)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_DMG4_70">
-                <Original>Dose 4+, 70 kg</Original>
-                <Russian>Доза 4 и дальше, 70 кг</Russian>
+            <Key ID="STR_PMCD_SET_DEBUG">
+                <Original>Debug panel</Original>
+                <Russian>Отладочная панель</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DEBUG_TIP">
+                <Original>Every value of the drugs, ACE fatigue, medical and rations, top left, refreshed every second. Also: call PMCD_fnc_debug in the debug console.</Original>
+                <Russian>Все значения препаратов, выносливости, медицины и пайков ACE слева сверху, обновляются каждую секунду. Также: call PMCD_fnc_debug в консоли отладки.</Russian>
             </Key>
         </Container>
     </Package>

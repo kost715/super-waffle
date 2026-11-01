@@ -163,6 +163,52 @@ def model(texture):
     return bytes(out)
 
 
+def hud_plate():
+    """A soft light rounded square under each HUD icon (tinted translucent in game)."""
+    s = 4
+    img = Image.new("RGBA", (64 * s, 64 * s), (0, 0, 0, 0))
+    ImageDraw.Draw(img).rounded_rectangle((2 * s, 2 * s, 62 * s, 62 * s), radius=14 * s, fill=(255, 255, 255, 255))
+    return img.filter(ImageFilter.GaussianBlur(s)).resize((64, 64), Image.LANCZOS)
+
+
+def hud_muscle():
+    """White flexed arm (biceps), tinted by the muscle damage in game; a thin dark outline."""
+    s = 4
+    m = Image.new("L", (64 * s, 64 * s), 0)
+    d = ImageDraw.Draw(m)
+    # Upper arm across, the biceps bulging up, the forearm raised, the fist on top.
+    d.rounded_rectangle((6 * s, 38 * s, 40 * s, 52 * s), radius=7 * s, fill=255)
+    d.ellipse((14 * s, 26 * s, 38 * s, 46 * s), fill=255)
+    d.polygon([(32 * s, 50 * s), (44 * s, 50 * s), (50 * s, 18 * s), (40 * s, 16 * s)], fill=255)
+    d.ellipse((36 * s, 6 * s, 54 * s, 22 * s), fill=255)
+    d.rectangle((2 * s, 40 * s, 8 * s, 50 * s), fill=255)  # the shoulder end
+    outline = m.filter(ImageFilter.MaxFilter(9))
+    img = Image.new("RGBA", m.size, (0, 0, 0, 0))
+    img.paste((30, 30, 30, 200), (0, 0), outline)
+    img.paste((255, 255, 255, 255), (0, 0), m)
+    # A crease: where the biceps meets the forearm.
+    ImageDraw.Draw(img).arc((24 * s, 30 * s, 44 * s, 50 * s), 200, 290, fill=(150, 150, 150, 255), width=2 * s)
+    return img.resize((64, 64), Image.LANCZOS)
+
+
+def hud_tired():
+    """White "tired" sign: an empty battery with a "z" over it; a thin dark outline."""
+    s = 4
+    m = Image.new("L", (64 * s, 64 * s), 0)
+    d = ImageDraw.Draw(m)
+    d.rounded_rectangle((6 * s, 26 * s, 52 * s, 50 * s), radius=4 * s, outline=255, width=4 * s)
+    d.rectangle((52 * s, 33 * s, 58 * s, 43 * s), fill=255)
+    d.rectangle((11 * s, 31 * s, 18 * s, 45 * s), fill=255)  # the last bar of charge
+    font = ImageFont.truetype(BOLD, 22 * s)
+    d.text((30 * s, -2 * s), "z", font=font, fill=255)
+    d.text((44 * s, 6 * s), "z", font=ImageFont.truetype(BOLD, 14 * s), fill=255)
+    outline = m.filter(ImageFilter.MaxFilter(9))
+    img = Image.new("RGBA", m.size, (0, 0, 0, 0))
+    img.paste((30, 30, 30, 200), (0, 0), outline)
+    img.paste((255, 255, 255, 255), (0, 0), m)
+    return img.resize((64, 64), Image.LANCZOS)
+
+
 def main():
     OUT.mkdir(exist_ok=True)
     DATA.mkdir(parents=True, exist_ok=True)
@@ -170,6 +216,8 @@ def main():
     sheet.save(OUT / "stim1f_co.png")
     icon(BODY, BAND, "STIM-1F").save(OUT / "stim1f_ca.png")
     (DATA / "stim1f.p3d").write_bytes(model(r"pmc_drugs\data\stim1f_co.paa"))
+    for name, draw in (("hud_plate_ca.png", hud_plate), ("hud_muscle_ca.png", hud_muscle), ("hud_tired_ca.png", hud_tired)):
+        draw().save(OUT / name)
     preview = Image.new("RGB", (768, 512), (60, 60, 60))
     preview.paste(sheet, (0, 0))
     ic = Image.open(OUT / "stim1f_ca.png")
@@ -178,6 +226,23 @@ def main():
     if ace_icon.exists():
         other = Image.open(ace_icon)
         preview.paste(other, (512, 256), other)
+    # The HUD icons as the game shows them: plate, then the muscle icon at 0.2 / 0.5 / 0.7 / 0.9.
+    plate = Image.open(OUT / "hud_plate_ca.png")
+    muscle = Image.open(OUT / "hud_muscle_ca.png")
+    tired = Image.open(OUT / "hud_tired_ca.png")
+    def tint(img, rgba):
+        r, g, b, a = img.split()
+        return Image.merge("RGBA", (r.point(lambda v: v * rgba[0]), g.point(lambda v: v * rgba[1]),
+                                     b.point(lambda v: v * rgba[2]), a.point(lambda v: v * rgba[3])))
+    for k, colour in enumerate([(1, 0.775, 0.35), (0.9, 0.1, 0.08), (0.63, 0.06, 0.05), (0, 0, 0)]):
+        cell = Image.new("RGBA", (64, 64), (60, 60, 60, 255))
+        cell.alpha_composite(tint(plate, (1, 1, 1, 0.45)))
+        cell.alpha_composite(tint(muscle, colour + (1,)))
+        preview.paste(cell.convert("RGB"), (516 + 62 * k, 440))
+    cell = Image.new("RGBA", (64, 64), (60, 60, 60, 255))
+    cell.alpha_composite(tint(plate, (1, 1, 1, 0.45)))
+    cell.alpha_composite(tired)
+    preview.paste(cell.convert("RGB"), (516, 370))
     preview.save(OUT / "_preview.png")
     print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d")
 

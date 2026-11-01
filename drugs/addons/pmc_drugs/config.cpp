@@ -7,7 +7,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.2.0";
+        version = "0.3.0";
     };
 };
 
@@ -22,9 +22,8 @@ class CfgFunctions {
         class Core {
             file = "\pmc_drugs\Core";
             class state {};
-            class loadClass {};
             class unitLoad {};
-            class stimDose {};
+            class weightCoef {};
             class effects {};
             class duty {};
             class step {};
@@ -34,6 +33,13 @@ class CfgFunctions {
             class thirst {};
             class canTake {};
             class notify {};
+        };
+        class Hud {
+            file = "\pmc_drugs\Hud";
+            class hud {};
+            class hudColor {};
+            class debug {};
+            class debugText {};
         };
         class Zeus {
             file = "\pmc_drugs\Zeus";

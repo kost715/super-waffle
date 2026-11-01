@@ -2,6 +2,8 @@
 class RscText;
 class RscButton;
 class RscEdit;
+class RscPicture;
+class RscStructuredText;
 
 class PMCD_Text: RscText {
     sizeEx = safezoneH * 0.024;
@@ -65,6 +67,63 @@ class PMCD_RscMuscle {
             PMCD_BOX(0.16, 0.16, 0.07, 0.045);
             text = "$STR_PMCD_CLOSE";
             onButtonClick = "closeDialog 2";
+        };
+    };
+};
+
+// Drug icons, placed by PMCD_fnc_hud from the player's CBA settings: a light plate under
+// each so a black icon still shows.
+class RscTitles {
+    class PMCD_RscHud {
+        idd = -1;
+        duration = 1e9;
+        fadeIn = 0;
+        fadeOut = 0;
+        movingEnable = 0;
+        onLoad = "uiNamespace setVariable ['PMCD_hudDisplay', _this select 0]";
+        onUnload = "uiNamespace setVariable ['PMCD_hudDisplay', displayNull]";
+        class controls {
+            class MusclePlate: RscPicture {
+                idc = PMCD_IDC_MUSCLE_PLATE;
+                x = 0; y = 0; w = 0.05; h = 0.05;
+                text = "\pmc_drugs\data\hud_plate_ca.paa";
+                colorText[] = {1, 1, 1, 0.45};
+            };
+            class Muscle: MusclePlate {
+                idc = PMCD_IDC_MUSCLE;
+                text = "\pmc_drugs\data\hud_muscle_ca.paa";
+                colorText[] = {1, 1, 1, 1};
+            };
+            class TiredPlate: MusclePlate {
+                idc = PMCD_IDC_TIRED_PLATE;
+            };
+            class Tired: MusclePlate {
+                idc = PMCD_IDC_TIRED;
+                text = "\pmc_drugs\data\hud_tired_ca.paa";
+                colorText[] = {1, 1, 1, 1};
+            };
+        };
+    };
+    // Debug panel (PMCD_fnc_debug): everything, top left, over a dark background.
+    class PMCD_RscDebug {
+        idd = -1;
+        duration = 1e9;
+        fadeIn = 0;
+        fadeOut = 0;
+        movingEnable = 0;
+        onLoad = "uiNamespace setVariable ['PMCD_debugDisplay', _this select 0]";
+        onUnload = "uiNamespace setVariable ['PMCD_debugDisplay', displayNull]";
+        class controls {
+            class Text: RscStructuredText {
+                idc = PMCD_IDC_DEBUG;
+                x = safezoneX + safezoneW * 0.005;
+                y = safezoneY + safezoneH * 0.05;
+                w = safezoneW * 0.5;
+                h = safezoneH * 0.9;
+                size = safezoneH * 0.022;
+                colorBackground[] = {0, 0, 0, 0.55};
+                text = "";
+            };
         };
     };
 };
