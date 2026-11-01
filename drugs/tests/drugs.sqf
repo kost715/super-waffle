@@ -1,6 +1,7 @@
-// PMC Drugs checks in SQF-VM: the Stim1f weight curve and pool, the duty combination, debt
-// and its payback from AE2 with the floor, overdose, thirst, CBA settings, the HUD colour
-// and the Zeus muscle module's network handlers. ACE, CBA and the windows are stand-ins;
+// PMC Drugs checks in SQF-VM: the Stim1f weight curve and doses, the duty combination, debt
+// from the work actually saved and its payback from AE2 with the floor, each dose's pulse
+// rise, thirst, CBA settings, the HUD colour, the debug panel and the Zeus muscle module's
+// network handlers. ACE, CBA and the windows are stand-ins;
 // nothing here runs ACE itself.
 call compile preprocessFileLineNumbers "tests/vm_compat.sqf";
 TEST_count = 0;
@@ -20,7 +21,8 @@ TEST_allNear = {
 {
     missionNamespace setVariable ["PMCD_fnc_" + (_x select 1), (format ["pmc_drugs/%1/fn_%2.sqf", _x select 0, _x select 1]) call TEST_fnc_load];
 } forEach [["Init", "settings"], ["Init", "init"], ["Core", "state"], ["Core", "unitLoad"], ["Core", "weightCoef"],
-    ["Core", "effects"], ["Core", "duty"], ["Core", "step"], ["Core", "tick"], ["Core", "takeStim"], ["Core", "overdose"], ["Core", "thirst"],
+    ["Core", "effects"], ["Core", "duty"], ["Core", "step"], ["Core", "tick"], ["Core", "takeStim"], ["Core", "pulseEnd"], ["Core", "thirst"],
+    ["Core", "currentWork"],
     ["Core", "canTake"], ["Core", "notify"], ["Hud", "hudColor"], ["Zeus", "muscleCheck"], ["Zeus", "muscleSet"]];
 // The icons and the panel are windows: not drawn here.
 PMCD_fnc_hud = {};
@@ -63,20 +65,24 @@ TEST_run = {
     params ["_seconds"];
     for "_i" from 1 to _seconds do {CBA_missionTime = CBA_missionTime + 1; call PMCD_fnc_tick};
 };
-TEST_newState = {createHashMapFromArray [["stimPool", 0], ["stimDoses", 0], ["stimDamage", 0], ["overdoses", 0], ["debt", 0], ["debtStim", 0], ["debtFen", 0]]};
+TEST_newState = {createHashMapFromArray [["stimDoses", 0], ["doses", []], ["debt", 0], ["debtStim", 0], ["debtFen", 0], ["lastWork", [0, 0, 0, 0]]]};
+// ACE's metabolic cost: a stand-in recording what it was asked, giving TEST_cost.
+TEST_cost = 100;
+ace_advanced_fatigue_fnc_getMetabolicCosts = {TEST_calls pushBack ["getMetabolicCosts", +_this]; TEST_cost};
 
 // --- Settings and start-up ------------------------------------------------------------------
 call PMCD_fnc_settings;
 private _names = TEST_settings apply {_x select 0};
 private _server = TEST_settings select {(_x select 3) == 1};
 private _own = (TEST_settings select {(_x select 3) == 0}) apply {_x select 0};
-[count TEST_settings == 24 && {count _server == 19} && {_own isEqualTo ["PMCD_hudShow", "PMCD_hudX", "PMCD_hudY", "PMCD_hudSize", "PMCD_debugOn"]}
+[count TEST_settings == 20 && {count _server == 15} && {_own isEqualTo ["PMCD_hudShow", "PMCD_hudX", "PMCD_hudY", "PMCD_hudSize", "PMCD_debugOn"]}
     && {(TEST_settings select {(_x select 0) == "PMCD_paybackMultiplier"}) isEqualTo [["PMCD_paybackMultiplier", "SLIDER", [8, 25, 15, 1], 1]]}
     && {(TEST_settings select {(_x select 0) == "PMCD_ae2Floor"}) isEqualTo [["PMCD_ae2Floor", "SLIDER", [0.15, 0.4, 0.25, 2], 1]]}
     && {PMCD_stimBaseDamage == 0.16} && {PMCD_stimPool == 900} && {PMCD_stimBevelA == 2} && {PMCD_stimBevelK == 1} && {PMCD_stimWeightMin == 5}
     && {PMCD_stimWeightMax == 80} && {PMCD_debtFactor == 1} && {PMCD_stimDuty == 0.5} && {!PMCD_debugOn}
-    && {!("PMCD_stimTime40" in _names)} && {!("PMCD_debtPaybackFloor" in _names)},
-    "24 CBA settings: 19 for the drug, forced by the server (new curve, pool, debt), 5 interface ones each player's own"] call TEST_fnc_assert;
+    && {PMCD_stimPulse == 75} && {PMCD_stimPulseRamp == 10}
+    && {!("PMCD_stimTime40" in _names)} && {!("PMCD_debtPaybackFloor" in _names)} && {!("PMCD_overdosePulse" in _names)} && {!("PMCD_debtBaseWork" in _names)},
+    "20 CBA settings: 15 for the drug, forced by the server (curve, pool, pulse per dose, debt), 5 interface ones each player's own"] call TEST_fnc_assert;
 call PMCD_fnc_init;
 private _duty = ("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) select 0 select 1;
 [count ("CBA_fnc_addEventHandler" call TEST_called) == 3 && {(_duty select 0) == "PMCD_drugs"} && {(_duty select 1) isEqualType {}}
@@ -93,14 +99,14 @@ private _duty = ("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) sele
 TEST_dose = {
     params ["_kg", ["_meld", 1]];
     private _state = call TEST_newState;
-    _state set ["stimPool", missionNamespace getVariable ["PMCD_stimPool", 900]];
+    _state set ["doses", [[missionNamespace getVariable ["PMCD_stimPool", 900], "dose", 0]]];
     private _effects = [["stim", "dec", 0.5]];
     if (_meld != 1) then {_effects pushBack ["meld", "meta", _meld]};
     private _seconds = 0;
     private _damage = 0;
-    while {(_state get "stimPool") > 0 && {_seconds < 2000}} do {
+    while {(_state get "doses") isNotEqualTo [] && {_seconds < 2000}} do {
         _seconds = _seconds + 1;
-        _damage = _damage + (([_state, 1, _effects, _kg, 84000, 8.77, 1] call PMCD_fnc_step) select 0);
+        _damage = _damage + (([_state, 1, _effects, _kg, 50, 84000, 8.77, 1] call PMCD_fnc_step) select 0);
     };
     [_seconds, _damage]
 };
@@ -122,21 +128,22 @@ private _meldBreaks = [5, 20, 40, 70, 80] apply {[([_x, 0.77] call TEST_dose) se
     "0.85 is reached on doses 6 / 5 / 5 / 4 / 3, with meldonium 7 / 7 / 6 / 4 / 4 (table of the spec)"] call TEST_fnc_assert;
 // Load changed mid-dose: the rest goes at the new load's rate.
 private _swap = call TEST_newState;
-_swap set ["stimPool", 900];
+private _swapDose = [900, "dose", 0];
+_swap set ["doses", [_swapDose]];
 private _lightTotal = 0;
-for "_i" from 1 to 300 do {_lightTotal = _lightTotal + (([_swap, 1, [["stim", "dec", 0.5]], 70, 84000, 8.77, 1] call PMCD_fnc_step) select 0)};
-private _left = _swap get "stimPool";
-while {(_swap get "stimPool") > 0} do {_lightTotal = _lightTotal + (([_swap, 1, [["stim", "dec", 0.5]], 5, 84000, 8.77, 1] call PMCD_fnc_step) select 0)};
+for "_i" from 1 to 300 do {_lightTotal = _lightTotal + (([_swap, 1, [["stim", "dec", 0.5]], 70, 50, 84000, 8.77, 1] call PMCD_fnc_step) select 0)};
+private _left = _swapDose select 0;
+while {(_swap get "doses") isNotEqualTo []} do {_lightTotal = _lightTotal + (([_swap, 1, [["stim", "dec", 0.5]], 5, 50, 84000, 8.77, 1] call PMCD_fnc_step) select 0)};
 private _wc70 = [70] call PMCD_fnc_weightCoef;
 [[_left, 900 - 300 * _wc70, 0.01] call TEST_near && {[_lightTotal, 0.16 * _wc70 ^ 2 / 900 * 300 + 0.16 * _left / 900, 0.001] call TEST_near}
-    && {[_swap get "stimDamage", _lightTotal, 1e-4] call TEST_near},
+    && {[_swapDose select 2, _lightTotal, 1e-4] call TEST_near},
     "dropping the load mid-dose: the pool drains slower from then on and the damage follows the lighter load"] call TEST_fnc_assert;
 
 private _tail = call TEST_newState;
-_tail set ["stimPool", 1];
-private _tailDamage = ([_tail, 1, [_stim], 80, 84000, 8.77, 1] call PMCD_fnc_step) select 0;
-[[_tailDamage, 0.16 * 4 / 900 * 0.5, 1e-7] call TEST_near && {(_tail get "stimPool") == 0},
-    "the last second of a dose counts only the part the pool still had (1 eq.s left at wc 2: half a second)"] call TEST_fnc_assert;
+_tail set ["doses", [[1, "PMCD_Stim1f_7", 0]]];
+([_tail, 1, [_stim], 80, 50, 84000, 8.77, 1] call PMCD_fnc_step) params ["_tailDamage", "", "_tailEnded"];
+[[_tailDamage, 0.16 * 4 / 900 * 0.5, 1e-7] call TEST_near && {(_tail get "doses") isEqualTo []} && {_tailEnded isEqualTo ["PMCD_Stim1f_7"]},
+    "the last second of a dose counts only the part the pool still had (1 eq.s left at wc 2: half a second); the ended dose is named"] call TEST_fnc_assert;
 
 // --- Duty combination ----------------------------------------------------------------------------
 private _fen = ["fen", "dec", 0.9];
@@ -145,37 +152,62 @@ private _hemo = ["hemo", "inc", 1.3];
     [0.5, 0.9, 1.3, 0.65, 1.17, 0.65, 1]] call TEST_allNear,
     "duty: the strongest decreasing factor times the strongest increasing one"] call TEST_fnc_assert;
 
-// --- Debt (spec 2.1): the whole saved work ---------------------------------------------------------
+// --- Debt: the work actually saved -------------------------------------------------------------------
 TEST_debtOver = {
-    params ["_effects", "_seconds"];
+    params ["_effects", "_seconds", "_work"];
     private _state = call TEST_newState;
-    for "_i" from 1 to _seconds do {[_state, 1, _effects, 40, 84000, 8.77, 1] call PMCD_fnc_step};
+    for "_i" from 1 to _seconds do {[_state, 1, _effects, 40, _work, 84000, 8.77, 1] call PMCD_fnc_step};
     _state
 };
-private _plain = [[_stim], 720] call TEST_debtOver;
-private _boosted = [[_stim, _hemo], 720] call TEST_debtOver;
-private _masked = [[_stim, _fen], 60] call TEST_debtOver;
-[[_plain get "debt", 16420, 2] call TEST_near && {[_boosted get "debt", 16420 * 1.3, 3] call TEST_near} && {(_plain get "debtStim") == (_plain get "debt")}
-    && {(_masked get "debtFen") == 0} && {[_masked get "debt", 200 * 60 / 8.77, 0.1] call TEST_near},
-    "debt: 16 420 mmol for 12 min of Stim1f (x1.3 with a hemostatic); one pool; Fentropil under Stim1f runs none up"] call TEST_fnc_assert;
+private _resting = [[_stim], 60, 18.83] call TEST_debtOver;
+private _sprint = [[_stim], 60, 367] call TEST_debtOver;
+private _boosted = [[_stim, _hemo], 60, 367 * 1.3] call TEST_debtOver;
+private _masked = [[_stim, _fen], 60, 100] call TEST_debtOver;
+private _none = [[], 60, 367] call TEST_debtOver;
+[[_resting get "debt", 18.83 / 8.77 * 60, 0.01] call TEST_near && {[_sprint get "debt", 367 / 8.77 * 60, 0.05] call TEST_near}
+    && {((_sprint get "lastWork") select [0, 3]) isEqualTo [367, 734, 367]} && {[(_sprint get "lastWork") select 3, 41.847, 0.01] call TEST_near}
+    && {[_boosted get "debt", 367 * 1.3 / 8.77 * 60, 0.05] call TEST_near} && {(_masked get "debtFen") == 0} && {(_none get "debt") == 0},
+    "debt is the work saved: work now x (1 - d) / d / anWattsPerATP - at rest (ACE's 18.83 W) 2.15 mmol/s, sprinting 367 W 41.8 mmol/s"] call TEST_fnc_assert;
+// The work now: ACE's metabolic cost on foot, its resting work otherwise.
+TEST_calls = [];
+player setVariable ["TEST_velocity", [0, 0, 0]];
+40 call TEST_setLoad;
+private _still = [player] call PMCD_fnc_currentWork;
+player setVariable ["TEST_velocity", [4, 0, 0]];
+TEST_cost = 250;
+private _moving = [player] call PMCD_fnc_currentWork;
+private _asked = ("getMetabolicCosts" call TEST_called) select 0 select 1;
+player setVariable ["TEST_stance", "PRONE"];
+[player] call PMCD_fnc_currentWork;
+private _proneSpeed = (("getMetabolicCosts" call TEST_called) select 1 select 1) select 3;
+player setVariable ["TEST_stance", "STAND"];
+player setVariable ["TEST_onGround", false];
+private _air = [player] call PMCD_fnc_currentWork;
+player setVariable ["TEST_onGround", true];
+TEST_cost = 5;
+private _slow = [player] call PMCD_fnc_currentWork;
+player setVariable ["TEST_velocity", [0, 0, 0]];
+[_still == 18.83 && {_moving == 250} && {[_asked select 0, 40, 0.01] call TEST_near} && {(_asked select 1) == 0} && {(_asked select 2) == 1}
+    && {(_asked select 3) == 4} && {_proneSpeed == 1.5} && {_air == 18.83} && {_slow == 18.83},
+    "work now: ACE's metabolic cost of the load and speed on foot (prone capped at 1.5 m/s), its resting 18.83 W standing or off the ground"] call TEST_fnc_assert;
 
 // --- Payback from AE2 (spec 2.2) ----------------------------------------------------------------------
 private _pay = call TEST_newState;
 _pay set ["debt", 1000];
-private _held = ([_pay, 1, [_stim], 40, 60000, 0, 1] call PMCD_fnc_step) select 1;
-private _first = ([_pay, 1, [], 40, 60000, 8.77, 1] call PMCD_fnc_step) select 1;
+private _held = ([_pay, 1, [_stim], 40, 100, 60000, 0, 1] call PMCD_fnc_step) select 1;
+private _first = ([_pay, 1, [], 40, 100, 60000, 8.77, 1] call PMCD_fnc_step) select 1;
 private _afterFirst = _pay get "debt";
-private _fast = ([_pay, 1, [], 40, 60000, 8.77, 1.44] call PMCD_fnc_step) select 1;
+private _fast = ([_pay, 1, [], 40, 100, 60000, 8.77, 1.44] call PMCD_fnc_step) select 1;
 [_held == 60000 && {_first == 59985} && {_afterFirst == 985} && {[_fast, 60000 - 21.6, 0.01] call TEST_near},
     "payback: none while a drug works; then 15 x recoveryFactor mmol/s from AE2 (15 at RF 1, 21.6 at 1.44)"] call TEST_fnc_assert;
-private _edge = ([_pay, 1, [], 40, 21005, 8.77, 1] call PMCD_fnc_step) select 1;
+private _edge = ([_pay, 1, [], 40, 100, 21005, 8.77, 1] call PMCD_fnc_step) select 1;
 private _paidAtEdge = _afterFirst - 21.6 - (_pay get "debt");
-private _below = ([_pay, 1, [], 40, 20000, 8.77, 1] call PMCD_fnc_step) select 1;
+private _below = ([_pay, 1, [], 40, 100, 20000, 8.77, 1] call PMCD_fnc_step) select 1;
 private _ticks = [];
 private _ae2 = 21000;
 for "_i" from 1 to 5 do {
     _ae2 = _ae2 + 6;  // what ACE regenerated in a second
-    _ae2 = ([_pay, 1, [], 40, _ae2, 8.77, 1] call PMCD_fnc_step) select 1;
+    _ae2 = ([_pay, 1, [], 40, 100, _ae2, 8.77, 1] call PMCD_fnc_step) select 1;
     _ticks pushBack _ae2;
 };
 [_edge == 21000 && {[_paidAtEdge, 5, 0.01] call TEST_near} && {_below == 20000} && {_ticks isEqualTo [21000, 21000, 21000, 21000, 21000]},
@@ -186,40 +218,62 @@ call TEST_fresh;
 [player] call PMCD_fnc_takeStim;
 private _state = player getVariable "PMCD_state";
 private _filled = ace_advanced_fatigue_anReserve;
-[_filled == 2300 && {(_state get "stimPool") == 900} && {(_state get "stimDoses") == 1} && {count (player getVariable ["TEST_inv", []]) == 2},
-    "a dose: one injector used, the AN reserve filled, a full pool of 900"] call TEST_fnc_assert;
+private _pulse = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
+[_filled == 2300 && {(_state get "doses") isEqualTo [[900, "PMCD_Stim1f_1", 0]]} && {(_state get "stimDoses") == 1} && {count (player getVariable ["TEST_inv", []]) == 2}
+    && {_pulse isEqualTo [player, "PMCD_Stim1f_1", 10, 90000, 75, 0, 0, 1]},
+    "a dose: one injector used, the AN reserve filled, a full pool of 900, its own pulse rise in ACE Medical (+75 in 10 s, long-lasting)"] call TEST_fnc_assert;
 call PMCD_fnc_init;
 private _factor = ((("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) select 0) select 1) select 1;
 [(player call _factor) == 0.5, "ACE's fatigue gets duty 0.5 from the drug factor while Stim1f works"] call TEST_fnc_assert;
 TEST_calls = [];
 ace_advanced_fatigue_ae2Reserve = 84000;
+// ACE Medical keeps the dose's effect (and another drug's) until the mod takes it out.
+player setVariable ["ace_medical_medications", [["PMCD_Stim1f_1", 0, 10, 90000, 75, 0, 0, 1], ["Morphine", 0, 120, 1800, -10, 0.8, -10, 1]]];
+PMCD_fnc_currentWork = {TEST_work};
+TEST_work = 200;
 [730] call TEST_run;
 // SQF numbers are 32-bit floats: hundreds of small steps add up within 1e-3.
-[[ace_advanced_fatigue_muscleDamage, 0.199, 0.002] call TEST_near && {(_state get "stimPool") == 0} && {(player call _factor) == 1}
-    && {ace_advanced_fatigue_anReserve == 2300} && {(_state get "debt") > 15000} && {ace_advanced_fatigue_ae2Reserve < 84000},
-    "over 12 min at 40 kg: 0.199 muscle damage, the debt runs up; then duty is back to 1, payback takes from AE2, AN untouched"] call TEST_fnc_assert;
+[[ace_advanced_fatigue_muscleDamage, 0.199, 0.002] call TEST_near && {(_state get "doses") isEqualTo []} && {(player call _factor) == 1}
+    && {ace_advanced_fatigue_anReserve == 2300} && {(_state get "debt") > 15000} && {ace_advanced_fatigue_ae2Reserve < 84000}
+    && {((player getVariable ["ace_medical_medications", []]) apply {_x select 0}) isEqualTo ["Morphine"]},
+    "over 12 min at 40 kg: 0.199 muscle damage, debt from the work saved; then duty is back to 1, the dose's pulse rise is taken out (morphine stays), payback from AE2"] call TEST_fnc_assert;
 private _debtNow = _state get "debt";
 ace_advanced_fatigue_ae2Reserve = 50000;
 [10] call TEST_run;
 [[_state get "debt", _debtNow - 150, 0.01] call TEST_near && {ace_advanced_fatigue_ae2Reserve == 49850}, "payback goes on at 15 mmol/s from AE2"] call TEST_fnc_assert;
 [player] call PMCD_fnc_takeStim;
 [(_state get "stimDoses") == 2 && {ace_advanced_fatigue_anReserve == 2300} && {[_state get "debt", _debtNow - 150, 0.01] call TEST_near}
-    && {(_state get "stimPool") == 900} && {(_state get "stimDamage") == 0},
-    "a dose during payback: allowed, a new pool, the reserve refilled, the old debt kept"] call TEST_fnc_assert;
+    && {(_state get "doses") isEqualTo [[900, "PMCD_Stim1f_2", 0]]},
+    "a dose during payback: a new dose, the reserve refilled, the old debt kept"] call TEST_fnc_assert;
 
-// --- Overdose -------------------------------------------------------------------------------------
+// --- Two doses at once: no overdose rule, the pulse rises add up ------------------------------------------
 TEST_calls = [];
+[60] call TEST_run;
 [player] call PMCD_fnc_takeStim;
-private _adjust = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
-[count _adjust == 8 && {(_adjust select 1) == "PMCD_Stim1f"} && {(_adjust select 2) >= 30 && {(_adjust select 2) <= 50}} && {(_adjust select 4) == 200}
-    && {(_state get "stimPool") == 900} && {(_state get "stimDoses") == 2} && {(_state get "overdoses") == 1} && {count (player getVariable ["TEST_inv", []]) == 0},
-    "a dose during the action is an overdose: ACE medication +200 bpm in 30-50 s; the action goes on unchanged"] call TEST_fnc_assert;
+private _second = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
+player setVariable ["ace_medical_medications", [["PMCD_Stim1f_2", 0, 10, 90000, 75, 0, 0, 1], ["PMCD_Stim1f_3", 60, 10, 90000, 75, 0, 0, 1]]];
+private _bothActing = (_state get "doses") apply {_x select 1};
+private _damageBefore = ace_advanced_fatigue_muscleDamage;
+private _debtBefore = _state get "debt";
+TEST_work = 250;
+[10] call TEST_run;
+private _twice = ace_advanced_fatigue_muscleDamage - _damageBefore;
+[_second isEqualTo [player, "PMCD_Stim1f_3", 10, 90000, 75, 0, 0, 1] && {_bothActing isEqualTo ["PMCD_Stim1f_2", "PMCD_Stim1f_3"]}
+    && {[_twice, 2 * 0.16 * 1.242 ^ 2 / 900 * 10, 1e-4] call TEST_near} && {count (player getVariable ["TEST_inv", []]) == 0}
+    && {((_state get "lastWork") select 0) == 250} && {[(_state get "debt") - _debtBefore, 250 / 8.77 * 10, 0.05] call TEST_near},
+    "a second dose while one acts is just another dose: its own +75 on top (+150 in all), both doses act and wear the muscles; the debt follows the work the tick measures"] call TEST_fnc_assert;
+[660] call TEST_run;
+private _firstGone = ((player getVariable ["ace_medical_medications", []]) apply {_x select 0}) isEqualTo ["PMCD_Stim1f_3"];
+[60] call TEST_run;
+[_firstGone && {(player getVariable ["ace_medical_medications", []]) isEqualTo []} && {(_state get "doses") isEqualTo []},
+    "each dose's pulse rise ends with that dose: the first goes first, then the second"] call TEST_fnc_assert;
 [!([player] call PMCD_fnc_takeStim), "without an injector nothing is taken"] call TEST_fnc_assert;
 
 // --- Thirst ---------------------------------------------------------------------------------------
 private _currentWork = 1.5;
+_state set ["doses", [[100, "dose", 0]]];
 private _thirsty = [player] call PMCD_fnc_thirst;
-_state set ["stimPool", 0];
+_state set ["doses", []];
 private _calm = [player] call PMCD_fnc_thirst;
 [_thirsty == 3 && {_calm == 0}, "an active Stim1f triples thirst (twice the base work on top); none after it"] call TEST_fnc_assert;
 
@@ -234,11 +288,11 @@ private _tunedWc = [80] call PMCD_fnc_weightCoef;
 private _tunedDose = [80] call TEST_dose;
 private _tunedPay = call TEST_newState;
 _tunedPay set ["debt", 1000];
-private _tunedAe2 = ([_tunedPay, 1, [], 40, 40000, 8.77, 1] call PMCD_fnc_step) select 1;
-private _tunedFloor = ([_tunedPay, 1, [], 40, 33610, 8.77, 1] call PMCD_fnc_step) select 1;
-private _tunedDebt = [[_stim], 10] call TEST_debtOver;
+private _tunedAe2 = ([_tunedPay, 1, [], 40, 100, 40000, 8.77, 1] call PMCD_fnc_step) select 1;
+private _tunedFloor = ([_tunedPay, 1, [], 40, 100, 33610, 8.77, 1] call PMCD_fnc_step) select 1;
+private _tunedDebt = [[_stim], 10, 100] call TEST_debtOver;
 [_tunedWc == 3 && {(_tunedDose select 0) == 200} && {[_tunedDose select 1, 0.6, 0.002] call TEST_near} && {_tunedAe2 == 39980} && {_tunedFloor == 33600}
-    && {[_tunedDebt get "debt", 100 * 10 / 8.77, 0.01] call TEST_near},
+    && {[_tunedDebt get "debt", 0.5 * 100 * 10 / 8.77, 0.01] call TEST_near},
     "CBA settings change the curve, the pool, the damage, the payback rate and floor, and the debt factor"] call TEST_fnc_assert;
 call PMCD_fnc_settings;
 

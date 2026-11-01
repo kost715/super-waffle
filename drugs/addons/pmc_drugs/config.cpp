@@ -7,7 +7,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.3.0";
+        version = "0.4.0";
     };
 };
 
@@ -29,7 +29,8 @@ class CfgFunctions {
             class step {};
             class tick {};
             class takeStim {};
-            class overdose {};
+            class currentWork {};
+            class pulseEnd {};
             class thirst {};
             class canTake {};
             class notify {};

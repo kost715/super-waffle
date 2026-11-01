@@ -7,8 +7,8 @@
                 <Russian>Stim1f (боевой стимулятор)</Russian>
             </Key>
             <Key ID="STR_PMCD_STIM_DESC">
-                <Original>Autoinjector. Halves the effort for 10-14 min and refills the sprint reserve. Costs debt and muscle damage; a second dose while it works stops the heart.</Original>
-                <Russian>Автоинъектор. На 10–14 мин вдвое снижает нагрузку и заливает запас для рывка. Цена — долг и износ мышц; вторая доза во время действия останавливает сердце.</Russian>
+                <Original>Autoinjector. Halves the effort for a while (shorter under a heavy load) and refills the sprint reserve. Costs debt and muscle damage; every dose raises the pulse, two at once can stop the heart.</Original>
+                <Russian>Автоинъектор. На время вдвое снижает нагрузку (с тяжёлым снаряжением — короче) и заливает запас для рывка. Цена — долг и износ мышц; каждая доза поднимает пульс, две сразу могут остановить сердце.</Russian>
             </Key>
             <Key ID="STR_PMCD_TAKE_STIM">
                 <Original>Inject Stim1f</Original>
@@ -70,10 +70,6 @@
                 <Original>Stim1f</Original>
                 <Russian>Stim1f</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_OVERDOSE">
-                <Original>Stim1f: overdose</Original>
-                <Russian>Stim1f: передозировка</Russian>
-            </Key>
             <Key ID="STR_PMCD_SET_DEBT">
                 <Original>Debt</Original>
                 <Russian>Долг</Russian>
@@ -97,30 +93,6 @@
             <Key ID="STR_PMCD_SET_STIM_FILL_TIP">
                 <Original>The anaerobic reserve of ACE Advanced Fatigue is set to full when Stim1f is injected.</Original>
                 <Russian>Анаэробный запас ACE Advanced Fatigue заполняется до максимума при вводе Stim1f.</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_OD_PULSE">
-                <Original>Pulse added by an overdose (bpm; above 220 the heart stops)</Original>
-                <Russian>Прибавка пульса при передозе (уд/мин; выше 220 — остановка сердца)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_OD_RAMP_MIN">
-                <Original>Pulse build-up, shortest (s)</Original>
-                <Russian>Разгон пульса, минимум (с)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_OD_RAMP_MAX">
-                <Original>Pulse build-up, longest (s)</Original>
-                <Russian>Разгон пульса, максимум (с)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_OD_DEATH_MIN">
-                <Original>Without ACE Medical: death after, shortest (s)</Original>
-                <Russian>Без ACE Medical: смерть через, минимум (с)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_OD_DEATH_MAX">
-                <Original>Without ACE Medical: death after, longest (s)</Original>
-                <Russian>Без ACE Medical: смерть через, максимум (с)</Russian>
-            </Key>
-            <Key ID="STR_PMCD_SET_DEBT_WORK">
-                <Original>Base work for debt (W)</Original>
-                <Russian>Базовая работа для долга (Вт)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_DEBT_FACTOR">
                 <Original>Debt factor (share of the saved work; 1 = all of it)</Original>
@@ -185,6 +157,14 @@
             <Key ID="STR_PMCD_SET_DEBUG_TIP">
                 <Original>Every value of the drugs, ACE fatigue, medical and rations, top left, refreshed every second. Also: call PMCD_fnc_debug in the debug console.</Original>
                 <Russian>Все значения препаратов, выносливости, медицины и пайков ACE слева сверху, обновляются каждую секунду. Также: call PMCD_fnc_debug в консоли отладки.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_PULSE">
+                <Original>Pulse rise per dose while it acts (bpm; doses add up, above 220 the heart stops)</Original>
+                <Russian>Прибавка пульса от дозы на время действия (уд/мин; дозы складываются, выше 220 — остановка сердца)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_PULSE_RAMP">
+                <Original>Pulse rise build-up (s)</Original>
+                <Russian>Нарастание прибавки пульса (с)</Russian>
             </Key>
         </Container>
     </Package>

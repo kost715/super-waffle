@@ -16,7 +16,7 @@ if (isNil "_state") then {_state = createHashMap};
 private _kg = [_unit] call PMCD_fnc_unitLoad;
 private _wc = [_kg] call PMCD_fnc_weightCoef;
 private _effects = [_state, CBA_missionTime] call PMCD_fnc_effects;
-private _pool = _state getOrDefault ["stimPool", 0];
+private _doses = _state getOrDefault ["doses", []];
 private _base = missionNamespace getVariable ["PMCD_stimBaseDamage", 0.16];
 private _poolMax = missionNamespace getVariable ["PMCD_stimPool", 900];
 private _recovery = missionNamespace getVariable ["ace_advanced_fatigue_recoveryFactor", 1];
@@ -24,7 +24,6 @@ private _rate = (missionNamespace getVariable ["PMCD_paybackMultiplier", 15]) * 
 private _floor = (missionNamespace getVariable ["PMCD_ae2Floor", 0.25]) * 84000;
 private _ae2 = missionNamespace getVariable ["ace_advanced_fatigue_ae2Reserve", 0];
 private _debt = _state getOrDefault ["debt", 0];
-private _wpa = missionNamespace getVariable ["ace_advanced_fatigue_anWattsPerATP", 0];
 private _dec = 1;
 private _inc = 1;
 {if ((_x select 1) == "dec") then {_dec = _dec min (_x select 2)}; if ((_x select 1) == "inc") then {_inc = _inc max (_x select 2)}} forEach _effects;
@@ -32,19 +31,25 @@ private _inc = 1;
 _lines pushBack ("PMC DRUGS DEBUG" call _head);
 _lines pushBack format ["unit %1  mission time %2 s  alive %3", name _unit, CBA_missionTime toFixed 0, alive _unit];
 _lines pushBack ("Stim1f" call _head);
-_lines pushBack format ["active %1  pool %2 / %3 eq.s  doses %4  overdoses %5", _pool > 0, _pool toFixed 0, _poolMax, _state getOrDefault ["stimDoses", 0], _state getOrDefault ["overdoses", 0]];
-_lines pushBack format ["load %1 kg  wc %2  time left %3 s (at this load)  dose damage so far %4", _kg toFixed 1, _wc toFixed 3,
-    (_pool / _wc) toFixed 0, (_state getOrDefault ["stimDamage", 0]) toFixed 4];
-_lines pushBack format ["damage now %1 /s  whole dose at this load %2  duration at this load %3 min", (_base * _wc ^ 2 / _poolMax) toFixed 6,
-    (_base * _wc) toFixed 3, (_poolMax / _wc / 60) toFixed 1];
+_lines pushBack format ["acting doses %1  doses taken %2  load %3 kg  wc %4", count _doses, _state getOrDefault ["stimDoses", 0], _kg toFixed 1, _wc toFixed 3];
+{
+    _x params ["_pool", "_name", "_done"];
+    _lines pushBack format ["  %1: pool %2 / %3 eq.s  left %4 s at this load  damage so far %5", _name, _pool toFixed 0, _poolMax, (_pool / _wc) toFixed 0, _done toFixed 4];
+} forEach _doses;
+_lines pushBack format ["damage now %1 /s per dose (%2 in all)  whole dose at this load %3  duration at this load %4 min", (_base * _wc ^ 2 / _poolMax) toFixed 6,
+    (_base * _wc ^ 2 / _poolMax * count _doses) toFixed 6, (_base * _wc) toFixed 3, (_poolMax / _wc / 60) toFixed 1];
+_lines pushBack format ["pulse per dose +%1 bpm in %2 s  now from the doses +%3 bpm", ["PMCD_stimPulse", 0] call _g, ["PMCD_stimPulseRamp", 0] call _g,
+    (missionNamespace getVariable ["PMCD_stimPulse", 75]) * count _doses];
 _lines pushBack ("Duty and debt" call _head);
 _lines pushBack format ["effects %1", _effects];
 _lines pushBack format ["duty: decreasing %1  increasing %2  final %3", _dec toFixed 2, _inc toFixed 2, ([_effects] call PMCD_fnc_duty) toFixed 3];
 _lines pushBack format ["debt %1 mmol (Stim1f %2, Fentropil %3)  icon %4", _debt toFixed 0, (_state getOrDefault ["debtStim", 0]) toFixed 0,
     (_state getOrDefault ["debtFen", 0]) toFixed 0, _debt > 500];
-_lines pushBack format ["accrual now %1 mmol/s  payback %2 mmol/s (15 x RF %3)  AE2 floor %4  paying %5",
-    ([0, (missionNamespace getVariable ["PMCD_debtBaseWork", 400]) * _inc * (1 - _dec) / (_wpa max 0.001) * (missionNamespace getVariable ["PMCD_debtFactor", 1])] select (_dec < 1)) toFixed 2,
-    _rate toFixed 1, _recovery toFixed 2, _floor toFixed 0, _dec >= 1 && {_debt > 0} && {_ae2 > _floor}];
+(_state getOrDefault ["lastWork", [0, 0, 0, 0]]) params ["_workNow", "_nominal", "_savings", "_accrual"];
+_lines pushBack format ["work now %1 W  nominal (no drugs) %2 W  saved %3 W  debt accrual %4 mmol/s", _workNow toFixed 1, _nominal toFixed 1,
+    _savings toFixed 1, _accrual toFixed 2];
+_lines pushBack format ["payback %1 mmol/s (15 x RF %2)  AE2 floor %3  paying %4", _rate toFixed 1, _recovery toFixed 2, _floor toFixed 0,
+    _dec >= 1 && {_debt > 0} && {_ae2 > _floor}];
 _lines pushBack format ["payback time at full rate %1 min", (_debt / (_rate max 0.001) / 60) toFixed 1];
 _lines pushBack ("ACE Advanced Fatigue" call _head);
 _lines pushBack format ["muscleDamage %1  muscleFactor %2  icon colour %3", ["ace_advanced_fatigue_muscleDamage", 4] call _g,
@@ -85,7 +90,6 @@ _lines pushBack ("PMC Drugs settings" call _head);
 _lines pushBack format ["duty %1  pool %2  base damage %3  bevel a %4 k %5  weight %6-%7 kg  thirst x%8  fill AN %9", ["PMCD_stimDuty"] call _g,
     ["PMCD_stimPool", 0] call _g, ["PMCD_stimBaseDamage", 3] call _g, ["PMCD_stimBevelA"] call _g, ["PMCD_stimBevelK"] call _g,
     ["PMCD_stimWeightMin", 0] call _g, ["PMCD_stimWeightMax", 0] call _g, ["PMCD_stimThirst", 1] call _g, ["PMCD_stimFillAN"] call _g];
-_lines pushBack format ["debt: base work %1 W  factor %2  payback x%3  AE2 floor %4  overdose: +%5 bpm in %6-%7 s", ["PMCD_debtBaseWork", 0] call _g,
-    ["PMCD_debtFactor"] call _g, ["PMCD_paybackMultiplier", 1] call _g, ["PMCD_ae2Floor"] call _g, ["PMCD_overdosePulse", 0] call _g,
-    ["PMCD_overdoseRampMin", 0] call _g, ["PMCD_overdoseRampMax", 0] call _g];
+_lines pushBack format ["debt: factor %1  payback x%2  AE2 floor %3  pulse per dose +%4 bpm in %5 s", ["PMCD_debtFactor"] call _g,
+    ["PMCD_paybackMultiplier", 1] call _g, ["PMCD_ae2Floor"] call _g, ["PMCD_stimPulse", 0] call _g, ["PMCD_stimPulseRamp", 0] call _g];
 format ["<t size='0.8' font='EtelkaMonospacePro' shadow='2'>%1</t>", _lines joinString "<br/>"]
