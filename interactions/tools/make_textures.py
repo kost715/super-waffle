@@ -23,7 +23,8 @@ from texture_scenes import (abrasion_pad, abrasion_swab, bandage_scene, cpr_hand
                             edges_target, gauze_stage, nut, pressure_hand, pressure_seep, tq_scene, tq_windlass, wheel, wound_abrasion,
                             wound_avulsion, wound_crush, wound_cut, wound_laceration, wound_puncture, wound_velocity,
                             iv_scene, iv_needle, iv_bruise, suture_point, suture_stitch, suture_needle, splint_scene, splint_limb,
-                            repair_engine, diag_light, weld_scene, weld_bead, weld_torch, track_scene, track_link, track_pin)
+                            repair_engine, diag_light, weld_scene, weld_bead, weld_torch, track_scene, track_link, track_pin,
+                            fuel_scene)
 from texture_locks import TEXTURES as LOCK_TEXTURES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -323,6 +324,18 @@ def icon_weld():
     return finish(img, w, h)
 
 
+def icon_fuel():
+    w = h = 128
+    img = canvas(w, h)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(s((14, 40, 114, 112)), radius=s(14), fill=(140, 70, 50, 255), outline=(70, 36, 26, 255), width=s(3))
+    d.rectangle(s((84, 26, 104, 42)), fill=(150, 150, 150, 255))
+    d.line(s((26, 76, 52, 70, 70, 82, 100, 74)), fill=(20, 20, 20, 255), width=s(4), joint="curve")
+    d.polygon(s([(44, 84), (52, 100), (36, 100)]), fill=(240, 200, 60, 255))
+    d.ellipse(s((36, 92, 52, 108)), fill=(240, 200, 60, 255))
+    return finish(img, w, h)
+
+
 def icon_track():
     w = h = 128
     img = canvas(w, h)
@@ -387,6 +400,7 @@ TEXTURES = [
     ("icon_wheel_ca.png", icon_wheel, "Значок замены колеса"),
     ("icon_diagnose_ca.png", icon_diagnose, "Значок ремонта узла"),
     ("icon_weld_ca.png", icon_weld, "Значок заплатки корпуса"),
+    ("icon_fuel_ca.png", icon_fuel, "Значок ремонта бензобака"),
     ("icon_track_ca.png", icon_track, "Значок ремонта гусеницы"),
     ("cpr_scene_ca.png", cpr_scene, "СЛР: пострадавший сверху, грудь крупно; место нажатия — (480, 256)"),
     ("cpr_hands_up_ca.png", lambda: cpr_hands(False), "СЛР: руки подняты (между нажатиями); точка нажатия — (128, 150)"),
@@ -425,6 +439,7 @@ TEXTURES = [
     ("diag_ok_ca.png", lambda: diag_light(True), "Ремонт узла: деталь исправна"),
     ("diag_bad_ca.png", lambda: diag_light(False), "Ремонт узла: неисправность"),
     *[(f"weld_scene_{k}_ca.png", (lambda k=k: weld_scene(k)), f"Заплатка: лист корпуса, трещина {k} (PMCI_fnc_weldSeams)") for k in range(1, 5)],
+    *[(f"fuel_scene_{k}_ca.png", (lambda k=k: fuel_scene(k)), f"Бензобак: бак с трещиной {k} и подтёками топлива (PMCI_fnc_weldSeams)") for k in range(1, 5)],
     ("weld_bead_ca.png", weld_bead, "Заплатка: кусок шва поперёк квадрата (поворачивается вдоль шва)"),
     ("weld_torch_ca.png", weld_torch, "Заплатка: горелка, дуга в (24, 232)"),
     ("track_scene_ca.png", track_scene, "Гусеница: разрыв в x 512"),

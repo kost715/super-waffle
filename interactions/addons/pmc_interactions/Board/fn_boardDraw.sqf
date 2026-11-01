@@ -29,6 +29,8 @@ private _visible = switch (_game) do {
     case "suture": {_progressOnly + [PMCI_IDC_SCRUB]};
     case "splint": {_gauge + [PMCI_IDC_SCRUB]};
     case "weld": {_progressOnly + [PMCI_IDC_SCRUB]};
+    // The "Drain fuel" button until the tank is drained or draining.
+    case "fuel": {_progressOnly + [PMCI_IDC_SCRUB] + ([[PMCI_IDC_FIX], []] select ((_state get "drained") || {(_state get "draining") >= 0}))};
     case "diagnose": {if ((_state get "phase") == "fix") then {_gauge + [PMCI_IDC_HOLD]} else {_wheel - [PMCI_IDC_SWAP]}};
     case "track": {_gauge + [PMCI_IDC_HOLD]};
     case "wheel": {if ((_state get "phase") == "swap") then {_wheel} else {_wheel - [PMCI_IDC_SWAP]}};
@@ -182,10 +184,19 @@ switch (_game) do {
         };
         _time = (_state get "t") / (_state get "limit");
     };
-    case "weld": {
+    case "weld";
+    case "fuel": {
         [PMCI_IDC_FILL, 0, _state get "covered", 0.0125] call _span;
         _status = format [localize "STR_PMCI_STATUS_WELD", round ((_state get "covered") * 100), round ((_state get "heat") * 100),
             round (((_state get "good") / ((_state get "covered") max 0.001)) * 100)];
+        if (_game == "fuel") then {
+            _status = _status + "  " + (switch (true) do {
+                case (_state get "drained"): {format ["<t color='#7aff8a'>%1</t>", localize "STR_PMCI_FUEL_EMPTY"]};
+                case ((_state get "draining") >= 0): {format [localize "STR_PMCI_FUEL_DRAINING",
+                    round (((_state get "t") - (_state get "draining")) / ((_state get "drain") max 0.01) * 100)]};
+                default {format ["<t color='#ff6a5a'>%1</t>", localize "STR_PMCI_FUEL_FULL"]};
+            });
+        };
         _time = (_state get "t") / (_state get "limit");
     };
     case "track": {

@@ -41,6 +41,8 @@ private _general = [_category, localize "STR_PMCI_SET_GENERAL"];
     ["weld", [["weldLimit", "STR_PMCI_SET_LIMIT", [5, 120, 40, 0]], ["weldTolerance", "STR_PMCI_SET_LINE_WIDTH", [4, 50, 14, 0]],
         ["weldSlow", "STR_PMCI_SET_SLOW", [0, 200, 35, 0]], ["weldFast", "STR_PMCI_SET_FAST", [20, 800, 160, 0]],
         ["weldHeat", "STR_PMCI_SET_WELD_HEAT", [0, 5, 0.6, 2]]]],
+    // The fuel tank patch uses the weld's tuning; only the draining is its own.
+    ["fuel", [["fuelDrain", "STR_PMCI_SET_FUEL_DRAIN", [1, 60, 6, 0]]]],
     ["track", [["trackLimit", "STR_PMCI_SET_LIMIT", [5, 120, 30, 0]], ["trackTolerance", "STR_PMCI_SET_TRACK_TOLERANCE", [1, 40, 6, 0]],
         ["trackSwing", "STR_PMCI_SET_TRACK_SWING", [0.1, 3, 0.5, 2]], ["trackHits", "STR_PMCI_SET_TRACK_HITS", [1, 10, 4, 0]],
         ["trackZone", "STR_PMCI_SET_ZONE", [0.05, 0.6, 0.16, 2]], ["trackSpeed", "STR_PMCI_SET_TRACK_SPEED", [0.2, 5, 1.1, 2]],

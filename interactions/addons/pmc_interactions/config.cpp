@@ -9,7 +9,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_medical_damage", "ace_medical_treatment", "ace_repair"};
-        version = "0.7.0";
+        version = "0.8.0";
     };
 };
 
@@ -57,6 +57,7 @@ class CfgFunctions {
             class diagnoseModel {};
             class weldModel {};
             class weldSeams {};
+            class fuelModel {};
             class trackModel {};
             class lockpickModel {};
             class terminalModel {};

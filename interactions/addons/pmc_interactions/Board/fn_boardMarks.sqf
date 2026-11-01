@@ -71,7 +71,8 @@ switch (_game) do {
             _marks pushBack [6 + _forEachIndex, [_sx - 24, _sy - 92, 48, 48], 1];
         } forEach (_state get "spots");
     };
-    case "weld": {
+    case "weld";
+    case "fuel": {
         private _seam = _state get "seam";
         private _lengths = _state get "lengths";
         private _total = _state get "total";

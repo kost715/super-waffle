@@ -834,6 +834,34 @@
                 <Original>Safe: needle tremble</Original>
                 <Russian>Сейф: дрожание стрелки</Russian>
             </Key>
+            <Key ID="STR_PMCI_GAME_fuel">
+                <Original>Fuel tank patch</Original>
+                <Russian>Ремонт бензобака</Russian>
+            </Key>
+            <Key ID="STR_PMCI_HELP_fuel">
+                <Original>First drain the fuel: &lt;t color='#ffd27f'&gt;Drain fuel&lt;/t&gt; or %2. Then hold the &lt;t color='#ffd27f'&gt;left mouse button&lt;/t&gt; and lead the torch along the crack. A torch on a tank with fuel in it sets the vehicle off.</Original>
+                <Russian>Сначала откачайте топливо: кнопка &lt;t color='#ffd27f'&gt;«Отсосать топливо»&lt;/t&gt; или %2. Потом зажмите &lt;t color='#ffd27f'&gt;левую кнопку мыши&lt;/t&gt; и ведите горелку вдоль трещины. Горелка на баке с топливом — машина взорвётся.</Russian>
+            </Key>
+            <Key ID="STR_PMCI_FUEL_DRAIN">
+                <Original>Drain fuel</Original>
+                <Russian>Отсосать топливо</Russian>
+            </Key>
+            <Key ID="STR_PMCI_FUEL_EMPTY">
+                <Original>Tank empty</Original>
+                <Russian>Бак пуст</Russian>
+            </Key>
+            <Key ID="STR_PMCI_FUEL_DRAINING">
+                <Original>Draining fuel: %1%</Original>
+                <Russian>Откачка топлива: %1%</Russian>
+            </Key>
+            <Key ID="STR_PMCI_FUEL_FULL">
+                <Original>Fuel in the tank!</Original>
+                <Russian>В баке топливо!</Russian>
+            </Key>
+            <Key ID="STR_PMCI_SET_FUEL_DRAIN">
+                <Original>Fuel draining time (s)</Original>
+                <Russian>Время откачки топлива (с)</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

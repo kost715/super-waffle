@@ -68,6 +68,7 @@ _scrub ctrlCommit 0;
 });
 // Two picks: the fix button switches between them.
 if (_game == "lockpick") then {(_display displayCtrl PMCI_IDC_FIX) ctrlSetText localize "STR_PMCI_PICK_SWITCH"};
+if (_game == "fuel") then {(_display displayCtrl PMCI_IDC_FIX) ctrlSetText localize "STR_PMCI_FUEL_DRAIN"};
 // The terminal's memory rows; PMCI_fnc_boardDraw writes them.
 if (_game == "terminal") then {
     private _list = _group controlsGroupCtrl PMCI_IDC_TERM_LIST;
@@ -88,6 +89,7 @@ PMCI_board set ["keys", [["press"] call PMCI_fnc_keyName, ["fix"] call PMCI_fnc_
     case "iv": {[0.45, 0.7, 0.95, 0.95]};
     case "splint": {[0.45, 0.7, 0.95, 0.95]};
     case "weld": {[1, 0.75, 0.3, 0.95]};
+    case "fuel": {[1, 0.75, 0.3, 0.95]};
     case "diagnose": {[0.95, 0.55, 0.2, 0.95]};
     case "track": {[0.95, 0.55, 0.2, 0.95]};
     case "lockpick": {[0.8, 0.82, 0.86, 0.95]};

@@ -81,8 +81,9 @@ switch (_game) do {
             }];
         } forEach (_state get "tested");
     };
-    case "weld": {
-        _look set [0, format ["weld_scene_%1", _state getOrDefault ["variant", 1]]];
+    case "weld";
+    case "fuel": {
+        _look set [0, format ["%1_scene_%2", _game, _state getOrDefault ["variant", 1]]];
         for "_k" from 0 to 15 do {if ((_state get "covered") >= (_k + 1) / 16) then {_look set [15 + _k, "weld_bead"]}};
         _look set [14, "weld_torch"];
     };

@@ -42,6 +42,8 @@ switch (_board get "kind") do {
     };
     default {
         if (_success) then {[_successFn, _args] call PMCI_fnc_original};
+        // A torch on an undrained fuel tank: the vehicle goes up.
+        if ((_board get "state") getOrDefault ["exploded", false]) then {(_args select 1) setDamage 1};
         {[objNull, _x, false] call ace_common_fnc_claim} forEach (_args param [6, []]);
     };
 };

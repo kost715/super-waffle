@@ -1085,6 +1085,66 @@ def weld_scene(variant):
     return vignette(c)
 
 
+def fuel_scene(variant):
+    """A fuel tank seen close: a red-brown painted cylinder lying across the picture (lit from
+    above), its filler neck and cap at the upper right, a stencilled marking, and the crack
+    WELD_SEAMS[variant - 1] with fuel seeping out: a dark wet halo, an oily sheen and drips."""
+    seam = WELD_SEAMS[variant - 1]
+    c = Canvas(1024, 512)
+    x, y = grid(c)
+    tank = material("Metal041A", c.w, c.h, S(380), tint=(170, 86, 52), tint_mix=0.85, contrast=0.6)
+    wear = np.clip(noise(c.w, c.h, 514, S(16)) * 2 - 1.0, 0, 1)
+    tank["color"] = tank["color"] * (1 - wear[:, :, None]) + np.array([0.42, 0.4, 0.37], np.float32) * wear[:, :, None]
+    # The cylinder: bright along the top, darker towards both edges.
+    v = (y - 230) / 330
+    h = np.sqrt(np.clip(1 - v ** 2, 0, 1)) * 0.6 + noise(c.w, c.h, 511, S(60)) * 0.05
+    c.put(shade(tank, h, strength=S(30), metal=0.35, spec=0.35, ambient=0.55), np.ones((c.h, c.w)))
+    tint(c, np.clip(np.abs(v) * 1.4 - 0.25, 0, 1), (0.05, 0.03, 0.02), 0.5)  # the cylinder turning away
+    for xx in (44, 980):  # welded end seams of the tank
+        tint(c, np.clip(1 - np.abs(x - xx) / 3, 0, 1), (0.08, 0.05, 0.04), 0.7)
+    # Stencil, faded: lower left, clear of the cracks.
+    from PIL import Image, ImageDraw, ImageFont
+    stencil = Image.new("L", (c.w, c.h), 0)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", S(30))
+    ImageDraw.Draw(stencil).text((S(70), S(448)), "DIESEL  \u00b7  FLAMMABLE  \u00b7  NO OPEN FLAME", font=font, fill=255)
+    tint(c, np.asarray(stencil, np.float32) / 255 * np.clip(noise(c.w, c.h, 515, S(3)) + 0.7, 0, 1), (0.92, 0.88, 0.7), 0.65)
+    # Filler neck and cap, upper right.
+    neck = blobs(c, [(930, 70, 46)])
+    metal_part(c, neck, (150, 150, 152), metal=0.6, height=0.5, material_name="Metal046A")
+    cap = blobs(c, [(930, 70, 34)])
+    metal_part(c, cap, (230, 228, 220), metal=0.5, height=0.9, material_name="Metal046A")
+    for a in range(0, 360, 30):  # knurled rim
+        import math
+        px, py = 930 + 30 * math.cos(math.radians(a)), 70 + 30 * math.sin(math.radians(a))
+        tint(c, blobs(c, [(px, py, 2.5)]), (0.2, 0.2, 0.2), 0.6)
+    # The crack, and fuel seeping from it.
+    d = np.full((c.h, c.w), 1e9, np.float32)
+    for (ax, ay), (bx, by) in zip(seam, seam[1:]):
+        t = np.clip(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2), 0, 1)
+        d = np.minimum(d, np.hypot(x - ax - t * (bx - ax), y - ay - t * (by - ay)))
+    jag = d + noise(c.w, c.h, 512, S(3)) * 3
+    wet = np.clip(1 - jag / 34, 0, 1) * np.clip(noise(c.w, c.h, 513, S(12)) + 0.8, 0, 1)
+    tint(c, wet, (0.12, 0.07, 0.04), 0.6)
+    # Drips running down from points along the crack.
+    drips = np.zeros((c.h, c.w), np.float32)
+    rng = np.random.default_rng(500 + variant)
+    for (ax, ay), (bx, by) in zip(seam, seam[1:]):
+        for _ in range(2):
+            t = rng.random()
+            px, py = ax + t * (bx - ax), ay + t * (by - ay)
+            length = 40 + rng.random() * 80
+            drips = np.maximum(drips, np.clip(1 - np.abs(x - px) / 3.5, 0, 1) * (y > py) * (y < py + length) * np.clip(1 - (y - py) / length, 0, 1))
+    tint(c, blur(drips, S(0.8)), (0.1, 0.06, 0.03), 0.75)
+    # An oily rainbow sheen on the wet metal.
+    hue = (np.sin(x * 0.05 + noise(c.w, c.h, 516, S(8)) * 6) + 1) / 2
+    sheen = np.dstack([0.5 + 0.5 * hue, 0.4 + 0.5 * (1 - hue), 0.7 * hue + 0.3]).astype(np.float32)
+    c.put(sheen, wet * 0.18)
+    crack = (jag < 6).astype(np.float32)
+    tint(c, blur(crack, S(0.6)), (0.02, 0.02, 0.02), 0.95)
+    tint(c, np.clip(1 - np.abs(jag - 7) / 2, 0, 1), (0.85, 0.82, 0.7), 0.2)
+    return vignette(c)
+
+
 def weld_bead():
     """A piece of weld bead across the middle of a square picture (turned along the seam):
     rippled, cooling from orange."""

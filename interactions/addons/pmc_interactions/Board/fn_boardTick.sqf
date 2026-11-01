@@ -9,7 +9,7 @@ private _game = PMCI_board get "game";
 private _model = missionNamespace getVariable format ["PMCI_fnc_%1Model", _game];
 // Mouse games: where the mouse is, how far it moved since the last frame, whether the
 // button is held. Cleaning only counts the path while scrubbing.
-if (_game in ["clean", "iv", "suture", "splint", "weld", "lockpick", "safe"]) then {
+if (_game in ["clean", "iv", "suture", "splint", "weld", "fuel", "lockpick", "safe"]) then {
     private _mouse = call PMCI_fnc_boardMouse;
     (PMCI_board getOrDefault ["mouse", _mouse]) params ["_fromX", "_fromY"];
     private _distance = sqrt (((_mouse select 0) - _fromX) ^ 2 + ((_mouse select 1) - _fromY) ^ 2);
@@ -22,6 +22,12 @@ if (_game in ["clean", "iv", "suture", "splint", "weld", "lockpick", "safe"]) th
     PMCI_board set ["mouse", _mouse];
 };
 ["tick", _state, _dt] call _model;
+// Fuel drained from the tank is gone from the vehicle at once (where the vehicle is local).
+if (_game == "fuel" && {_state get "drained"} && {!(PMCI_board getOrDefault ["fuelGone", false])}) then {
+    PMCI_board set ["fuelGone", true];
+    private _vehicle = (PMCI_board get "args") select 1;
+    ["ace_common_setFuel", [_vehicle, 0], _vehicle] call CBA_fnc_targetEvent;
+};
 // A pick broken in the lock is gone from the inventory at once.
 if (_game == "lockpick" && {(_state get "broken") > (PMCI_board getOrDefault ["used", 0])}) then {
     PMCI_board set ["used", _state get "broken"];

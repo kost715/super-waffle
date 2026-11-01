@@ -15,6 +15,7 @@ icon_splint_ca.png	128	128	Значок шины
 icon_wheel_ca.png	128	128	Значок замены колеса
 icon_diagnose_ca.png	128	128	Значок ремонта узла
 icon_weld_ca.png	128	128	Значок заплатки корпуса
+icon_fuel_ca.png	128	128	Значок ремонта бензобака
 icon_track_ca.png	128	128	Значок ремонта гусеницы
 cpr_scene_ca.png	1024	512	СЛР: пострадавший сверху, грудь крупно; место нажатия — (480, 256)
 cpr_hands_up_ca.png	256	512	СЛР: руки подняты (между нажатиями); точка нажатия — (128, 150)
@@ -68,6 +69,10 @@ weld_scene_1_ca.png	1024	512	Заплатка: лист корпуса, трещ
 weld_scene_2_ca.png	1024	512	Заплатка: лист корпуса, трещина 2 (PMCI_fnc_weldSeams)
 weld_scene_3_ca.png	1024	512	Заплатка: лист корпуса, трещина 3 (PMCI_fnc_weldSeams)
 weld_scene_4_ca.png	1024	512	Заплатка: лист корпуса, трещина 4 (PMCI_fnc_weldSeams)
+fuel_scene_1_ca.png	1024	512	Бензобак: бак с трещиной 1 и подтёками топлива (PMCI_fnc_weldSeams)
+fuel_scene_2_ca.png	1024	512	Бензобак: бак с трещиной 2 и подтёками топлива (PMCI_fnc_weldSeams)
+fuel_scene_3_ca.png	1024	512	Бензобак: бак с трещиной 3 и подтёками топлива (PMCI_fnc_weldSeams)
+fuel_scene_4_ca.png	1024	512	Бензобак: бак с трещиной 4 и подтёками топлива (PMCI_fnc_weldSeams)
 weld_bead_ca.png	128	128	Заплатка: кусок шва поперёк квадрата (поворачивается вдоль шва)
 weld_torch_ca.png	256	256	Заплатка: горелка, дуга в (24, 232)
 track_scene_ca.png	1024	512	Гусеница: разрыв в x 512

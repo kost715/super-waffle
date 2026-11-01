@@ -117,6 +117,18 @@ private _state = switch (_game) do {
         _state set ["variant", _variant + 1];
         _state
     };
+    case "fuel": {
+        // The hull patch weld on a fuel tank (same cracks and tuning), drained first; a tank
+        // that is already empty needs no draining.
+        private _seams = call PMCI_fnc_weldSeams;
+        private _variant = floor random count _seams;
+        private _state = ["init", nil, [_seams select _variant, (["weldTolerance", 14] call _set) * _ease,
+            (["weldSlow", 35] call _set) / _ease, (["weldFast", 160] call _set) * _ease, ["weldLimit", 40] call _set,
+            (["weldHeat", 0.6] call _set) / _ease, ["fuelDrain", 6] call _set, (fuel _target) <= 0]] call PMCI_fnc_fuelModel;
+        _state set ["limit", (_state get "limit") * (1 max ((_state get "total") / 650)) + (_state get "drain")];
+        _state set ["variant", _variant + 1];
+        _state
+    };
     case "track": {
         private _half = (["trackZone", 0.16] call _set) / 2 * _ease;
         ["init", nil, [40, (["trackTolerance", 6] call _set) * _ease, (["trackSwing", 0.5] call _set) / _ease, ["trackHits", 4] call _set,

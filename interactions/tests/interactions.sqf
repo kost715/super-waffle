@@ -24,7 +24,7 @@ TEST_fnc_assert = {
     ["Games", "lockpickModel"], ["Games", "terminalModel"], ["Games", "safeModel"], ["Lock", "lockSet"], ["Lock", "lockClear"], ["Lock", "lockApply"],
     ["Lock", "lockActions"], ["Lock", "lockOpen"], ["Lock", "lockHack"], ["Lock", "lockNotify"], ["Lock", "lockKeys"], ["Lock", "lockTool"],
     ["Lock", "codeValid"], ["Lock", "itemCount"], ["Lock", "itemName"], ["Lock", "itemTake"], ["Lock", "terminalDump"],
-    ["Games", "weldSeams"], ["Hooks", "stitchCount"], ["Lock", "lockPins"]];
+    ["Games", "weldSeams"], ["Hooks", "stitchCount"], ["Lock", "lockPins"], ["Games", "fuelModel"]];
 TEST_mouse = [0, 0];
 PMCI_fnc_boardMouse = {+TEST_mouse};
 PMCI_fnc_boardDraw = {};
@@ -103,7 +103,7 @@ call TEST_fnc_fresh;
 
 // --- Settings -----------------------------------------------------------------------
 private _names = TEST_settings apply {_x select 0};
-[count TEST_settings == 86 && {"PMCI_enable_wheel" in _names} && {"PMCI_lockKey5" in _names} && {"PMCI_safeItem" in _names} && {"PMCI_terminalAttempts" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
+[count TEST_settings == 88 && {"PMCI_enable_fuel" in _names} && {"PMCI_fuelDrain" in _names} && {"PMCI_enable_wheel" in _names} && {"PMCI_lockKey5" in _names} && {"PMCI_safeItem" in _names} && {"PMCI_terminalAttempts" in _names} && {"PMCI_trackHits" in _names} && {"PMCI_weldHeat" in _names} && {"PMCI_enable_edges" in _names} && {"PMCI_ribChance" in _names}
     && {"PMCI_enable_track" in _names} && {"PMCI_ivLimit" in _names} && {!("PMCI_enable_diagnose" in _names)} && {"PMCI_sutureMax" in _names}
     && {"PMCI_lockpickTwo" in _names} && {"PMCI_lockpickSpeed" in _names} && {"PMCI_safeNoise" in _names}
     && {(TEST_settings findIf {(_x select 2) != 1}) < 0},
@@ -768,13 +768,53 @@ private _tr = ["init", nil, [40, 6, 0.5, 2, 0.6, 0.9, 1, 30, 1]] call PMCI_fnc_t
 ["press", _tr] call PMCI_fnc_trackModel;
 [(_tr get "status") == "success" && {abs ((_tr get "quality") - 0.85) < 0.001}, "hits in the zone drive the pin in; the miss costs 15%"] call TEST_fnc_assert;
 
+// --- Fuel tank patch ----------------------------------------------------------------------------------------------------
+// A straight crack from (0, 100) to (400, 100); drain time 3 s.
+TEST_fnc_fuelGame = {
+    params ["_empty"];
+    ["init", nil, [[[0, 100], [400, 100]], 10, 20, 200, 60, 1, 3, _empty]] call PMCI_fnc_fuelModel
+};
+TEST_fnc_fuelWeld = {
+    params ["_state"];
+    private _x0 = 0;
+    for "_i" from 1 to 400 do {
+        if ((_state get "status") != "running") exitWith {};
+        _x0 = _x0 + 100 * 0.05;
+        ["mouse", _state, [_x0, 100, 5, true, 0.05]] call PMCI_fnc_fuelModel;
+        ["tick", _state, 0.05] call PMCI_fnc_fuelModel;
+    };
+    _state
+};
+private _boom = [[false] call TEST_fnc_fuelGame] call TEST_fnc_fuelWeld;
+[(_boom get "status") == "fail" && {_boom get "exploded"} && {(_boom get "covered") == 0},
+    "a torch on the crack of a tank that was not drained: the game fails, the tank goes up"] call TEST_fnc_assert;
+private _drained = [false] call TEST_fnc_fuelGame;
+["fix", _drained] call PMCI_fnc_fuelModel;
+for "_i" from 1 to 20 do {["tick", _drained, 0.1] call PMCI_fnc_fuelModel};
+private _halfway = !(_drained get "drained");
+private _early = +_drained;
+["mouse", _early, [200, 104, 0, true, 0.05]] call PMCI_fnc_fuelModel;
+for "_i" from 1 to 11 do {["tick", _drained, 0.1] call PMCI_fnc_fuelModel};
+private _readyAt = _drained get "drained";
+["mouse", _drained, [200, 160, 0, true, 0.05]] call PMCI_fnc_fuelModel;
+private _offCrack = (_drained get "status") == "running";
+[_drained] call TEST_fnc_fuelWeld;
+[_halfway && {_early get "exploded"} && {_readyAt} && {_offCrack} && {(_drained get "status") == "success"} && {!(_drained get "exploded")},
+    "draining takes its time (a torch on the crack meanwhile still sets it off); drained, the tank is welded like the hull"] call TEST_fnc_assert;
+private _dry = [[true] call TEST_fnc_fuelGame] call TEST_fnc_fuelWeld;
+private _offTank = [false] call TEST_fnc_fuelGame;
+["mouse", _offTank, [200, 160, 0, true, 0.05]] call PMCI_fnc_fuelModel;
+["mouse", _offTank, [200, 104, 0, false, 0.05]] call PMCI_fnc_fuelModel;
+[(_dry get "status") == "success" && {(_offTank get "status") == "running"},
+    "an empty tank needs no draining; a torch off the crack or not lit sets nothing off"] call TEST_fnc_assert;
+
 // --- Which game a medical action or repair plays ---------------------------------------------------------------------
 private _tank = "B_MBT_01_cannon_F" createVehicle [3, 3, 0];
 _tank setVariable ["TEST_class", "B_MBT_01_cannon_F"];
 _tank setVariable ["TEST_hitPoints", [["HitHull", "HitEngine", "HitFuel", "HitTurret", "HitLTrack"], [], [0.5, 0.5, 0.5, 0.5, 0.5]]];
-[([0, 1, 2, 3, 4] apply {[_tank, _x, "repair"] call PMCI_fnc_repairGame}) isEqualTo ["weld", "", "", "", ""]
+[([0, 1, 2, 3, 4] apply {[_tank, _x, "repair"] call PMCI_fnc_repairGame}) isEqualTo ["weld", "", "fuel", "", ""]
     && {([_tank, "HitBody", "repair"] call PMCI_fnc_repairGame) == "weld"} && {([_tank, "HitLTrack", "track"] call PMCI_fnc_repairGame) == "track"},
-    "a component repair is a weld on the hull or body, no game elsewhere (diagnosis off for now); tracks stay tracks"] call TEST_fnc_assert;
+    "a component repair is a weld on the hull or body, a tank patch on the fuel tank, no game elsewhere (diagnosis off for now); tracks stay tracks"] call TEST_fnc_assert;
 [([0, 1, 2, 3, 4] apply {[_tank, _x] call PMCI_fnc_partOf}) isEqualTo ["hull", "engine", "fuel", "turret", "other"], "the part named in the title"] call TEST_fnc_assert;
 call TEST_fnc_fresh;
 [([TEST_medic, _tank, 0, "MiscRepair"] call PMCI_fnc_repairTime) == 1 && {([TEST_medic, _tank, 1, "MiscRepair"] call PMCI_fnc_repairTime) == 15}
@@ -799,6 +839,26 @@ private _variant = _weldState get "variant";
 (PMCI_board get "state") set ["status", "success"];
 call PMCI_fnc_boardTick;
 [("ace_repair_fnc_doRepair" call TEST_called) isEqualTo [["ace_repair_fnc_doRepair", [TEST_medic, _tank, 0, "MiscRepair", [], [], []]]], "a finished weld is repaired by ACE"] call TEST_fnc_assert;
+call TEST_fnc_fresh;
+[TEST_medic, _tank, 2, "MiscRepair", [], [], []] call PMCI_fnc_repairSuccess;
+private _fuelBoard = PMCI_board get "state";
+["keyDown", [0, 28, false, false, false]] call PMCI_fnc_boardEvent;
+private _drainStarted = (_fuelBoard get "draining") >= 0;
+TEST_calls = [];
+for "_i" from 1 to 40 do {TEST_realTime = TEST_realTime + 0.25; call PMCI_fnc_boardTick};
+private _setFuel = "CBA_fnc_targetEvent" call TEST_called;
+[(PMCI_board get "game") == "fuel" && {_drainStarted} && {_fuelBoard get "drained"} && {count _setFuel == 1}
+    && {((_setFuel select 0) select 1) isEqualTo ["ace_common_setFuel", [_tank, 0], _tank]}
+    && {((["fuel", _fuelBoard] call TEST_look) select 0) == (format ["fuel_scene_%1", _fuelBoard get "variant"] call TEST_tex)},
+    "a fuel tank repair opens the tank patch; the fix key drains it, emptying the vehicle's tank where it is local, once"] call TEST_fnc_assert;
+[false] call PMCI_fnc_finish;
+call TEST_fnc_fresh;
+[TEST_medic, _tank, 2, "MiscRepair", [], [], []] call PMCI_fnc_repairSuccess;
+(PMCI_board get "state") set ["exploded", true];
+(PMCI_board get "state") set ["status", "fail"];
+call PMCI_fnc_boardTick;
+[isNil "PMCI_board" && {damage _tank == 1} && {("ace_repair_fnc_doRepair" call TEST_called) isEqualTo []},
+    "welding an undrained tank blows up the vehicle; nothing is repaired"] call TEST_fnc_assert;
 call TEST_fnc_fresh;
 private _track = "ACE_Track" createVehicle [2, 3, 0];
 [TEST_medic, _tank, "HitLTrack", "RepairTrack", [], [], [_track]] call PMCI_fnc_repairSuccess;

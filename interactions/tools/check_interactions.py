@@ -48,9 +48,9 @@ def check_textures():
     look = (ADDON / "Board/fn_boardLook.sqf").read_text(encoding="utf-8")
     names |= {m + "_ca" for m in re.findall(r'"([a-z]+_[a-z0-9_]+)"', look)}
     names |= {f"tq_windlass_{k}_ca" for k in range(8)} | {f"bandage_gauze_{k}_ca" for k in range(1, 5)}
-    names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"weld_scene_{k}_ca" for k in range(1, 5)}
+    names |= {f"dirt_{k}_ca" for k in range(1, 4)} | {f"weld_scene_{k}_ca" for k in range(1, 5)} | {f"fuel_scene_{k}_ca" for k in range(1, 5)}
     names |= {f"icon_{g}_ca" for g in ("cpr", "tourniquet", "bandage", "pressure", "edges", "clean", "iv", "suture", "splint", "wheel",
-                                         "diagnose", "weld", "track", "lockpick", "terminal", "safe")}
+                                         "diagnose", "weld", "fuel", "track", "lockpick", "terminal", "safe")}
     names |= {f"icon_{a}_ca" for a in ("lock", "key", "keypad")}  # ACE actions of a locked box
     missing = sorted(n for n in names if not (data / f"{n}.paa").is_file())
     if missing:
