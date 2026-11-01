@@ -29,7 +29,7 @@ TEST_settings = [];
 CBA_fnc_addSetting = {
     params ["_name", "_type", "_title", "_category", "_value", ["_global", 0]];
     TEST_settings pushBack [_name, _type, _value, _global];
-    missionNamespace setVariable [_name, _value select 2];
+    missionNamespace setVariable [_name, if (_type == "SLIDER") then {_value select 2} else {_value}];
 };
 TEST_hasInterface = true;
 ACE_player = player;
@@ -54,8 +54,11 @@ TEST_run = {
 
 // --- Settings and start-up ------------------------------------------------------------------
 call PMCD_fnc_settings;
-[TEST_settings isEqualTo [["PMCD_debtPaybackFloor", "SLIDER", [0.3, 0.5, 0.4, 2], 1]] && {PMCD_debtPaybackFloor == 0.4},
-    "one CBA setting: the payback floor, 0.30-0.50, default 0.40, forced by the server"] call TEST_fnc_assert;
+private _floorSetting = TEST_settings select {(_x select 0) == "PMCD_debtPaybackFloor"};
+[count TEST_settings == 31 && {(TEST_settings findIf {(_x select 3) != 1}) < 0} && {_floorSetting isEqualTo [["PMCD_debtPaybackFloor", "SLIDER", [0.3, 0.5, 0.4, 2], 1]]}
+    && {PMCD_debtPaybackFloor == 0.4} && {PMCD_stimDuty == 0.5} && {PMCD_stimTime40 == 12} && {PMCD_stimDamage2_70 == 0.35} && {PMCD_stimFillAN}
+    && {PMCD_overdosePulse == 200} && {PMCD_paybackStim == 4} && {PMCD_debtBaseWork == 400},
+    "31 CBA settings, all forced by the server, defaults of the spec (payback floor 0.30-0.50, default 0.40)"] call TEST_fnc_assert;
 call PMCD_fnc_init;
 private _duty = ("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) select 0 select 1;
 [count ("CBA_fnc_addEventHandler" call TEST_called) == 3 && {count ("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) == 1}
@@ -174,6 +177,36 @@ private _thirsty = [player] call PMCD_fnc_thirst;
 CBA_missionTime = _phaseEnd;
 private _calm = [player] call PMCD_fnc_thirst;
 [_thirsty == 3 && {_calm == 0}, "an active Stim1f triples thirst (twice the base work on top); none after it"] call TEST_fnc_assert;
+
+// --- CBA settings change the drug --------------------------------------------------------------
+PMCD_stimTime40 = 5;
+PMCD_stimDamage1_40 = 0.5;
+PMCD_stimDamage4_70 = 0.05;
+PMCD_loadLight = 45;
+private _tuned = [[1, 1] call PMCD_fnc_stimDose, [9, 2] call PMCD_fnc_stimDose, [40] call PMCD_fnc_loadClass];
+PMCD_stimDuty = 0.3;
+private _dutyTuned = [[createHashMapFromArray [["stimUntil", 10]], 0] call PMCD_fnc_effects] call PMCD_fnc_duty;
+PMCD_debtBaseWork = 800;
+PMCD_debtFactor = 1;
+PMCD_paybackStim = 10;
+private _tunedDebt = createHashMapFromArray [["stimUntil", -1], ["stimDoses", 0], ["stimRate", 0], ["debtStim", 0], ["debtFen", 0]];
+[_tunedDebt, 1, 0, [["stim", "dec", 0.3]], 2300, 8.8, 0.4] call PMCD_fnc_step;
+private _tunedAccrued = _tunedDebt get "debtStim";
+private _tunedPay = ([_tunedDebt, 1, 0, [], 2000, 8.8, 0.4] call PMCD_fnc_step) select 1;
+PMCD_stimThirst = 5;
+player setVariable ["PMCD_state", createHashMapFromArray [["stimUntil", 1e9]]];
+private _currentWork = 1;
+private _tunedThirst = [player] call PMCD_fnc_thirst;
+PMCD_overdosePulse = 250;
+PMCD_overdoseRampMin = 40;
+PMCD_overdoseRampMax = 40;
+TEST_calls = [];
+[player] call PMCD_fnc_overdose;
+private _tunedOd = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
+[_tuned isEqualTo [[300, 0.5], [600, 0.05], 0] && {[_dutyTuned, 0.3] call TEST_near} && {[_tunedAccrued, 800 * 0.7 / 8.8, 0.01] call TEST_near}
+    && {_tunedPay == 1990} && {_tunedThirst == 4} && {(_tunedOd select 2) == 40} && {(_tunedOd select 4) == 250},
+    "CBA settings change durations, damage, load columns, duty, debt and payback, thirst and the overdose"] call TEST_fnc_assert;
+call PMCD_fnc_settings;
 
 // --- Zeus module: check and set on the player's machine ----------------------------------------
 call TEST_fresh;

@@ -1,0 +1,11 @@
+Files in this folder come from ACE3 (https://github.com/acemod/ACE3), GNU General Public
+License v2.0:
+
+- epinephrine.p3d: addons/medical_treatment/data/epinephrine.p3d (MLOD source model).
+- epimorphine_co.png: addons/medical_treatment/data/EpiMorphine_co.paa converted to PNG.
+- epinephrine_ca.png: addons/medical_treatment/ui/epinephrine_ca.paa converted to PNG
+  (used only for the side-by-side preview).
+
+tools/make_textures.py derives from them addons/pmc_drugs/data/stim1f.p3d (the same model
+pointing to another texture) and textures/stim1f_co.png (the epinephrine part of the sheet
+repainted). Those two derived files are therefore also under GPL-2.0 terms.

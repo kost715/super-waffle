@@ -74,6 +74,146 @@
                 <Original>Paying back drug debt never takes the anaerobic reserve below this share of its maximum.</Original>
                 <Russian>Выплата долга никогда не опускает анаэробный запас ниже этой доли от максимума.</Russian>
             </Key>
+            <Key ID="STR_PMCD_SET_STIM">
+                <Original>Stim1f</Original>
+                <Russian>Stim1f</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_DAMAGE">
+                <Original>Stim1f: muscle damage per dose</Original>
+                <Russian>Stim1f: урон мышцам за дозу</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OVERDOSE">
+                <Original>Stim1f: overdose</Original>
+                <Russian>Stim1f: передозировка</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DEBT">
+                <Original>Debt</Original>
+                <Russian>Долг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_DUTY">
+                <Original>Duty while active (lower = less effort)</Original>
+                <Russian>Нагрузка во время действия (меньше — легче)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_TIME20">
+                <Original>Duration at 20 kg load (min)</Original>
+                <Russian>Длительность при 20 кг (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_TIME40">
+                <Original>Duration at 40 kg load (min)</Original>
+                <Russian>Длительность при 40 кг (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_TIME70">
+                <Original>Duration at 70 kg load (min)</Original>
+                <Russian>Длительность при 70 кг (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_LOAD_LIGHT">
+                <Original>Load counted as 20 kg up to (kg)</Original>
+                <Russian>Нагрузка считается «20 кг» до (кг)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_LOAD_HEAVY">
+                <Original>Load counted as 40 kg up to (kg), above: 70 kg</Original>
+                <Russian>Нагрузка считается «40 кг» до (кг), выше — «70 кг»</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_THIRST">
+                <Original>Thirst multiplier while active (ACE Field Rations)</Original>
+                <Russian>Множитель жажды во время действия (ACE Field Rations)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_INJECT">
+                <Original>Injection time (s)</Original>
+                <Russian>Время ввода (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_FILL">
+                <Original>Fill the sprint reserve on injection</Original>
+                <Russian>Заливать запас для рывка при вводе</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_STIM_FILL_TIP">
+                <Original>The anaerobic reserve of ACE Advanced Fatigue is set to full when Stim1f is injected.</Original>
+                <Russian>Анаэробный запас ACE Advanced Fatigue заполняется до максимума при вводе Stim1f.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OD_PULSE">
+                <Original>Pulse added by an overdose (bpm; above 220 the heart stops)</Original>
+                <Russian>Прибавка пульса при передозе (уд/мин; выше 220 — остановка сердца)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OD_RAMP_MIN">
+                <Original>Pulse build-up, shortest (s)</Original>
+                <Russian>Разгон пульса, минимум (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OD_RAMP_MAX">
+                <Original>Pulse build-up, longest (s)</Original>
+                <Russian>Разгон пульса, максимум (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OD_DEATH_MIN">
+                <Original>Without ACE Medical: death after, shortest (s)</Original>
+                <Russian>Без ACE Medical: смерть через, минимум (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_OD_DEATH_MAX">
+                <Original>Without ACE Medical: death after, longest (s)</Original>
+                <Russian>Без ACE Medical: смерть через, максимум (с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DEBT_WORK">
+                <Original>Base work for debt (W)</Original>
+                <Russian>Базовая работа для долга (Вт)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DEBT_FACTOR">
+                <Original>Debt factor (share of the saved work)</Original>
+                <Russian>Коэффициент долга (доля сэкономленной работы)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_PAY_STIM">
+                <Original>Stim1f debt payback (mmol/s)</Original>
+                <Russian>Выплата долга Stim1f (ммоль/с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_PAY_FEN">
+                <Original>Fentropil debt payback (mmol/s)</Original>
+                <Russian>Выплата долга Фенотропила (ммоль/с)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG1_20">
+                <Original>Dose 1, 20 kg</Original>
+                <Russian>Доза 1, 20 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG1_40">
+                <Original>Dose 1, 40 kg</Original>
+                <Russian>Доза 1, 40 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG1_70">
+                <Original>Dose 1, 70 kg</Original>
+                <Russian>Доза 1, 70 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG2_20">
+                <Original>Dose 2, 20 kg</Original>
+                <Russian>Доза 2, 20 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG2_40">
+                <Original>Dose 2, 40 kg</Original>
+                <Russian>Доза 2, 40 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG2_70">
+                <Original>Dose 2, 70 kg</Original>
+                <Russian>Доза 2, 70 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG3_20">
+                <Original>Dose 3, 20 kg</Original>
+                <Russian>Доза 3, 20 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG3_40">
+                <Original>Dose 3, 40 kg</Original>
+                <Russian>Доза 3, 40 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG3_70">
+                <Original>Dose 3, 70 kg</Original>
+                <Russian>Доза 3, 70 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG4_20">
+                <Original>Dose 4+, 20 kg</Original>
+                <Russian>Доза 4 и дальше, 20 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG4_40">
+                <Original>Dose 4+, 40 kg</Original>
+                <Russian>Доза 4 и дальше, 40 кг</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_DMG4_70">
+                <Original>Dose 4+, 70 kg</Original>
+                <Russian>Доза 4 и дальше, 70 кг</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

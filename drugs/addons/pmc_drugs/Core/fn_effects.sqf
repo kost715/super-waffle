@@ -5,5 +5,5 @@
 // Stim1f for now; the other drugs of the spec add their entries here.
 params ["_state", "_now"];
 private _effects = [];
-if (_now < (_state get "stimUntil")) then {_effects pushBack ["stim", "dec", 0.5]};
+if (_now < (_state get "stimUntil")) then {_effects pushBack ["stim", "dec", missionNamespace getVariable ["PMCD_stimDuty", 0.5]]};
 _effects

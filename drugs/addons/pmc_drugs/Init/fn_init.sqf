@@ -13,8 +13,9 @@ if (!hasInterface) exitWith {};
 if (!isNil "ace_field_rations_fnc_addStatusModifier") then {
     [0, {[_this] call PMCD_fnc_thirst}] call ace_field_rations_fnc_addStatusModifier;
 };
-private _action = ["PMCD_takeStim", localize "STR_PMCD_TAKE_STIM", "\z\ace\addons\medical_treatment\ui\epinephrine_ca.paa", {
+private _action = ["PMCD_takeStim", localize "STR_PMCD_TAKE_STIM", "\pmc_drugs\data\stim1f_ca.paa", {
     params ["", "_player"];
-    [2, [_player], {(_this select 0) params ["_unit"]; [_unit] call PMCD_fnc_takeStim}, {}, localize "STR_PMCD_INJECTING"] call ace_common_fnc_progressBar;
+    [missionNamespace getVariable ["PMCD_stimInject", 2], [_player], {(_this select 0) params ["_unit"]; [_unit] call PMCD_fnc_takeStim}, {},
+        localize "STR_PMCD_INJECTING"] call ace_common_fnc_progressBar;
 }, {params ["", "_player"]; [_player] call PMCD_fnc_canTake}] call ace_interact_menu_fnc_createAction;
 ["CAManBase", 1, ["ACE_SelfActions", "ACE_Equipment"], _action, true] call ace_interact_menu_fnc_addActionToClass;

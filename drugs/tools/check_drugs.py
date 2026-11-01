@@ -37,12 +37,26 @@ def stage(tree):
             path.write_text(text, encoding="utf-8")
 
 
+def check_files():
+    """Every picture or model the addon names must be in the addon (Arma shows nothing otherwise)."""
+    names = set()
+    for path in ADDON.rglob("*"):
+        if path.suffix in (".sqf", ".hpp", ".cpp"):
+            names |= set(re.findall(r"\\pmc_drugs\\(data\\[A-Za-z0-9_]+\.(?:paa|p3d))", path.read_text(encoding="utf-8")))
+    model = (ADDON / "data/stim1f.p3d").read_bytes()
+    names |= {m.decode().split("pmc_drugs\\", 1)[1] for m in re.findall(rb"pmc_drugs\\data\\[a-z0-9_]+\.paa", model)}
+    missing = sorted(n for n in names if not (ADDON / n.replace("\\", "/")).is_file())
+    if missing:
+        raise SystemExit(f"Files missing from the addon: {', '.join(missing)}")
+    return len(names)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--vm", type=Path, required=True)
     p.add_argument("--report", type=Path, help="write a JSON summary here")
     args = p.parse_args()
-    report = {"syntax": [], "arma_runtime_tested": False}
+    report = {"syntax": [], "arma_runtime_tested": False, "files": check_files()}
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp)
         stage(tree)
@@ -65,7 +79,7 @@ def main():
         args.report.write_text(json.dumps(report, indent=2) + "\n")
     if not ok or not match:
         raise SystemExit("Drugs checks failed or did not complete")
-    print(f"Parsed {len(report['syntax'])} SQF files; {match[1]} drug assertions passed.")
+    print(f"Parsed {len(report['syntax'])} SQF files; {match[1]} drug assertions passed; {report['files']} data files named, all present.")
 
 
 if __name__ == "__main__":

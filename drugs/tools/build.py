@@ -9,7 +9,7 @@ import struct
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.1.0_alpha1"
+VERSION = "0.2.0_alpha1"
 MOD = "@PMC_Drugs"
 PREFIX = "pmc_drugs"
 STAMP = (2026, 11, 1, 12, 0, 0)
@@ -56,7 +56,7 @@ def main() -> None:
     ready = dist / f"PMC_Drugs_{VERSION}.zip"
     write_zip(ready, package)
     source_files = {}
-    for folder in ["addons", "tools", "tests"]:
+    for folder in ["addons", "tools", "tests", "textures"]:
         for p in sorted((ROOT / folder).rglob("*")):
             if p.is_file() and "__pycache__" not in p.parts and ".cache" not in p.parts:
                 source_files[f"PMC_Drugs_sources/{p.relative_to(ROOT).as_posix()}"] = p.read_bytes()

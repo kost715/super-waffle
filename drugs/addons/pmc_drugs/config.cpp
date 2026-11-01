@@ -7,7 +7,7 @@ class CfgPatches {
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.1.0";
+        version = "0.2.0";
     };
 };
 
@@ -49,15 +49,16 @@ class CfgFunctions {
 class CfgWeapons {
     class ACE_ItemCore;
     class CBA_MiscItem_ItemInfo;
-    // Combat stimulant, self-injected (ACE self-interaction, Equipment). The autoinjector
-    // model and picture are ACE's (medical_treatment).
+    // Combat stimulant, self-injected (ACE self-interaction, Equipment). Its own picture, and
+    // ACE's autoinjector model with its own texture: matte black, orange bands, "STIM-1F"
+    // (tools/make_textures.py).
     class PMCD_Stim1f: ACE_ItemCore {
         scope = 2;
         author = "LifeSim PMC project";
         displayName = "$STR_PMCD_STIM_NAME";
         descriptionShort = "$STR_PMCD_STIM_DESC";
-        picture = "\z\ace\addons\medical_treatment\ui\epinephrine_ca.paa";
-        model = "\z\ace\addons\medical_treatment\data\epinephrine.p3d";
+        picture = "\pmc_drugs\data\stim1f_ca.paa";
+        model = "\pmc_drugs\data\stim1f.p3d";
         class ItemInfo: CBA_MiscItem_ItemInfo {
             mass = 11; // 0.5 kg (22 mass units per kg)
         };

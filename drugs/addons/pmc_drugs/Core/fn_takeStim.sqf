@@ -14,6 +14,6 @@ _state set ["stimDoses", _dose];
 ([_dose, [[_unit] call PMCD_fnc_unitLoad] call PMCD_fnc_loadClass] call PMCD_fnc_stimDose) params ["_duration", "_damage"];
 _state set ["stimUntil", _now + _duration];
 _state set ["stimRate", _damage / _duration];
-// ACE Advanced Fatigue's full AN reserve (AN_MAXRESERVE).
-if (_unit isEqualTo ACE_player) then {ace_advanced_fatigue_anReserve = 2300};
+// ACE Advanced Fatigue's full AN reserve (AN_MAXRESERVE), unless switched off in CBA.
+if (_unit isEqualTo ACE_player && {missionNamespace getVariable ["PMCD_stimFillAN", true]}) then {ace_advanced_fatigue_anReserve = 2300};
 true
