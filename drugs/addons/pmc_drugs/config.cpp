@@ -3,11 +3,11 @@ class CfgPatches {
         name = "PMC Drugs";
         author = "LifeSim PMC project";
         units[] = {"PMCD_ModuleMuscle"};
-        weapons[] = {"PMCD_Stim1f"};
+        weapons[] = {"PMCD_Stim1f", "PMCD_Fentropil"};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.4.0";
+        version = "0.5.0";
     };
 };
 
@@ -29,6 +29,11 @@ class CfgFunctions {
             class step {};
             class tick {};
             class takeStim {};
+            class takeFen {};
+            class fenLevel {};
+            class fenApply {};
+            class fenGrain {};
+            class fenPain {};
             class currentWork {};
             class pulseEnd {};
             class thirst {};
@@ -68,6 +73,18 @@ class CfgWeapons {
         model = "\pmc_drugs\data\stim1f.p3d";
         class ItemInfo: CBA_MiscItem_ItemInfo {
             mass = 11; // 0.5 kg (22 mass units per kg)
+        };
+    };
+    // Cognitive modulator, self-injected the same way. White, teal bands, "FENTROPIL".
+    class PMCD_Fentropil: ACE_ItemCore {
+        scope = 2;
+        author = "LifeSim PMC project";
+        displayName = "$STR_PMCD_FEN_NAME";
+        descriptionShort = "$STR_PMCD_FEN_DESC";
+        picture = "\pmc_drugs\data\fentropil_ca.paa";
+        model = "\pmc_drugs\data\fentropil.p3d";
+        class ItemInfo: CBA_MiscItem_ItemInfo {
+            mass = 7; // 0.3 kg
         };
     };
 };

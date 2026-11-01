@@ -27,9 +27,20 @@ CONDENSED = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 BODY = (34, 36, 33)
 BAND = (232, 118, 24)
 TEXT = (240, 240, 232)
+# Fentropil: off-white body, teal bands and lettering, dark small print.
+FEN_BODY = (222, 224, 218)
+FEN_BAND = (0, 138, 140)
+FEN_TEXT = (40, 44, 48)
 
 
-def injector_sheet(body, band, label, sub):
+def fit(draw, text, size, width):
+    """The font size (at most size) at which text fits in width."""
+    while size > 8 and draw.textlength(text, font=ImageFont.truetype(BOLD, size)) > width:
+        size -= 2
+    return ImageFont.truetype(BOLD, size)
+
+
+def injector_sheet(body, band, label, sub, text_colour=TEXT):
     """The epinephrine half of ACE's sheet repainted: body colour, a band at both ends of the
     body, the label along the barrel. Returns 512 x 512 RGB."""
     src = Image.open(ACE / "epimorphine_co.png").convert("RGB")
@@ -63,12 +74,12 @@ def injector_sheet(body, band, label, sub):
     length = (y1 - y0) - 160
     strip = Image.new("RGBA", (length, x1 - x0), (0, 0, 0, 0))
     d = ImageDraw.Draw(strip)
-    big = ImageFont.truetype(BOLD, 96)
-    small = ImageFont.truetype(CONDENSED, 30)
+    big = fit(d, label, 96, length - 20)
+    small = fit(d, sub, 30, length - 20)
     w = d.textlength(label, font=big)
     d.text(((length - w) / 2, (x1 - x0) / 2 - 92), label, font=big, fill=band + (255,))
     w = d.textlength(sub, font=small)
-    d.text(((length - w) / 2, (x1 - x0) / 2 + 20), sub, font=small, fill=TEXT + (255,))
+    d.text(((length - w) / 2, (x1 - x0) / 2 + 20), sub, font=small, fill=text_colour + (255,))
     strip = strip.rotate(90, expand=True)
     img.paste(strip, (cx - strip.width // 2, cy - strip.height // 2), strip)
     return img.resize((512, 512), Image.LANCZOS)
@@ -105,9 +116,9 @@ def icon(body, band, label):
     shaded(0.76, 0.84, 15.4, band)
     shaded(0.86, 1.0, 14, (210, 214, 220))       # needle end, clear plastic
     # Label along the barrel.
-    font = ImageFont.truetype(BOLD, 15 * s)
     text = Image.new("RGBA", (int(0.5 * length), 20 * s), (0, 0, 0, 0))
     td = ImageDraw.Draw(text)
+    font = fit(td, label, 15 * s, text.width)
     w = td.textlength(label, font=font)
     td.text(((text.width - w) / 2, 0), label, font=font, fill=band + (255,))
     import math
@@ -216,16 +227,19 @@ def main():
     sheet.save(OUT / "stim1f_co.png")
     icon(BODY, BAND, "STIM-1F").save(OUT / "stim1f_ca.png")
     (DATA / "stim1f.p3d").write_bytes(model(r"pmc_drugs\data\stim1f_co.paa"))
+    fen = injector_sheet(FEN_BODY, FEN_BAND, "FENTROPIL", "COGNITIVE MODULATOR · IM", FEN_TEXT)
+    fen.save(OUT / "fentropil_co.png")
+    icon(FEN_BODY, FEN_BAND, "FENTROPIL").save(OUT / "fentropil_ca.png")
+    (DATA / "fentropil.p3d").write_bytes(model(r"pmc_drugs\data\fentropil_co.paa"))
     for name, draw in (("hud_plate_ca.png", hud_plate), ("hud_muscle_ca.png", hud_muscle), ("hud_tired_ca.png", hud_tired)):
         draw().save(OUT / name)
-    preview = Image.new("RGB", (768, 512), (60, 60, 60))
+    preview = Image.new("RGB", (1280, 512), (60, 60, 60))
     preview.paste(sheet, (0, 0))
+    preview.paste(fen, (768, 0))
+    fic = Image.open(OUT / "fentropil_ca.png")
+    preview.paste(fic, (512, 256), fic)
     ic = Image.open(OUT / "stim1f_ca.png")
     preview.paste(ic, (512, 0), ic)
-    ace_icon = ACE / "epinephrine_ca.png"
-    if ace_icon.exists():
-        other = Image.open(ace_icon)
-        preview.paste(other, (512, 256), other)
     # The HUD icons as the game shows them: plate, then the muscle icon at 0.2 / 0.5 / 0.7 / 0.9.
     plate = Image.open(OUT / "hud_plate_ca.png")
     muscle = Image.open(OUT / "hud_muscle_ca.png")
@@ -244,7 +258,7 @@ def main():
     cell.alpha_composite(tired)
     preview.paste(cell.convert("RGB"), (516, 370))
     preview.save(OUT / "_preview.png")
-    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d")
+    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d, fentropil_co.png, fentropil_ca.png, data/fentropil.p3d")
 
 
 if __name__ == "__main__":

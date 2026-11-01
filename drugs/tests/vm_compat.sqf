@@ -248,6 +248,15 @@ TEST_fnc_onGround = {_this getVariable ["TEST_onGround", true]};
 TEST_fnc_underwater = {false};
 TEST_fnc_stance = {_this getVariable ["TEST_stance", "STAND"]};
 TEST_fnc_surfaceNormal = {[0, 0, 1]};
+// Animation speed and Fentropil's film grain (post-process effects are recorded).
+TEST_fnc_setAnimSpeed = {(_this select 0) setVariable ["TEST_animSpeed", _this select 1]};
+TEST_fnc_visionMode = {_this getVariable ["TEST_vision", 0]};
+TEST_pp = [];
+TEST_fnc_ppCreate = {TEST_pp pushBack ["create", _this]; count TEST_pp + 100};
+TEST_fnc_ppEnable = {TEST_pp pushBack ["enable", _this]};
+TEST_fnc_ppAdjust = {TEST_pp pushBack ["adjust", +_this]};
+TEST_fnc_ppCommit = {TEST_pp pushBack ["commit", _this]};
+TEST_fnc_ppDestroy = {TEST_pp pushBack ["destroy", _this]};
 TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
 TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
 
@@ -282,6 +291,13 @@ TEST_fnc_compatCode = {
             case "CALLUNARY underwater": {"TEST_fnc_underwater" call _compatCall};
             case "CALLUNARY stance": {"TEST_fnc_stance" call _compatCall};
             case "CALLUNARY surfacenormal": {"TEST_fnc_surfaceNormal" call _compatCall};
+            case "CALLBINARY setanimspeedcoef": {"TEST_fnc_setAnimSpeed" call _compatPair};
+            case "CALLUNARY currentvisionmode": {"TEST_fnc_visionMode" call _compatCall};
+            case "CALLUNARY ppeffectcreate": {"TEST_fnc_ppCreate" call _compatCall};
+            case "CALLBINARY ppeffectenable": {"TEST_fnc_ppEnable" call _compatPair};
+            case "CALLBINARY ppeffectadjust": {"TEST_fnc_ppAdjust" call _compatPair};
+            case "CALLBINARY ppeffectcommit": {"TEST_fnc_ppCommit" call _compatPair};
+            case "CALLUNARY ppeffectdestroy": {"TEST_fnc_ppDestroy" call _compatCall};
             // Flat fixture world: the model centre is the VM position.
             case "CALLUNARY getposworld": {_compatOut pushBack "CALLUNARY getpos"};
             case "CALLUNARY getallhitpointsdamage": {"TEST_fnc_hitPoints" call _compatCall};

@@ -40,17 +40,33 @@ _lines pushBack format ["damage now %1 /s per dose (%2 in all)  whole dose at th
     (_base * _wc ^ 2 / _poolMax * count _doses) toFixed 6, (_base * _wc) toFixed 3, (_poolMax / _wc / 60) toFixed 1];
 _lines pushBack format ["pulse per dose +%1 bpm in %2 s  now from the doses +%3 bpm", ["PMCD_stimPulse", 0] call _g, ["PMCD_stimPulseRamp", 0] call _g,
     (missionNamespace getVariable ["PMCD_stimPulse", 75]) * count _doses];
+_lines pushBack ("Fentropil" call _head);
+([_state, CBA_missionTime] call PMCD_fnc_fenLevel) params ["_c", "_f"];
+private _fenDoses = _state getOrDefault ["fenDoses", []];
+_lines pushBack format ["doses taken %1  in the body %2 (minutes since each %3)  C %4  f(C) %5", _state getOrDefault ["fenTaken", 0], count _fenDoses,
+    _fenDoses apply {((CBA_missionTime - _x) / 60) toFixed 1}, _c toFixed 3, _f toFixed 3];
+_lines pushBack format ["duty %1  pathway boost x%2 (ACE base %3)  AE2 recovery +%4 mmol/s  anim speed x%5 (on %6)  sway x%7  new pain x%8",
+    (1 - (1 - (missionNamespace getVariable ["PMCD_fenDuty", 0.9])) * _f) toFixed 3, (_state getOrDefault ["fenBoost", 1]) toFixed 4,
+    (_state getOrDefault ["fenBase", []]) apply {_x toFixed 1}, (_state getOrDefault ["fenRegen", 0]) toFixed 3,
+    (1 + (missionNamespace getVariable ["PMCD_fenAnim", 0.05]) * _f) toFixed 3, missionNamespace getVariable ["PMCD_fenAnimOn", true],
+    (1 - (missionNamespace getVariable ["PMCD_fenSway", 0.15]) * _f) toFixed 3, (1 - (missionNamespace getVariable ["PMCD_fenPain", 0.15]) * _f) toFixed 3];
+_lines pushBack format ["film grain %1 (effect %2)  pain last second %3", missionNamespace getVariable ["PMCD_fenGrainValues", "-"],
+    missionNamespace getVariable ["PMCD_fenGrain", -1], (_state getOrDefault ["painSeen", 0]) toFixed 3];
 _lines pushBack ("Duty and debt" call _head);
 _lines pushBack format ["effects %1", _effects];
 _lines pushBack format ["duty: decreasing %1  increasing %2  final %3", _dec toFixed 2, _inc toFixed 2, ([_effects] call PMCD_fnc_duty) toFixed 3];
-_lines pushBack format ["debt %1 mmol (Stim1f %2, Fentropil %3)  icon %4", _debt toFixed 0, (_state getOrDefault ["debtStim", 0]) toFixed 0,
+_lines pushBack format ["debt %1 mmol: Stim1f pool %2, Fentropil pool %3  icon %4", _debt toFixed 0, (_state getOrDefault ["debtStim", 0]) toFixed 0,
     (_state getOrDefault ["debtFen", 0]) toFixed 0, _debt > 500];
 (_state getOrDefault ["lastWork", [0, 0, 0, 0]]) params ["_workNow", "_nominal", "_savings", "_accrual"];
 _lines pushBack format ["work now %1 W  nominal (no drugs) %2 W  saved %3 W  debt accrual %4 mmol/s", _workNow toFixed 1, _nominal toFixed 1,
     _savings toFixed 1, _accrual toFixed 2];
-_lines pushBack format ["payback %1 mmol/s (15 x RF %2)  AE2 floor %3  paying %4", _rate toFixed 1, _recovery toFixed 2, _floor toFixed 0,
-    _dec >= 1 && {_debt > 0} && {_ae2 > _floor}];
-_lines pushBack format ["payback time at full rate %1 min", (_debt / (_rate max 0.001) / 60) toFixed 1];
+private _fenRate = _rate / ((missionNamespace getVariable ["PMCD_fenPaybackDivider", 3]) max 1);
+(_state getOrDefault ["lastPay", ["", 0]]) params ["_payPool", "_payRate"];
+_lines pushBack format ["payback: Stim1f pool %1 mmol/s (15 x RF %2), Fentropil pool %3 mmol/s (after Stim1f's)  AE2 floor %4  last second: %5 %6 mmol/s",
+    _rate toFixed 1, _recovery toFixed 2, _fenRate toFixed 1, _floor toFixed 0, [_payPool, "none"] select (_payPool == ""), _payRate toFixed 2];
+_lines pushBack format ["payback time at full rate %1 min (Stim1f %2, Fentropil %3)",
+    (((_state getOrDefault ["debtStim", 0]) / (_rate max 0.001) + (_state getOrDefault ["debtFen", 0]) / (_fenRate max 0.001)) / 60) toFixed 1,
+    ((_state getOrDefault ["debtStim", 0]) / (_rate max 0.001) / 60) toFixed 1, ((_state getOrDefault ["debtFen", 0]) / (_fenRate max 0.001) / 60) toFixed 1];
 _lines pushBack ("ACE Advanced Fatigue" call _head);
 _lines pushBack format ["muscleDamage %1  muscleFactor %2  icon colour %3", ["ace_advanced_fatigue_muscleDamage", 4] call _g,
     (sqrt (1 - (missionNamespace getVariable ["ace_advanced_fatigue_muscleDamage", 0]))) toFixed 3,
@@ -90,6 +106,11 @@ _lines pushBack ("PMC Drugs settings" call _head);
 _lines pushBack format ["duty %1  pool %2  base damage %3  bevel a %4 k %5  weight %6-%7 kg  thirst x%8  fill AN %9", ["PMCD_stimDuty"] call _g,
     ["PMCD_stimPool", 0] call _g, ["PMCD_stimBaseDamage", 3] call _g, ["PMCD_stimBevelA"] call _g, ["PMCD_stimBevelK"] call _g,
     ["PMCD_stimWeightMin", 0] call _g, ["PMCD_stimWeightMax", 0] call _g, ["PMCD_stimThirst", 1] call _g, ["PMCD_stimFillAN"] call _g];
-_lines pushBack format ["debt: factor %1  payback x%2  AE2 floor %3  pulse per dose +%4 bpm in %5 s", ["PMCD_debtFactor"] call _g,
-    ["PMCD_paybackMultiplier", 1] call _g, ["PMCD_ae2Floor"] call _g, ["PMCD_stimPulse", 0] call _g, ["PMCD_stimPulseRamp", 0] call _g];
+_lines pushBack format ["debt: factor %1  payback x%2  Fentropil pool /%3  AE2 floor %4  pulse per dose +%5 bpm in %6 s", ["PMCD_debtFactor"] call _g,
+    ["PMCD_paybackMultiplier", 1] call _g, ["PMCD_fenPaybackDivider", 1] call _g, ["PMCD_ae2Floor"] call _g, ["PMCD_stimPulse", 0] call _g,
+    ["PMCD_stimPulseRamp", 0] call _g];
+_lines pushBack format ["Fentropil at f 1: duty %1  power +%2  AE2 recovery +%3  sway -%4  anim +%5  new pain -%6  dose %7 / %8 / %9 min  grain %10 / %11",
+    ["PMCD_fenDuty"] call _g, ["PMCD_fenPower", 3] call _g, ["PMCD_fenRegen"] call _g, ["PMCD_fenSway"] call _g, ["PMCD_fenAnim", 3] call _g,
+    ["PMCD_fenPain"] call _g, ["PMCD_fenRise", 0] call _g, ["PMCD_fenPlateau", 0] call _g, ["PMCD_fenFall", 0] call _g,
+    ["PMCD_fenGrainBase"] call _g, ["PMCD_fenGrainIntensity"] call _g];
 format ["<t size='0.8' font='EtelkaMonospacePro' shadow='2'>%1</t>", _lines joinString "<br/>"]

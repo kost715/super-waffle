@@ -166,6 +166,82 @@
                 <Original>Pulse rise build-up (s)</Original>
                 <Russian>Нарастание прибавки пульса (с)</Russian>
             </Key>
+            <Key ID="STR_PMCD_FEN_NAME">
+                <Original>Fentropil (cognitive modulator)</Original>
+                <Russian>Фенотропил (когнитивный модулятор)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_FEN_DESC">
+                <Original>Autoinjector. For about two hours: a little less effort, a little more power, steadier aim, quicker hands, new wounds hurt less. Builds up over 20 min; doses add up with diminishing effect. Costs debt.</Original>
+                <Russian>Автоинъектор. Около двух часов: чуть меньше нагрузка, чуть больше мощности, твёрже прицел, быстрее руки, новые раны болят меньше. Набирает силу 20 мин; дозы складываются с убывающим эффектом. Цена — долг.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_TAKE_FEN">
+                <Original>Inject Fentropil</Original>
+                <Russian>Ввести Фенотропил</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN">
+                <Original>Fentropil</Original>
+                <Russian>Фенотропил</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_DUTY">
+                <Original>Effort at full effect (a dose's plateau gives half the cut)</Original>
+                <Russian>Нагрузка при полном эффекте (плато одной дозы — половина снижения)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_POWER">
+                <Original>Pathway power boost at full effect (share)</Original>
+                <Russian>Прибавка мощности путей при полном эффекте (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_REGEN">
+                <Original>AE2 recovery boost at full effect (share)</Original>
+                <Russian>Прибавка восстановления AE2 при полном эффекте (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_SWAY">
+                <Original>Sway cut at full effect (share)</Original>
+                <Russian>Снижение качания прицела при полном эффекте (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_ANIM">
+                <Original>Animation speed boost at full effect (share)</Original>
+                <Russian>Ускорение анимаций при полном эффекте (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_PAIN">
+                <Original>Pain cut of new wounds at full effect (share)</Original>
+                <Russian>Снижение боли от новых ран при полном эффекте (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_RISE">
+                <Original>Dose build-up (min)</Original>
+                <Russian>Набор дозы (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_PLATEAU">
+                <Original>Dose plateau (min)</Original>
+                <Russian>Плато дозы (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_FALL">
+                <Original>Dose wear-off (min)</Original>
+                <Russian>Спад дозы (мин)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_ANIM_ON">
+                <Original>Fentropil speeds up animations</Original>
+                <Russian>Фенотропил ускоряет анимации</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_ANIM_ON_TIP">
+                <Original>Switch off if faster animations cause trouble (reloads, other mods).</Original>
+                <Russian>Выключите, если ускорение анимаций мешает (перезарядка, другие моды).</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_PAYBACK">
+                <Original>Fentropil debt pays back this many times slower (after the Stim1f debt)</Original>
+                <Russian>Долг Фенотропила выплачивается во столько раз медленнее (после долга Stim1f)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_GRAIN_BASE">
+                <Original>Fentropil film grain: base sharpness</Original>
+                <Russian>Зерно Фенотропила: базовая резкость</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_GRAIN_BASE_TIP">
+                <Original>Sharpness of the film grain that shows Fentropil; grows to x1.5 at full effect.</Original>
+                <Russian>Резкость зерна, которым виден Фенотропил; растёт до x1,5 при полном эффекте.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_GRAIN_INTENSITY">
+                <Original>Fentropil film grain: intensity at full effect</Original>
+                <Russian>Зерно Фенотропила: сила при полном эффекте</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

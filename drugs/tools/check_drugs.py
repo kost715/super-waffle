@@ -43,8 +43,8 @@ def check_files():
     for path in ADDON.rglob("*"):
         if path.suffix in (".sqf", ".hpp", ".cpp"):
             names |= set(re.findall(r"\\pmc_drugs\\(data\\[A-Za-z0-9_]+\.(?:paa|p3d))", path.read_text(encoding="utf-8")))
-    model = (ADDON / "data/stim1f.p3d").read_bytes()
-    names |= {m.decode().split("pmc_drugs\\", 1)[1] for m in re.findall(rb"pmc_drugs\\data\\[a-z0-9_]+\.paa", model)}
+    for p3d in (ADDON / "data").glob("*.p3d"):
+        names |= {m.decode().split("pmc_drugs\\", 1)[1] for m in re.findall(rb"pmc_drugs\\data\\[a-z0-9_]+\.paa", p3d.read_bytes())}
     missing = sorted(n for n in names if not (ADDON / n.replace("\\", "/")).is_file())
     if missing:
         raise SystemExit(f"Files missing from the addon: {', '.join(missing)}")

@@ -22,7 +22,7 @@ TEST_allNear = {
     missionNamespace setVariable ["PMCD_fnc_" + (_x select 1), (format ["pmc_drugs/%1/fn_%2.sqf", _x select 0, _x select 1]) call TEST_fnc_load];
 } forEach [["Init", "settings"], ["Init", "init"], ["Core", "state"], ["Core", "unitLoad"], ["Core", "weightCoef"],
     ["Core", "effects"], ["Core", "duty"], ["Core", "step"], ["Core", "tick"], ["Core", "takeStim"], ["Core", "pulseEnd"], ["Core", "thirst"],
-    ["Core", "currentWork"],
+    ["Core", "currentWork"], ["Core", "takeFen"], ["Core", "fenLevel"], ["Core", "fenApply"], ["Core", "fenGrain"], ["Core", "fenPain"],
     ["Core", "canTake"], ["Core", "notify"], ["Hud", "hudColor"], ["Zeus", "muscleCheck"], ["Zeus", "muscleSet"]];
 // The icons and the panel are windows: not drawn here.
 PMCD_fnc_hud = {};
@@ -33,7 +33,7 @@ TEST_calls = [];
     missionNamespace setVariable [_x, compile format ["TEST_calls pushBack ['%1', +_this]; 0", _x]];
 } forEach ["CBA_fnc_targetEvent", "CBA_fnc_addEventHandler", "CBA_fnc_addPerFrameHandler", "ace_advanced_fatigue_fnc_addDutyFactor",
     "ace_field_rations_fnc_addStatusModifier", "ace_interact_menu_fnc_addActionToClass", "ace_common_fnc_displayTextStructured",
-    "ace_medical_status_fnc_addMedicationAdjustment", "CBA_fnc_waitAndExecute"];
+    "ace_medical_status_fnc_addMedicationAdjustment", "CBA_fnc_waitAndExecute", "ace_common_fnc_addSwayFactor"];
 ace_interact_menu_fnc_createAction = {TEST_calls pushBack ["createAction", +_this]; +_this};
 TEST_called = {params ["_name"]; TEST_calls select {(_x select 0) == _name}};
 TEST_settings = [];
@@ -65,7 +65,10 @@ TEST_run = {
     params ["_seconds"];
     for "_i" from 1 to _seconds do {CBA_missionTime = CBA_missionTime + 1; call PMCD_fnc_tick};
 };
-TEST_newState = {createHashMapFromArray [["stimDoses", 0], ["doses", []], ["debt", 0], ["debtStim", 0], ["debtFen", 0], ["lastWork", [0, 0, 0, 0]]]};
+TEST_newState = {
+    private _unit = "Logic" createVehicleLocal [0, 0, 0];
+    [_unit] call PMCD_fnc_state
+};
 // ACE's metabolic cost: a stand-in recording what it was asked, giving TEST_cost.
 TEST_cost = 100;
 ace_advanced_fatigue_fnc_getMetabolicCosts = {TEST_calls pushBack ["getMetabolicCosts", +_this]; TEST_cost};
@@ -75,20 +78,29 @@ call PMCD_fnc_settings;
 private _names = TEST_settings apply {_x select 0};
 private _server = TEST_settings select {(_x select 3) == 1};
 private _own = (TEST_settings select {(_x select 3) == 0}) apply {_x select 0};
-[count TEST_settings == 20 && {count _server == 15} && {_own isEqualTo ["PMCD_hudShow", "PMCD_hudX", "PMCD_hudY", "PMCD_hudSize", "PMCD_debugOn"]}
+[count TEST_settings == 34 && {count _server == 27}
+    && {_own isEqualTo ["PMCD_hudShow", "PMCD_hudX", "PMCD_hudY", "PMCD_hudSize", "PMCD_fenGrainBase", "PMCD_fenGrainIntensity", "PMCD_debugOn"]}
     && {(TEST_settings select {(_x select 0) == "PMCD_paybackMultiplier"}) isEqualTo [["PMCD_paybackMultiplier", "SLIDER", [8, 25, 15, 1], 1]]}
     && {(TEST_settings select {(_x select 0) == "PMCD_ae2Floor"}) isEqualTo [["PMCD_ae2Floor", "SLIDER", [0.15, 0.4, 0.25, 2], 1]]}
     && {PMCD_stimBaseDamage == 0.16} && {PMCD_stimPool == 900} && {PMCD_stimBevelA == 2} && {PMCD_stimBevelK == 1} && {PMCD_stimWeightMin == 5}
     && {PMCD_stimWeightMax == 80} && {PMCD_debtFactor == 1} && {PMCD_stimDuty == 0.5} && {!PMCD_debugOn}
-    && {PMCD_stimPulse == 75} && {PMCD_stimPulseRamp == 10}
+    && {PMCD_stimPulse == 58} && {PMCD_stimPulseRamp == 10}
+    && {PMCD_fenDuty == 0.9} && {PMCD_fenPower == 0.05} && {PMCD_fenRegen == 0.1} && {PMCD_fenSway == 0.15} && {PMCD_fenAnim == 0.05}
+    && {PMCD_fenPain == 0.15} && {PMCD_fenRise == 20} && {PMCD_fenPlateau == 50} && {PMCD_fenFall == 60} && {PMCD_fenPaybackDivider == 3}
+    && {PMCD_fenAnimOn} && {PMCD_fenGrainBase == 1.25}
     && {!("PMCD_stimTime40" in _names)} && {!("PMCD_debtPaybackFloor" in _names)} && {!("PMCD_overdosePulse" in _names)} && {!("PMCD_debtBaseWork" in _names)},
-    "20 CBA settings: 15 for the drug, forced by the server (curve, pool, pulse per dose, debt), 5 interface ones each player's own"] call TEST_fnc_assert;
+    "34 CBA settings: 27 for the drugs, forced by the server (Stim1f with +58 pulse per dose, Fentropil, debt), 7 each player's own (icons, grain, panel)"] call TEST_fnc_assert;
 call PMCD_fnc_init;
 private _duty = ("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) select 0 select 1;
-[count ("CBA_fnc_addEventHandler" call TEST_called) == 3 && {(_duty select 0) == "PMCD_drugs"} && {(_duty select 1) isEqualType {}}
+private _sway = ("ace_common_fnc_addSwayFactor" call TEST_called) select 0 select 1;
+[count ("CBA_fnc_addEventHandler" call TEST_called) == 4 && {(("CBA_fnc_addEventHandler" call TEST_called) select 3 select 1 select 0) == "ace_medical_injured"}
+    && {(_duty select 0) == "PMCD_drugs"} && {(_duty select 1) isEqualType {}}
     && {count ("ace_field_rations_fnc_addStatusModifier" call TEST_called) == 1}
-    && {((("ace_interact_menu_fnc_addActionToClass" call TEST_called) select 0 select 1) select [0, 3]) isEqualTo ["CAManBase", 1, ["ACE_SelfActions", "ACE_Equipment"]]},
-    "start-up: Zeus events, one duty factor for all drugs, the thirst modifier, the self-injection"] call TEST_fnc_assert;
+    && {(_sway select 0) == "multiplier"} && {(_sway select 2) == "PMCD_fen"} && {(call (_sway select 1)) == 1}
+    && {(("ace_interact_menu_fnc_addActionToClass" call TEST_called) apply {(_x select 1) select [0, 3]}) isEqualTo
+        [["CAManBase", 1, ["ACE_SelfActions", "ACE_Equipment"]], ["CAManBase", 1, ["ACE_SelfActions", "ACE_Equipment"]]]}
+    && {(("ace_interact_menu_fnc_addActionToClass" call TEST_called) apply {(_x select 1) select 3 select 0}) isEqualTo ["PMCD_takeStim", "PMCD_takeFen"]},
+    "start-up: Zeus events, one duty factor for all drugs, the thirst modifier, Fentropil's sway factor and pain handler, two self-injections"] call TEST_fnc_assert;
 
 // --- Weight curve (spec 1.1) ------------------------------------------------------------------
 [[[5, 20, 40, 70, 80, 0, 120] apply {[_x] call PMCD_fnc_weightCoef}, [1, 1.077, 1.242, 1.729, 2, 1, 2]] call TEST_allNear,
@@ -193,7 +205,7 @@ player setVariable ["TEST_velocity", [0, 0, 0]];
 
 // --- Payback from AE2 (spec 2.2) ----------------------------------------------------------------------
 private _pay = call TEST_newState;
-_pay set ["debt", 1000];
+_pay set ["debtStim", 1000];
 private _held = ([_pay, 1, [_stim], 40, 100, 60000, 0, 1] call PMCD_fnc_step) select 1;
 private _first = ([_pay, 1, [], 40, 100, 60000, 8.77, 1] call PMCD_fnc_step) select 1;
 private _afterFirst = _pay get "debt";
@@ -220,15 +232,15 @@ private _state = player getVariable "PMCD_state";
 private _filled = ace_advanced_fatigue_anReserve;
 private _pulse = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
 [_filled == 2300 && {(_state get "doses") isEqualTo [[900, "PMCD_Stim1f_1", 0]]} && {(_state get "stimDoses") == 1} && {count (player getVariable ["TEST_inv", []]) == 2}
-    && {_pulse isEqualTo [player, "PMCD_Stim1f_1", 10, 90000, 75, 0, 0, 1]},
-    "a dose: one injector used, the AN reserve filled, a full pool of 900, its own pulse rise in ACE Medical (+75 in 10 s, long-lasting)"] call TEST_fnc_assert;
+    && {_pulse isEqualTo [player, "PMCD_Stim1f_1", 10, 90000, 58, 0, 0, 1]},
+    "a dose: one injector used, the AN reserve filled, a full pool of 900, its own pulse rise in ACE Medical (+58 in 10 s, long-lasting)"] call TEST_fnc_assert;
 call PMCD_fnc_init;
 private _factor = ((("ace_advanced_fatigue_fnc_addDutyFactor" call TEST_called) select 0) select 1) select 1;
 [(player call _factor) == 0.5, "ACE's fatigue gets duty 0.5 from the drug factor while Stim1f works"] call TEST_fnc_assert;
 TEST_calls = [];
 ace_advanced_fatigue_ae2Reserve = 84000;
 // ACE Medical keeps the dose's effect (and another drug's) until the mod takes it out.
-player setVariable ["ace_medical_medications", [["PMCD_Stim1f_1", 0, 10, 90000, 75, 0, 0, 1], ["Morphine", 0, 120, 1800, -10, 0.8, -10, 1]]];
+player setVariable ["ace_medical_medications", [["PMCD_Stim1f_1", 0, 10, 90000, 58, 0, 0, 1], ["Morphine", 0, 120, 1800, -10, 0.8, -10, 1]]];
 PMCD_fnc_currentWork = {TEST_work};
 TEST_work = 200;
 [730] call TEST_run;
@@ -251,17 +263,17 @@ TEST_calls = [];
 [60] call TEST_run;
 [player] call PMCD_fnc_takeStim;
 private _second = ("ace_medical_status_fnc_addMedicationAdjustment" call TEST_called) select 0 select 1;
-player setVariable ["ace_medical_medications", [["PMCD_Stim1f_2", 0, 10, 90000, 75, 0, 0, 1], ["PMCD_Stim1f_3", 60, 10, 90000, 75, 0, 0, 1]]];
+player setVariable ["ace_medical_medications", [["PMCD_Stim1f_2", 0, 10, 90000, 58, 0, 0, 1], ["PMCD_Stim1f_3", 60, 10, 90000, 58, 0, 0, 1]]];
 private _bothActing = (_state get "doses") apply {_x select 1};
 private _damageBefore = ace_advanced_fatigue_muscleDamage;
 private _debtBefore = _state get "debt";
 TEST_work = 250;
 [10] call TEST_run;
 private _twice = ace_advanced_fatigue_muscleDamage - _damageBefore;
-[_second isEqualTo [player, "PMCD_Stim1f_3", 10, 90000, 75, 0, 0, 1] && {_bothActing isEqualTo ["PMCD_Stim1f_2", "PMCD_Stim1f_3"]}
+[_second isEqualTo [player, "PMCD_Stim1f_3", 10, 90000, 58, 0, 0, 1] && {_bothActing isEqualTo ["PMCD_Stim1f_2", "PMCD_Stim1f_3"]}
     && {[_twice, 2 * 0.16 * 1.242 ^ 2 / 900 * 10, 1e-4] call TEST_near} && {count (player getVariable ["TEST_inv", []]) == 0}
     && {((_state get "lastWork") select 0) == 250} && {[(_state get "debt") - _debtBefore, 250 / 8.77 * 10, 0.05] call TEST_near},
-    "a second dose while one acts is just another dose: its own +75 on top (+150 in all), both doses act and wear the muscles; the debt follows the work the tick measures"] call TEST_fnc_assert;
+    "a second dose while one acts is just another dose: its own +58 on top (+116 in all), both doses act and wear the muscles; the debt follows the work the tick measures"] call TEST_fnc_assert;
 [660] call TEST_run;
 private _firstGone = ((player getVariable ["ace_medical_medications", []]) apply {_x select 0}) isEqualTo ["PMCD_Stim1f_3"];
 [60] call TEST_run;
@@ -269,8 +281,153 @@ private _firstGone = ((player getVariable ["ace_medical_medications", []]) apply
     "each dose's pulse rise ends with that dose: the first goes first, then the second"] call TEST_fnc_assert;
 [!([player] call PMCD_fnc_takeStim), "without an injector nothing is taken"] call TEST_fnc_assert;
 
+// --- Fentropil: concentration (spec 2.4) ------------------------------------------------------------
+private _fenState = call TEST_newState;
+_fenState set ["fenDoses", [0]];
+private _levels = [0, 600, 1200, 2700, 4200, 6000, 7800, 9000] apply {[_fenState, _x] call PMCD_fnc_fenLevel};
+_fenState set ["fenDoses", [0, 1800]];
+private _two = [_fenState, 3000] call PMCD_fnc_fenLevel;
+_fenState set ["fenDoses", [0, 0, 0]];
+private _three = [_fenState, 2400] call PMCD_fnc_fenLevel;
+[[_levels apply {_x select 0}, [0, 0.5, 1, 1, 1, 0.5, 0, 0]] call TEST_allNear
+    && {[_levels apply {_x select 1}, [0, 1 - 0.5 ^ 0.5, 0.5, 0.5, 0.5, 1 - 0.5 ^ 0.5, 0, 0]] call TEST_allNear}
+    && {[_two, [2, 0.75]] call TEST_allNear} && {[_three, [3, 0.875]] call TEST_allNear},
+    "Fentropil: a dose builds up 0-1 in 20 min, stays 50 min, wears off in 60; f(C) = 1 - 0.5^C: one dose 0.5, two 0.75, three 0.875"] call TEST_fnc_assert;
+_fenState set ["fenDoses", [0]];
+private _fenOnly = [_fenState, 2700] call PMCD_fnc_effects;
+_fenState set ["doses", [[900, "PMCD_Stim1f_9", 0]]];
+private _fenStim = [_fenState, 2700] call PMCD_fnc_effects;
+_fenState set ["doses", []];
+private _fenDebt = [[["fen", "dec", 0.95]], 60, 200] call TEST_debtOver;
+[_fenOnly isEqualTo [["fen", "dec", 0.95]] && {([_fenStim] call PMCD_fnc_duty) == 0.5} && {count _fenStim == 2}
+    && {[_fenDebt get "debtFen", 200 * 0.05 / 0.95 / 8.77 * 60, 0.01] call TEST_near} && {(_fenDebt get "debtStim") == 0}
+    && {[_fenDebt get "debt", _fenDebt get "debtFen", 1e-6] call TEST_near},
+    "Fentropil's duty is 1 - 0.1 f (0.95 on a dose's plateau), Stim1f's 0.5 masks it; its debt is the work saved like Stim1f's, in its own pool"] call TEST_fnc_assert;
+
+// --- Two debt pools: Stim1f first, then Fentropil 3 times slower ---------------------------------------
+private _pools = call TEST_newState;
+_pools set ["debtStim", 20];
+_pools set ["debtFen", 20];
+private _payAe2 = 60000;
+_payAe2 = ([_pools, 1, [_stim], 40, 100, _payAe2, 8.77, 1] call PMCD_fnc_step) select 1;
+private _whileStim = [_pools get "debtStim", _pools get "debtFen"];
+_pools set ["debtStim", 20];
+_payAe2 = 60000;
+_payAe2 = ([_pools, 1, [["fen", "dec", 0.95]], 40, 0, _payAe2, 8.77, 1] call PMCD_fnc_step) select 1;
+private _whileFen = [_pools get "debtStim", _pools get "debtFen", _payAe2];
+_payAe2 = ([_pools, 1, [], 40, 0, _payAe2, 8.77, 1] call PMCD_fnc_step) select 1;
+private _stimDone = [_pools get "debtStim", _pools get "debtFen", _payAe2];
+_payAe2 = ([_pools, 1, [], 40, 0, _payAe2, 8.77, 1] call PMCD_fnc_step) select 1;
+private _fenSlow = [_pools get "debtStim", _pools get "debtFen", _payAe2, _pools get "lastPay"];
+_payAe2 = ([_pools, 1, [], 40, 0, _payAe2, 8.77, 1.44] call PMCD_fnc_step) select 1;
+private _fenFast = _pools get "debtFen";
+[[_whileStim, [20 + 100 / 8.77, 20], 0.001] call TEST_allNear
+    && {[_whileFen, [5, 20, 59985], 0.001] call TEST_allNear} && {[_stimDone, [0, 20, 59980], 0.001] call TEST_allNear}
+    && {[_fenSlow select [0, 3], [0, 15, 59975], 0.001] call TEST_allNear} && {(_fenSlow select 3 select 0) == "debtFen"}
+    && {[_fenFast, 15 - 7.2, 0.001] call TEST_near} && {[_pools get "debt", 7.8, 0.001] call TEST_near},
+    "two pools: nothing paid while Stim1f acts; the Stim1f pool pays at 15 x RF (even with Fentropil in the body), then the Fentropil pool at a third of it once Stim1f's is clear and Fentropil is gone"] call TEST_fnc_assert;
+
+// --- Fentropil on the loop: ACE's pathways, AE2 recovery, animations, grain, sway --------------------
+call TEST_fresh;
+player setVariable ["TEST_inv", ["PMCD_Fentropil"]];
+ace_advanced_fatigue_ae1PathwayPower = 100;
+ace_advanced_fatigue_ae2PathwayPower = 200;
+ace_advanced_fatigue_anPathwayPower = 1000;
+ace_advanced_fatigue_aePathwayPower = 300;
+ace_advanced_fatigue_ae1Reserve = 4000000;
+ace_advanced_fatigue_respiratoryRate = 0;
+ace_advanced_fatigue_setAnimExclusions = [];
+TEST_pp = [];
+TEST_work = 18.83;
+private _fenTaken = [player] call PMCD_fnc_takeFen;
+private _fenStateLoop = player getVariable "PMCD_state";
+private _fenNoMore = [player] call PMCD_fnc_takeFen;
+[_fenTaken && {!_fenNoMore} && {(_fenStateLoop get "fenDoses") isEqualTo [0]} && {(_fenStateLoop get "fenTaken") == 1}
+    && {(player getVariable ["TEST_inv", []]) isEqualTo []},
+    "a Fentropil dose: the injector used, the dose starts now; without an injector nothing is taken"] call TEST_fnc_assert;
+CBA_missionTime = 2699;
+PMCD_lastTick = 2699;
+ace_advanced_fatigue_ae2Reserve = 42000;
+[1] call TEST_run;
+private _boosted = [ace_advanced_fatigue_ae1PathwayPower, ace_advanced_fatigue_ae2PathwayPower, ace_advanced_fatigue_anPathwayPower, ace_advanced_fatigue_aePathwayPower];
+// ACE's main loop is not run here: the only AE2 change is Fentropil's (no payback while it acts).
+// SQF numbers are 32-bit floats: near 42 000 a step is 0.004.
+private _regen = ace_advanced_fatigue_ae2Reserve - 42000;
+private _grain = (TEST_pp select {(_x select 0) == "adjust"}) select 0 select 1 select 1;
+private _swayNow = call (_sway select 1);
+[[_boosted, [102.5, 205, 1025, 307.5]] call TEST_allNear && {[_regen, 5.83 * 0.1 * 0.5, 0.005] call TEST_near}
+    && {"PMCD_fen" in ace_advanced_fatigue_setAnimExclusions} && {[player getVariable "TEST_animSpeed", 1.025] call TEST_near}
+    && {[_grain select [0, 5], [0.06, 1.5625, 1, 0.1, 1]] call TEST_allNear} && {[_swayNow, 0.925] call TEST_near} && {PMCD_fenF == 0.5}
+    && {(_fenStateLoop get "debtFen") > 0},
+    "on a dose's plateau (f 0.5): pathways x1.025, AE2 recovery +5%, animations x1.025 kept from ACE's reset, grain sharpness 1.25 x 1.25, sway x0.925, debt in the Fentropil pool"] call TEST_fnc_assert;
+// ACE writes its own pathway powers (a new body, a changed setting): they become the base.
+ace_advanced_fatigue_ae1PathwayPower = 120;
+player setVariable ["TEST_animSpeed", 1];
+[1] call TEST_run;
+private _rebased = ace_advanced_fatigue_ae1PathwayPower;
+private _keptAe2 = ace_advanced_fatigue_ae2PathwayPower;
+player setVariable ["TEST_vision", 1];
+TEST_pp = [];
+[1] call TEST_run;
+private _nvg = TEST_pp apply {_x select 0};
+player setVariable ["TEST_vision", 0];
+[[_rebased, 123] call TEST_near && {[_keptAe2, 205] call TEST_near} && {[player getVariable "TEST_animSpeed", 1.025] call TEST_near}
+    && {_nvg isEqualTo ["destroy"]},
+    "ACE's own new pathway value becomes the base (120 -> 123), the others stay; the animation speed is set again; no grain under night vision"] call TEST_fnc_assert;
+// Worn off: ACE's values back, nothing left.
+[1] call TEST_run;
+CBA_missionTime = 7801;
+PMCD_lastTick = 7800;
+TEST_pp = [];
+[1] call TEST_run;
+[[[ace_advanced_fatigue_ae1PathwayPower, ace_advanced_fatigue_ae2PathwayPower, ace_advanced_fatigue_anPathwayPower, ace_advanced_fatigue_aePathwayPower],
+    [120, 200, 1000, 300]] call TEST_allNear && {ace_advanced_fatigue_setAnimExclusions isEqualTo []} && {(player getVariable "TEST_animSpeed") == 1}
+    && {PMCD_fenF == 0} && {(_fenStateLoop get "fenDoses") isEqualTo []} && {!("fenBase" in _fenStateLoop)} && {(TEST_pp select 0 select 0) == "destroy"},
+    "after 130 min the dose is gone: ACE's pathway powers back, the animation exclusion out and the speed 1, no grain"] call TEST_fnc_assert;
+// A dead player leaves nothing either.
+[player] call PMCD_fnc_takeFen;
+player setVariable ["TEST_inv", ["PMCD_Fentropil"]];
+[player] call PMCD_fnc_takeFen;
+CBA_missionTime = 7801 + 1800;
+PMCD_lastTick = CBA_missionTime - 1;
+[1] call TEST_run;
+private _wasOn = "PMCD_fen" in ace_advanced_fatigue_setAnimExclusions;
+ACE_player = objNull;
+TEST_pp = [];
+[1] call TEST_run;
+ACE_player = player;
+[_wasOn && {ace_advanced_fatigue_setAnimExclusions isEqualTo []} && {PMCD_fenF == 0} && {(TEST_pp select 0 select 0) == "destroy"},
+    "no player body (dead): Fentropil's grain and animation exclusion are cleared"] call TEST_fnc_assert;
+
+// --- Fentropil: new pain only ---------------------------------------------------------------------
+private _painState = [player] call PMCD_fnc_state;
+PMCD_fenF = 0.5;
+_painState set ["painSeen", 0.2];
+player setVariable ["ace_medical_pain", 0.2];
+private _first = [player, 0.6];
+_first call PMCD_fnc_fenPain;
+private _firstPain = player getVariable "ace_medical_pain";
+player setVariable ["ace_medical_pain", 0.6];
+[player, 0.6] call PMCD_fnc_fenPain;
+private _afterAce = player getVariable "ace_medical_pain";
+player setVariable ["ace_medical_pain", 0.7];
+_painState set ["painSeen", 0.7];
+[player, 0.3] call PMCD_fnc_fenPain;
+private _smaller = player getVariable "ace_medical_pain";
+_painState set ["painSeen", 0.58];
+player setVariable ["ace_medical_pain", 0.6];
+[player, 0.6] call PMCD_fnc_fenPain;
+private _kept = player getVariable "ace_medical_pain";
+PMCD_fenF = 0;
+private _clean = [player, 0.6];
+_clean call PMCD_fnc_fenPain;
+[[_first select 1, 0.555] call TEST_near && {_firstPain == 0.2} && {[_afterAce, 0.555] call TEST_near} && {_smaller == 0.7} && {[_kept, 0.58] call TEST_near} && {(_clean select 1) == 0.6},
+    "new wounds hurt 7.5% less on a dose's plateau, whichever of ACE's handler and this one runs first; pain already there stays; nothing without Fentropil"] call TEST_fnc_assert;
+player setVariable ["ace_medical_pain", 0];
+
 // --- Thirst ---------------------------------------------------------------------------------------
 private _currentWork = 1.5;
+_state = [player] call PMCD_fnc_state;
 _state set ["doses", [[100, "dose", 0]]];
 private _thirsty = [player] call PMCD_fnc_thirst;
 _state set ["doses", []];
@@ -287,7 +444,7 @@ PMCD_debtFactor = 0.5;
 private _tunedWc = [80] call PMCD_fnc_weightCoef;
 private _tunedDose = [80] call TEST_dose;
 private _tunedPay = call TEST_newState;
-_tunedPay set ["debt", 1000];
+_tunedPay set ["debtStim", 1000];
 private _tunedAe2 = ([_tunedPay, 1, [], 40, 100, 40000, 8.77, 1] call PMCD_fnc_step) select 1;
 private _tunedFloor = ([_tunedPay, 1, [], 40, 100, 33610, 8.77, 1] call PMCD_fnc_step) select 1;
 private _tunedDebt = [[_stim], 10, 100] call TEST_debtOver;
@@ -331,10 +488,12 @@ PMCD_fnc_debugText = "pmc_drugs/Hud/fn_debugText.sqf" call TEST_fnc_load;
 call TEST_fresh;
 [player] call PMCD_fnc_takeStim;
 ace_advanced_fatigue_dutyList = createHashMapFromArray [["PMCD_drugs", {0.5}], ["other", 0.9]];
+([player] call PMCD_fnc_state) set ["fenDoses", [-2700]];
 private _panel = call PMCD_fnc_debugText;
 diag_log _panel;
 [_panel isEqualType "" && {(_panel find "pool 900 / 900") >= 0} && {(_panel find "wc 1.242") >= 0} && {(_panel find "final 0.500") >= 0}
-    && {(_panel find "PMCD_drugs=0.500") >= 0} && {(_panel find "heart rate -") >= 0} && {(_panel find "AE2 84000") >= 0},
+    && {(_panel find "PMCD_drugs=0.500") >= 0} && {(_panel find "heart rate -") >= 0} && {(_panel find "AE2 84000") >= 0}
+    && {(_panel find "f(C) 0.500") >= 0} && {(_panel find "duty 0.950") >= 0} && {(_panel find "Fentropil pool 0") >= 0},
     "the debug panel shows the drug, fatigue, medical and settings values, '-' where a value does not exist"] call TEST_fnc_assert;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];
