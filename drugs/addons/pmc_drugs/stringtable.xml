@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="PMC Drugs">
+    <Package name="Drugs">
+        <Container name="Main">
+            <Key ID="STR_PMCD_STIM_NAME">
+                <Original>Stim1f (combat stimulant)</Original>
+                <Russian>Stim1f (боевой стимулятор)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_STIM_DESC">
+                <Original>Autoinjector. Halves the effort for 10-14 min and refills the sprint reserve. Costs debt and muscle damage; a second dose while it works stops the heart.</Original>
+                <Russian>Автоинъектор. На 10–14 мин вдвое снижает нагрузку и заливает запас для рывка. Цена — долг и износ мышц; вторая доза во время действия останавливает сердце.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_TAKE_STIM">
+                <Original>Inject Stim1f</Original>
+                <Russian>Ввести Stim1f</Russian>
+            </Key>
+            <Key ID="STR_PMCD_INJECTING">
+                <Original>Injecting...</Original>
+                <Russian>Ввожу...</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MODULE_MUSCLE">
+                <Original>Muscle damage</Original>
+                <Russian>Износ мышц</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_TITLE">
+                <Original>Muscle damage: %1</Original>
+                <Russian>Износ мышц: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_HIDDEN">
+                <Original>Value hidden: press Check</Original>
+                <Russian>Значение скрыто: нажмите «Проверить»</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_VALUE">
+                <Original>Current: %1 (0-1)</Original>
+                <Russian>Сейчас: %1 (0–1)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_NEW">
+                <Original>New value 0-1:</Original>
+                <Russian>Новое значение 0–1:</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_CHECK">
+                <Original>Check</Original>
+                <Russian>Проверить</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_SET">
+                <Original>Set</Original>
+                <Russian>Установить</Russian>
+            </Key>
+            <Key ID="STR_PMCD_CLOSE">
+                <Original>Close</Original>
+                <Russian>Закрыть</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_WORN">
+                <Original>You feel your body is more worn.</Original>
+                <Russian>Вы чувствуете, что тело изношено сильнее.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MUSCLE_RECOVERED">
+                <Original>You feel your body has recovered.</Original>
+                <Russian>Вы чувствуете, что тело восстановилось.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_ERR_UNIT">
+                <Original>Place the module on a player's unit.</Original>
+                <Russian>Поставьте модуль на юнита-игрока.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_CATEGORY">
+                <Original>PMC Drugs</Original>
+                <Russian>PMC Препараты</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FLOOR">
+                <Original>Debt payback floor (share of the sprint reserve)</Original>
+                <Russian>Порог выплаты долга (доля запаса для рывка)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FLOOR_TIP">
+                <Original>Paying back drug debt never takes the anaerobic reserve below this share of its maximum.</Original>
+                <Russian>Выплата долга никогда не опускает анаэробный запас ниже этой доли от максимума.</Russian>
+            </Key>
+        </Container>
+    </Package>
+</Project>
