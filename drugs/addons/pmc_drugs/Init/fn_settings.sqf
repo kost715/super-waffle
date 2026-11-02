@@ -4,6 +4,7 @@ private _category = localize "STR_PMCD_SET_CATEGORY";
 private _stim = [_category, localize "STR_PMCD_SET_STIM"];
 private _fen = [_category, localize "STR_PMCD_SET_FEN"];
 private _meld = [_category, localize "STR_PMCD_SET_MELD"];
+private _hemo = [_category, localize "STR_PMCD_SET_HEMO"];
 private _debt = [_category, localize "STR_PMCD_SET_DEBT"];
 private _hud = [_category, localize "STR_PMCD_SET_HUD"];
 {
@@ -39,6 +40,10 @@ private _hud = [_category, localize "STR_PMCD_SET_HUD"];
     ["meldAcid", "STR_PMCD_SET_MELD_ACID", _meld, [0.5, 1, 0.75, 2]],
     ["meldRegen", "STR_PMCD_SET_MELD_REGEN", _meld, [0, 0.5, 0.12, 2]],
     ["meldInject", "STR_PMCD_SET_INJECT", _meld, [0.5, 10, 2, 1]],
+    ["hemoDuration", "STR_PMCD_SET_HEMO_DURATION", _hemo, [3, 10, 6, 1]],
+    ["hemoDuty", "STR_PMCD_SET_HEMO_DUTY", _hemo, [1, 2, 1.3, 2]],
+    ["hemoBleed", "STR_PMCD_SET_HEMO_BLEED", _hemo, [0, 0.9, 0.35, 2]],
+    ["hemoInject", "STR_PMCD_SET_INJECT", _hemo, [0.5, 10, 2, 1]],
     ["debtFactor", "STR_PMCD_SET_DEBT_FACTOR", _debt, [0, 2, 1, 2]],
     ["paybackMultiplier", "STR_PMCD_SET_PAYBACK", _debt, [8, 25, 15, 1]],
     ["ae2Floor", "STR_PMCD_SET_AE2_FLOOR", _debt, [0.15, 0.4, 0.25, 2]],

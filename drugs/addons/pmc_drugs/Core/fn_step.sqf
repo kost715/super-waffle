@@ -11,14 +11,17 @@
 //    duty d): work now x (1 - d) / d, the work now coming from ACE with every duty factor
 //    in it (PMCD_fnc_currentWork), then / anWattsPerATP x factor (1.0) mmol per second.
 //    Standing still costs ACE its resting work, so a stimulated soldier at rest runs up
-//    little; one sprinting under a heavy load runs up a lot. Each source has its own pool:
-//    Stim1f (debtStim) and Fentropil (debtFen); under Stim1f only Stim1f runs up debt.
-//    "debt" is the two together.
+//    little; one sprinting under a heavy load runs up a lot. Pools: each Stim1f dose its
+//    own (stimDebts), Fentropil one (debtFen); under Stim1f only Stim1f runs up debt.
+//    While Stim1f doses overlap, the saving is the oldest acting dose's: it is the one
+//    giving the duty, a newer dose only takes over when it ends. debtStim is the Stim1f
+//    pools together, "debt" all of them.
 //  - Payback from the AE2 reserve, never below the floor (25% of 84 000 mmol: at the floor
-//    it only takes what ACE regenerated); the AN reserve is not touched. The Stim1f debt
-//    first, at 15 x recoveryFactor mmol/s, while no Stim1f dose acts; then the Fentropil
-//    debt, 3 times slower (CBA), once the Stim1f debt is paid and no Fentropil is in the
-//    body. A pool never pays while its own drug acts.
+//    it only takes what ACE regenerated); the AN reserve is not touched. One pool at a time,
+//    in order: the Stim1f doses by number, each from the moment its own dose ends (a newer
+//    dose acting does not hold it back), at 15 x recoveryFactor mmol/s; then Fentropil, 3
+//    times slower (CBA), once every Stim1f pool is paid, no Stim1f acts and no Fentropil is
+//    in the body.
 params ["_state", "_dt", "_effects", "_kg", "_work", "_ae2", "_wattsPerATP", "_recovery"];
 private _source = "";
 private _sourceDuty = 1;
@@ -37,8 +40,17 @@ private _rate = 0;
 if (_source != "" && {_wattsPerATP > 0} && {_sourceDuty > 0}) then {
     _savings = _work * (1 - _sourceDuty) / _sourceDuty;
     _rate = _savings / _wattsPerATP * (missionNamespace getVariable ["PMCD_debtFactor", 1]);
-    private _key = ["debtStim", "debtFen"] select (_source == "fen");
-    _state set [_key, (_state get _key) + _rate * _dt];
+    if (_source == "fen") then {
+        _state set ["debtFen", (_state get "debtFen") + _rate * _dt];
+    } else {
+        // The oldest acting Stim1f dose (its own pool, made when it was taken).
+        private _owner = ((_state get "doses") param [0, [0, ""]]) select 1;
+        private _debts = _state getOrDefault ["stimDebts", []];
+        private _at = _debts findIf {(_x select 0) == _owner};
+        if (_at < 0) then {_at = _debts pushBack [_owner, 0, false]};
+        (_debts select _at) set [1, ((_debts select _at) select 1) + _rate * _dt];
+        _state set ["stimDebts", _debts];
+    };
 };
 _state set ["lastWork", [_work, _work / (_duty max 0.01), _savings, _rate]];
 private _muscle = 0;
@@ -61,26 +73,38 @@ if (_doses isNotEqualTo []) then {
 };
 private _stimActs = _effects findIf {(_x select 0) == "stim"} >= 0;
 private _fenActs = _effects findIf {(_x select 0) == "fen"} >= 0;
+private _debts = _state getOrDefault ["stimDebts", []];
+// A Stim1f pool is due once its dose has ended (ended this second included).
+{
+    if ((_x select 0) in _ended) then {_x set [2, true]};
+} forEach _debts;
 private _floor = (missionNamespace getVariable ["PMCD_ae2Floor", 0.25]) * 84000;
 private _full = (missionNamespace getVariable ["PMCD_paybackMultiplier", 15]) * _recovery * _dt;
-private _key = "";
-private _cap = 0;
-if (!_stimActs && {(_state get "debtStim") > 0}) then {
-    _key = "debtStim";
-    _cap = _full;
+private _room = 0 max (_ae2 - _floor);
+private _paidFrom = "";
+private _paid = 0;
+private _due = _debts findIf {(_x select 2) && {(_x select 1) > 0}};
+if (_due >= 0) then {
+    private _pool = _debts select _due;
+    _paid = ((_pool select 1) min _full) min _room;
+    _pool set [1, (_pool select 1) - _paid];
+    _paidFrom = _pool select 0;
 } else {
-    // Here the Stim1f pool is clear or Stim1f acts.
+    // No pool is due: the Stim1f pools left belong to acting doses, so with no Stim1f acting
+    // every one of them is paid.
     if (!_stimActs && {!_fenActs} && {(_state get "debtFen") > 0}) then {
-        _key = "debtFen";
-        _cap = _full / ((missionNamespace getVariable ["PMCD_fenPaybackDivider", 3]) max 1);
+        _paid = ((_state get "debtFen") min (_full / ((missionNamespace getVariable ["PMCD_fenPaybackDivider", 3]) max 1))) min _room;
+        _state set ["debtFen", (_state get "debtFen") - _paid];
+        _paidFrom = "debtFen";
     };
 };
-private _paid = 0;
-if (_key != "") then {
-    _paid = (((_state get _key) min _cap) min (0 max (_ae2 - _floor))) max 0;
-    _state set [_key, (_state get _key) - _paid];
-    _ae2 = _ae2 - _paid;
-};
-_state set ["lastPay", [_key, _paid / (_dt max 0.001)]];
-_state set ["debt", (_state get "debtStim") + (_state get "debtFen")];
+_ae2 = _ae2 - _paid;
+// Paid pools of ended doses are done with.
+_debts = _debts select {!(_x select 2) || {(_x select 1) > 0}};
+_state set ["stimDebts", _debts];
+private _stimTotal = 0;
+{_stimTotal = _stimTotal + (_x select 1)} forEach _debts;
+_state set ["debtStim", _stimTotal];
+_state set ["lastPay", [_paidFrom, _paid / (_dt max 0.001)]];
+_state set ["debt", _stimTotal + (_state get "debtFen")];
 [_muscle, _ae2, _ended]

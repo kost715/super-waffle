@@ -3,11 +3,11 @@ class CfgPatches {
         name = "PMC Drugs";
         author = "LifeSim PMC project";
         units[] = {"PMCD_ModuleMuscle"};
-        weapons[] = {"PMCD_Stim1f", "PMCD_Fentropil", "PMCD_Meldonium"};
+        weapons[] = {"PMCD_Stim1f", "PMCD_Fentropil", "PMCD_Meldonium", "PMCD_Hemostatic"};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.6.0";
+        version = "0.7.0";
     };
 };
 
@@ -39,6 +39,8 @@ class CfgFunctions {
             class takeMeld {};
             class meldLevel {};
             class meldApply {};
+            class takeHemo {};
+            class hemoBleed {};
             class fenPain {};
             class currentWork {};
             class pulseEnd {};
@@ -103,6 +105,18 @@ class CfgWeapons {
         model = "\pmc_drugs\data\meldonium.p3d";
         class ItemInfo: CBA_MiscItem_ItemInfo {
             mass = 4; // 0.2 kg
+        };
+    };
+    // Hemostatic (TXA-based), self-injected the same way. White, red bands, "HEMOSTATIC".
+    class PMCD_Hemostatic: ACE_ItemCore {
+        scope = 2;
+        author = "LifeSim PMC project";
+        displayName = "$STR_PMCD_HEMO_NAME";
+        descriptionShort = "$STR_PMCD_HEMO_DESC";
+        picture = "\pmc_drugs\data\hemostatic_ca.paa";
+        model = "\pmc_drugs\data\hemostatic.p3d";
+        class ItemInfo: CBA_MiscItem_ItemInfo {
+            mass = 7; // 0.3 kg
         };
     };
 };

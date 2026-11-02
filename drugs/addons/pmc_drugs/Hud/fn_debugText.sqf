@@ -60,11 +60,20 @@ _lines pushBack format ["acting %1  doses taken %2  metabolite %3 (threshold 0.2
     ["PMCD_meldAcid"] call _g];
 _lines pushBack format ["taken back from ACE per second: muscle damage %1  acidosis %2", _muscleBack toFixed 8, _acidBack toFixed 6];
 _lines pushBack format ["AE2 recovery support (Fentropil + meldonium) +%1 mmol/s", (_state getOrDefault ["regen", 0]) toFixed 3];
+_lines pushBack ("Hemostatic" call _head);
+private _hemoEnd = _state getOrDefault ["hemoEnd", -1];
+(_state getOrDefault ["bleedSeen", [0, 0]]) params ["_lossAce", "_lossCut"];
+_lines pushBack format ["acting %1  doses taken %2  ends in %3 min  duty x%4  blood loss cut %5  last blood loss: ACE %6 -> %7",
+    CBA_missionTime < _hemoEnd, _state getOrDefault ["hemoTaken", 0], ((0 max (_hemoEnd - CBA_missionTime)) / 60) toFixed 1, ["PMCD_hemoDuty"] call _g,
+    ["PMCD_hemoBleed"] call _g, _lossAce toFixed 5, _lossCut toFixed 5];
 _lines pushBack ("Duty and debt" call _head);
 _lines pushBack format ["effects %1", _effects];
 _lines pushBack format ["duty: decreasing %1  increasing %2  final %3", _dec toFixed 2, _inc toFixed 2, ([_effects] call PMCD_fnc_duty) toFixed 3];
 _lines pushBack format ["debt %1 mmol: Stim1f pool %2, Fentropil pool %3  icon %4", _debt toFixed 0, (_state getOrDefault ["debtStim", 0]) toFixed 0,
     (_state getOrDefault ["debtFen", 0]) toFixed 0, _debt > 500];
+_lines pushBack format ["Stim1f pools in payback order: %1", (_state getOrDefault ["stimDebts", []]) apply {
+    format ["%1 %2 (%3)", _x select 0, (_x select 1) toFixed 0, ["dose acting", "due"] select (_x select 2)]
+}];
 (_state getOrDefault ["lastWork", [0, 0, 0, 0]]) params ["_workNow", "_nominal", "_savings", "_accrual"];
 _lines pushBack format ["work now %1 W  nominal (no drugs) %2 W  saved %3 W  debt accrual %4 mmol/s", _workNow toFixed 1, _nominal toFixed 1,
     _savings toFixed 1, _accrual toFixed 2];
@@ -121,6 +130,8 @@ _lines pushBack format ["Fentropil at C 1: duty %1  power +%2  AE2 support +%3  
     ["PMCD_fenDuty"] call _g, ["PMCD_fenPower", 3] call _g, ["PMCD_fenRegen"] call _g, ["PMCD_fenSway"] call _g, ["PMCD_fenAnim", 3] call _g,
     ["PMCD_fenPain"] call _g, ["PMCD_fenRise", 0] call _g, ["PMCD_fenPlateau", 0] call _g, ["PMCD_fenFall", 0] call _g,
     ["PMCD_fenContrast", 3] call _g, ["PMCD_fenSaturation", 3] call _g];
+_lines pushBack format ["hemostatic: duration %1 min  duty x%2  blood loss cut %3", ["PMCD_hemoDuration", 1] call _g, ["PMCD_hemoDuty"] call _g,
+    ["PMCD_hemoBleed"] call _g];
 _lines pushBack format ["meldonium: duration %1 min  muscle x%2  acidosis x%3  AE2 support +%4", ["PMCD_meldDuration", 0] call _g, ["PMCD_meldMuscle"] call _g,
     ["PMCD_meldAcid"] call _g, ["PMCD_meldRegen"] call _g];
 format ["<t size='0.8' font='EtelkaMonospacePro' shadow='2'>%1</t>", _lines joinString "<br/>"]

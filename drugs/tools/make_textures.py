@@ -33,6 +33,8 @@ FEN_BAND = (0, 138, 140)
 FEN_TEXT = (40, 44, 48)
 # Meldonium: off-white body, green bands and lettering.
 MELD_BAND = (40, 150, 60)
+# Hemostatic: off-white body, dark red bands and lettering.
+HEMO_BAND = (176, 24, 30)
 
 
 def fit(draw, text, size, width):
@@ -237,9 +239,16 @@ def main():
     meld.save(OUT / "meldonium_co.png")
     icon(FEN_BODY, MELD_BAND, "MELDONIUM").save(OUT / "meldonium_ca.png")
     (DATA / "meldonium.p3d").write_bytes(model(r"pmc_drugs\data\meldonium_co.paa"))
+    hemo = injector_sheet(FEN_BODY, HEMO_BAND, "HEMOSTATIC", "TRANEXAMIC ACID · IM", FEN_TEXT)
+    hemo.save(OUT / "hemostatic_co.png")
+    icon(FEN_BODY, HEMO_BAND, "HEMOSTATIC").save(OUT / "hemostatic_ca.png")
+    (DATA / "hemostatic.p3d").write_bytes(model(r"pmc_drugs\data\hemostatic_co.paa"))
     for name, draw in (("hud_plate_ca.png", hud_plate), ("hud_muscle_ca.png", hud_muscle), ("hud_tired_ca.png", hud_tired)):
         draw().save(OUT / name)
-    preview = Image.new("RGB", (1792, 512), (60, 60, 60))
+    preview = Image.new("RGB", (2304, 512), (60, 60, 60))
+    preview.paste(hemo, (1792, 0))
+    hic = Image.open(OUT / "hemostatic_ca.png")
+    preview.paste(hic, (512, 64), hic)
     preview.paste(meld, (1280, 0))
     mic = Image.open(OUT / "meldonium_ca.png")
     preview.paste(mic, (512, 128), mic)
@@ -267,7 +276,7 @@ def main():
     cell.alpha_composite(tired)
     preview.paste(cell.convert("RGB"), (516, 370))
     preview.save(OUT / "_preview.png")
-    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d, fentropil_co.png, fentropil_ca.png, data/fentropil.p3d, meldonium_co.png, meldonium_ca.png, data/meldonium.p3d")
+    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d, fentropil_co.png, fentropil_ca.png, data/fentropil.p3d, meldonium_co.png, meldonium_ca.png, data/meldonium.p3d, hemostatic_co.png, hemostatic_ca.png, data/hemostatic.p3d")
 
 
 if __name__ == "__main__":

@@ -282,6 +282,34 @@
                 <Original>AE2 recovery support (share of the recovery standing still)</Original>
                 <Russian>Поддержка восстановления AE2 (доля восстановления стоя)</Russian>
             </Key>
+            <Key ID="STR_PMCD_HEMO_NAME">
+                <Original>Hemostatic (TXA)</Original>
+                <Russian>Гемостатик (ТХА)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_HEMO_DESC">
+                <Original>Autoinjector. For about six minutes bleeding is about a third slower - time to bandage. The heart works harder: effort x1.3, and any stimulant's debt grows as much.</Original>
+                <Russian>Автоинъектор. Около шести минут кровь теряется примерно на треть медленнее — время перевязаться. Сердце работает тяжелее: нагрузка ×1,3, долг стимуляторов растёт так же.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_TAKE_HEMO">
+                <Original>Inject hemostatic</Original>
+                <Russian>Ввести гемостатик</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_HEMO">
+                <Original>Hemostatic</Original>
+                <Russian>Гемостатик</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_HEMO_DURATION">
+                <Original>Duration (min); a new dose starts it again</Original>
+                <Russian>Действие (мин); новая доза начинает его заново</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_HEMO_DUTY">
+                <Original>Effort while it acts (increasing)</Original>
+                <Russian>Нагрузка во время действия (повышающая)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_HEMO_BLEED">
+                <Original>Blood loss cut (share, ACE Medical)</Original>
+                <Russian>Снижение кровопотери (доля, ACE Medical)</Russian>
+            </Key>
         </Container>
     </Package>
 </Project>

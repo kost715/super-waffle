@@ -13,6 +13,8 @@ _state set ["stimDoses", _number];
 private _name = format ["PMCD_Stim1f_%1", _number];
 private _pool = missionNamespace getVariable ["PMCD_stimPool", 900];
 (_state get "doses") pushBack [_pool, _name, 0];
+// Its own debt pool: paid back from the moment this dose ends (PMCD_fnc_step).
+(_state get "stimDebts") pushBack [_name, 0, false];
 // ACE Advanced Fatigue's full AN reserve (AN_MAXRESERVE), unless switched off in CBA.
 if (_unit isEqualTo ACE_player && {missionNamespace getVariable ["PMCD_stimFillAN", true]}) then {ace_advanced_fatigue_anReserve = 2300};
 // The pulse rise: ACE makes a medication's effect fade over its time in the body, so the
