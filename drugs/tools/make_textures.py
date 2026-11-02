@@ -31,6 +31,8 @@ TEXT = (240, 240, 232)
 FEN_BODY = (222, 224, 218)
 FEN_BAND = (0, 138, 140)
 FEN_TEXT = (40, 44, 48)
+# Meldonium: off-white body, green bands and lettering.
+MELD_BAND = (40, 150, 60)
 
 
 def fit(draw, text, size, width):
@@ -231,9 +233,16 @@ def main():
     fen.save(OUT / "fentropil_co.png")
     icon(FEN_BODY, FEN_BAND, "FENTROPIL").save(OUT / "fentropil_ca.png")
     (DATA / "fentropil.p3d").write_bytes(model(r"pmc_drugs\data\fentropil_co.paa"))
+    meld = injector_sheet(FEN_BODY, MELD_BAND, "MELDONIUM", "METABOLIC OPTIMIZER · IM", FEN_TEXT)
+    meld.save(OUT / "meldonium_co.png")
+    icon(FEN_BODY, MELD_BAND, "MELDONIUM").save(OUT / "meldonium_ca.png")
+    (DATA / "meldonium.p3d").write_bytes(model(r"pmc_drugs\data\meldonium_co.paa"))
     for name, draw in (("hud_plate_ca.png", hud_plate), ("hud_muscle_ca.png", hud_muscle), ("hud_tired_ca.png", hud_tired)):
         draw().save(OUT / name)
-    preview = Image.new("RGB", (1280, 512), (60, 60, 60))
+    preview = Image.new("RGB", (1792, 512), (60, 60, 60))
+    preview.paste(meld, (1280, 0))
+    mic = Image.open(OUT / "meldonium_ca.png")
+    preview.paste(mic, (512, 128), mic)
     preview.paste(sheet, (0, 0))
     preview.paste(fen, (768, 0))
     fic = Image.open(OUT / "fentropil_ca.png")
@@ -258,7 +267,7 @@ def main():
     cell.alpha_composite(tired)
     preview.paste(cell.convert("RGB"), (516, 370))
     preview.save(OUT / "_preview.png")
-    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d, fentropil_co.png, fentropil_ca.png, data/fentropil.p3d")
+    print("stim1f_co.png, stim1f_ca.png, data/stim1f.p3d, fentropil_co.png, fentropil_ca.png, data/fentropil.p3d, meldonium_co.png, meldonium_ca.png, data/meldonium.p3d")
 
 
 if __name__ == "__main__":

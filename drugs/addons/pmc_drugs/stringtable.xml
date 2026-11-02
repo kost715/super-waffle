@@ -171,8 +171,8 @@
                 <Russian>Фенотропил (когнитивный модулятор)</Russian>
             </Key>
             <Key ID="STR_PMCD_FEN_DESC">
-                <Original>Autoinjector. For about two hours: a little less effort, a little more power, steadier aim, quicker hands, new wounds hurt less. Builds up over 20 min; doses add up with diminishing effect. Costs debt.</Original>
-                <Russian>Автоинъектор. Около двух часов: чуть меньше нагрузка, чуть больше мощности, твёрже прицел, быстрее руки, новые раны болят меньше. Набирает силу 20 мин; дозы складываются с убывающим эффектом. Цена — долг.</Russian>
+                <Original>Autoinjector. For about two hours: a little less effort, a little more power, steadier aim, quicker hands, a crisper picture, new wounds hurt less. Builds up over 20 min; doses add up with diminishing effect. Costs debt.</Original>
+                <Russian>Автоинъектор. Около двух часов: чуть меньше нагрузка, чуть больше мощности, твёрже прицел, быстрее руки, чётче картинка, новые раны болят меньше. Набирает силу 20 мин; дозы складываются с убывающим эффектом. Цена — долг.</Russian>
             </Key>
             <Key ID="STR_PMCD_TAKE_FEN">
                 <Original>Inject Fentropil</Original>
@@ -183,28 +183,28 @@
                 <Russian>Фенотропил</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_DUTY">
-                <Original>Effort at full effect (a dose's plateau gives half the cut)</Original>
-                <Russian>Нагрузка при полном эффекте (плато одной дозы — половина снижения)</Russian>
+                <Original>Effort at C = 1 (one dose's plateau)</Original>
+                <Russian>Нагрузка при C = 1 (плато одной дозы)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_POWER">
-                <Original>Pathway power boost at full effect (share)</Original>
-                <Russian>Прибавка мощности путей при полном эффекте (доля)</Russian>
+                <Original>Pathway power boost at C = 1 (share)</Original>
+                <Russian>Прибавка мощности путей при C = 1 (доля)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_REGEN">
-                <Original>AE2 recovery boost at full effect (share)</Original>
-                <Russian>Прибавка восстановления AE2 при полном эффекте (доля)</Russian>
+                <Original>AE2 recovery support at C = 1 (share of the recovery standing still)</Original>
+                <Russian>Поддержка восстановления AE2 при C = 1 (доля восстановления стоя)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_SWAY">
-                <Original>Sway cut at full effect (share)</Original>
-                <Russian>Снижение качания прицела при полном эффекте (доля)</Russian>
+                <Original>Sway cut at C = 1 (share)</Original>
+                <Russian>Снижение качания прицела при C = 1 (доля)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_ANIM">
-                <Original>Animation speed boost at full effect (share)</Original>
-                <Russian>Ускорение анимаций при полном эффекте (доля)</Russian>
+                <Original>Animation speed boost at C = 1 (share)</Original>
+                <Russian>Ускорение анимаций при C = 1 (доля)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_PAIN">
-                <Original>Pain cut of new wounds at full effect (share)</Original>
-                <Russian>Снижение боли от новых ран при полном эффекте (доля)</Russian>
+                <Original>Pain cut of new wounds at C = 1 (share)</Original>
+                <Russian>Снижение боли от новых ран при C = 1 (доля)</Russian>
             </Key>
             <Key ID="STR_PMCD_SET_FEN_RISE">
                 <Original>Dose build-up (min)</Original>
@@ -230,17 +230,57 @@
                 <Original>Fentropil debt pays back this many times slower (after the Stim1f debt)</Original>
                 <Russian>Долг Фенотропила выплачивается во столько раз медленнее (после долга Stim1f)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_GRAIN_BASE">
-                <Original>Fentropil film grain: base sharpness</Original>
-                <Russian>Зерно Фенотропила: базовая резкость</Russian>
+            <Key ID="STR_PMCD_SET_FEN_DIVIDER">
+                <Original>Each further unit of concentration gives this many times less</Original>
+                <Russian>Каждая следующая единица концентрации даёт во столько раз меньше</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_GRAIN_BASE_TIP">
-                <Original>Sharpness of the film grain that shows Fentropil; grows to x1.5 at full effect.</Original>
-                <Russian>Резкость зерна, которым виден Фенотропил; растёт до x1,5 при полном эффекте.</Russian>
+            <Key ID="STR_PMCD_SET_FEN_CAP">
+                <Original>Strength cap (x the C = 1 effect)</Original>
+                <Russian>Предел силы (× эффект при C = 1)</Russian>
             </Key>
-            <Key ID="STR_PMCD_SET_GRAIN_INTENSITY">
-                <Original>Fentropil film grain: intensity at full effect</Original>
-                <Russian>Зерно Фенотропила: сила при полном эффекте</Russian>
+            <Key ID="STR_PMCD_SET_FEN_CONTRAST">
+                <Original>Fentropil: contrast at C = 1 (share)</Original>
+                <Russian>Фенотропил: контраст при C = 1 (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_SATURATION">
+                <Original>Fentropil: saturation at C = 1 (share)</Original>
+                <Russian>Фенотропил: насыщенность при C = 1 (доля)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_FEN_VISUAL_TIP">
+                <Original>A crisper picture on top of your own video settings; grows with the concentration.</Original>
+                <Russian>Картинка чётче поверх ваших настроек видео; растёт с концентрацией.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MELD_NAME">
+                <Original>Meldonium (metabolic optimizer)</Original>
+                <Russian>Мельдоний (метаболический оптимизатор)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_MELD_DESC">
+                <Original>Autoinjector. For about an hour and a half: muscles wear 23% less (from Stim1f too), acidosis builds up slower, AE2 recovers a little faster. Another dose extends it.</Original>
+                <Russian>Автоинъектор. Около полутора часов: мышцы изнашиваются на 23% меньше (и от Stim1f), ацидоз копится медленнее, AE2 восстанавливается чуть быстрее. Новая доза продлевает действие.</Russian>
+            </Key>
+            <Key ID="STR_PMCD_TAKE_MELD">
+                <Original>Inject meldonium</Original>
+                <Russian>Ввести мельдоний</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_MELD">
+                <Original>Meldonium</Original>
+                <Russian>Мельдоний</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_MELD_DURATION">
+                <Original>Duration of one dose (min); the metabolite's half-life is half of it</Original>
+                <Russian>Действие одной дозы (мин); период полувыведения — половина</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_MELD_MUSCLE">
+                <Original>Muscle damage factor (Stim1f and natural)</Original>
+                <Russian>Множитель урона мышцам (Stim1f и естественного)</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_MELD_ACID">
+                <Original>Acidosis growth factor</Original>
+                <Russian>Множитель роста ацидоза</Russian>
+            </Key>
+            <Key ID="STR_PMCD_SET_MELD_REGEN">
+                <Original>AE2 recovery support (share of the recovery standing still)</Original>
+                <Russian>Поддержка восстановления AE2 (доля восстановления стоя)</Russian>
             </Key>
         </Container>
     </Package>
