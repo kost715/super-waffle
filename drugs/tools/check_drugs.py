@@ -51,11 +51,20 @@ def check_files():
     return len(names)
 
 
+def check_settings_registration():
+    """CBA settings must come from CBA's preInit (Eden and the main menu show only those), never
+    from a CfgFunctions preInit."""
+    cfg = (ADDON / "config.cpp").read_text(encoding="utf-8")
+    if "preInit = 1" in cfg or "Extended_PreInit_EventHandlers" not in cfg or "Init\\fn_settings.sqf" not in cfg:
+        raise SystemExit("CBA settings must be registered through Extended_PreInit_EventHandlers")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--vm", type=Path, required=True)
     p.add_argument("--report", type=Path, help="write a JSON summary here")
     args = p.parse_args()
+    check_settings_registration()
     report = {"syntax": [], "arma_runtime_tested": False, "files": check_files()}
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp)

@@ -5,9 +5,18 @@ class CfgPatches {
         units[] = {"PMCD_ModuleMuscle"};
         weapons[] = {"PMCD_Stim1f", "PMCD_Fentropil", "PMCD_Meldonium", "PMCD_Hemostatic"};
         requiredVersion = 2.14;
-        requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
+        requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "A3_Modules_F_Curator", "cba_xeh", "cba_settings", "cba_events", "ace_common", "ace_interact_menu",
             "ace_advanced_fatigue"};
-        version = "0.7.0";
+        version = "0.7.1";
+    };
+};
+
+// The CBA settings are registered in CBA's own preInit, which also runs in the Eden editor
+// and in the main menu's addon options: there missions and servers can be configured
+// before they start. A CfgFunctions preInit runs only in a mission.
+class Extended_PreInit_EventHandlers {
+    class pmc_drugs {
+        init = "call compile preprocessFileLineNumbers '\pmc_drugs\Init\fn_settings.sqf'";
     };
 };
 
@@ -16,7 +25,8 @@ class CfgFunctions {
         tag = "PMCD";
         class Init {
             file = "\pmc_drugs\Init";
-            class settings {preInit = 1;};
+            // Registered from CBA's preInit (Extended_PreInit_EventHandlers below), not here.
+            class settings {};
             class init {postInit = 1;};
         };
         class Core {
