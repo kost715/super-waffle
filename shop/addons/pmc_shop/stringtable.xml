@@ -2,6 +2,138 @@
 <Project name="PMC Shop">
     <Package name="Shop">
         <Container name="Main">
+            <Key ID="STR_PMCS_NAV_TECH">
+                <Original>Gunsmith</Original>
+                <Russian>Техник</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADDRESS_TECH">
+                <Original>market.ion-logistics / gunsmith / weapon upgrades</Original>
+                <Russian>market.ion-logistics / техник / улучшение оружия</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_WEAPONS">
+                <Original>YOUR WEAPONS</Original>
+                <Russian>ВАШЕ ОРУЖИЕ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_PARTS">
+                <Original>WEAPON PARTS IN THE INVENTORY</Original>
+                <Russian>ОРУЖЕЙНЫЕ ДЕТАЛИ В ИНВЕНТАРЕ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NOTE">
+                <Original>The weapon is taken from your hands or back, the parts from your inventory. Attachments and loaded magazines move to the new weapon where they fit; the rest goes to your inventory.</Original>
+                <Russian>Оружие берётся из рук или со спины, детали — из инвентаря. Обвес и заряженные магазины переходят на новое оружие, если подходят; остальное — в инвентарь.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_TITLE">
+                <Original>Upgrades</Original>
+                <Russian>Улучшения</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_TITLE_FOR">
+                <Original>Upgrades · %1</Original>
+                <Russian>Улучшения · %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NO_WEAPON">
+                <Original>Take a weapon in your hands or on your back: the gunsmith works with what you carry.</Original>
+                <Russian>Возьмите оружие в руки или на спину: техник работает с тем, что у вас при себе.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NONE">
+                <Original>The gunsmith has no upgrades for this weapon.</Original>
+                <Russian>У техника нет улучшений для этого оружия.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NONE_SHORT">
+                <Original>no upgrades</Original>
+                <Russian>улучшений нет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_COUNT">
+                <Original>upgrades: %1</Original>
+                <Russian>улучшений: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NEXT">
+                <Original>then %1 more upgrade(s)</Original>
+                <Russian>дальше ещё улучшений: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_DO">
+                <Original>Upgrade</Original>
+                <Russian>Улучшить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_CONFIRM">
+                <Original>Confirm · %1</Original>
+                <Russian>Подтвердить · %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_SHORT">
+                <Original>not enough money or parts</Original>
+                <Russian>не хватает денег или деталей</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_WORKING">
+                <Original>The gunsmith is working…</Original>
+                <Russian>Техник работает…</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SLOT_RIFLE">
+                <Original>Primary weapon</Original>
+                <Russian>Основное оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SLOT_LAUNCHER">
+                <Original>Launcher</Original>
+                <Russian>Гранатомёт</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SLOT_HANDGUN">
+                <Original>Handgun</Original>
+                <Russian>Пистолет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SLOT_EMPTY">
+                <Original>empty</Original>
+                <Russian>пусто</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_LOW">
+                <Original>Low-grade parts</Original>
+                <Russian>Детали низкого уровня</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_MED">
+                <Original>Medium-grade parts</Original>
+                <Russian>Детали среднего уровня</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_HIGH">
+                <Original>High-grade parts</Original>
+                <Russian>Детали высокого уровня</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_SHORT_LOW">
+                <Original>low</Original>
+                <Russian>низ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_SHORT_MED">
+                <Original>med</Original>
+                <Russian>сред</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PART_SHORT_HIGH">
+                <Original>high</Original>
+                <Russian>выс</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_UP">
+                <Original>Upgrade</Original>
+                <Russian>Дооснащение</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_GL">
+                <Original>Grenade launcher</Original>
+                <Russian>Подствольник</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_UPGRADE">
+                <Original>This upgrade is not possible for the weapon you carry.</Original>
+                <Russian>Это улучшение невозможно для оружия, которое у вас при себе.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_PARTS">
+                <Original>Not enough weapon parts in your inventory.</Original>
+                <Russian>В инвентаре не хватает оружейных деталей.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_UPGRADE_FAILED">
+                <Original>The weapon or the parts were gone: nothing changed, %1 returned.</Original>
+                <Russian>Оружия или деталей уже не было: ничего не изменилось, %1 возвращено.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DONE_UPGRADE">
+                <Original>Done: %1. Paid %2.</Original>
+                <Russian>Готово: %1. Оплачено %2.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_UPGRADE">
+                <Original>Upgrade %1 → %2 (%3): %4, parts %5 / %6 / %7</Original>
+                <Russian>Улучшение %1 → %2 (%3): %4, детали %5 / %6 / %7</Russian>
+            </Key>
             <Key ID="STR_PMCS_BOX_DETAIL">
                 <Original>Box of %1 — %2</Original>
                 <Russian>Ящик %1 шт. — %2</Russian>
@@ -530,10 +662,6 @@
                 <Original>Shop</Original>
                 <Russian>Магазин</Russian>
             </Key>
-            <Key ID="STR_PMCS_NAV_VEHICLES">
-                <Original>Vehicles</Original>
-                <Russian>Техника</Russian>
-            </Key>
             <Key ID="STR_PMCS_NOTHING">
                 <Original>Nothing found</Original>
                 <Russian>Ничего не найдено</Russian>
@@ -753,6 +881,14 @@
             <Key ID="STR_PMCS_MODULE_POINT_ID_TIP">
                 <Original>Laptops and the box of one point use the same ID, e.g. 8Z8N</Original>
                 <Russian>Ноутбуки и ящик одного пункта используют один ID, например 8Z8N</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_upgrade">
+                <Original>Gunsmith upgrade</Original>
+                <Russian>Улучшение оружия у техника</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_upgradeRefund">
+                <Original>Gunsmith upgrade refund</Original>
+                <Russian>Возврат за улучшение оружия</Russian>
             </Key>
             <Key ID="STR_PMCB_OP_shop">
                 <Original>ION market purchase</Original>

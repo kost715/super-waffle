@@ -11,6 +11,12 @@ magazine row's price is one magazine of the first type (factor x1), the other ty
 price x factor. Box sizes and single-piece surcharges are the mod's CBA settings. Rows
 without a price are written with price 0: the shop hides them until a Zeus sets one.
 Every doubtful entry is reported and left out.
+
+source/upgrades.xlsx  the gunsmith's upgrades ("Техник"): one row per arrow of the upgrade
+                   tree (built here from the weapons sheet's grenade launcher and upgrade
+                   columns), with its cost in money and weapon parts (low, medium, high).
+                   Rows are matched by the hidden "Ключ" column; an arrow without a cost
+                   is not offered.
 Usage: python3 tools/make_catalog.py [--check]   (--check: fail if catalog.hpp is stale)
 """
 from __future__ import annotations
@@ -63,6 +69,83 @@ def price_of(value, what: str, warnings: list[str]) -> int:
         return int(round(value))
     warnings.append(f"{what}: no price, hidden until a Zeus sets one")
     return 0
+
+
+NOPE = {"", "na", "невозможно", "гп не совместим", "уже установлен", "установка гп-25 невозможна"}
+
+
+def norm(s: str) -> str:
+    return re.sub(r"\s+", "", s.lower())
+
+
+def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
+    """The arrows of the upgrade tree: [{from, to, kind, op, pairs, key}], where pairs maps
+    each class (or MMM pattern) of the source to the class (or pattern) it becomes."""
+    rows = []
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        r = [text(v) for v in row[:9]]
+        if r[0]:
+            rows.append(dict(name=r[0], classes=[c.strip() for c in r[3].split(",") if c.strip()], gl=(r[5], r[6]), up=(r[7], r[8])))
+    by_class = {}
+    for i, n in enumerate(rows):
+        for c in n["classes"]:
+            by_class.setdefault(c.lower(), i)
+    by_name = {norm(n["name"]): i for i, n in enumerate(rows)}
+    edges = []
+    for n in rows:
+        for kind, (name, cell) in (("gl", n["gl"]), ("up", n["up"])):
+            if name.lower() in NOPE and cell.upper() in ("", "NA"):
+                continue
+            explicit, bare = [], []
+            for part in (p.strip() for p in cell.split(",")):
+                if not part or part.upper() == "NA":
+                    continue
+                if "->" in part:
+                    a, b = (x.strip() for x in part.split("->", 1))
+                    explicit.append((a, b))
+                else:
+                    bare.append(part)
+            target = None
+            for t in [b for _, b in explicit] + bare:
+                if t.lower() in by_class:
+                    target = rows[by_class[t.lower()]]; break
+                if norm(t) in by_name:
+                    target = rows[by_name[norm(t)]]; break
+            if target is None and not explicit and not bare and norm(name) in by_name:
+                target = rows[by_name[norm(name)]]
+            names = {norm(t) for t in bare}
+            classes = [t for t in bare if norm(t) not in by_name or t.lower() in by_class]
+            if target is not None:
+                to_classes = target["classes"]
+                to_name = target["name"]
+            elif explicit or classes:
+                to_classes = [b for _, b in explicit] + classes
+                looks = name.lower().startswith(n["name"].split()[0].lower())
+                to_name = name if looks else to_classes[0]
+            else:
+                warnings.append(f"upgrade {n['name']}: {name!r} / {cell!r} leads nowhere, left out")
+                continue
+            # Which source class becomes which: the table's "a -> b" first, then the source's
+            # remaining classes in order against the target's remaining ones; a target with one
+            # class takes them all.
+            pairs = list(explicit)
+            done = {a.lower() for a, _ in pairs}
+            left = [c for c in to_classes if c.lower() not in {b.lower() for _, b in pairs}]
+            for c in n["classes"]:
+                if c.lower() in done:
+                    continue
+                if len(to_classes) == 1:
+                    pairs.append((c, to_classes[0]))
+                elif left:
+                    pairs.append((c, left.pop(0)))
+                else:
+                    warnings.append(f"upgrade {n['name']} -> {to_name}: no target class for {c}, left out")
+            if not pairs:
+                continue
+            label = name if norm(name) != norm(to_name) and name.lower() not in NOPE else ""
+            key = re.sub(r"[^A-Za-z0-9_\-.~:@+]", "x", n["classes"][0] + "__" + to_classes[0])
+            edges.append(dict(src=n["name"], dst=to_name, kind=kind, op=label or to_name, pairs=pairs, key=key))
+    return edges
 
 
 def build() -> tuple[str, list[str]]:
@@ -138,10 +221,44 @@ def build() -> tuple[str, list[str]]:
         if not any(m[1] == w[3] for m in magazines) and w[2] != "одноразовый гранатомет":
             warnings.append(f"weapon {w[1]}: no magazines for calibre {w[3]!r}")
 
+    # The gunsmith's upgrades and their costs.
+    edges = upgrade_edges(book["Оружие"], warnings)
+    costs = {}
+    up_book = openpyxl.load_workbook(ROOT / "source" / "upgrades.xlsx", data_only=True)
+    sheet = up_book["Стоимость улучшений"]
+    head = [text(v) for v in next(sheet.iter_rows(max_row=1, values_only=True))]
+    col = {h: i for i, h in enumerate(head)}
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        key = text(row[col["Ключ"]])
+        vals = [row[col[h]] for h in ("Деньги, $", "Детали низ.", "Детали сред.", "Детали выс.")]
+        if key and any(isinstance(v, (int, float)) for v in vals):
+            costs[key] = [int(v) if isinstance(v, (int, float)) and v >= 0 else 0 for v in vals]
+    upgrades = []
+    for e in edges:
+        if e["key"] not in costs:
+            warnings.append(f"upgrade {e['src']} -> {e['dst']}: no cost in upgrades.xlsx, not offered")
+            continue
+        upgrades.append((e, costs[e["key"]]))
+    for key in sorted(set(costs) - {e["key"] for e in edges}):
+        warnings.append(f"upgrades.xlsx: {key} matches no arrow of the tree, ignored")
+
+    # Every class pattern of the table (all states, the upgrade columns' "a -> b" too): a class
+    # of the game belongs to the most specific one that fits it, so "MMM_weap_AK74_H1S1_GP25"
+    # is the GP-25 version's, not the plain AK-74's "MMM_weap_AK74_H*S*".
+    patterns = []
+    for row in book["Оружие"].iter_rows(min_row=2, values_only=True):
+        cells = [text(v) for v in row[:9]]
+        for cell in (cells[3], cells[6], cells[8]):
+            for part in re.split(r",|->", cell):
+                part = part.strip()
+                if "*" in part and CLASS_RE.match(part) and part not in patterns:
+                    patterns.append(part)
+
     lines = [
-        "// Generated by tools/make_catalog.py from source/items.xlsx.",
+        "// Generated by tools/make_catalog.py from source/items.xlsx and source/upgrades.xlsx.",
         "// Do not edit by hand: edit the table and run the script again.",
         "class CfgPMCShop {",
+        "    patterns[] = {" + ", ".join(cfg(x) for x in patterns) + "};",
         "    class Categories {",
     ]
     for i, (key, label) in enumerate(CATEGORY_LABELS.items()):
@@ -155,6 +272,11 @@ def build() -> tuple[str, list[str]]:
     for key, calibre, label, price, types in magazines:
         listed = ", ".join(f"{{{cfg(a)}, {number(f)}, {cfg(c)}}}" for a, f, c in types)
         lines.append(f"        class {key} {{caliber = {cfg(calibre)}; magazine = {cfg(label)}; price = {price}; types[] = {{{listed}}};}};")
+    lines += ["    };", "    class Upgrades {"]
+    for i, (e, (price, low, med, high)) in enumerate(upgrades):
+        pairs = ", ".join(f"{{{cfg(a)}, {cfg(b)}}}" for a, b in e["pairs"])
+        lines.append(f"        class u{i} {{key = {cfg(e['key'])}; from = {cfg(e['src'])}; to = {cfg(e['dst'])}; kind = {cfg(e['kind'])}; "
+                     f"op = {cfg(e['op'])}; price = {price}; parts[] = {{{low}, {med}, {high}}}; pairs[] = {{{pairs}}};}};")
     lines += ["    };", "};", ""]
     return "\n".join(lines), warnings
 
@@ -170,7 +292,7 @@ def main() -> None:
         return
     OUT.write_text(catalog, encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}: {catalog.count('classes[]')} weapons, {catalog.count('types[]')} magazine rows, "
-          f"{len(warnings)} warnings")
+          f"{catalog.count('pairs[]')} upgrades, {len(warnings)} warnings")
 
 
 if __name__ == "__main__":

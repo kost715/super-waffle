@@ -6,7 +6,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "cba_xeh", "cba_settings", "pmc_bank"};
-        version = "0.3.0";
+        version = "0.4.0";
     };
 };
 
@@ -28,6 +28,12 @@ class CfgFunctions {
             file = "\pmc_shop\Common";
             class catalog {};
             class categoryName {};
+            class matchCaptures {};
+            class ownerPattern {};
+            class parts {};
+            class upgrades {};
+            class upgradesFor {};
+            class upgradeTarget {};
             class itemInfo {};
             class itemName {};
             class marketNew {};
@@ -43,6 +49,8 @@ class CfgFunctions {
             file = "\pmc_shop\Server";
             class admin {};
             class bankState {};
+            class upgrade {};
+            class upgradeDone {};
             class broadcast {};
             class buy {};
             class caller {};
@@ -67,6 +75,8 @@ class CfgFunctions {
             file = "\pmc_shop\Client";
             class notify {};
             class open {};
+            class uiTech {};
+            class upgradeApply {};
             class receive {};
             class terminalInit {};
             class ui {};
@@ -90,6 +100,9 @@ class CfgRemoteExec {
         class PMCS_fnc_closed {allowedTargets = 2; jip = 0;};
         class PMCS_fnc_buy {allowedTargets = 2; jip = 0;};
         class PMCS_fnc_admin {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_upgrade {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_upgradeDone {allowedTargets = 2; jip = 0;};
+        class PMCS_fnc_upgradeApply {allowedTargets = 1; jip = 0;};
         class PMCS_fnc_receive {allowedTargets = 0; jip = 0;};
         class PMCS_fnc_notify {allowedTargets = 0; jip = 0;};
         class PMCS_fnc_terminalInit {allowedTargets = 0; jip = 1;};

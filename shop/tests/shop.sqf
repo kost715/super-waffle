@@ -16,6 +16,8 @@ TEST_fnc_assert = {
     missionNamespace setVariable ["PMCS_fnc_" + (_x select 1), (format ["pmc_shop/%1/fn_%2.sqf", _x select 0, _x select 1]) call TEST_fnc_load];
 } forEach [["Common", "match"], ["Common", "catalog"], ["Common", "itemInfo"], ["Common", "price"], ["Common", "quote"], ["Common", "marketNew"],
     ["Common", "marketPack"], ["Common", "marketUnpack"], ["Common", "money"], ["Common", "requestOwner"], ["Common", "itemName"], ["Common", "categoryName"],
+    ["Common", "matchCaptures"], ["Common", "ownerPattern"], ["Common", "parts"], ["Common", "upgrades"], ["Common", "upgradesFor"], ["Common", "upgradeTarget"],
+    ["Server", "upgrade"], ["Server", "upgradeDone"], ["Client", "upgradeApply"],
     ["Server", "serverLoad"], ["Server", "save"], ["Server", "marketKey"], ["Server", "caller"], ["Server", "isZeus"], ["Server", "terminalNear"],
     ["Server", "registerTerminal"], ["Server", "registerPoint"], ["Server", "moduleShop"], ["Server", "modulePoint"], ["Server", "bankState"],
     ["Server", "push"], ["Server", "broadcast"], ["Server", "requestState"], ["Server", "closed"], ["Server", "log"], ["Server", "deliver"], ["Server", "buy"],
@@ -111,6 +113,27 @@ private _q8 = [[["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plasti
     && {(_q6 select 2) == "STR_PMCS_ERR_STOCK"} && {(_q7 select 2) == "STR_PMCS_ERR_CART"} && {(_q8 select 0) == 2250 + 2 * 33}
     && {((_q8 select 1) get "MMM_mag_545x39_6L23_Plastic_7N6M") == 32} && {(([[], _market] call PMCS_fnc_quote) select 2) == "STR_PMCS_ERR_CART"},
     "quote: a box (4 pieces) and single pieces priced, the MMM version by its own id (one of its classes is not a version); an armour-piercing box (x3) and two ball magazines; a box counts its pieces against the stock (3 left); another item's class, zero, an empty cart, more than is left and a hidden item are refused"] call TEST_fnc_assert;
+
+// --- Gunsmith: class mapping -------------------------------------------------------------------------
+private _byKey = {params ["_k"]; ((call PMCS_fnc_upgrades) select {(_x select 0) == _k}) param [0, []]};
+private _gp = ["rhs_weap_ak74__rhs_weap_ak74_gp25"] call _byKey;
+private _mr = ["rhs_weap_ak74__rhs_weap_ak74mr"] call _byKey;
+private _for = ["rhs_weap_ak74"] call PMCS_fnc_upgradesFor;
+[(["MMM_weap_AK74_H2S1", "MMM_weap_AK74_H*S*"] call PMCS_fnc_matchCaptures) isEqualTo [true, ["2", "1"]]
+    && {(["mmm_weap_ak74_h2s1_gp25", "MMM_weap_AK74_H*S*_GP25"] call PMCS_fnc_matchCaptures) isEqualTo [true, ["2", "1"]]}
+    && {((["MMM_weap_AK74N_H1S1", "MMM_weap_AK74_H*S*"] call PMCS_fnc_matchCaptures) select 0) isEqualTo false}
+    && {((["MMM_weap_AKS74_H1_Long", "MMM_weap_AKS74_H*_GP25"] call PMCS_fnc_matchCaptures) select 0) isEqualTo false}
+    && {(["MMM_weap_AK74_H1S1_GP25"] call PMCS_fnc_ownerPattern) == "mmm_weap_ak74_h*s*_gp25"} && {(["MMM_weap_AK74_H1S1"] call PMCS_fnc_ownerPattern) == "mmm_weap_ak74_h*s*"}
+    && {((_gp select 6) isEqualTo [0, 1, 0])} && {(_mr select 5) == 300} && {(_mr select 6) isEqualTo [1, 3, 0]}
+    && {(["MMM_weap_AK74_H2S1", _gp select 7] call PMCS_fnc_upgradeTarget) == "MMM_weap_AK74_H2S1_GP25"}
+    && {(["MMM_weap_AK74_H1S1", _gp select 7] call PMCS_fnc_upgradeTarget) == ""}
+    && {(["rhs_weap_ak74", _mr select 7] call PMCS_fnc_upgradeTarget) == "rhs_weap_ak74mr"}
+    && {(["MMM_weap_AK74_H1S1", _mr select 7] call PMCS_fnc_upgradeTarget) == "rhs_weap_ak74mr"}
+    && {(["MMM_weap_AK74_H2S1_GP25", _mr select 7] call PMCS_fnc_upgradeTarget) == ""} && {(["rhs_weap_akm", _mr select 7] call PMCS_fnc_upgradeTarget) == ""}
+    && {(_for apply {(_x select 0) select 0}) isEqualTo ["rhs_weap_ak74__rhs_weap_ak74_gp25", "rhs_weap_ak74__rhs_weap_ak74mr"]}
+    && {(["rhs_weap_pkm"] call PMCS_fnc_upgradesFor) isEqualTo []} && {count (call PMCS_fnc_upgrades) == 72}
+    && {!("MMM_weap_AK74_H2S1_GP25" in ((((call PMCS_fnc_catalog) get "items") get "rhs_weap_ak74") select 7 select 1 select 3))},
+    "gunsmith classes: what each '*' stood for, the most specific pattern owns a class (the GP-25 version is not a plain AK-74, neither in the shop's MMM pool nor for upgrades); an MMM AK-74 gets its own GP-25 version, every AK-74 becomes the AK-74MR; classes the game lacks and other weapons get nothing; 72 upgrades with their cost"] call TEST_fnc_assert;
 
 // --- Server: laptop, point, purchase through PMC Bank ----------------------------------------------
 TEST_fresh = {
@@ -306,7 +329,7 @@ private _hiddenRow = ([] call PMCS_fnc_uiShopList) select 0;
 // --- The laptop on screen: desktop, shop, cart, purchase, management ------------------------------------
 {
     missionNamespace setVariable ["PMCS_fnc_" + _x, (format ["pmc_shop/Client/fn_%1.sqf", _x]) call TEST_fnc_load];
-} forEach ["ui", "uiMake", "uiClear", "uiColor", "uiShop", "uiCartLine", "uiCartAdd", "uiAdmin", "open", "receive", "notify"];
+} forEach ["ui", "uiMake", "uiClear", "uiColor", "uiShop", "uiCartLine", "uiCartAdd", "uiAdmin", "open", "receive", "notify", "uiTech"];
 TEST_deferSpawn = true;
 PMCS_ui = nil;
 call TEST_fresh;
@@ -340,7 +363,8 @@ TEST_serve = {
         _guard = _guard + 1;
         (TEST_messages deleteAt 0) params ["_args", "_target"];
         private _fn = _target select 0;
-        if (_fn in ["PMCS_fnc_requestState", "PMCS_fnc_buy", "PMCS_fnc_admin", "PMCS_fnc_closed", "PMCS_fnc_receive", "PMCS_fnc_notify"]) then {
+        if (_fn in ["PMCS_fnc_requestState", "PMCS_fnc_buy", "PMCS_fnc_admin", "PMCS_fnc_closed", "PMCS_fnc_receive", "PMCS_fnc_notify",
+            "PMCS_fnc_upgrade", "PMCS_fnc_upgradeApply", "PMCS_fnc_upgradeDone"]) then {
             _args call (missionNamespace getVariable _fn);
         };
     };
@@ -536,6 +560,81 @@ private _log = ((["table"] call TEST_region) select {(_x getVariable ["TEST_ctrl
     && {(_foundVal select 0) == "AS Val"} && {((PMCS_market get "items") get "x_rhs_weap_asval") isEqualTo [false, 700, 0, 2, 2]} && {_armed == 0}
     && {count (_log getVariable ["TEST_rows", []]) == 1 + count (PMCS_market get "log")},
     "management: the table lists the goods with category and calibre columns, filtered by calibre (weapons and magazines with their ammo type); the chosen one gets price, discount and a limited quantity; a market discount and one for a weapon category of the table; a class found in the game and added; reset waits for a second click; the journal lists every change"] call TEST_fnc_assert;
+["onUnload", []] call PMCS_fnc_ui;
+
+// --- The gunsmith ("Техник"): the player's weapon, parts and money -----------------------------------
+private _uid = "76561100000000002";
+player setVariable ["TEST_wslots", [["rhs_weap_ak74", "rhs_acc_dtk", "", "rhs_acc_1p29", ["rhs_30Rnd_545x39_7N10_AK", 25], [], ""], [], []]];
+player setVariable ["TEST_inv", ["ar_things_weapon_parts_low", "ar_things_weapon_parts_low", "ar_things_weapon_parts_med", "ar_things_weapon_parts_med", "ar_things_weapon_parts_med", "FirstAidKit"]];
+TEST_noFit = ["rhs_acc_dtk"];
+(PMCB_accounts get _uid) set [0, 1000];
+player setPos [100, 1, 0];
+TEST_messages = [];
+[_shopLaptop] call PMCS_fnc_open;
+["onLoad", ["Logic" createVehicle [0, 0, 0]]] call PMCS_fnc_ui;
+[((["desk"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_ButtonClear"}) select 0] call TEST_click;
+call TEST_serve;
+private _nav = ([] call TEST_live) select {(_x getVariable ["PMCS_site", ""]) == "tech"};
+[_nav select 0] call TEST_click;
+call TEST_serve;
+private _onTech = (PMCS_ui get "site") == "tech" && {(["grid"] call TEST_region) isEqualTo []};
+private _offers = (["tech"] call TEST_region) select {((_x getVariable ["PMCS_event", []]) param [0, ""]) == "upgrade"};
+private _offerKeys = _offers apply {((_x getVariable "PMCS_event") select 1) select 0};
+private _bothOn = (_offers findIf {!(_x getVariable ["TEST_enabled", true])}) < 0;
+// First click arms the button, the second sends the upgrade.
+private _mrButton = {(["upgrade", ["rhs_weap_ak74__rhs_weap_ak74mr"]] call TEST_byEvent) select 0};
+[[] call _mrButton] call TEST_click;
+private _armedFirst = (TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_upgrade"}) isEqualTo [];
+[[] call _mrButton] call TEST_click;
+private _sent = (TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_upgrade"}) isNotEqualTo [];
+call TEST_serve;
+private _after = (player getVariable "TEST_wslots") select 0;
+private _inv = player getVariable ["TEST_inv", []];
+private _bankUp = PMCB_log select (count PMCB_log - 1);
+[_onTech && {_offerKeys isEqualTo ["rhs_weap_ak74__rhs_weap_ak74_gp25", "rhs_weap_ak74__rhs_weap_ak74mr"]} && {_bothOn} && {_armedFirst} && {_sent}
+    && {(_after select 0) == "rhs_weap_ak74mr"} && {"rhs_acc_1p29" in _after} && {(_after select 4) isEqualTo ["rhs_30Rnd_545x39_7N10_AK", 25]}
+    && {"rhs_acc_dtk" in _inv} && {({_x == "ar_things_weapon_parts_low"} count _inv) == 1} && {({_x == "ar_things_weapon_parts_med"} count _inv) == 0}
+    && {"FirstAidKit" in _inv} && {((PMCB_accounts get _uid) select 0) == 700} && {(_bankUp select 4) == "upgrade"} && {(_bankUp select 5) == 300}
+    && {((PMCS_market get "log") select (count (PMCS_market get "log") - 1)) select 2 find "STR_PMCS_LOG_UPGRADE" == 0}
+    && {!(PMCS_ui get "techBusy")} && {(["upgrade", ["rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"]] call TEST_byEvent) isNotEqualTo []},
+    "gunsmith: the page lists the AK-74's two upgrades, the second click upgrades it to the AK-74MR: 300 from the account (PMC Bank journal: upgrade), 1 low and 3 medium parts taken, the optic and the loaded magazine stay on, the muzzle device that does not fit goes to the inventory; the next upgrade is offered"] call TEST_fnc_assert;
+
+// Refused and refunded.
+TEST_messages = [];
+player setVariable ["TEST_inv", []];
+["body"] call PMCS_fnc_uiTech;
+private _blocked = !((((["upgrade", ["rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"]] call TEST_byEvent) select 0) getVariable ["TEST_enabled", true]))
+    && {(["STR_PMCS_TECH_SHORT"] call TEST_byText) isNotEqualTo []};
+[player, _shopLaptop, "personal", 0, "rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"] call PMCS_fnc_upgrade;
+private _noParts = (((["PMCS_fnc_notify"] call TEST_sent) select 0) select 0) select 0;
+player setVariable ["TEST_inv", ["ar_things_weapon_parts_low"]];
+[player, _shopLaptop, "personal", 0, "rhs_weap_ak74__rhs_weap_ak74_gp25"] call PMCS_fnc_upgrade;
+private _wrongWeapon = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+(PMCB_accounts get _uid) set [0, 100];
+[player, _shopLaptop, "personal", 0, "rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"] call PMCS_fnc_upgrade;
+private _poorTech = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+(PMCB_accounts get _uid) set [0, 1000];
+player setPos [140, 1, 0];
+[player, _shopLaptop, "personal", 0, "rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"] call PMCS_fnc_upgrade;
+private _farTech = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+player setPos [100, 1, 0];
+private _untouched = ((PMCB_accounts get _uid) select 0) == 1000 && {(TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_upgradeApply"}) isEqualTo []};
+// Paid, but the weapon is gone before the swap: the money comes back.
+TEST_messages = [];
+[player, _shopLaptop, "personal", 0, "rhs_weap_ak74mr__rhs_weap_ak74mr_gp25"] call PMCS_fnc_upgrade;
+private _charged = ((PMCB_accounts get _uid) select 0) == 750;
+private _apply = (TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_upgradeApply"}) select 0;
+player setVariable ["TEST_wslots", [[], [], []]];
+(_apply select 0) call PMCS_fnc_upgradeApply;
+call TEST_serve;
+private _refunded = ((PMCB_accounts get _uid) select 0) == 1000 && {(PMCB_log select (count PMCB_log - 1)) select 4 == "upgradeRefund"}
+    && {"ar_things_weapon_parts_low" in (player getVariable ["TEST_inv", []])};
+// An answer for an upgrade the server does not know, or a second answer, changes nothing.
+[player, "made-up", false] call PMCS_fnc_upgradeDone;
+[player, (_apply select 0) select 0, false] call PMCS_fnc_upgradeDone;
+[_blocked && {_noParts == "STR_PMCS_ERR_PARTS"} && {_wrongWeapon == "STR_PMCS_ERR_UPGRADE"} && {_poorTech == "STR_PMCS_ERR_FUNDS"} && {_farTech == "STR_PMCS_ERR_FAR"} && {_untouched}
+    && {_charged} && {_refunded} && {((PMCB_accounts get _uid) select 0) == 1000},
+    "gunsmith refuses: without parts the button is off; no parts, a weapon the upgrade does not take, not enough money, too far from the laptop - nothing charged; paid but the weapon was gone before the swap: refunded (journal: upgradeRefund), parts kept; a made-up answer changes nothing"] call TEST_fnc_assert;
 ["onUnload", []] call PMCS_fnc_ui;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

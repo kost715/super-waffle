@@ -37,7 +37,7 @@ switch (_event) do {
         PMCS_ui = nil;
     };
     case "desktop": {
-        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "aside", "table", "tools"]] call PMCS_fnc_uiClear;
+        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "aside", "table", "tools", "tech"]] call PMCS_fnc_uiClear;
         PMCS_ui set ["view", "desk"];
         if ((PMCS_ui get "regions") getOrDefault ["desk", []] isNotEqualTo []) exitWith {};
         ["PMCS_Picture", [0, 0, 1, 0.95], controlNull, "desk", "\pmc_shop\data\wallpaper_co.paa"] call _make;
@@ -92,11 +92,34 @@ switch (_event) do {
         ["PMCS_Text", [0.018, 0.112, 0.12, 0.025], controlNull, "page", localize (["STR_PMCS_SITE_SUB", "STR_PMCS_SITE_SUB_ADMIN"] select _admin), 0.015, "navyText"] call _make;
         PMCS_ui set ["requested", true];
         [player, PMCS_ui get "terminal"] remoteExecCall ["PMCS_fnc_requestState", 2];
-        if (_admin) then {["build"] call PMCS_fnc_uiAdmin} else {["build"] call PMCS_fnc_uiShop};
+        if (_admin) exitWith {["build"] call PMCS_fnc_uiAdmin};
+        // The site's two sections: the market and the gunsmith ("Техник").
+        private _site = PMCS_ui getOrDefault ["site", "shop"];
+        {
+            _x params ["_key", "_label", "_x0", "_w"];
+            private _on = _key == _site;
+            [["PMCS_TextBold", "PMCS_Text"] select !_on, [_x0, 0.075, _w, 0.064], controlNull, "page", localize _label, 0.024, ["navyMuted", "white"] select _on] call _make;
+            if (_on) then {["PMCS_Text", [_x0, 0.139, _w * 0.8, 0.006], controlNull, "page", "", 0.02, "", "orange"] call _make};
+            private _go = ["PMCS_ButtonClear", [_x0, 0.075, _w, 0.07], controlNull, "page"] call _make;
+            _go setVariable ["PMCS_site", _key];
+            _go ctrlAddEventHandler ["ButtonClick", {["site", [(_this select 0) getVariable "PMCS_site"]] call PMCS_fnc_ui}];
+        } forEach [["shop", "STR_PMCS_NAV_SHOP", 0.13, 0.07], ["tech", "STR_PMCS_NAV_TECH", 0.205, 0.07]];
+        if (_site == "tech") then {["build"] call PMCS_fnc_uiTech} else {["build"] call PMCS_fnc_uiShop};
+    };
+    // ["shop" | "tech"]: switch the site's section; the page is drawn again.
+    case "site": {
+        _args params [["_site", "shop", [""]]];
+        if (_site == (PMCS_ui getOrDefault ["site", "shop"]) || {(PMCS_ui get "mode") == "admin"}) exitWith {};
+        PMCS_ui set ["site", _site];
+        PMCS_ui set ["techArmed", ["", -1]];
+        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "tech"]] call PMCS_fnc_uiClear;
+        PMCS_ui set ["view", "switching"];
+        ["browser"] call PMCS_fnc_ui;
     };
     case "receive": {
         if ((PMCS_ui get "view") != "browser") exitWith {};
-        if ((PMCS_ui get "mode") == "admin") then {["refresh"] call PMCS_fnc_uiAdmin} else {["refresh"] call PMCS_fnc_uiShop};
+        if ((PMCS_ui get "mode") == "admin") exitWith {["refresh"] call PMCS_fnc_uiAdmin};
+        if ((PMCS_ui getOrDefault ["site", "shop"]) == "tech") then {["refresh"] call PMCS_fnc_uiTech} else {["refresh"] call PMCS_fnc_uiShop};
     };
     case "toast": {
         _args params ["_text"];

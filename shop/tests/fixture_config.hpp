@@ -17,6 +17,10 @@ class CfgWeapons {
     class MMM_weap_AK74_H3S1_base {scope = 1; type = 1; displayName = "base";};
     class MMM_weap_AK74N_H1S1 {scope = 2; type = 1; displayName = "AK-74N"; picture = "";};
     class rhs_weap_akm {scope = 2; type = 1; displayName = "AKM"; picture = "\rhs\akm_ca.paa";};
+    class rhs_weap_ak74_gp25 {scope = 2; type = 1; displayName = "AK-74 GP-25"; picture = "\rhs\ak74gp_ca.paa";};
+    class MMM_weap_AK74_H2S1_GP25 {scope = 2; type = 1; displayName = "AK-74 (plum) GP-25"; picture = "\mmm\ak74gp_ca.paa";};
+    class rhs_weap_ak74mr {scope = 2; type = 1; displayName = "AK-74MR"; picture = "\rhs\ak74mr_ca.paa";};
+    class rhs_weap_ak74mr_gp25 {scope = 2; type = 1; displayName = "AK-74MR GP-25"; picture = "\rhs\ak74mrgp_ca.paa";};
     class rhs_weap_pkm {scope = 2; type = 1; displayName = "PKM"; picture = "\rhs\pkm_ca.paa";};
     class rhs_weap_svds {scope = 2; type = 1; displayName = "SVD-S"; picture = "\rhs\svds_ca.paa";};
     class uk3cb_saiga12k {scope = 2; type = 1; displayName = "Saiga 12K"; picture = "";};

@@ -16,10 +16,6 @@ private _click = {
 };
 switch (_event) do {
     case "build": {
-        ["PMCS_TextBold", [0.13, 0.075, 0.07, 0.064], controlNull, "page", localize "STR_PMCS_NAV_SHOP", 0.024, "white"] call _make;
-        ["PMCS_Text", [0.13, 0.139, 0.055, 0.006], controlNull, "page", "", 0.02, "", "orange"] call _make;
-        ["PMCS_Text", [0.205, 0.075, 0.06, 0.064], controlNull, "page", localize "STR_PMCS_NAV_VEHICLES", 0.024, "navyMuted"] call _make;
-        ["PMCS_TextCenter", [0.262, 0.098, 0.04, 0.022], controlNull, "page", localize "STR_PMCS_SOON", 0.015, "navyText", [0.2, 0.263, 0.31, 1]] call _make;
         ["PMCS_Text", [0.6, 0.079, 0.22, 0.022], controlNull, "page", localize "STR_PMCS_PAY_WITH", 0.016, "navyText"] call _make;
         private _account = ["PMCS_Combo", [0.6, 0.103, 0.22, 0.032], controlNull, "page", "", 0.018] call _make;
         _account ctrlAddEventHandler ["LBSelChanged", {

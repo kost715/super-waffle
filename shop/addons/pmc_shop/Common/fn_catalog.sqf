@@ -34,7 +34,9 @@ private _all = [];
     {
         private _pattern = _x;
         if ("*" in _pattern) then {
-            private _found = _all select {[_x, _pattern] call PMCS_fnc_match};
+            // Only the classes this pattern owns: a more specific pattern of the table (a GP-25
+            // version) keeps its own.
+            private _found = _all select {[_x, _pattern] call PMCS_fnc_match && {([_x] call PMCS_fnc_ownerPattern) == toLower _pattern}};
             _found sort true;
             if (_found isEqualTo []) then {_missing pushBack _pattern} else {
                 private _mod = toUpper ((_pattern splitString "_") select 0);

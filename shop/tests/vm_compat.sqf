@@ -213,6 +213,50 @@ TEST_fnc_invRemove = {
     if (_compatAt >= 0) then {_compatList deleteAt _compatAt};
     _compatUnit setVariable [_compatVar, _compatList];
 };
+// Weapon slots: TEST_wslots = [rifle, launcher, handgun], each [] or a weaponsItems entry
+// [class, muzzle, pointer, optic, [magazine, rounds], [magazine, rounds], bipod]. A class
+// goes to the slot its config type names (1 rifle, 4 launcher, 2 handgun). addWeaponItem
+// fits anything not listed in TEST_noFit.
+TEST_noFit = [];
+TEST_fnc_wslots = {
+    private _compatSlots = _this getVariable ["TEST_wslots", [[], [], []]];
+    _this setVariable ["TEST_wslots", _compatSlots];
+    _compatSlots
+};
+TEST_fnc_slotClass = {params ["_compatUnit", "_compatSlot"]; ((_compatUnit call TEST_fnc_wslots) select _compatSlot) param [0, ""]};
+TEST_fnc_primaryWeapon = {[_this, 0] call TEST_fnc_slotClass};
+TEST_fnc_secondaryWeapon = {[_this, 1] call TEST_fnc_slotClass};
+TEST_fnc_handgunWeapon = {[_this, 2] call TEST_fnc_slotClass};
+TEST_fnc_weaponsItems = {((_this call TEST_fnc_wslots) select {_x isNotEqualTo []}) apply {+_x}};
+TEST_fnc_removeWeapon = {
+    params ["_compatUnit", "_compatClass"];
+    private _compatSlots = _compatUnit call TEST_fnc_wslots;
+    {if ((_x param [0, ""]) == _compatClass) then {_compatSlots set [_forEachIndex, []]}} forEach +_compatSlots;
+};
+TEST_fnc_addWeapon = {
+    params ["_compatUnit", "_compatClass"];
+    private _compatType = getNumber (configFile >> "CfgWeapons" >> _compatClass >> "type");
+    private _compatSlot = [1, 4, 2] find _compatType;
+    if (_compatSlot < 0) exitWith {};
+    private _compatSlots = _compatUnit call TEST_fnc_wslots;
+    if ((_compatSlots select _compatSlot) isEqualTo []) then {_compatSlots set [_compatSlot, [_compatClass, "", "", "", [], [], ""]]};
+};
+TEST_fnc_addWeaponItem = {
+    params ["_compatUnit", "_compatSpec"];
+    _compatSpec params ["_compatWeapon", "_compatItem"];
+    private _compatKey = if (_compatItem isEqualType []) then {_compatItem select 0} else {_compatItem};
+    if (_compatKey in TEST_noFit) exitWith {};
+    private _compatEntry = (_compatUnit call TEST_fnc_wslots) select {(_x param [0, ""]) == _compatWeapon};
+    if (_compatEntry isEqualTo []) exitWith {};
+    _compatEntry = _compatEntry select 0;
+    if (_compatItem isEqualType []) then {
+        private _compatAt = [4, 5] select (((_compatEntry select 4) isNotEqualTo []));
+        _compatEntry set [_compatAt, [_compatItem select 0, _compatItem select 1]];
+    } else {
+        private _compatAt = [1, 2, 3, 6] select {(_compatEntry select _x) == ""};
+        if (_compatAt isNotEqualTo []) then {_compatEntry set [_compatAt select 0, _compatItem]};
+    };
+};
 TEST_fnc_addItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invAdd};
 TEST_fnc_addMagazine = {[_this select 0, _this select 1, "TEST_invMags"] call TEST_fnc_invAdd};
 TEST_fnc_removeItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invRemove};
@@ -422,6 +466,13 @@ TEST_fnc_compatCode = {
             case "CALLUNARY magazines": {"TEST_fnc_mags" call _compatCall};
             case "CALLBINARY canadd": {"TEST_fnc_canAdd" call _compatPair};
             case "CALLBINARY additem": {"TEST_fnc_addItem" call _compatPair};
+            case "CALLUNARY primaryweapon": {"TEST_fnc_primaryWeapon" call _compatCall};
+            case "CALLUNARY secondaryweapon": {"TEST_fnc_secondaryWeapon" call _compatCall};
+            case "CALLUNARY handgunweapon": {"TEST_fnc_handgunWeapon" call _compatCall};
+            case "CALLUNARY weaponsitems": {"TEST_fnc_weaponsItems" call _compatCall};
+            case "CALLBINARY removeweapon": {"TEST_fnc_removeWeapon" call _compatPair};
+            case "CALLBINARY addweapon": {"TEST_fnc_addWeapon" call _compatPair};
+            case "CALLBINARY addweaponitem": {"TEST_fnc_addWeaponItem" call _compatPair};
             case "CALLBINARY addmagazine": {"TEST_fnc_addMagazine" call _compatPair};
             case "CALLBINARY removeitem": {"TEST_fnc_removeItem" call _compatPair};
             case "CALLBINARY removemagazine": {"TEST_fnc_removeMagazine" call _compatPair};
