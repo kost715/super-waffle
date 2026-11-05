@@ -1,0 +1,530 @@
+// SQF-VM lacks the UI, network and scheduler commands the interactions use.
+// Compiled opcodes are adapted to the fixtures below; application code is unchanged.
+TEST_isServer = true;
+TEST_hasInterface = false;
+TEST_systemTime = [2026, 10, 29, 9, 5, 7, 0];
+TEST_clipboard = "";
+TEST_dialogs = [];
+TEST_isRemoteExecuted = false;
+TEST_remoteOwner = 2;
+TEST_messages = [];
+TEST_missionHandlers = [];
+TEST_profilesSaved = 0;
+TEST_realTime = 1000;
+TEST_canSuspend = false;
+TEST_sleeps = 0;
+TEST_onSleep = {};
+TEST_deferSpawn = false;
+TEST_deferred = [];
+
+TEST_fnc_getDefault = {
+    params ["_compatMap", "_compatArgs"];
+    if !((_compatArgs select 0) in _compatMap) exitWith {_compatArgs select 1};
+    _compatMap get (_compatArgs select 0)
+};
+TEST_fnc_setVariable = {
+    params ["_compatTarget", "_compatArgs"];
+    _compatTarget setVariable (_compatArgs select [0, 2]);
+};
+// VM keeps a nil-valued key after setVariable [name, nil]; Arma removes it.
+TEST_fnc_getVariable = {
+    params ["_compatTarget", "_compatArgs"];
+    if (_compatArgs isEqualType "") exitWith {_compatTarget getVariable _compatArgs};
+    private _compatValue = _compatTarget getVariable _compatArgs;
+    if (isNil "_compatValue") exitWith {_compatArgs select 1};
+    _compatValue
+};
+TEST_fnc_toPairs = {
+    params ["_compatMap", "_compatOption"];
+    (keys _compatMap) apply {[_x, _compatMap get _x]}
+};
+TEST_fnc_values = {private _compatMap = _this; (keys _compatMap) apply {_compatMap get _x}};
+TEST_fnc_forEach = {
+    params ["_compatCode", "_compatCollection"];
+    if (_compatCollection isEqualType []) exitWith {_compatCode forEach _compatCollection};
+    {
+        private _compatKey = _x;
+        private _compatValue = _compatCollection get _compatKey;
+        private _x = _compatKey;
+        private _y = _compatValue;
+        call _compatCode;
+    } forEach (keys _compatCollection);
+};
+TEST_fnc_remote = {TEST_messages pushBack +_this; 0};
+TEST_fnc_owner = {_this getVariable ["TEST_owner", 2]};
+TEST_fnc_typeOf = {_this getVariable ["TEST_class", ""]};
+// SQF-VM's inheritsFrom returns the enclosing class, not the parent, so fixture
+// classes list their kinds in TEST_kinds[] (inherited by subclasses).
+TEST_fnc_isKindOf = {
+    params ["_compatLeft", "_compatRight"];
+    private _compatRoot = configFile >> "CfgVehicles";
+    private _compatParent = _compatRight;
+    if (_compatRight isEqualType []) then {_compatParent = _compatRight select 0; _compatRoot = _compatRight select 1};
+    private _compatClass = if (_compatLeft isEqualType objNull) then {_compatLeft getVariable ["TEST_class", ""]} else {_compatLeft};
+    if (_compatClass == "" || {!isClass (_compatRoot >> _compatClass)}) exitWith {false};
+    toLower _compatClass == toLower _compatParent || {
+        (getArray (_compatRoot >> _compatClass >> "TEST_kinds")) findIf {toLower _x == toLower _compatParent} >= 0}
+};
+// VM's isNil {code} loses its stack when the code ends after a skipped exitWith.
+TEST_fnc_isNil = {
+    if (_this isEqualType {}) exitWith {private _compatResult = call _this; isNil "_compatResult"};
+    isNil _this
+};
+TEST_fnc_noParent = {_this getVariable ["TEST_parent", objNull]};
+TEST_fnc_missionHandler = {TEST_missionHandlers pushBack _this; count TEST_missionHandlers - 1};
+// Scheduler: spawned code runs at once with canSuspend true; sleep advances the
+// clock and runs TEST_onSleep, which tests use to deliver late inventory updates.
+TEST_fnc_spawn = {
+    params ["_compatArgs", "_compatCode"];
+    if (TEST_deferSpawn) exitWith {TEST_deferred pushBack [_compatArgs, _compatCode]; scriptNull};
+    private _compatWas = TEST_canSuspend;
+    TEST_canSuspend = true;
+    _compatArgs call _compatCode;
+    TEST_canSuspend = _compatWas;
+    scriptNull
+};
+TEST_fnc_sleep = {
+    TEST_realTime = TEST_realTime + _this;
+    TEST_sleeps = TEST_sleeps + 1;
+    call TEST_onSleep;
+};
+// Unit inventory: the loadout array itself. Container inventory: magazines
+// [[class, rounds]...], items/backpacks [[class, count]...], weapons in the
+// weaponsItemsCargo format, and nested [class, object] containers.
+TEST_fnc_getLoadout = {+(_this getVariable ["TEST_loadout", [[],[],[],[],[],[],"","",[],["","","","","",""]]])};
+TEST_fnc_magsAmmo = {+(_this getVariable ["TEST_mags", []])};
+TEST_fnc_pairsCargo = {
+    params ["_compatObject", "_compatVar"];
+    private _compatPairs = _compatObject getVariable [_compatVar, []];
+    [_compatPairs apply {_x select 0}, _compatPairs apply {_x select 1}]
+};
+TEST_fnc_itemCargo = {[_this, "TEST_items"] call TEST_fnc_pairsCargo};
+TEST_fnc_backpackCargo = {[_this, "TEST_packs"] call TEST_fnc_pairsCargo};
+TEST_fnc_weaponsCargo = {+(_this getVariable ["TEST_weapons", []])};
+TEST_fnc_containers = {+(_this getVariable ["TEST_containers", []])};
+TEST_fnc_clearMags = {_this setVariable ["TEST_mags", []]};
+TEST_fnc_isPack = {getNumber (configFile >> "CfgVehicles" >> _this >> "isBackpack") == 1};
+TEST_fnc_clearItems = {
+    _this setVariable ["TEST_items", []];
+    _this setVariable ["TEST_containers", (_this getVariable ["TEST_containers", []]) select {(_x select 0) call TEST_fnc_isPack}];
+};
+TEST_fnc_clearWeapons = {_this setVariable ["TEST_weapons", []]};
+TEST_fnc_clearPacks = {
+    _this setVariable ["TEST_packs", []];
+    _this setVariable ["TEST_containers", (_this getVariable ["TEST_containers", []]) select {!((_x select 0) call TEST_fnc_isPack)}];
+};
+// Uniforms, vests and backpacks added to cargo become container objects of their own.
+TEST_fnc_addContainers = {
+    params ["_compatObject", "_compatClass", "_compatCount"];
+    private _compatType = getNumber (configFile >> "CfgWeapons" >> _compatClass >> "ItemInfo" >> "type");
+    if !(_compatType in [701, 801] || {_compatClass call TEST_fnc_isPack}) exitWith {};
+    private _compatList = _compatObject getVariable ["TEST_containers", []];
+    for "_compatI" from 1 to _compatCount do {
+        private _compatNew = _compatClass createVehicle [0, 0, 0];
+        _compatNew setVariable ["TEST_class", _compatClass];
+        _compatList pushBack [_compatClass, _compatNew];
+    };
+    _compatObject setVariable ["TEST_containers", _compatList];
+};
+TEST_fnc_addPairs = {
+    params ["_compatObject", "_compatVar", "_compatClass", "_compatCount"];
+    private _compatPairs = _compatObject getVariable [_compatVar, []];
+    private _compatAt = _compatPairs findIf {(_x select 0) == _compatClass};
+    if (_compatAt < 0) then {_compatPairs pushBack [_compatClass, _compatCount]} else {
+        (_compatPairs select _compatAt) set [1, ((_compatPairs select _compatAt) select 1) + _compatCount];
+    };
+    _compatObject setVariable [_compatVar, _compatPairs];
+};
+TEST_fnc_addItemCargo = {
+    [_this select 0, "TEST_items", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs;
+    [_this select 0, (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addContainers;
+};
+TEST_fnc_addPackCargo = {
+    [_this select 0, "TEST_packs", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs;
+    [_this select 0, (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addContainers;
+};
+TEST_fnc_addWeaponItems = {
+    params ["_compatObject", "_compatSpec"];
+    private _compatWeapons = _compatObject getVariable ["TEST_weapons", []];
+    for "_compatI" from 1 to (_compatSpec select 1) do {_compatWeapons pushBack +(_compatSpec select 0)};
+    _compatObject setVariable ["TEST_weapons", _compatWeapons];
+};
+TEST_fnc_addWeaponCargo = {
+    params ["_compatObject", "_compatSpec"];
+    private _compatWeapons = _compatObject getVariable ["TEST_weapons", []];
+    for "_compatI" from 1 to (_compatSpec select 1) do {_compatWeapons pushBack [_compatSpec select 0, "", "", "", [], [], ""]};
+    _compatObject setVariable ["TEST_weapons", _compatWeapons];
+};
+TEST_fnc_addMagAmmo = {
+    params ["_compatObject", "_compatSpec"];
+    private _compatMags = _compatObject getVariable ["TEST_mags", []];
+    for "_compatI" from 1 to (_compatSpec select 1) do {_compatMags pushBack [_compatSpec select 0, _compatSpec select 2]};
+    _compatObject setVariable ["TEST_mags", _compatMags];
+};
+// Units: side via TEST_side (group is the unit itself); Zeus, locality and Eden sync via variables.
+TEST_fnc_identity = {_this};
+TEST_fnc_side = {_this getVariable ["TEST_side", west]};
+TEST_fnc_local = {_this getVariable ["TEST_local", true]};
+TEST_fnc_attachedTo = {_this getVariable ["TEST_attachedTo", objNull]};
+TEST_fnc_synced = {_this getVariable ["TEST_synced", []]};
+TEST_fnc_curator = {_this getVariable ["TEST_curator", objNull]};
+// Files: TEST_files maps a path to its text; missing files read as "".
+TEST_files = createHashMap;
+TEST_filePatching = false;
+TEST_parseFails = false;
+// Arma reports reading a missing file as a script error; record any such read.
+TEST_missingReads = [];
+TEST_fnc_fileExists = {_this in TEST_files};
+TEST_fnc_loadFile = {if (_this in TEST_files) then {TEST_files get _this} else {TEST_missingReads pushBack _this; ""}};
+// Arma's parseSimpleArray takes plain data only: comments make it fail.
+TEST_fnc_parseSimple = {
+    if (TEST_parseFails || {_this == ""} || {(_this find (toString [47, 47])) >= 0}) exitWith {[]};
+    call compile _this
+};
+// Players: UID, name and player flag via variables. Unit inventory: TEST_inv
+// (item classes) and TEST_invMags (magazine classes), at most TEST_capacity pieces.
+TEST_fnc_uid = {_this getVariable ["TEST_uid", ""]};
+TEST_fnc_name = {_this getVariable ["TEST_name", "Unit"]};
+TEST_fnc_isPlayer = {_this getVariable ["TEST_player", false]};
+TEST_fnc_items = {+(_this getVariable ["TEST_inv", []])};
+TEST_fnc_mags = {+(_this getVariable ["TEST_invMags", []])};
+TEST_fnc_canAdd = {
+    params ["_compatUnit"];
+    count (_compatUnit getVariable ["TEST_inv", []]) + count (_compatUnit getVariable ["TEST_invMags", []]) < (_compatUnit getVariable ["TEST_capacity", 100])
+};
+TEST_fnc_invAdd = {
+    params ["_compatUnit", "_compatClass", "_compatVar"];
+    if !([_compatUnit] call TEST_fnc_canAdd) exitWith {};
+    private _compatList = _compatUnit getVariable [_compatVar, []];
+    _compatList pushBack _compatClass;
+    _compatUnit setVariable [_compatVar, _compatList];
+};
+TEST_fnc_invRemove = {
+    params ["_compatUnit", "_compatClass", "_compatVar"];
+    private _compatList = _compatUnit getVariable [_compatVar, []];
+    private _compatAt = _compatList findIf {toLower _x == toLower _compatClass};
+    if (_compatAt >= 0) then {_compatList deleteAt _compatAt};
+    _compatUnit setVariable [_compatVar, _compatList];
+};
+TEST_fnc_addItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invAdd};
+TEST_fnc_addMagazine = {[_this select 0, _this select 1, "TEST_invMags"] call TEST_fnc_invAdd};
+TEST_fnc_removeItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invRemove};
+TEST_fnc_removeMagazine = {[_this select 0, _this select 1, "TEST_invMags"] call TEST_fnc_invRemove};
+TEST_fnc_createVehicleArray = {
+    private _compatObject = (_this select 0) createVehicle (_this select 1);
+    _compatObject setVariable ["TEST_class", _this select 0];
+    TEST_created pushBack _compatObject;
+    _compatObject
+};
+TEST_created = [];
+TEST_fnc_addMagCargo = {[_this select 0, "TEST_mags", (_this select 1) select 0, (_this select 1) select 1] call TEST_fnc_addPairs};
+TEST_fnc_clipboard = {TEST_clipboard = _this};
+TEST_fnc_createDialog = {TEST_dialogs pushBack _this; true};
+// SQF-VM's inheritsFrom returns the enclosing class: fixture classes name their parent
+// in TEST_parent instead. Displays are plain null objects; findDisplay finds nothing
+// unless TEST_zeusOpen is set.
+TEST_null = objNull;
+TEST_zeusOpen = false;
+TEST_closed = 0;
+TEST_fnc_inheritsFrom = {
+    private _compatParent = getText (_this >> "TEST_parent");
+    if (_compatParent == "") exitWith {configFile >> "TEST_NoSuchClass"};
+    private _compatRoot = configFile >> "ace_medical_treatment_actions";
+    if !(isClass (_compatRoot >> configName _this)) then {_compatRoot = configFile >> "ACE_Repair" >> "Actions"};
+    _compatRoot >> _compatParent
+};
+TEST_fnc_findDisplay = {if (TEST_zeusOpen && {_this == 312}) then {player} else {objNull}};
+TEST_fnc_closeDialog = {TEST_closed = TEST_closed + 1};
+TEST_fnc_speed = {_this getVariable ["TEST_speed", 0]};
+TEST_fnc_hitPoints = {_this getVariable ["TEST_hitPoints", [[], [], []]]};
+// Movement and aim state of a unit, for the drugs' debug panel.
+TEST_fnc_sprintAllowed = {!(_this getVariable ["TEST_blockSprint", false])};
+TEST_fnc_forcedWalk = {_this getVariable ["TEST_forceWalk", false]};
+TEST_fnc_animSpeed = {_this getVariable ["TEST_animSpeed", 1]};
+TEST_fnc_aimCoef = {_this getVariable ["TEST_aimCoef", 1]};
+// Movement of a unit for ACE's metabolic cost (PMCD_fnc_currentWork): set by the tests.
+TEST_fnc_velocity = {_this getVariable ["TEST_velocity", [0, 0, 0]]};
+TEST_fnc_onGround = {_this getVariable ["TEST_onGround", true]};
+TEST_fnc_underwater = {false};
+TEST_fnc_stance = {_this getVariable ["TEST_stance", "STAND"]};
+TEST_fnc_surfaceNormal = {[0, 0, 1]};
+// Animation speed and Fentropil's film grain (post-process effects are recorded).
+TEST_fnc_setAnimSpeed = {(_this select 0) setVariable ["TEST_animSpeed", _this select 1]};
+TEST_fnc_visionMode = {_this getVariable ["TEST_vision", 0]};
+TEST_pp = [];
+TEST_ppTaken = [];
+TEST_fnc_ppCreate = {TEST_pp pushBack ["create", _this]; if ((_this select 1) in TEST_ppTaken) exitWith {-1}; count TEST_pp + 100};
+TEST_fnc_ppEnable = {TEST_pp pushBack ["enable", _this]};
+TEST_fnc_ppAdjust = {TEST_pp pushBack ["adjust", +_this]};
+TEST_fnc_ppCommit = {TEST_pp pushBack ["commit", _this]};
+TEST_fnc_ppDestroy = {TEST_pp pushBack ["destroy", _this]};
+TEST_fnc_lockInventory = {(_this select 0) setVariable ["TEST_locked", _this select 1]};
+TEST_fnc_lockedInventory = {_this getVariable ["TEST_locked", false]};
+
+// Arma sorts arrays of arrays by their first element, then the next; SQF-VM does not.
+TEST_fnc_less = {
+    params ["_compatA", "_compatB"];
+    if (_compatA isEqualType [] && {_compatB isEqualType []}) exitWith {
+        private _compatResult = count _compatA < count _compatB;
+        private _compatDone = false;
+        for "_compatI" from 0 to ((count _compatA) min (count _compatB)) - 1 do {
+            if (!_compatDone) then {
+                private _compatX = _compatA select _compatI;
+                private _compatY = _compatB select _compatI;
+                if !(_compatX isEqualTo _compatY) then {
+                    _compatResult = [_compatX, _compatY] call TEST_fnc_less;
+                    _compatDone = true;
+                };
+            };
+        };
+        _compatResult
+    };
+    if (_compatA isEqualType "") exitWith {
+        private _compatPair = [_compatA, _compatB];
+        _compatPair sort true;
+        !(_compatA isEqualTo _compatB) && {(_compatPair select 0) isEqualTo _compatA}
+    };
+    _compatA < _compatB
+};
+TEST_fnc_sort = {
+    params ["_compatArray", "_compatAscending"];
+    if (_compatArray findIf {_x isEqualType []} < 0) exitWith {_compatArray sort _compatAscending};
+    private _compatCopy = +_compatArray;
+    private _compatOut = [];
+    while {_compatCopy isNotEqualTo []} do {
+        private _compatBest = 0;
+        for "_compatI" from 1 to count _compatCopy - 1 do {
+            private _compatLess = [_compatCopy select _compatI, _compatCopy select _compatBest] call TEST_fnc_less;
+            if (_compatLess isEqualTo _compatAscending) then {_compatBest = _compatI};
+        };
+        _compatOut pushBack (_compatCopy deleteAt _compatBest);
+    };
+    _compatArray resize 0;
+    _compatArray append _compatOut;
+};
+// Laptop windows: a control is a stand-in object that keeps what the code set on it -
+// text, position, colours, list rows, check state and its event handlers (TEST_eh_<name>),
+// so tests can read the screen and "click" by calling a handler.
+TEST_ctrls = [];
+TEST_szX = 0;
+TEST_szY = 0;
+TEST_szW = 1;
+TEST_szH = 1;
+TEST_date = [2026, 11, 5, 14, 32];
+TEST_fnc_ctrlCreate = {
+    params ["_compatDisplay", "_compatSpec"];
+    private _compatCtrl = "Logic" createVehicle [0, 0, 0];
+    _compatCtrl setVariable ["TEST_ctrlClass", _compatSpec select 0];
+    _compatCtrl setVariable ["TEST_ctrlParent", _compatSpec param [2, objNull]];
+    _compatCtrl setVariable ["TEST_enabled", true];
+    TEST_ctrls pushBack _compatCtrl;
+    _compatCtrl
+};
+TEST_fnc_ctrlPos = {(_this select 0) setVariable ["TEST_pos", _this select 1]};
+TEST_fnc_ctrlText = {(_this select 0) setVariable ["TEST_text", _this select 1]};
+TEST_fnc_ctrlFont = {(_this select 0) setVariable ["TEST_font", _this select 1]};
+TEST_fnc_ctrlFg = {(_this select 0) setVariable ["TEST_fg", _this select 1]};
+TEST_fnc_ctrlBg = {(_this select 0) setVariable ["TEST_bg", _this select 1]};
+TEST_fnc_ctrlEnable = {(_this select 0) setVariable ["TEST_enabled", _this select 1]};
+TEST_fnc_ctrlTip = {(_this select 0) setVariable ["TEST_tip", _this select 1]};
+TEST_fnc_ctrlCheck = {(_this select 0) setVariable ["TEST_checked", _this select 1]};
+TEST_fnc_ctrlNothing = {};
+TEST_fnc_ctrlEh = {
+    (_this select 0) setVariable ["TEST_eh_" + ((_this select 1) select 0), (_this select 1) select 1];
+    0
+};
+TEST_fnc_ctrlDelete = {_this setVariable ["TEST_deleted", true]; true};
+TEST_fnc_ctrlGetText = {_this getVariable ["TEST_text", ""]};
+TEST_fnc_ctrlGetPos = {_this getVariable ["TEST_pos", [0, 0, 0, 0]]};
+TEST_fnc_ctrlChecked = {_this getVariable ["TEST_checked", false]};
+TEST_fnc_lbCur = {_this getVariable ["TEST_cur", -1]};
+TEST_fnc_lbClear = {_this setVariable ["TEST_rows", []]};
+TEST_fnc_lbAdd = {
+    private _compatRows = (_this select 0) getVariable ["TEST_rows", []];
+    _compatRows pushBack [_this select 1, ""];
+    (_this select 0) setVariable ["TEST_rows", _compatRows];
+    count _compatRows - 1
+};
+TEST_fnc_lbSetData = {(((_this select 0) getVariable ["TEST_rows", []]) select ((_this select 1) select 0)) set [1, (_this select 1) select 1]};
+TEST_fnc_lbData = {(((_this select 0) getVariable ["TEST_rows", []]) select (_this select 1)) select 1};
+TEST_fnc_lbSetCur = {(_this select 0) setVariable ["TEST_cur", _this select 1]};
+TEST_fnc_lnbData = {
+    private _compatCells = (_this select 0) getVariable ["TEST_cells", createHashMap];
+    private _compatKey = str (_this select 1);
+    if (_compatKey in _compatCells) then {_compatCells get _compatKey} else {""}
+};
+TEST_fnc_lnbSetData = {
+    private _compatCells = (_this select 0) getVariable ["TEST_cells", createHashMap];
+    _compatCells set [str ((_this select 1) select 0), (_this select 1) select 1];
+    (_this select 0) setVariable ["TEST_cells", _compatCells];
+};
+TEST_fnc_trim = {
+    params ["_compatText", "_compatSpec"];
+    private _compatChars = (_compatSpec select 0) splitString "";
+    private _compatOut = _compatText splitString "";
+    while {_compatOut isNotEqualTo [] && {(_compatOut select 0) in _compatChars}} do {_compatOut deleteAt 0};
+    while {_compatOut isNotEqualTo [] && {(_compatOut select (count _compatOut - 1)) in _compatChars}} do {_compatOut deleteAt (count _compatOut - 1)};
+    _compatOut joinString ""
+};
+TEST_fnc_identityText = {_this};
+TEST_fnc_compatCode = {
+    private _compatOut = [];
+    {
+        private _compatLine = _x;
+        if ((_compatLine select [0, 6]) == "PUSH {") then {
+            private _compatNested = call compile (_compatLine select [5]);
+            _compatLine = "PUSH " + str (_compatNested call TEST_fnc_compatCode);
+        };
+        private _compatCall = {_compatOut append ["GETVARIABLE " + _this, "CALLBINARY call"]};
+        private _compatPair = {_compatOut append ["MAKEARRAY 2", "GETVARIABLE " + _this, "CALLBINARY call"]};
+        switch (_compatLine) do {
+            case "CALLNULAR isserver": {_compatOut pushBack "GETVARIABLE TEST_isServer"};
+            case "CALLNULAR hasinterface": {_compatOut pushBack "GETVARIABLE TEST_hasInterface"};
+            case "CALLNULAR systemtime": {_compatOut pushBack "GETVARIABLE TEST_systemTime"};
+            case "CALLNULAR missionname": {_compatOut pushBack "PUSH ""TestMission"""};
+            case "CALLNULAR worldname": {_compatOut pushBack "PUSH ""Altis"""};
+            case "CALLNULAR dialog": {_compatOut pushBack "PUSH false"};
+            case "CALLNULAR displaynull": {_compatOut pushBack "GETVARIABLE TEST_null"};
+            case "CALLUNARY inheritsfrom": {"TEST_fnc_inheritsFrom" call _compatCall};
+            case "CALLUNARY finddisplay": {"TEST_fnc_findDisplay" call _compatCall};
+            case "CALLUNARY closedialog": {"TEST_fnc_closeDialog" call _compatCall};
+            case "CALLUNARY speed": {"TEST_fnc_speed" call _compatCall};
+            case "CALLUNARY issprintallowed": {"TEST_fnc_sprintAllowed" call _compatCall};
+            case "CALLUNARY isforcedwalk": {"TEST_fnc_forcedWalk" call _compatCall};
+            case "CALLUNARY getanimspeedcoef": {"TEST_fnc_animSpeed" call _compatCall};
+            case "CALLUNARY getcustomaimcoef": {"TEST_fnc_aimCoef" call _compatCall};
+            case "CALLUNARY velocity": {"TEST_fnc_velocity" call _compatCall};
+            case "CALLUNARY istouchingground": {"TEST_fnc_onGround" call _compatCall};
+            case "CALLUNARY underwater": {"TEST_fnc_underwater" call _compatCall};
+            case "CALLUNARY stance": {"TEST_fnc_stance" call _compatCall};
+            case "CALLUNARY surfacenormal": {"TEST_fnc_surfaceNormal" call _compatCall};
+            case "CALLBINARY setanimspeedcoef": {"TEST_fnc_setAnimSpeed" call _compatPair};
+            case "CALLUNARY currentvisionmode": {"TEST_fnc_visionMode" call _compatCall};
+            case "CALLUNARY ppeffectcreate": {"TEST_fnc_ppCreate" call _compatCall};
+            case "CALLBINARY ppeffectenable": {"TEST_fnc_ppEnable" call _compatPair};
+            case "CALLBINARY ppeffectadjust": {"TEST_fnc_ppAdjust" call _compatPair};
+            case "CALLBINARY ppeffectcommit": {"TEST_fnc_ppCommit" call _compatPair};
+            case "CALLUNARY ppeffectdestroy": {"TEST_fnc_ppDestroy" call _compatCall};
+            // Flat fixture world: the model centre is the VM position.
+            case "CALLUNARY getposworld": {_compatOut pushBack "CALLUNARY getpos"};
+            case "CALLUNARY getallhitpointsdamage": {"TEST_fnc_hitPoints" call _compatCall};
+            case "CALLUNARY getplayeruid": {"TEST_fnc_uid" call _compatCall};
+            case "CALLUNARY name": {"TEST_fnc_name" call _compatCall};
+            case "CALLUNARY isplayer": {"TEST_fnc_isPlayer" call _compatCall};
+            case "CALLUNARY items": {"TEST_fnc_items" call _compatCall};
+            case "CALLUNARY magazines": {"TEST_fnc_mags" call _compatCall};
+            case "CALLBINARY canadd": {"TEST_fnc_canAdd" call _compatPair};
+            case "CALLBINARY additem": {"TEST_fnc_addItem" call _compatPair};
+            case "CALLBINARY addmagazine": {"TEST_fnc_addMagazine" call _compatPair};
+            case "CALLBINARY removeitem": {"TEST_fnc_removeItem" call _compatPair};
+            case "CALLBINARY removemagazine": {"TEST_fnc_removeMagazine" call _compatPair};
+            case "CALLUNARY createvehicle": {"TEST_fnc_createVehicleArray" call _compatCall};
+            // Flat fixture world: ATL and the VM position coincide.
+            case "CALLUNARY getposatl": {_compatOut pushBack "CALLUNARY getpos"};
+            case "CALLBINARY addmagazinecargoglobal": {"TEST_fnc_addMagCargo" call _compatPair};
+            case "CALLUNARY copytoclipboard": {"TEST_fnc_clipboard" call _compatCall};
+            case "CALLUNARY createdialog": {"TEST_fnc_createDialog" call _compatCall};
+            case "CALLNULAR isremoteexecuted": {_compatOut pushBack "GETVARIABLE TEST_isRemoteExecuted"};
+            case "CALLNULAR remoteexecutedowner": {_compatOut pushBack "GETVARIABLE TEST_remoteOwner"};
+            case "CALLNULAR clientowner": {_compatOut pushBack "PUSH 2"};
+            case "CALLNULAR cansuspend": {_compatOut pushBack "GETVARIABLE TEST_canSuspend"};
+            case "CALLNULAR diag_ticktime": {_compatOut pushBack "GETVARIABLE TEST_realTime"};
+            case "CALLNULAR saveprofilenamespace": {_compatOut append ["GETVARIABLE TEST_profilesSaved", "PUSH 1", "CALLBINARY +", "ASSIGNTO TEST_profilesSaved"]};
+            case "CALLNULAR safezonex": {_compatOut pushBack "GETVARIABLE TEST_szX"};
+            case "CALLNULAR safezoney": {_compatOut pushBack "GETVARIABLE TEST_szY"};
+            case "CALLNULAR safezonew": {_compatOut pushBack "GETVARIABLE TEST_szW"};
+            case "CALLNULAR safezoneh": {_compatOut pushBack "GETVARIABLE TEST_szH"};
+            case "CALLNULAR date": {_compatOut pushBack "GETVARIABLE TEST_date"};
+            case "CALLNULAR controlnull": {_compatOut pushBack "GETVARIABLE TEST_null"};
+            case "CALLBINARY ctrlcreate": {"TEST_fnc_ctrlCreate" call _compatPair};
+            case "CALLBINARY ctrlsetposition": {"TEST_fnc_ctrlPos" call _compatPair};
+            case "CALLBINARY ctrlcommit": {"TEST_fnc_ctrlNothing" call _compatPair};
+            case "CALLBINARY ctrlsettext": {"TEST_fnc_ctrlText" call _compatPair};
+            case "CALLBINARY ctrlsetstructuredtext": {"TEST_fnc_ctrlText" call _compatPair};
+            case "CALLBINARY ctrlsetfontheight": {"TEST_fnc_ctrlFont" call _compatPair};
+            case "CALLBINARY ctrlsettextcolor": {"TEST_fnc_ctrlFg" call _compatPair};
+            case "CALLBINARY ctrlsetbackgroundcolor": {"TEST_fnc_ctrlBg" call _compatPair};
+            case "CALLBINARY ctrlsetactivecolor": {"TEST_fnc_ctrlNothing" call _compatPair};
+            case "CALLBINARY ctrlenable": {"TEST_fnc_ctrlEnable" call _compatPair};
+            case "CALLBINARY ctrlsettooltip": {"TEST_fnc_ctrlTip" call _compatPair};
+            case "CALLBINARY cbsetchecked": {"TEST_fnc_ctrlCheck" call _compatPair};
+            case "CALLBINARY ctrladdeventhandler": {"TEST_fnc_ctrlEh" call _compatPair};
+            case "CALLUNARY ctrldelete": {"TEST_fnc_ctrlDelete" call _compatCall};
+            case "CALLUNARY ctrltext": {"TEST_fnc_ctrlGetText" call _compatCall};
+            case "CALLUNARY ctrlposition": {"TEST_fnc_ctrlGetPos" call _compatCall};
+            case "CALLUNARY cbchecked": {"TEST_fnc_ctrlChecked" call _compatCall};
+            case "CALLUNARY lbcursel": {"TEST_fnc_lbCur" call _compatCall};
+            case "CALLUNARY lbclear": {"TEST_fnc_lbClear" call _compatCall};
+            case "CALLUNARY parsetext": {"TEST_fnc_identityText" call _compatCall};
+            case "CALLBINARY lbadd": {"TEST_fnc_lbAdd" call _compatPair};
+            case "CALLBINARY lnbaddrow": {"TEST_fnc_lbAdd" call _compatPair};
+            case "CALLBINARY lbsetdata": {"TEST_fnc_lbSetData" call _compatPair};
+            case "CALLBINARY lbdata": {"TEST_fnc_lbData" call _compatPair};
+            case "CALLBINARY lbsetcursel": {"TEST_fnc_lbSetCur" call _compatPair};
+            case "CALLBINARY lnbsetcurselrow": {"TEST_fnc_lbSetCur" call _compatPair};
+            case "CALLBINARY lnbsetdata": {"TEST_fnc_lnbSetData" call _compatPair};
+            case "CALLBINARY lnbdata": {"TEST_fnc_lnbData" call _compatPair};
+            case "CALLBINARY lnbsetcolor": {"TEST_fnc_ctrlNothing" call _compatPair};
+            case "CALLBINARY lnbsetcolumnspos": {"TEST_fnc_ctrlNothing" call _compatPair};
+            case "CALLBINARY trim": {"TEST_fnc_trim" call _compatPair};
+            case "CALLBINARY getordefault": {"TEST_fnc_getDefault" call _compatPair};
+            case "CALLBINARY sort": {"TEST_fnc_sort" call _compatPair};
+            case "CALLBINARY toarray": {"TEST_fnc_toPairs" call _compatPair};
+            case "CALLBINARY setvariable": {"TEST_fnc_setVariable" call _compatPair};
+            case "CALLBINARY getvariable": {"TEST_fnc_getVariable" call _compatPair};
+            case "CALLBINARY foreach": {"TEST_fnc_forEach" call _compatPair};
+            case "CALLBINARY remoteexec";
+            case "CALLBINARY remoteexeccall": {"TEST_fnc_remote" call _compatPair};
+            case "CALLBINARY iskindof": {"TEST_fnc_isKindOf" call _compatPair};
+            case "CALLBINARY spawn": {"TEST_fnc_spawn" call _compatPair};
+            case "CALLBINARY lockinventory": {"TEST_fnc_lockInventory" call _compatPair};
+            case "CALLBINARY additemcargoglobal": {"TEST_fnc_addItemCargo" call _compatPair};
+            case "CALLBINARY addbackpackcargoglobal": {"TEST_fnc_addPackCargo" call _compatPair};
+            case "CALLBINARY addweaponcargoglobal": {"TEST_fnc_addWeaponCargo" call _compatPair};
+            case "CALLBINARY addmagazineammocargo": {"TEST_fnc_addMagAmmo" call _compatPair};
+            case "CALLBINARY addweaponwithattachmentscargoglobal": {"TEST_fnc_addWeaponItems" call _compatPair};
+            case "CALLUNARY group": {"TEST_fnc_identity" call _compatCall};
+            case "CALLUNARY loadfile": {"TEST_fnc_loadFile" call _compatCall};
+            case "CALLUNARY fileexists": {"TEST_fnc_fileExists" call _compatCall};
+            case "CALLUNARY parsesimplearray": {"TEST_fnc_parseSimple" call _compatCall};
+            case "CALLNULAR isfilepatchingenabled": {_compatOut pushBack "GETVARIABLE TEST_filePatching"};
+            case "CALLUNARY side": {"TEST_fnc_side" call _compatCall};
+            case "CALLUNARY local": {"TEST_fnc_local" call _compatCall};
+            case "CALLUNARY attachedto": {"TEST_fnc_attachedTo" call _compatCall};
+            case "CALLUNARY synchronizedobjects": {"TEST_fnc_synced" call _compatCall};
+            case "CALLUNARY getassignedcuratorlogic": {"TEST_fnc_curator" call _compatCall};
+            // Mission strings are checked in the stringtable; the VM keeps the keys.
+            case "CALLUNARY localize": {"TEST_fnc_identity" call _compatCall};
+            case "CALLUNARY isnil": {"TEST_fnc_isNil" call _compatCall};
+            case "CALLUNARY values": {"TEST_fnc_values" call _compatCall};
+            case "CALLUNARY owner": {"TEST_fnc_owner" call _compatCall};
+            case "CALLUNARY typeof": {"TEST_fnc_typeOf" call _compatCall};
+            case "CALLUNARY objectparent": {"TEST_fnc_noParent" call _compatCall};
+            case "CALLUNARY addmissioneventhandler": {"TEST_fnc_missionHandler" call _compatCall};
+            case "CALLUNARY sleep": {"TEST_fnc_sleep" call _compatCall};
+            case "CALLUNARY getunitloadout": {"TEST_fnc_getLoadout" call _compatCall};
+            case "CALLUNARY magazinesammocargo": {"TEST_fnc_magsAmmo" call _compatCall};
+            case "CALLUNARY getitemcargo": {"TEST_fnc_itemCargo" call _compatCall};
+            case "CALLUNARY getbackpackcargo": {"TEST_fnc_backpackCargo" call _compatCall};
+            case "CALLUNARY weaponsitemscargo": {"TEST_fnc_weaponsCargo" call _compatCall};
+            case "CALLUNARY everycontainer": {"TEST_fnc_containers" call _compatCall};
+            case "CALLUNARY clearmagazinecargoglobal": {"TEST_fnc_clearMags" call _compatCall};
+            case "CALLUNARY clearitemcargoglobal": {"TEST_fnc_clearItems" call _compatCall};
+            case "CALLUNARY clearweaponcargoglobal": {"TEST_fnc_clearWeapons" call _compatCall};
+            case "CALLUNARY clearbackpackcargoglobal": {"TEST_fnc_clearPacks" call _compatCall};
+            case "CALLUNARY lockedinventory": {"TEST_fnc_lockedInventory" call _compatCall};
+            case "CALLUNARY toloweransi": {_compatOut pushBack "CALLUNARY tolower"};
+            default {_compatOut pushBack _compatLine};
+        };
+    } forEach (assembly__ _this);
+    // VM's assembler expects quoted identifiers although assembly__ omits them.
+    _compatOut = _compatOut apply {
+        private _space = _x find " ";
+        private _op = if (_space < 0) then {_x} else {_x select [0, _space]};
+        if (_op in ["GETVARIABLE", "ASSIGNTO", "ASSIGNTOLOCAL"]) then {
+            _op + " " + str (_x select [_space + 1])
+        } else {_x}
+    };
+    fromAssembly__ _compatOut
+};
+TEST_fnc_load = {(compile preprocessFileLineNumbers _this) call TEST_fnc_compatCode};

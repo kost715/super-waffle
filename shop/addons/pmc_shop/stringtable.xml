@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="PMC Shop">
+    <Package name="Shop">
+        <Container name="Main">
+            <Key ID="STR_PMCS_ACCOUNT_PERSONAL">
+                <Original>Personal account — %1</Original>
+                <Russian>Личный счёт — %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ACCOUNT_GROUP">
+                <Original>Group account — %1</Original>
+                <Russian>Общий счёт — %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ACTION_SHOP">
+                <Original>Laptop: ION market</Original>
+                <Russian>Ноутбук: рынок ION</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ACTION_ADMIN">
+                <Original>Laptop: market management</Original>
+                <Russian>Ноутбук: управление рынком</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADD">
+                <Original>Add to cart</Original>
+                <Russian>В корзину</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADD_BOX">
+                <Original>By the box</Original>
+                <Russian>Ящиком</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADD_MAG">
+                <Original>Add magazines to cart</Original>
+                <Russian>Магазины в корзину</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADDED">
+                <Original>In the cart: %1</Original>
+                <Russian>В корзине: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADDRESS_SHOP">
+                <Original>market.ion-logistics / shop / weapons / firearms</Original>
+                <Russian>market.ion-logistics / магазин / вооружение / оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADDRESS_AMMO">
+                <Original>market.ion-logistics / shop / weapons / ammunition</Original>
+                <Russian>market.ion-logistics / магазин / вооружение / боеприпасы</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADDRESS_ADMIN">
+                <Original>market.ion-logistics / staff area / market</Original>
+                <Russian>market.ion-logistics / служебный раздел / рынок</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ADD">
+                <Original>+ Add from the game</Original>
+                <Russian>+ Добавить из игры</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ADD_TITLE">
+                <Original>Add from the game</Original>
+                <Russian>Добавить из игры</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ADD_HINT">
+                <Original>A class of the game that is not in the catalog: weapon, magazine, item or backpack.</Original>
+                <Russian>Класс из игры, которого нет в каталоге: оружие, магазин, предмет или рюкзак.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ADD_QTY_TIP">
+                <Original>Empty: not limited</Original>
+                <Russian>Пусто — без ограничения</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ADD_CONFIRM">
+                <Original>Add to the market</Original>
+                <Russian>Добавить на рынок</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_APPLY">
+                <Original>Apply</Original>
+                <Russian>Применить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_CATALOG_PRICE">
+                <Original>Catalog price: %1</Original>
+                <Russian>Цена по каталогу: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_CLASS">
+                <Original>Class</Original>
+                <Russian>Класс</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DEFAULT">
+                <Original>Back to the catalog</Original>
+                <Russian>Вернуть к каталогу</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DISCOUNTS">
+                <Original>Discounts</Original>
+                <Russian>Скидки</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DISCOUNT_RULE">
+                <Original>One discount applies: the largest of the item's, its category's and the whole market's. A box takes the box discount when that is larger.</Original>
+                <Russian>Действует одна скидка — самая большая из скидок позиции, категории и всего рынка. Ящик берёт скидку за ящик, если она больше.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DISCOUNT_TIP">
+                <Original>0-90</Original>
+                <Russian>0–90</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DISC_GLOBAL">
+                <Original>Whole market, %</Original>
+                <Russian>Весь рынок, %</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_DISC_BOX">
+                <Original>By the box, %</Original>
+                <Russian>За ящик, %</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_FINAL">
+                <Original>Price now: &lt;t font='RobotoCondensedBold'&gt;%1&lt;/t&gt; %2</Original>
+                <Russian>Цена сейчас: &lt;t font='RobotoCondensedBold'&gt;%1&lt;/t&gt; %2</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_FIND">
+                <Original>Find in the game</Original>
+                <Russian>Найти в игре</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_ITEMS">
+                <Original>Goods</Original>
+                <Russian>Ассортимент</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_LOG">
+                <Original>Journal</Original>
+                <Russian>Журнал</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_LOG_EMPTY">
+                <Original>No changes yet</Original>
+                <Russian>Изменений пока нет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_MISSION">
+                <Original>Applies in the mission: %1 (%2)</Original>
+                <Russian>Действует в миссии: %1 (%2)</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_OK">
+                <Original>OK</Original>
+                <Russian>ОК</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_PICK">
+                <Original>Pick an item in the table</Original>
+                <Russian>Выберите позицию в таблице</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_PICK_CATEGORY">
+                <Original>Pick a category in the table</Original>
+                <Russian>Выберите категорию в таблице</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_PRICE_TIP">
+                <Original>Empty: the catalog price</Original>
+                <Russian>Пусто — цена каталога</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_QTY">
+                <Original>How many</Original>
+                <Russian>Сколько</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_QTY_TIP">
+                <Original>Setting a quantity restocks to it</Original>
+                <Russian>Новое количество — новый остаток</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_RESET">
+                <Original>Reset to the catalog</Original>
+                <Russian>Сбросить к каталогу</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_RESET_CONFIRM">
+                <Original>Click again to reset</Original>
+                <Russian>Нажмите ещё раз</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_WHO">
+                <Original>Access: Zeus · %1</Original>
+                <Russian>Доступ: Зевс · %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_Ball">
+                <Original>ball</Original>
+                <Russian>обычные</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_Trace">
+                <Original>tracer</Original>
+                <Russian>трассирующие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_EPR">
+                <Original>EPR</Original>
+                <Russian>EPR</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_EPT">
+                <Original>EPT</Original>
+                <Russian>EPT</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_AP">
+                <Original>armour-piercing</Original>
+                <Russian>бронебойные</Russian>
+            </Key>
+            <Key ID="STR_PMCS_AMMO_special">
+                <Original>special</Original>
+                <Russian>особые</Russian>
+            </Key>
+            <Key ID="STR_PMCS_BOX_LINE">
+                <Original>Box of %1 — %2 (-%3%)</Original>
+                <Russian>Ящик %1 шт. — %2 (−%3%)</Russian>
+            </Key>
+            <Key ID="STR_PMCS_BOX_DETAIL">
+                <Original>Box of %1 — %2</Original>
+                <Russian>Ящик %1 шт. — %2</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CART">
+                <Original>Cart</Original>
+                <Russian>Корзина</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CART_BUTTON">
+                <Original>Cart · %1</Original>
+                <Russian>Корзина · %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CART_EMPTY">
+                <Original>empty</Original>
+                <Russian>пусто</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CART_MORE">
+                <Original>and %1 more</Original>
+                <Russian>и ещё %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CATEGORY_CUSTOM">
+                <Original>Added</Original>
+                <Russian>Добавлено</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CHECKOUT">
+                <Original>Check out</Original>
+                <Russian>Оформить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CLEAR">
+                <Original>Empty</Original>
+                <Russian>Очистить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_CLOSE">
+                <Original>Close</Original>
+                <Russian>Закрыть</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_CATEGORY">
+                <Original>Category</Original>
+                <Russian>Категория</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_DISCOUNT">
+                <Original>Discount</Original>
+                <Russian>Скидка</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_FINAL">
+                <Original>Price now</Original>
+                <Russian>Итоговая цена</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_ITEM">
+                <Original>Item</Original>
+                <Russian>Позиция</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_PRICE">
+                <Original>Price</Original>
+                <Russian>Цена за шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_QTY">
+                <Original>Quantity</Original>
+                <Russian>Количество</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_SOURCE">
+                <Original>Source</Original>
+                <Russian>Источник</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_STATE">
+                <Original>On sale</Original>
+                <Russian>В продаже</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_TIME">
+                <Original>Time</Original>
+                <Russian>Время</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_WHAT">
+                <Original>What</Original>
+                <Russian>Что</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_WHO">
+                <Original>Who</Original>
+                <Russian>Кто</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DELIVERY_TO">
+                <Original>Delivery: box at point %1</Original>
+                <Russian>Выдача: ящик на пункте %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_PC">
+                <Original>This computer</Original>
+                <Russian>Этот компьютер</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_DOCS">
+                <Original>Documents</Original>
+                <Russian>Документы</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_SHOP">
+                <Original>ION Market</Original>
+                <Russian>ION Market</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_ADMIN">
+                <Original>ION Market — management</Original>
+                <Russian>ION Market — управление</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_BIN">
+                <Original>Recycle bin</Original>
+                <Russian>Корзина</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_SEARCH">
+                <Original>Search</Original>
+                <Russian>Поиск</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DESK_TRAY">
+                <Original>base network   RU</Original>
+                <Russian>сеть базы   RU</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DISCOUNT_LINE">
+                <Original>discount %1%</Original>
+                <Russian>скидка %1%</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DONE_BUY">
+                <Original>Paid %1. The goods are in the box at point %2.</Original>
+                <Russian>Оплачено %1. Товар в ящике на пункте выдачи %2.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_CART">
+                <Original>The cart cannot be bought like this</Original>
+                <Russian>Такую корзину купить нельзя</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_CLASS">
+                <Original>No such weapon, magazine, item or backpack in the game</Original>
+                <Russian>Такого оружия, магазина, предмета или рюкзака в игре нет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_FAR">
+                <Original>You are too far from the laptop</Original>
+                <Russian>Вы слишком далеко от ноутбука</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_FUNDS">
+                <Original>Not enough money on the account</Original>
+                <Russian>На счёте недостаточно денег</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_IN_CATALOG">
+                <Original>It is already on the market</Original>
+                <Russian>Это уже есть на рынке</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_NOT_TREASURER">
+                <Original>Only treasurers pay from the group's account</Original>
+                <Russian>С общего счёта платят только казначеи</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_NO_BOX">
+                <Original>Delivery point %1 has no box</Original>
+                <Russian>На пункте выдачи %1 нет ящика</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_STOCK">
+                <Original>Not that many left</Original>
+                <Russian>Столько не осталось</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_UNAVAILABLE">
+                <Original>Something in the cart is no longer on sale</Original>
+                <Russian>Что-то из корзины больше не продаётся</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_VALUE">
+                <Original>Check the numbers</Original>
+                <Russian>Проверьте числа</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_ZEUS">
+                <Original>Only a Zeus manages the market</Original>
+                <Russian>Рынком управляет только Зевс</Russian>
+            </Key>
+            <Key ID="STR_PMCS_FILTER_CALIBRE">
+                <Original>CALIBRE</Original>
+                <Russian>КАЛИБР</Russian>
+            </Key>
+            <Key ID="STR_PMCS_FILTER_TYPE">
+                <Original>TYPE</Original>
+                <Russian>ТИП</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_weapon">
+                <Original>weapon</Original>
+                <Russian>оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_mag">
+                <Original>magazine</Original>
+                <Russian>магазин</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_item">
+                <Original>item</Original>
+                <Russian>предмет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_backpack">
+                <Original>backpack</Original>
+                <Russian>рюкзак</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LEFT_DETAIL">
+                <Original>%1 left</Original>
+                <Russian>Осталось: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LEFT_LINE">
+                <Original> · %1 left</Original>
+                <Russian> · осталось %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_ADD">
+                <Original>Added %1 (%2): %3, quantity %4</Original>
+                <Russian>Добавлено %1 (%2): %3, количество %4</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_BOX">
+                <Original>Box discount: %1%</Original>
+                <Russian>Скидка за ящик: %1%</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_BUY">
+                <Original>Purchase for %1: %2 (point %3)</Original>
+                <Russian>Покупка на %1: %2 (пункт %3)</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_CATEGORY">
+                <Original>Category %1: discount %2%</Original>
+                <Russian>Категория %1: скидка %2%</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_GLOBAL">
+                <Original>Whole market: discount %1%</Original>
+                <Russian>Весь рынок: скидка %1%</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_ITEM">
+                <Original>%1: %2, price %3, discount %4%, quantity %5</Original>
+                <Russian>%1: %2, цена %3, скидка %4%, количество %5</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_REMOVE">
+                <Original>Removed %1</Original>
+                <Russian>Удалено %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_RESET">
+                <Original>Market reset to the catalog</Original>
+                <Russian>Рынок сброшен к каталогу</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MAGAZINES">
+                <Original>COMPATIBLE MAGAZINES</Original>
+                <Russian>СОВМЕСТИМЫЕ МАГАЗИНЫ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MAGS_NONE">
+                <Original>No magazines in the catalog</Original>
+                <Russian>Магазинов в каталоге нет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MAGS_NO_PRICE">
+                <Original>Ammunition prices are not set yet</Original>
+                <Russian>Цены на патроны пока не заданы</Russian>
+            </Key>
+            <Key ID="STR_PMCS_NAV_SHOP">
+                <Original>Shop</Original>
+                <Russian>Магазин</Russian>
+            </Key>
+            <Key ID="STR_PMCS_NAV_VEHICLES">
+                <Original>Vehicles</Original>
+                <Russian>Техника</Russian>
+            </Key>
+            <Key ID="STR_PMCS_NOTHING">
+                <Original>Nothing found</Original>
+                <Russian>Ничего не найдено</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PAYING">
+                <Original>Paying…</Original>
+                <Russian>Оплата…</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PAY_WITH">
+                <Original>Payment: PMC Bank</Original>
+                <Russian>Оплата: PMC Bank</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PER_UNIT">
+                <Original>each</Original>
+                <Russian>за шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_QTY_BOX">
+                <Original>%1 box(es), %2 pcs</Original>
+                <Russian>ящик × %1 (%2 шт.)</Russian>
+            </Key>
+            <Key ID="STR_PMCS_QTY_UNITS">
+                <Original>× %1</Original>
+                <Russian>× %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_REMOVE">
+                <Original>Remove</Original>
+                <Russian>Удалить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SEARCH">
+                <Original>Search</Original>
+                <Russian>Поиск</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SECTION_WEAPONS">
+                <Original>Weapons</Original>
+                <Russian>Вооружение</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SECTION_GEAR">
+                <Original>Equipment</Original>
+                <Russian>Экипировка</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_ALL">
+                <Original>All items</Original>
+                <Russian>Все позиции</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_ON_SALE">
+                <Original>On sale</Original>
+                <Russian>В продаже</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_HIDDEN">
+                <Original>Hidden</Original>
+                <Russian>Скрытые</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_NO_PRICE">
+                <Original>Without a price</Original>
+                <Russian>Без цены</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_LIMITED">
+                <Original>Limited</Original>
+                <Russian>Ограниченные</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_DISCOUNT">
+                <Original>With a discount</Original>
+                <Russian>Со скидкой</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SHOW_CHANGED">
+                <Original>Changed</Original>
+                <Russian>Изменённые</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SITE_SUB">
+                <Original>WEAPONS MARKET</Original>
+                <Russian>ОРУЖЕЙНЫЙ РЫНОК</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SITE_SUB_ADMIN">
+                <Original>MARKET MANAGEMENT</Original>
+                <Russian>УПРАВЛЕНИЕ РЫНКОМ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SOLD_OUT">
+                <Original>out of stock</Original>
+                <Russian>нет в наличии</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SOON">
+                <Original>soon</Original>
+                <Russian>скоро</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SORT_PRICE_UP">
+                <Original>Price: low to high</Original>
+                <Russian>Цена: по возрастанию</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SORT_PRICE_DOWN">
+                <Original>Price: high to low</Original>
+                <Russian>Цена: по убыванию</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SORT_NAME">
+                <Original>Name</Original>
+                <Russian>Название</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SOURCE_CATALOG">
+                <Original>catalog</Original>
+                <Russian>каталог</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SOURCE_CHANGED">
+                <Original>changed</Original>
+                <Russian>изменено</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SOURCE_ADDED">
+                <Original>added</Original>
+                <Russian>добавлено</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STATE_ok">
+                <Original>yes</Original>
+                <Russian>да</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STATE_hidden">
+                <Original>hidden</Original>
+                <Russian>скрыто</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STATE_noprice">
+                <Original>no price</Original>
+                <Russian>нет цены</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STATE_soldout">
+                <Original>sold out</Original>
+                <Russian>нет в наличии</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STATE_none">
+                <Original>-</Original>
+                <Russian>-</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TAB_SHOP">
+                <Original>ION · Weapons market</Original>
+                <Russian>ION · Оружейный рынок</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TAB_ADMIN">
+                <Original>ION · Market management</Original>
+                <Russian>ION · Управление рынком</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TAB_BANK">
+                <Original>PMC Bank — account</Original>
+                <Russian>PMC Bank — личный кабинет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TAB_WEAPONS">
+                <Original>Firearms</Original>
+                <Russian>Оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TAB_AMMO">
+                <Original>Ammunition</Original>
+                <Russian>Боеприпасы</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TOTAL">
+                <Original>Total: %1</Original>
+                <Russian>Итого: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UI_CATALOG_PRICE">
+                <Original>catalog price</Original>
+                <Russian>цена каталога</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UI_HIDDEN">
+                <Original>hidden</Original>
+                <Russian>скрыто</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UI_LIMITED">
+                <Original>Limited</Original>
+                <Russian>Ограничено</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UI_ON_SALE">
+                <Original>On sale</Original>
+                <Russian>В продаже</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UI_UNLIMITED">
+                <Original>Not limited</Original>
+                <Russian>Без ограничения</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UNAVAILABLE">
+                <Original>not on sale</Original>
+                <Russian>не продаётся</Russian>
+            </Key>
+            <Key ID="STR_PMCS_VARIANT">
+                <Original>Version:</Original>
+                <Russian>Исполнение:</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_CATEGORY">
+                <Original>PMC Shop</Original>
+                <Russian>PMC Магазин</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_DISTANCE">
+                <Original>Laptop use distance (m)</Original>
+                <Russian>Расстояние до ноутбука (м)</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_LOG">
+                <Original>Market journal entries kept</Original>
+                <Russian>Записей в журнале рынка</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_SHOP">
+                <Original>ION market laptop</Original>
+                <Russian>Ноутбук рынка ION</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_SHOP_DESC">
+                <Original>Synchronise objects (a laptop) with this module: they open the ION market. Goods go to the box of the delivery point with the same ID.</Original>
+                <Russian>Синхронизируйте с модулем объекты (ноутбук): они открывают рынок ION. Товар идёт в ящик пункта выдачи с тем же ID.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_ADMIN">
+                <Original>Market management laptop</Original>
+                <Russian>Ноутбук управления рынком</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_ADMIN_DESC">
+                <Original>Synchronise objects (a laptop) with this module: a Zeus manages this mission's market there.</Original>
+                <Russian>Синхронизируйте с модулем объекты (ноутбук): на нём Зевс управляет рынком этой миссии.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_POINT">
+                <Original>Delivery point</Original>
+                <Russian>Пункт выдачи</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_POINT_DESC">
+                <Original>Synchronise a box with this module: what is bought at the market laptops with the same point ID goes into it.</Original>
+                <Russian>Синхронизируйте с модулем ящик: в него попадает то, что куплено на ноутбуках рынка с тем же ID пункта.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_POINT_ID">
+                <Original>Delivery point ID</Original>
+                <Russian>ID пункта выдачи</Russian>
+            </Key>
+            <Key ID="STR_PMCS_MODULE_POINT_ID_TIP">
+                <Original>Laptops and the box of one point use the same ID, e.g. 8Z8N</Original>
+                <Russian>Ноутбуки и ящик одного пункта используют один ID, например 8Z8N</Russian>
+            </Key>
+            <Key ID="STR_PMCB_OP_shop">
+                <Original>ION market purchase</Original>
+                <Russian>Покупка на рынке ION</Russian>
+            </Key>
+        </Container>
+    </Package>
+</Project>

@@ -1,0 +1,2 @@
+548ec236302dcdaea611cbdf981a6d4a46bf65c71251177f8aea424bdada491a  PMC_Shop_0.1.0_alpha1.zip
+883cff2a6f54d3798eb61118501f91525c1e16c3dd95ccb066cc314ba8b4da2d  PMC_Shop_0.1.0_alpha1_sources.zip
