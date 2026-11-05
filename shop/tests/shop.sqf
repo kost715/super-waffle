@@ -40,35 +40,46 @@ TEST_lastOf = {params ["_list"]; _list select (count _list - 1)};
 private _catalog = call PMCS_fnc_catalog;
 private _items = _catalog get "items";
 private _ak = if ("rhs_weap_ak74" in _items) then {_items get "rhs_weap_ak74"} else {[]};
-private _variants = (_ak select 7) apply {_x select 0};
-[_variants isEqualTo ["rhs_weap_ak74", "MMM_weap_AK74_H1S1", "MMM_weap_AK74_H2S1"] && {(_ak select 5) == 250} && {(_ak select 2) == "штурмовая винтовка"}
-    && {(_ak select 3) == "5.45x39 АК"}
-    && {(((_ak select 7) select 1) select 1) == "AK-74 (plum) (MMM_weap_AK74_H1S1)"} && {"rhs_weap_akm" in _items} && {"rhs_weap_pkm" in _items}
-    && {!("rhs_weap_m4a1_carryhandle" in _items)} && {((_items get "rhs_weap_pkm") select 5) == 800} && {((_items get "rhs_weap_svds") select 5) == 450}
-    && {((_items get "uk3cb_saiga12k") select 5) == 0} && {!("boxDiscount" in _catalog)}
+private _variants = _ak select 7;
+private _poly = if ("MMM_mag_545x39_6L23_Plastic_7N6M" in _items) then {_items get "MMM_mag_545x39_6L23_Plastic_7N6M"} else {[]};
+private _bake = if ("MMM_mag_545x39_6L20_7N6M" in _items) then {_items get "MMM_mag_545x39_6L20_7N6M"} else {[]};
+[(_variants apply {_x select 0}) isEqualTo ["rhs_weap_ak74", "MMM_weap_AK74_H*S*"] && {((_variants select 1) select 1) == "MMM"}
+    && {((_variants select 1) select 3) isEqualTo ["MMM_weap_AK74_H1S1", "MMM_weap_AK74_H2S1"]} && {((_variants select 0) select 3) isEqualTo ["rhs_weap_ak74"]}
+    && {((_variants select 0) select 1) == "AK-74"} && {(_ak select 5) == 250} && {(_ak select 2) == "штурмовая винтовка"} && {(_ak select 3) == "5.45x39 АК"}
+    && {"rhs_weap_akm" in _items} && {!("rhs_weap_m4a1_carryhandle" in _items)} && {((_items get "rhs_weap_pkm") select 5) == 450}
+    && {((_items get "rhs_weap_svds") select 5) == 500} && {((_items get "uk3cb_saiga12k") select 5) == 250}
+    && {(((_items get "rhs_weap_ak74n") select 7) apply {_x select 0}) isEqualTo ["MMM_weap_AK74N_H*S*"]}
     && {(_catalog get "categories") findIf {(_x select 0) == "единый пулемет"} >= 0}
     && {(["единый пулемет"] call PMCS_fnc_categoryName) == "Единые пулемёты"} && {(["ammo"] call PMCS_fnc_categoryName) == "STR_PMCS_TAB_AMMO"}
-    && {((_catalog get "calibres") get "5.45x39 АК") isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22"]}
-    && {((_items get "MMM_mag_545x39_6L23_Plastic_7N22") select 9) == "AP"} && {((_items get "MMM_mag_545x39_6L23_Plastic_7N22") select 8) == "30 патр. Полимер"},
-    "catalog: the base weapons the game has, MMM patterns found and sorted (same names told apart), the table's category and calibre, prices by type (assault 250, MG 800, semi-auto 450, Saiga none), magazines by calibre with their magazine and ammo type"] call TEST_fnc_assert;
+    && {((_catalog get "calibres") get "5.45x39 АК") isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M"]}
+    && {(_poly select 5) == 25} && {(_poly select 8) == "30 патр. Полимер"} && {(_poly select 1) == "5.45x39 АК 30 патр. Полимер"}
+    && {((_poly select 7) apply {[_x select 0, _x select 1, _x select 3, _x select 4]}) isEqualTo [
+        ["MMM_mag_545x39_6L23_Plastic_7N6M", "STR_PMCS_AMMO_Ball", ["MMM_mag_545x39_6L23_Plastic_7N6M"], 1],
+        ["MMM_mag_545x39_6L23_Plastic_7N22", "STR_PMCS_AMMO_AP", ["MMM_mag_545x39_6L23_Plastic_7N22"], 3]]}
+    && {((_bake select 7) apply {_x select 4}) isEqualTo [1, 1.1]} && {((_items get "rhs_100Rnd_762x54mmR") select 5) == 170},
+    "catalog: the base weapons the game has with the table's price, category and calibre; a table class is a version of its own, an MMM pattern one 'MMM' version with every class that fits; a magazine row per calibre and magazine, its price, its ammo types (classes the game has) with the table's factors"] call TEST_fnc_assert;
 
-// --- Prices: a box is the base, one piece costs more; discounts ------------------------------------------
+// --- Prices: a box is the base, one piece costs more; ammo types cost more; discounts ------------------
 private _market = call PMCS_fnc_marketNew;
 private _p0 = ["rhs_weap_ak74", _market] call PMCS_fnc_price;
+private _pMmm = ["rhs_weap_ak74", _market, "MMM_weap_AK74_H*S*"] call PMCS_fnc_price;
 (_market get "items") set ["rhs_weap_ak74", [false, -1, 10, -1, -1]];
 private _p1 = ["rhs_weap_ak74", _market] call PMCS_fnc_price;
 (_market get "cats") set ["штурмовая винтовка", 20];
 private _p2 = ["rhs_weap_ak74", _market] call PMCS_fnc_price;
 _market set ["global", 30];
 private _p3 = ["rhs_weap_ak74", _market] call PMCS_fnc_price;
-private _mag = ["MMM_mag_545x39_6L20_7N6M", _market] call PMCS_fnc_price;
 (_market get "items") set ["rhs_weap_akm", [true, -1, 0, -1, -1]];
 (_market get "items") set ["rhs_weap_pkm", [false, 900, 0, 2, 0]];
 private _hidden = (["rhs_weap_akm", _market] call PMCS_fnc_price) select 0;
 private _soldout = ["rhs_weap_pkm", _market] call PMCS_fnc_price;
 private _magMarket = call PMCS_fnc_marketNew;
+private _catalogMag = ["MMM_mag_545x39_6L23_Plastic_7N6M", _magMarket, "MMM_mag_545x39_6L23_Plastic_7N22"] call PMCS_fnc_price;
 (_magMarket get "items") set ["MMM_mag_545x39_6L20_7N6M", [false, 15, 0, -1, -1]];
+(_magMarket get "items") set ["MMM_mag_545x39_6L23_Plastic_7N6M", [false, 20, 0, -1, -1]];
 private _magPrice = ["MMM_mag_545x39_6L20_7N6M", _magMarket] call PMCS_fnc_price;
+private _magTrace = ["MMM_mag_545x39_6L20_7N6M", _magMarket, "MMM_mag_545x39_6L20_7T3M"] call PMCS_fnc_price;
+private _magAp = ["MMM_mag_545x39_6L23_Plastic_7N6M", _magMarket, "MMM_mag_545x39_6L23_Plastic_7N22"] call PMCS_fnc_price;
 (_magMarket get "cats") set ["ammo", 10];
 private _magOff = ["MMM_mag_545x39_6L20_7N6M", _magMarket] call PMCS_fnc_price;
 // The box sizes and the single-piece rules are CBA settings.
@@ -76,25 +87,30 @@ PMCS_weaponBoxUnits = 5; PMCS_weaponUnitShare = 50; PMCS_magBoxUnits = 20; PMCS_
 private _cbaWeapon = ["rhs_weap_ak74", call PMCS_fnc_marketNew] call PMCS_fnc_price;
 private _cbaMag = ["MMM_mag_545x39_6L20_7N6M", _magMarket] call PMCS_fnc_price;
 PMCS_weaponBoxUnits = nil; PMCS_weaponUnitShare = nil; PMCS_magBoxUnits = nil; PMCS_magUnitMarkup = nil;
-[_p0 isEqualTo ["ok", 400, 1000, 0, -1, 4] && {_p1 isEqualTo ["ok", 360, 900, 10, -1, 4]} && {_p2 isEqualTo ["ok", 320, 800, 20, -1, 4]}
-    && {_p3 isEqualTo ["ok", 280, 700, 30, -1, 4]} && {(_mag select 0) == "noprice"} && {_hidden == "hidden"}
-    && {_soldout isEqualTo ["soldout", 1008, 2520, 30, 0, 4]} && {_magPrice isEqualTo ["ok", 20, 450, 0, -1, 30]}
+[_p0 isEqualTo ["ok", 400, 1000, 0, -1, 4] && {_pMmm isEqualTo _p0} && {_p1 isEqualTo ["ok", 360, 900, 10, -1, 4]} && {_p2 isEqualTo ["ok", 320, 800, 20, -1, 4]}
+    && {_p3 isEqualTo ["ok", 280, 700, 30, -1, 4]} && {_hidden == "hidden"} && {_soldout isEqualTo ["soldout", 1008, 2520, 30, 0, 4]}
+    && {(_catalogMag select 2) == 25 * 3 * 30} && {_magPrice isEqualTo ["ok", 20, 450, 0, -1, 30]} && {_magTrace isEqualTo ["ok", 21, 495, 0, -1, 30]}
+    && {_magAp isEqualTo ["ok", 78, 1800, 0, -1, 30]}
     && {_magOff isEqualTo ["ok", 18, 405, 10, -1, 30]} && {_cbaWeapon isEqualTo ["ok", 625, 1250, 0, -1, 5]} && {_cbaMag isEqualTo ["ok", 27, 270, 10, -1, 20]},
-    "price: a box of 4 at the base price (4 x 250 = 1 000, no box discount), one weapon 40% of a box (400); a box of 30 magazines at the base (450), one magazine +30% (20); one discount - the largest of item 10, category 20, market 30; box sizes and single-piece rules from CBA; no price, hidden, sold out"] call TEST_fnc_assert;
+    "price: a box of 4 at the base price (4 x 250 = 1 000, no box discount), one weapon 40% of a box (400); a magazine row's box of 30 at its price (450), one +30% (20); a tracer x1.1 (495), armour-piercing x3 (1 800); one discount - the largest of item 10, category 20, market 30; box sizes and single-piece rules from CBA; hidden, sold out"] call TEST_fnc_assert;
 
 // --- Cart quote -----------------------------------------------------------------------------------------
 _market = call PMCS_fnc_marketNew;
 (_market get "items") set ["rhs_weap_pkm", [false, -1, 0, 3, 3]];
-private _q1 = [[["rhs_weap_ak74", "MMM_weap_AK74_H2S1", 1, true], ["rhs_weap_pkm", "rhs_weap_pkm", 2, false]], _market] call PMCS_fnc_quote;
+(_market get "items") set ["rhs_weap_akm", [true, -1, 0, -1, -1]];
+private _q1 = [[["rhs_weap_ak74", "MMM_weap_AK74_H*S*", 1, true], ["rhs_weap_pkm", "rhs_weap_pkm", 2, false]], _market] call PMCS_fnc_quote;
 private _q2 = [[["rhs_weap_ak74", "rhs_weap_akm", 1, false]], _market] call PMCS_fnc_quote;
 private _q3 = [[["rhs_weap_pkm", "rhs_weap_pkm", 2, false], ["rhs_weap_pkm", "rhs_weap_pkm", 2, false]], _market] call PMCS_fnc_quote;
 private _q4 = [[["rhs_weap_ak74", "rhs_weap_ak74", 0, false]], _market] call PMCS_fnc_quote;
-private _q5 = [[["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L20_7N6M", 5, false]], _market] call PMCS_fnc_quote;
+private _q5 = [[["rhs_weap_akm", "rhs_weap_akm", 1, false]], _market] call PMCS_fnc_quote;
 private _q6 = [[["rhs_weap_pkm", "rhs_weap_pkm", 1, true]], _market] call PMCS_fnc_quote;
-[(_q1 select 0) == 1000 + 2 * 1280 && {((_q1 select 1) get "rhs_weap_ak74") == 4} && {(_q1 select 2) == ""} && {(_q2 select 2) == "STR_PMCS_ERR_CART"}
+private _q7 = [[["rhs_weap_ak74", "MMM_weap_AK74_H1S1", 1, true]], _market] call PMCS_fnc_quote;
+private _q8 = [[["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22", 1, true], ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", 2, false]], _market] call PMCS_fnc_quote;
+[(_q1 select 0) == 1000 + 2 * 720 && {((_q1 select 1) get "rhs_weap_ak74") == 4} && {(_q1 select 2) == ""} && {(_q2 select 2) == "STR_PMCS_ERR_CART"}
     && {(_q3 select 2) == "STR_PMCS_ERR_STOCK"} && {(_q4 select 2) == "STR_PMCS_ERR_CART"} && {(_q5 select 2) == "STR_PMCS_ERR_UNAVAILABLE"}
-    && {(_q6 select 2) == "STR_PMCS_ERR_STOCK"} && {(([[], _market] call PMCS_fnc_quote) select 2) == "STR_PMCS_ERR_CART"},
-    "quote: a box (4 pieces) and single pieces priced; a box counts its 4 pieces against the stock (3 left); a class that is not the item's variant, zero, an empty cart, more than is left and an item without a price are refused"] call TEST_fnc_assert;
+    && {(_q6 select 2) == "STR_PMCS_ERR_STOCK"} && {(_q7 select 2) == "STR_PMCS_ERR_CART"} && {(_q8 select 0) == 2250 + 2 * 33}
+    && {((_q8 select 1) get "MMM_mag_545x39_6L23_Plastic_7N6M") == 32} && {(([[], _market] call PMCS_fnc_quote) select 2) == "STR_PMCS_ERR_CART"},
+    "quote: a box (4 pieces) and single pieces priced, the MMM version by its own id (one of its classes is not a version); an armour-piercing box (x3) and two ball magazines; a box counts its pieces against the stock (3 left); another item's class, zero, an empty cart, more than is left and a hidden item are refused"] call TEST_fnc_assert;
 
 // --- Server: laptop, point, purchase through PMC Bank ----------------------------------------------
 TEST_fresh = {
@@ -123,19 +139,21 @@ _pointModule setVariable ["TEST_synced", [_box]];
 [_buyer] call PMCB_fnc_ensure;
 (PMCB_accounts get "76561100000000001") set [0, 5000];
 private _jip = (["PMCS_fnc_terminalInit"] call TEST_sent) select 0;
-[_buyer, _laptop, "personal", [["rhs_weap_ak74", "MMM_weap_AK74_H1S1", 1, true], ["rhs_weap_pkm", "rhs_weap_pkm", 2, false]]] call PMCS_fnc_buy;
+[_buyer, _laptop, "personal", [["rhs_weap_ak74", "MMM_weap_AK74_H*S*", 1, true], ["rhs_weap_pkm", "rhs_weap_pkm", 2, false]]] call PMCS_fnc_buy;
 private _balance = (PMCB_accounts get "76561100000000001") select 0;
 private _weapons = (_box getVariable ["TEST_weapons", []]) apply {_x select 0};
+private _mmmCount = {({_x == "MMM_weap_AK74_H1S1"} count _this) + ({_x == "MMM_weap_AK74_H2S1"} count _this)};
+private _oneClass = ({_x == "MMM_weap_AK74_H1S1"} count _weapons) == 4 || {({_x == "MMM_weap_AK74_H2S1"} count _weapons) == 4};
 private _bankLog = PMCB_log select (count PMCB_log - 1);
 [(_laptop getVariable "PMCS_mode") == "shop" && {(_laptop getVariable "PMCS_point") == "8Z8N"} && {(_jip select 1) isEqualTo ["PMCS_fnc_terminalInit", 0, _laptop]}
-    && {_balance == 5000 - 1000 - 2560} && {({_x == "MMM_weap_AK74_H1S1"} count _weapons) == 4} && {({_x == "rhs_weap_pkm"} count _weapons) == 2}
-    && {(_bankLog select 4) == "shop"} && {(_bankLog select 5) == 3560} && {(_bankLog select 8) == "Buyer"}
+    && {_balance == 5000 - 1000 - 1440} && {(_weapons call _mmmCount) == 4} && {_oneClass} && {({_x == "rhs_weap_pkm"} count _weapons) == 2}
+    && {(_bankLog select 4) == "shop"} && {(_bankLog select 5) == 2440} && {(_bankLog select 8) == "Buyer"}
     && {([["PMCS_fnc_receive"] call TEST_sent] call TEST_lastOf) select 0 select 2 == "bought"} && {count (PMCS_market get "log") == 1},
-    "purchase: the laptop and box from their modules (point 8Z8N), the personal account charged 3 560 for a box and two single machine guns (PMC Bank journal: shop), the box's 4 pieces of the chosen variant and the 2 single ones in the point's box, the client told"] call TEST_fnc_assert;
+    "purchase: the laptop and box from their modules (point 8Z8N), the personal account charged 2 440 for a box and two single machine guns (PMC Bank journal: shop), the MMM box holds 4 of one of its classes, the 2 single ones in the point's box, the client told"] call TEST_fnc_assert;
 
 TEST_messages = [];
 private _before = count (_box getVariable ["TEST_weapons", []]);
-[_buyer, _laptop, "personal", [["rhs_weap_pkm", "rhs_weap_pkm", 3, false]]] call PMCS_fnc_buy;
+[_buyer, _laptop, "personal", [["rhs_weap_pkm", "rhs_weap_pkm", 4, false]]] call PMCS_fnc_buy;
 private _poor = ((["PMCS_fnc_notify"] call TEST_sent) select 0) select 0;
 [_buyer, _laptop, "group", [["rhs_weap_ak74", "rhs_weap_ak74", 1, false]]] call PMCS_fnc_buy;
 private _notTreasurer = ((["PMCS_fnc_notify"] call TEST_sent) select 1) select 0;
@@ -153,7 +171,7 @@ private _far = ([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0;
 _buyer setPos [0, 0, 0];
 [(_poor select 0) == "STR_PMCS_ERR_FUNDS" && {(_notTreasurer select 0) == "STR_PMCS_ERR_NOT_TREASURER"} && {_groupAfter == 600}
     && {(_noBox select 0) == "STR_PMCS_ERR_NO_BOX"} && {(_far select 0) == "STR_PMCS_ERR_FAR"}
-    && {((PMCB_accounts get "76561100000000001") select 0) == 1440} && {count (_box getVariable ["TEST_weapons", []]) == _before + 1},
+    && {((PMCB_accounts get "76561100000000001") select 0) == 2560} && {count (_box getVariable ["TEST_weapons", []]) == _before + 1},
     "refused: not enough money, the group's account without being a treasurer, no box standing at the point, too far from the laptop - nothing charged or delivered; a treasurer pays from the group's account"] call TEST_fnc_assert;
 
 // --- Zeus management ---------------------------------------------------------------------------------------
@@ -169,14 +187,22 @@ _buyer setVariable ["TEST_curator", _buyer];
 [_buyer, _adminLaptop, "category", ["ammo", 5]] call PMCS_fnc_admin;
 [_buyer, _adminLaptop, "global", [95]] call PMCS_fnc_admin;
 [_buyer, _adminLaptop, "box", [40]] call PMCS_fnc_admin;
-[_buyer, _adminLaptop, "item", ["MMM_mag_545x39_6L23_Plastic_7N22", false, 12, 0, -1]] call PMCS_fnc_admin;
+[_buyer, _adminLaptop, "item", ["MMM_mag_545x39_6L23_Plastic_7N6M", false, 12, 0, -1]] call PMCS_fnc_admin;
 PMCB_accounts get "76561100000000001" set [0, 100000];
-[_buyer, _laptop, "personal", [["rhs_weap_pkm", "rhs_weap_pkm", 2, false], ["MMM_mag_545x39_6L23_Plastic_7N22", "MMM_mag_545x39_6L23_Plastic_7N22", 10, false],
-    ["MMM_mag_545x39_6L23_Plastic_7N22", "MMM_mag_545x39_6L23_Plastic_7N22", 1, true]]] call PMCS_fnc_buy;
+[_buyer, _laptop, "personal", [["rhs_weap_pkm", "rhs_weap_pkm", 2, false], ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22", 10, false],
+    ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22", 1, true]]] call PMCS_fnc_buy;
 private _paid = 100000 - ((PMCB_accounts get "76561100000000001") select 0);
 private _left = ((PMCS_market get "items") get "rhs_weap_pkm") select 4;
 private _mags = 0;
 {if ((_x select 0) == "MMM_mag_545x39_6L23_Plastic_7N22") then {_mags = _mags + (_x select 1)}} forEach (_box getVariable ["TEST_mags", []]);
+// Five MMM boxes: each holds 4 of one class picked for it.
+private _mmmBefore = (_box getVariable ["TEST_weapons", []]) select {(_x select 0) in ["MMM_weap_AK74_H1S1", "MMM_weap_AK74_H2S1"]};
+TEST_randomDraws = 0;
+[_buyer, _laptop, "personal", [["rhs_weap_ak74", "MMM_weap_AK74_H*S*", 5, true]]] call PMCS_fnc_buy;
+private _draws = TEST_randomDraws;
+private _h1 = {_x select 0 == "MMM_weap_AK74_H1S1"} count (_box getVariable ["TEST_weapons", []]);
+private _mmmTotal = (((_box getVariable ["TEST_weapons", []]) apply {_x select 0}) call _mmmCount) - ((_mmmBefore apply {_x select 0}) call _mmmCount);
+private _h1Before = {_x select 0 == "MMM_weap_AK74_H1S1"} count _mmmBefore;
 [_buyer, _laptop, "personal", [["rhs_weap_pkm", "rhs_weap_pkm", 2, false]]] call PMCS_fnc_buy;
 private _stock = ([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0;
 [_buyer, _adminLaptop, "item", ["rhs_weap_pkm", false, -1, 0, 3]] call PMCS_fnc_admin;
@@ -185,8 +211,8 @@ private _kept = ((PMCS_market get "items") get "rhs_weap_pkm") select 4;
 private _restocked = ((PMCS_market get "items") get "rhs_weap_pkm") select 4;
 [_refused == "STR_PMCS_ERR_ZEUS" && {_left == 1} && {(_stock select 0) == "STR_PMCS_ERR_STOCK"} && {_kept == 1} && {_restocked == 5}
     && {((PMCS_market get "cats") get "штурмовая винтовка") == 15} && {!("assault" in (PMCS_market get "cats"))} && {((PMCS_market get "cats") get "ammo") == 5}
-    && {(PMCS_market get "global") == 0} && {!("box" in PMCS_market)} && {_mags == 10 + 30} && {_paid == 2 * 1280 + 10 * round (12 * 1.3 * 0.95) + round (12 * 30 * 0.95)},
-    "Zeus only: a limited quantity sells down (3 -> 1, then not enough), stays when only the price changes, restocks when the quantity changes; discounts by the table's weapon category and on ammunition (a price type and the old box discount are refused); a price for a magazine puts it on sale, a box of it is 30; a 95% discount is refused"] call TEST_fnc_assert;
+    && {(PMCS_market get "global") == 0} && {!("box" in PMCS_market)} && {_mags == 10 + 30} && {_paid == 2 * 720 + 10 * round (36 * 1.3 * 0.95) + round (36 * 30 * 0.95)} && {_mmmTotal == 20} && {_draws == 5} && {_h1 - _h1Before == 12},
+    "Zeus only: a limited quantity sells down (3 -> 1, then not enough), stays when only the price changes, restocks when the quantity changes; discounts by the table's weapon category and on ammunition (a price type and the old box discount are refused); a price for a magazine row (armour-piercing x3), a box of it is 30; five MMM boxes of 4, each one class; a 95% discount is refused"] call TEST_fnc_assert;
 
 TEST_messages = [];
 [_buyer, _adminLaptop, "add", ["rhs_weap_asval", 900, 1]] call PMCS_fnc_admin;
@@ -252,30 +278,30 @@ private _noMg = ([] call PMCS_fnc_uiShopList) select 0;
 PMCS_ui set ["offTypes", []];
 PMCS_ui set ["search", "mmm_weap_ak74_h2"];
 private _found = ([] call PMCS_fnc_uiShopList) select 0;
-[(_shown select 0) == "rhs_weap_pkm" && {!("rhs_weap_akm" in _shown)} && {!("uk3cb_saiga12k" in _shown)} && {"rhs_weap_ak74" in _shown}
-    && {!("rhs_weap_ak74" in _noAk)} && {!("rhs_weap_pkm" in _noMg)} && {"rhs_weap_ak74" in _noMg} && {_found isEqualTo ["rhs_weap_ak74"]}
-    && {(_types get "штурмовая винтовка") == 2} && {(_types get "единый пулемет") == 1} && {(_cals get "5.45x39 АК") == 2} && {(_types get "dmr") == 1},
-    "weapons grid: dearest box first, hidden and unpriced items left out, filters by the table's weapon category and by calibre, search by a variant's class, counts per category and calibre"] call TEST_fnc_assert;
-
-// Ammunition: the grid lists calibres; the filter is the ammo type.
-(PMCS_market get "items") set ["MMM_mag_545x39_6L20_7N6M", [false, 15, 0, -1, -1]];
-(PMCS_market get "items") set ["MMM_mag_545x39_6L23_Plastic_7N22", [false, 20, 0, -1, -1]];
-PMCS_ui set ["tab", "ammo"];
 PMCS_ui set ["search", ""];
-([] call PMCS_fnc_uiShopList) params ["_calibres", "_ammoTypes"];
-PMCS_ui set ["offTypes", ["Ball"]];
-private _apOnly = ([] call PMCS_fnc_uiShopList) select 0;
-PMCS_ui set ["offTypes", ["Ball", "AP"]];
-private _none = ([] call PMCS_fnc_uiShopList) select 0;
-PMCS_ui set ["offTypes", []];
+[(_shown select 0) == "rhs_weap_svds" && {!("rhs_weap_akm" in _shown)} && {"uk3cb_saiga12k" in _shown} && {"rhs_weap_ak74" in _shown}
+    && {!("rhs_weap_ak74" in _noAk)} && {!("rhs_weap_pkm" in _noMg)} && {"rhs_weap_ak74" in _noMg} && {_found isEqualTo ["rhs_weap_ak74"]}
+    && {(_types get "штурмовая винтовка") == 2} && {(_types get "единый пулемет") == 1} && {(_cals get "5.45x39 АК") == 2} && {(_types get "dmr") == 1}
+    && {!("MMM_mag_545x39_6L20_7N6M" in _shown)},
+    "weapons grid: dearest box first, hidden items left out, filters by the table's weapon category and by calibre, search by a class of an MMM version's pool, counts per category and calibre"] call TEST_fnc_assert;
+
+// Ammunition: a card per magazine row of the table; the filter is the calibre.
+PMCS_ui set ["tab", "ammo"];
+PMCS_ui set ["sort", 0];
+([] call PMCS_fnc_uiShopList) params ["_ammoRows", "", "_ammoCals"];
+PMCS_ui set ["offCals", ["7.62x54R ПКМ"]];
+private _only545 = ([] call PMCS_fnc_uiShopList) select 0;
+PMCS_ui set ["offCals", []];
 PMCS_ui set ["search", "7n22"];
 private _byClass = ([] call PMCS_fnc_uiShopList) select 0;
 PMCS_ui set ["search", ""];
-[_calibres isEqualTo ["5.45x39 АК"] && {(_ammoTypes get "Ball") == 1} && {(_ammoTypes get "AP") == 1} && {!("Trace" in _ammoTypes)}
-    && {_apOnly isEqualTo ["5.45x39 АК"]} && {_none isEqualTo []} && {_byClass isEqualTo ["5.45x39 АК"]}
-    && {(["5.45x39 АК"] call PMCS_fnc_uiCalibreMags) isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22"]}
-    && {(["7.62x54R ПКМ"] call PMCS_fnc_uiCalibreMags) isEqualTo []},
-    "ammunition grid: a calibre card when it has a priced magazine, the ammo type filter keeps a calibre while one of its types is ticked, search by a magazine's class; the calibre's magazines on sale"] call TEST_fnc_assert;
+(PMCS_market get "items") set ["MMM_mag_545x39_6L20_7N6M", [true, -1, 0, -1, -1]];
+private _hiddenRow = ([] call PMCS_fnc_uiShopList) select 0;
+[_ammoRows isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", "rhs_100Rnd_762x54mmR"] && {(_ammoCals get "5.45x39 АК") == 2}
+    && {(_ammoCals get "7.62x54R ПКМ") == 1} && {_only545 isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M"]}
+    && {_byClass isEqualTo ["MMM_mag_545x39_6L23_Plastic_7N6M"]} && {_hiddenRow isEqualTo ["MMM_mag_545x39_6L23_Plastic_7N6M", "rhs_100Rnd_762x54mmR"]}
+    && {(["5.45x39 АК"] call PMCS_fnc_uiCalibreMags) isEqualTo ["MMM_mag_545x39_6L23_Plastic_7N6M"]} && {(["7.62x54R СВД"] call PMCS_fnc_uiCalibreMags) isEqualTo []},
+    "ammunition grid: a card per magazine row, cheapest box of its first type first, the calibre filter, search by a type's class, a hidden row left out; a calibre's rows on sale"] call TEST_fnc_assert;
 
 // --- The laptop on screen: desktop, shop, cart, purchase, management ------------------------------------
 {
@@ -320,6 +346,7 @@ TEST_serve = {
     };
 };
 TEST_messages = [];
+TEST_strings = createHashMapFromArray [["STR_PMCS_CARD_TITLE", "%1 x%2"], ["STR_PMCS_ADD_BOX", "box x%1"], ["STR_PMCS_ADD_UNIT", "single %1"]];
 [_shopLaptop] call PMCS_fnc_open;
 private _display = "Logic" createVehicle [0, 0, 0];
 ["onLoad", [_display]] call PMCS_fnc_ui;
@@ -335,22 +362,27 @@ private _sel = PMCS_ui get "sel";
     && {(["АК-74"] call TEST_byText) isNotEqualTo []} && {(["detail"] call TEST_region) isNotEqualTo []},
     "laptop: the desktop with the ION Market icon, the browser asks the server, the grid has a card per item, the cheapest is chosen and shown in the card"] call TEST_fnc_assert;
 
-private _boxFirst = (PMCS_ui get "pack") == "box" && {(["pack", ["unit"]] call TEST_byEvent) isNotEqualTo []} && {(["1 000 $"] call TEST_byText) isNotEqualTo []};
-[(["add"] call TEST_byEvent) select 0] call TEST_click;
-[(["variant", ["MMM_weap_AK74_H2S1"]] call TEST_byEvent) select 0] call TEST_click;
-[(["pack", ["unit"]] call TEST_byEvent) select 0] call TEST_click;
+private _cardTitle = (["АК-74 x4"] call TEST_byText) isNotEqualTo [] && {(["1 000 $"] call TEST_byText) isNotEqualTo []};
+private _buttons = (["box x4"] call TEST_byText) isNotEqualTo [] && {(["single 400 $"] call TEST_byText) isNotEqualTo []}
+    && {(["add", ["box"]] call TEST_byEvent) isNotEqualTo []} && {(["add", ["unit"]] call TEST_byEvent) isNotEqualTo []};
+[(["add", ["box"]] call TEST_byEvent) select 0] call TEST_click;
+private _mmmChip = ["variant", ["MMM_weap_AK74_H*S*"]] call TEST_byEvent;
+[_mmmChip select 0] call TEST_click;
+private _randomNote = (["STR_PMCS_RANDOM_LINE"] call TEST_byText) isNotEqualTo [];
 [(["qty", [1]] call TEST_byEvent) select 0] call TEST_click;
-private _unitShown = ((["detail"] call TEST_region) select {"400 $" in (_x getVariable ["TEST_text", ""])}) isNotEqualTo [];
-[(["add"] call TEST_byEvent) select 0] call TEST_click;
+[(["add", ["unit"]] call TEST_byEvent) select 0] call TEST_click;
 private _cart = +(PMCS_ui get "cart");
 [(["checkout"] call TEST_byEvent) select 0] call TEST_click;
 private _request = (TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_buy"}) select 0;
+private _drawsBefore = TEST_randomDraws;
 call TEST_serve;
 private _inBox = (_shopBox getVariable ["TEST_weapons", []]) apply {_x select 0};
-[_boxFirst && {_unitShown} && {_cart isEqualTo [["rhs_weap_ak74", "rhs_weap_ak74", 1, true], ["rhs_weap_ak74", "MMM_weap_AK74_H2S1", 2, false]]}
+[_cardTitle && {_buttons} && {count _mmmChip == 1} && {(_mmmChip select 0) getVariable ["TEST_text", ""] == "MMM"} && {_randomNote}
+    && {_cart isEqualTo [["rhs_weap_ak74", "rhs_weap_ak74", 1, true], ["rhs_weap_ak74", "MMM_weap_AK74_H*S*", 2, false]]}
     && {((_request select 0) select 2) == "personal"} && {((PMCB_accounts get "76561100000000002") select 0) == 10000 - 1000 - 800}
-    && {({_x == "rhs_weap_ak74"} count _inBox) == 4} && {({_x == "MMM_weap_AK74_H2S1"} count _inBox) == 2} && {(PMCS_ui get "cart") isEqualTo []},
-    "shop: a box is the default (1 000 for 4); add a box, pick a variant, switch to single pieces (400 each), two of them; check out pays 1 800 from the personal account, the box gets 4 + 2 of the chosen variant, the cart empties"] call TEST_fnc_assert;
+    && {({_x == "rhs_weap_ak74"} count _inBox) == 4} && {({_x == "MMM_weap_AK74_H1S1"} count _inBox) == 1} && {({_x == "MMM_weap_AK74_H2S1"} count _inBox) == 1}
+    && {TEST_randomDraws - _drawsBefore == 1 + 2} && {(PMCS_ui get "cart") isEqualTo []},
+    "shop: the card reads 'АК-74 x4' and the box price; the main button adds a box, the second one single pieces (400 each); one 'MMM' version, two single pieces of it drawn one by one; check out pays 1 800, the box gets 4 + 2, the cart empties"] call TEST_fnc_assert;
 
 private _filterOf = {params ["_kind", "_key"]; (([] call TEST_live) select {(_x getVariable ["PMCS_filter", []]) isEqualTo [_kind, _key]}) select 0};
 private _calCheck = ["cal", "5.45x39 АК"] call _filterOf;
@@ -361,59 +393,71 @@ private _catCheck = ["type", "штурмовая винтовка"] call _filter
 [_catCheck, 0] call (_catCheck getVariable "TEST_eh_CheckedChanged");
 private _noAssault = PMCS_ui get "shown";
 [_catCheck, 1] call (_catCheck getVariable "TEST_eh_CheckedChanged");
-{(PMCS_market get "items") set [_x select 0, [false, _x select 1, 0, -1, -1]]} forEach [["MMM_mag_545x39_6L20_7N6M", 15], ["MMM_mag_545x39_6L23_Plastic_7N6M", 16],
-    ["MMM_mag_545x39_6L23_Plastic_7N22", 20]];
+{(PMCS_market get "items") set [_x select 0, [false, _x select 1, 0, -1, -1]]} forEach [["MMM_mag_545x39_6L20_7N6M", 15], ["MMM_mag_545x39_6L23_Plastic_7N6M", 20]];
 call PMCS_fnc_broadcast;
 call TEST_serve;
 [(["select", ["rhs_weap_ak74"]] call TEST_byEvent) select 0] call TEST_click;
-// Step 1: the ammo types the calibre has on sale; step 2: the magazines of that type.
-private _typeChips = [["Ball", "Trace", "AP"], {(["ammoType", [_x]] call TEST_byEvent) isNotEqualTo []}] call {params ["_t", "_f"]; _t apply _f};
-private _ballMags = ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M"] apply {count (["mag", [_x]] call TEST_byEvent)};
-private _firstMag = PMCS_ui get "mag";
-[(["ammoType", ["AP"]] call TEST_byEvent) select 0] call TEST_click;
-private _apMag = PMCS_ui get "mag";
-private _apChips = count ((["detail"] call TEST_region) select {((_x getVariable ["PMCS_event", []]) param [0, ""]) == "mag"});
-[(["magPack", ["unit"]] call TEST_byEvent) select 0] call TEST_click;
-[(["magQty", [1]] call TEST_byEvent) select 0] call TEST_click;
-[(["magAdd"] call TEST_byEvent) select 0] call TEST_click;
-[(["ammoType", ["Ball"]] call TEST_byEvent) select 0] call TEST_click;
+// The weapon's card: the magazine rows of its calibre, then the ammo types of the chosen row.
+private _rowChips = ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M"] apply {count (["mag", [_x]] call TEST_byEvent)};
+private _firstRow = PMCS_ui get "mag";
+private _bakeTypes = ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L20_7T3M", "MMM_mag_545x39_6L23_Plastic_7N22"] apply {count (["ammoType", [_x]] call TEST_byEvent)};
 [(["mag", ["MMM_mag_545x39_6L23_Plastic_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
-[(["magPack", ["box"]] call TEST_byEvent) select 0] call TEST_click;
-[(["magAdd"] call TEST_byEvent) select 0] call TEST_click;
+private _polyType = PMCS_ui get "ammoType";
+[(["ammoType", ["MMM_mag_545x39_6L23_Plastic_7N22"]] call TEST_byEvent) select 0] call TEST_click;
+private _apPrice = (["detail"] call TEST_region) select {"1 800 $" in (_x getVariable ["TEST_text", ""])};
+[(["magQty", [1]] call TEST_byEvent) select 0] call TEST_click;
+[(["magAdd", ["unit"]] call TEST_byEvent) select 0] call TEST_click;
+[(["ammoType", ["MMM_mag_545x39_6L23_Plastic_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
+[(["magAdd", ["box"]] call TEST_byEvent) select 0] call TEST_click;
 private _magCart = +(PMCS_ui get "cart");
-[_typeChips isEqualTo [true, false, true] && {_ballMags isEqualTo [1, 1]} && {_firstMag == "MMM_mag_545x39_6L20_7N6M"} && {_apMag == "MMM_mag_545x39_6L23_Plastic_7N22"}
-    && {_apChips == 1} && {(({"rhs_weap_ak74" == _x} count _without) == 0)} && {!("rhs_weap_ak74" in _noAssault)} && {"rhs_weap_pkm" in _noAssault}
-    && {_magCart isEqualTo [["MMM_mag_545x39_6L23_Plastic_7N22", "MMM_mag_545x39_6L23_Plastic_7N22", 2, false], ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", 2, true]]},
-    "shop: the calibre and category boxes hide the AK; the AK's card offers its calibre's ammunition: the types on sale (no tracers), then the magazines of the chosen type, then box or single pieces"] call TEST_fnc_assert;
+// A row hidden by a Zeus while the card is open: the card moves on to one still on sale.
+[(["mag", ["MMM_mag_545x39_6L20_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
+(PMCS_market get "items") set ["MMM_mag_545x39_6L20_7N6M", [true, 15, 0, -1, -1]];
+call PMCS_fnc_broadcast;
+call TEST_serve;
+private _movedOn = PMCS_ui get "mag";
+(PMCS_market get "items") set ["MMM_mag_545x39_6L20_7N6M", [false, 15, 0, -1, -1]];
+call PMCS_fnc_broadcast;
+call TEST_serve;
+[_rowChips isEqualTo [1, 1] && {_firstRow == "MMM_mag_545x39_6L20_7N6M"} && {_movedOn == "MMM_mag_545x39_6L23_Plastic_7N6M"} && {_bakeTypes isEqualTo [1, 1, 0]} && {_polyType == "MMM_mag_545x39_6L23_Plastic_7N6M"}
+    && {_apPrice isNotEqualTo []} && {(({"rhs_weap_ak74" == _x} count _without) == 0)} && {!("rhs_weap_ak74" in _noAssault)} && {"rhs_weap_pkm" in _noAssault}
+    && {_magCart isEqualTo [["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22", 2, false], ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", 2, true]]},
+    "shop: the calibre and category boxes hide the AK; the AK's card offers its calibre's magazine rows, then the chosen row's ammo types (armour-piercing x3: 1 800 a box), then a box or single magazines; a row hidden meanwhile is replaced"] call TEST_fnc_assert;
 
 [PMCS_ui get "tabAmmo"] call TEST_click;
 private _ammoCards = (["grid"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_ButtonClear"};
 private _ammoShown = +(PMCS_ui get "shown");
+private _ammoTitle = (["30 патр. Бакелит x30"] call TEST_byText) isNotEqualTo [] && {(["450 $"] call TEST_byText) isNotEqualTo []};
+private _calFilter = ["cal", "7.62x54R ПКМ"] call _filterOf;
+[_calFilter, 0] call (_calFilter getVariable "TEST_eh_CheckedChanged");
+private _noPkm = +(PMCS_ui get "shown");
+[_calFilter, 1] call (_calFilter getVariable "TEST_eh_CheckedChanged");
+[(["select", ["MMM_mag_545x39_6L20_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
 private _fits = (((["detail"] call TEST_region) select {(_x getVariable ["TEST_text", ""]) == "5.45x39 АК"}) isNotEqualTo []) && {(["STR_PMCS_FITS"] call TEST_byText) isNotEqualTo []};
-private _typeCheck = ["type", "AP"] call _filterOf;
-[_typeCheck, 0] call (_typeCheck getVariable "TEST_eh_CheckedChanged");
-private _stillThere = +(PMCS_ui get "shown");
-[_typeCheck, 1] call (_typeCheck getVariable "TEST_eh_CheckedChanged");
-[(["magAdd"] call TEST_byEvent) select 0] call TEST_click;
+[(["ammoType", ["MMM_mag_545x39_6L20_7T3M"]] call TEST_byEvent) select 0] call TEST_click;
+private _tracePrice = ((["detail"] call TEST_region) select {"495 $" in (_x getVariable ["TEST_text", ""])}) isNotEqualTo [];
+[(["add", ["box"]] call TEST_byEvent) select 0] call TEST_click;
 [(["cartOpen"] call TEST_byEvent) select 0] call TEST_click;
 private _rows = count (((["overlay"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_List"}) select 0 getVariable ["TEST_rows", []]);
 [(["cartQty", [1]] call TEST_byEvent) select 0] call TEST_click;
 private _three = ((PMCS_ui get "cart") select 0) select 2;
 [(["cartRemove", []] call TEST_byEvent) select 0] call TEST_click;
-private _afterRemove = (PMCS_ui get "cart") apply {_x select 0};
+private _afterRemove = (PMCS_ui get "cart") apply {_x select 1};
 [(["checkout"] call TEST_byEvent) select 0] call TEST_click;
 call TEST_serve;
 private _boxMags = createHashMap;
 {_boxMags set [_x select 0, (if ((_x select 0) in _boxMags) then {_boxMags get (_x select 0)} else {0}) + (_x select 1)]} forEach (_shopBox getVariable ["TEST_mags", []]);
-[(["select", [_ammoShown select 0]] call TEST_byEvent) select 0] call TEST_click;
-[(["magAdd"] call TEST_byEvent) select 0] call TEST_click;
-private _beforeClear = count (PMCS_ui get "cart");
+[(["select", ["MMM_mag_545x39_6L23_Plastic_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
+[(["add", ["box"]] call TEST_byEvent) select 0] call TEST_click;
+private _beforeClear = +(PMCS_ui get "cart");
 [(["cartClear", []] call TEST_byEvent) select 0] call TEST_click;
-[count _ammoCards == 1 && {_ammoShown isEqualTo ["5.45x39 АК"]} && {_fits} && {_stillThere isEqualTo ["5.45x39 АК"]} && {_rows == 3} && {_three == 3}
-    && {_afterRemove isEqualTo ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L20_7N6M"]}
-    && {(_boxMags get "MMM_mag_545x39_6L23_Plastic_7N6M") == 60} && {(_boxMags get "MMM_mag_545x39_6L20_7N6M") == 60}
-    && {((PMCB_accounts get "76561100000000002") select 0) == 8200 - 2 * 480 - 2 * 450} && {_beforeClear == 1} && {(PMCS_ui get "cart") isEqualTo []},
-    "ammunition tab: a card per calibre, what it fits; the type filter; a box of magazines from the calibre's card; the cart window changes and removes lines; two boxes each give 60 magazines for 1 860"] call TEST_fnc_assert;
+[count _ammoCards == 3 && {_ammoShown isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", "rhs_100Rnd_762x54mmR"]} && {_ammoTitle}
+    && {_noPkm isEqualTo ["MMM_mag_545x39_6L20_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M"]} && {_fits} && {_tracePrice} && {_rows == 3} && {_three == 3}
+    && {_afterRemove isEqualTo ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L20_7T3M"]}
+    && {(_boxMags get "MMM_mag_545x39_6L23_Plastic_7N6M") == 60} && {(_boxMags get "MMM_mag_545x39_6L20_7T3M") == 30}
+    && {((PMCB_accounts get "76561100000000002") select 0) == 8200 - 2 * 600 - 495}
+    && {_beforeClear isEqualTo [["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", 1, true]]} && {(PMCS_ui get "cart") isEqualTo []},
+    "ammunition tab: a card per magazine row ('30 патр. Бакелит x30', the ball box price), the calibre filter, the row's card with what it fits and its ammo types (tracer x1.1: 495 a box); the cart window changes and removes lines; check out delivers boxes of 30"] call TEST_fnc_assert;
 
 TEST_messages = [];
 [(["×"] call TEST_byText) select 0] call TEST_click;
@@ -444,8 +488,12 @@ private _magRows545 = [] call TEST_tableRows;
 ["set", ["asection", "weapon"]] call PMCS_fnc_uiAdmin;
 _table = ((["table"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_List"}) select 0;
 private _calColumns = count _pkmRows == 2 && {"7.62x54R ПКМ" in ((_pkmRows select 1) select 0)} && {"Единые пулемёты" in ((_pkmRows select 1) select 0)}
-    && {count _magRows == 5} && {count _magRows545 == 4} && {(_magRows545 findIf {"STR_PMCS_AMMO_AP" in (_x select 0) && {"5.45x39 АК" in (_x select 0)}}) > 0};
-[_table, 1] call (_table getVariable "TEST_eh_LBSelChanged");
+    && {count _magRows == 4} && {count _magRows545 == 3}
+    && {(_magRows545 findIf {"5.45x39 АК" in (_x select 0) && {((_x select 0) findIf {"STR_PMCS_AMMO_AP" in _x}) >= 0} && {"30 патр. Полимер" in (_x select 0)}}) > 0};
+private _akRow = -1;
+private _cellData = _table getVariable ["TEST_cells", createHashMap];
+{if ((_cellData get _x) == "rhs_weap_ak74") then {_akRow = parseNumber (((_x select [1, count _x - 2]) splitString ",") select 0)}} forEach keys _cellData;
+[_table, _akRow] call (_table getVariable "TEST_eh_LBSelChanged");
 private _picked = PMCS_ui get "asel";
 (PMCS_ui get "afields") params ["", "_priceEdit", "_discountEdit", "_modeCombo", "_qtyEdit"];
 _priceEdit setVariable ["TEST_text", "300"];

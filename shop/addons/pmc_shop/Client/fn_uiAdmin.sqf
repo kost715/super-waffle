@@ -132,12 +132,12 @@ switch (_event) do {
             ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
             private _name = [_key, _market] call PMCS_fnc_itemName;
             private _cells = switch (_section) do {
-                case "mag": {[[_info select 8, _info select 1] select ((_info select 8) == ""), _info select 3, localize ("STR_PMCS_AMMO_" + ([_info select 9, "special"] select ((_info select 9) == "")))]};
+                case "mag": {[[_info select 8, _info select 1] select ((_info select 8) == ""), _info select 3, ((_info select 7) apply {_x select 1}) joinString ", "]};
                 case "custom": {[_name, localize ("STR_PMCS_KIND_" + (_info select 0)), ((_info select 7) select 0) select 0]};
                 default {[_name, [_info select 2] call PMCS_fnc_categoryName, _info select 3]};
             };
             private _match = (_search == "" || {_search in toLower _name} || {_search in toLower (_info select 3)}
-                || {(_info select 7) findIf {_search in toLower (_x select 0)} >= 0}) && {_calibre == "" || {(_info select 3) == _calibre}};
+                || {(_info select 7) findIf {(_x select 3) findIf {_search in toLower _x} >= 0} >= 0}) && {_calibre == "" || {(_info select 3) == _calibre}};
             private _fits = switch (_show) do {
                 case 1: {_state in ["ok", "soldout"]};
                 case 2: {_state == "hidden"};
@@ -193,8 +193,15 @@ switch (_event) do {
         ["PMCS_Text", [_x0, 0.215, _wd, 0.1], controlNull, "aside", "", 0.02, "", "photo"] call _make;
         ["PMCS_Picture", [_x0 + 0.01, 0.22, _wd - 0.02, 0.09], controlNull, "aside", [_picture, "\pmc_shop\data\noimage_ca.paa"] select (_picture == "")] call _make;
         ["PMCS_TextBold", [_x0, 0.322, _wd, 0.04], controlNull, "aside", [_key, _market] call PMCS_fnc_itemName, 0.026] call _make;
-        ["PMCS_Text", [_x0, 0.36, _wd, 0.026], controlNull, "aside", format ["%1 · %2 · %3", [_info select 2] call PMCS_fnc_categoryName, _info select 3,
-            (_info select 7) apply {_x select 0} joinString ", "], 0.015, "grey"] call _make;
+        // A weapon: category, calibre, its classes (a pattern stands for its random pool); a
+        // magazine row: the calibre and each ammo type with its price factor.
+        private _line = if ((_info select 0) == "mag") then {
+            format ["%1 · %2", _info select 3, ((_info select 7) apply {format ["%1 ×%2", _x select 1, _x select 4]}) joinString ", "]
+        } else {
+            format ["%1 · %2 · %3", [_info select 2] call PMCS_fnc_categoryName, _info select 3, (_info select 7) apply {_x select 0} joinString ", "]
+        };
+        private _lineCtrl = ["PMCS_Text", [_x0, 0.36, _wd, 0.026], controlNull, "aside", _line, 0.015, "grey"] call _make;
+        _lineCtrl ctrlSetTooltip _line;
         ["PMCS_Text", [_x0, 0.386, _wd, 0.026], controlNull, "aside", format [localize "STR_PMCS_ADMIN_CATALOG_PRICE", [(_info select 5) call _money, "-"] select ((_info select 5) <= 0)], 0.016, "grey"] call _make;
         private _onSale = ["PMCS_Check", [_x0, 0.422, 0.012, 0.024], controlNull, "aside"] call _make;
         _onSale cbSetChecked !(_over select 0);

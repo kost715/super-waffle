@@ -2,17 +2,65 @@
 <Project name="PMC Shop">
     <Package name="Shop">
         <Container name="Main">
-            <Key ID="STR_PMCS_FROM">
-                <Original>from %1</Original>
-                <Russian>от %1</Russian>
+            <Key ID="STR_PMCS_BOX_DETAIL">
+                <Original>Box of %1 — %2</Original>
+                <Russian>Ящик %1 шт. — %2</Russian>
             </Key>
-            <Key ID="STR_PMCS_CALIBRE_LINE">
-                <Original>%1 ammo types · %2 magazines</Original>
-                <Russian>видов патронов: %1 · магазинов: %2</Russian>
+            <Key ID="STR_PMCS_UNIT_DETAIL">
+                <Original>Single — %2</Original>
+                <Russian>Штучно — %2</Russian>
             </Key>
-            <Key ID="STR_PMCS_BOX_OF">
-                <Original>box of %1</Original>
-                <Russian>ящик %1 шт.</Russian>
+            <Key ID="STR_PMCS_CARD_TITLE">
+                <Original>%1 x%2</Original>
+                <Russian>%1 x%2</Russian>
+            </Key>
+            <Key ID="STR_PMCS_PER_BOX_OF">
+                <Original>per box of %1</Original>
+                <Russian>за ящик · %1 шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_UNIT_PRICE">
+                <Original>Single: %1 each</Original>
+                <Russian>Штучно: %1 за шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_QTY">
+                <Original>Quantity</Original>
+                <Russian>Количество</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADD_BOX">
+                <Original>Add to cart · box ×%1</Original>
+                <Russian>В корзину · ящик ×%1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADD_UNIT">
+                <Original>Buy single · %1 each</Original>
+                <Russian>Купить штучно · %1 за шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_RANDOM_TIP">
+                <Original>Each box (or single piece) gets one of: %1</Original>
+                <Russian>Каждый ящик (или штука) — один из: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_RANDOM_LINE">
+                <Original>Random of %1 versions for each box</Original>
+                <Russian>Случайный из %1 вариантов на каждый ящик</Russian>
+            </Key>
+            <Key ID="STR_PMCS_IN_GAME">
+                <Original>In game: %1</Original>
+                <Russian>В игре: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STEP_TYPE">
+                <Original>AMMO TYPE</Original>
+                <Russian>ТИП ПАТРОНА</Russian>
+            </Key>
+            <Key ID="STR_PMCS_STEP_MAG">
+                <Original>MAGAZINE</Original>
+                <Russian>МАГАЗИН</Russian>
+            </Key>
+            <Key ID="STR_PMCS_COL_AMMO">
+                <Original>Ammo types</Original>
+                <Russian>Типы патронов</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ADMIN_PACK_RULE">
+                <Original>Box: units × base price, no discount of its own. Single: a weapon costs a share of the box, a magazine its price with a markup (CBA settings). A magazine row's price is its first ammo type; the other types cost the price × their factor from the table.</Original>
+                <Russian>Ящик — штук × базовая цена, своей скидки нет. Штучно: оружие — доля цены ящика, магазин — цена с надбавкой (настройки CBA). Цена строки патронов — за магазин первого типа; другие типы — цена × их коэффициент из таблицы.</Russian>
             </Key>
             <Key ID="STR_PMCS_UNIT_LINE">
                 <Original>single %1</Original>
@@ -22,34 +70,6 @@
                 <Original> · -%1%</Original>
                 <Russian> · −%1%</Russian>
             </Key>
-            <Key ID="STR_PMCS_PACK_BOX">
-                <Original>Box (%1 pcs)</Original>
-                <Russian>Ящик (%1 шт.)</Russian>
-            </Key>
-            <Key ID="STR_PMCS_PACK_UNIT">
-                <Original>Single</Original>
-                <Russian>Штучно</Russian>
-            </Key>
-            <Key ID="STR_PMCS_PER_BOX">
-                <Original>per box</Original>
-                <Russian>за ящик</Russian>
-            </Key>
-            <Key ID="STR_PMCS_UNIT_DETAIL">
-                <Original>Single — %2</Original>
-                <Russian>Штучно — %2</Russian>
-            </Key>
-            <Key ID="STR_PMCS_STEP_TYPE">
-                <Original>1. AMMO TYPE</Original>
-                <Russian>1. ТИП ПАТРОНА</Russian>
-            </Key>
-            <Key ID="STR_PMCS_STEP_MAG">
-                <Original>2. MAGAZINE</Original>
-                <Russian>2. МАГАЗИН</Russian>
-            </Key>
-            <Key ID="STR_PMCS_STEP_PACK">
-                <Original>3. PACKING AND QUANTITY</Original>
-                <Russian>3. УПАКОВКА И КОЛИЧЕСТВО</Russian>
-            </Key>
             <Key ID="STR_PMCS_FITS">
                 <Original>Fits: %1</Original>
                 <Russian>Подходит к: %1</Russian>
@@ -57,10 +77,6 @@
             <Key ID="STR_PMCS_AMMO_FOR">
                 <Original>AMMUNITION · %1</Original>
                 <Russian>ПАТРОНЫ · %1</Russian>
-            </Key>
-            <Key ID="STR_PMCS_FILTER_AMMO">
-                <Original>AMMO TYPE</Original>
-                <Russian>ТИП ПАТРОНА</Russian>
             </Key>
             <Key ID="STR_PMCS_FILTER_CATEGORY">
                 <Original>CATEGORY</Original>
@@ -78,10 +94,6 @@
                 <Original>Calibre</Original>
                 <Russian>Калибр</Russian>
             </Key>
-            <Key ID="STR_PMCS_COL_AMMO">
-                <Original>Ammo</Original>
-                <Russian>Патрон</Russian>
-            </Key>
             <Key ID="STR_PMCS_COL_KIND">
                 <Original>Kind</Original>
                 <Russian>Вид</Russian>
@@ -97,10 +109,6 @@
             <Key ID="STR_PMCS_COL_UNIT">
                 <Original>Single</Original>
                 <Russian>Штучно</Russian>
-            </Key>
-            <Key ID="STR_PMCS_ADMIN_PACK_RULE">
-                <Original>Box: units × base price, no discount of its own. Single: a weapon costs a share of the box, a magazine its base with a markup (CBA settings).</Original>
-                <Russian>Ящик — штук × базовая цена, своей скидки нет. Штучно: оружие — доля цены ящика, магазин — базовая цена с надбавкой (настройки CBA).</Russian>
             </Key>
             <Key ID="STR_PMCS_SET_WEAPON_BOX">
                 <Original>Weapons per box</Original>
@@ -145,18 +153,6 @@
             <Key ID="STR_PMCS_ACTION_ADMIN">
                 <Original>Laptop: market management</Original>
                 <Russian>Ноутбук: управление рынком</Russian>
-            </Key>
-            <Key ID="STR_PMCS_ADD">
-                <Original>Add to cart</Original>
-                <Russian>В корзину</Russian>
-            </Key>
-            <Key ID="STR_PMCS_ADD_BOX">
-                <Original>By the box</Original>
-                <Russian>Ящиком</Russian>
-            </Key>
-            <Key ID="STR_PMCS_ADD_MAG">
-                <Original>Add magazines to cart</Original>
-                <Russian>Магазины в корзину</Russian>
             </Key>
             <Key ID="STR_PMCS_ADDED">
                 <Original>In the cart: %1</Original>
@@ -310,10 +306,6 @@
                 <Original>special</Original>
                 <Russian>особые</Russian>
             </Key>
-            <Key ID="STR_PMCS_BOX_DETAIL">
-                <Original>Box of %1 — %2</Original>
-                <Russian>Ящик %1 шт. — %2</Russian>
-            </Key>
             <Key ID="STR_PMCS_CART">
                 <Original>Cart</Original>
                 <Russian>Корзина</Russian>
@@ -353,10 +345,6 @@
             <Key ID="STR_PMCS_COL_DISCOUNT">
                 <Original>Discount</Original>
                 <Russian>Скидка</Russian>
-            </Key>
-            <Key ID="STR_PMCS_COL_FINAL">
-                <Original>Price now</Original>
-                <Russian>Итоговая цена</Russian>
             </Key>
             <Key ID="STR_PMCS_COL_ITEM">
                 <Original>Item</Original>
@@ -478,10 +466,6 @@
                 <Original>CALIBRE</Original>
                 <Russian>КАЛИБР</Russian>
             </Key>
-            <Key ID="STR_PMCS_FILTER_TYPE">
-                <Original>TYPE</Original>
-                <Russian>ТИП</Russian>
-            </Key>
             <Key ID="STR_PMCS_KIND_weapon">
                 <Original>weapon</Original>
                 <Russian>оружие</Russian>
@@ -534,10 +518,6 @@
                 <Original>Market reset to the catalog</Original>
                 <Russian>Рынок сброшен к каталогу</Russian>
             </Key>
-            <Key ID="STR_PMCS_MAGAZINES">
-                <Original>COMPATIBLE MAGAZINES</Original>
-                <Russian>СОВМЕСТИМЫЕ МАГАЗИНЫ</Russian>
-            </Key>
             <Key ID="STR_PMCS_MAGS_NONE">
                 <Original>No magazines in the catalog</Original>
                 <Russian>Магазинов в каталоге нет</Russian>
@@ -565,10 +545,6 @@
             <Key ID="STR_PMCS_PAY_WITH">
                 <Original>Payment: PMC Bank</Original>
                 <Russian>Оплата: PMC Bank</Russian>
-            </Key>
-            <Key ID="STR_PMCS_PER_UNIT">
-                <Original>each</Original>
-                <Russian>за шт.</Russian>
             </Key>
             <Key ID="STR_PMCS_QTY_BOX">
                 <Original>%1 box(es), %2 pcs</Original>

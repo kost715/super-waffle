@@ -7,4 +7,4 @@ if (_item isNotEqualTo []) exitWith {_item};
 private _custom = (_market getOrDefault ["custom", createHashMap]) getOrDefault [_key, []];
 if (_custom isEqualTo []) exitWith {[]};
 _custom params ["_kind", "_class", "_name", "_picture"];
-[_kind, _name, "custom", "", "custom", 0, 0, [[_class, _name, _picture]], "", ""]
+[_kind, _name, "custom", "", "", 0, 0, [[_class, _name, _picture, [_class], 1]], "", ""]

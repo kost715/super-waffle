@@ -25,6 +25,7 @@ class CfgWeapons {
 };
 class CfgMagazines {
     class MMM_mag_545x39_6L20_7N6M {displayName = "6L20 7N6M"; picture = "\mmm\6l20_ca.paa";};
+    class MMM_mag_545x39_6L20_7T3M {displayName = "6L20 7T3M"; picture = "\mmm\6l20_t_ca.paa";};
     class MMM_mag_545x39_6L23_Plastic_7N6M {displayName = "6L23 7N6M"; picture = "\mmm\6l23_ca.paa";};
     class MMM_mag_545x39_6L23_Plastic_7N22 {displayName = "6L23 7N22"; picture = "\mmm\6l23_ap_ca.paa";};
     class rhs_100Rnd_762x54mmR {displayName = "PKM box"; picture = "\rhs\pk_ca.paa";};

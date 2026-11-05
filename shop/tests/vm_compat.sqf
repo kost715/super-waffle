@@ -163,6 +163,13 @@ TEST_fnc_addMagAmmo = {
 };
 // Units: side via TEST_side (group is the unit itself); Zeus, locality and Eden sync via variables.
 TEST_fnc_identity = {_this};
+// selectRandom: in turn (first, second, ...), each call counted, so a test can tell how
+// often the code draws.
+TEST_randomDraws = 0;
+TEST_fnc_selectRandom = {TEST_randomDraws = TEST_randomDraws + 1; _this select ((TEST_randomDraws - 1) % count _this)};
+// localize: the keys a test gives a text (TEST_strings) are formatted with it; the rest stay keys.
+TEST_strings = createHashMap;
+TEST_fnc_localize = {if (_this in TEST_strings) then {TEST_strings get _this} else {_this}};
 TEST_fnc_side = {_this getVariable ["TEST_side", west]};
 TEST_fnc_local = {_this getVariable ["TEST_local", true]};
 TEST_fnc_attachedTo = {_this getVariable ["TEST_attachedTo", objNull]};
@@ -494,7 +501,8 @@ TEST_fnc_compatCode = {
             case "CALLUNARY synchronizedobjects": {"TEST_fnc_synced" call _compatCall};
             case "CALLUNARY getassignedcuratorlogic": {"TEST_fnc_curator" call _compatCall};
             // Mission strings are checked in the stringtable; the VM keeps the keys.
-            case "CALLUNARY localize": {"TEST_fnc_identity" call _compatCall};
+            case "CALLUNARY localize": {"TEST_fnc_localize" call _compatCall};
+            case "CALLUNARY selectrandom": {"TEST_fnc_selectRandom" call _compatCall};
             case "CALLUNARY isnil": {"TEST_fnc_isNil" call _compatCall};
             case "CALLUNARY values": {"TEST_fnc_values" call _compatCall};
             case "CALLUNARY owner": {"TEST_fnc_owner" call _compatCall};

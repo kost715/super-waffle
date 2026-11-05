@@ -2,7 +2,8 @@
 // the cart. Everything is decided here: the prices (PMCS_fnc_quote, never the client's),
 // the stock, the account (the group's only for its treasurers, as in PMC Bank), the
 // balance and the delivery box. Then the account is charged (PMC Bank journal: "shop"),
-// limited items lose what was sold and the goods go into the box.
+// limited items lose what was sold and the goods go into the box. A variant with several
+// classes (an MMM pattern) gives each box, or each single piece, one of them at random.
 if (!isServer) exitWith {};
 call PMCS_fnc_serverLoad;
 params [["_unit", objNull, [objNull]], ["_terminal", objNull, [objNull]], ["_account", "", [""]], ["_lines", [], [[]]]];
@@ -39,11 +40,17 @@ private _stock = false;
 } forEach _units;
 private _bought = [];
 {
-    _x params ["_itemKey", "_class", "_qty", "_asBox"];
+    _x params ["_itemKey", "_variant", "_qty", "_asBox"];
     private _info = [_itemKey, PMCS_market] call PMCS_fnc_itemInfo;
-    private _count = [_qty, _qty * (([_itemKey, PMCS_market] call PMCS_fnc_price) select 5)] select _asBox;
-    [_box, _info select 0, _class, _count] call PMCS_fnc_deliver;
-    _bought pushBack format ["%1 × %2", _info select 1, _count];
+    private _classes = ((_info select 7) select ((_info select 7) findIf {(_x select 0) == _variant})) select 3;
+    private _per = [1, ([_itemKey, PMCS_market, _variant] call PMCS_fnc_price) select 5] select _asBox;
+    private _given = createHashMap;
+    for "_i" from 1 to _qty do {
+        private _class = selectRandom _classes;
+        _given set [_class, (_given getOrDefault [_class, 0]) + _per];
+    };
+    {[_box, _info select 0, _x, _y] call PMCS_fnc_deliver} forEach _given;
+    _bought pushBack format ["%1 × %2", [_itemKey, PMCS_market, _variant] call PMCS_fnc_itemName, _qty * _per];
 } forEach _lines;
 [name _unit, format [localize "STR_PMCS_LOG_BUY", [_total] call PMCS_fnc_money, _bought joinString ", ", _point]] call PMCS_fnc_log;
 ["STR_PMCS_DONE_BUY", [[_total] call PMCS_fnc_money, _point]] remoteExecCall ["PMCS_fnc_notify", _owner];

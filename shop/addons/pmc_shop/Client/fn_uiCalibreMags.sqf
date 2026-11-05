@@ -1,5 +1,5 @@
-// [calibre] -> the magazine keys of that calibre on sale or sold out (catalog magazines
-// and magazines a Zeus added; those have no calibre and are listed under "-"). Client.
+// [calibre] -> the magazine rows of that calibre on sale or sold out (rows of the table;
+// magazines a Zeus added have no calibre and are listed under "-"). Client.
 params [["_calibre", "", [""]]];
 private _market = PMCS_ui get "market";
 private _keys = +(((call PMCS_fnc_catalog) get "calibres") getOrDefault [_calibre, []]);

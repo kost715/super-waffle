@@ -63,7 +63,7 @@ switch (_action) do {
         _class = configName _cfg;
         private _key = "x_" + _class;
         private _catalog = (call PMCS_fnc_catalog) get "items";
-        if (_class in _catalog || {_key in (PMCS_market get "custom")} || {(values _catalog) findIf {((_x select 7) findIf {(_x select 0) == _class}) >= 0} >= 0}) exitWith {
+        if (_class in _catalog || {_key in (PMCS_market get "custom")} || {(values _catalog) findIf {((_x select 7) findIf {_class in (_x select 3)}) >= 0} >= 0}) exitWith {
             "STR_PMCS_ERR_IN_CATALOG" call _deny;
         };
         (PMCS_market get "custom") set [_key, [_kind, _class, getText (_cfg >> "displayName"), getText (_cfg >> "picture")]];
