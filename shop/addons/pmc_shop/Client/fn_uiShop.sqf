@@ -96,6 +96,7 @@ switch (_event) do {
         private _y = 0.215;
         private _section = {
             params ["_title", "_rows", "_kind"];
+            if (_rows isEqualTo []) exitWith {};
             ["PMCS_TextBold", [0.012, _y, 0.14, 0.025], _group, "filters", _title, 0.016, "grey"] call _make;
             _y = _y + 0.03;
             {
@@ -107,31 +108,34 @@ switch (_event) do {
                     params ["_ctrl", "_state"];
                     ["filter", (_ctrl getVariable "PMCS_filter") + [_state == 1]] call PMCS_fnc_uiShop;
                 }];
-                ["PMCS_Text", [0.028, _y, 0.1, 0.026], _group, "filters", _label, 0.018, "text"] call _make;
-                ["PMCS_TextRight", [0.11, _y, 0.037, 0.026], _group, "filters", str _n, 0.018, "grey"] call _make;
+                ["PMCS_Text", [0.028, _y, 0.1, 0.026], _group, "filters", _label, 0.017, "text"] call _make;
+                ["PMCS_TextRight", [0.11, _y, 0.037, 0.026], _group, "filters", str _n, 0.017, "grey"] call _make;
                 _y = _y + 0.03;
             } forEach _rows;
             _y = _y + 0.015;
         };
-        private _typeRows = [];
         if (_ammo) then {
+            private _typeRows = [];
             {
                 if (_x in _types) then {_typeRows pushBack [_x, localize ("STR_PMCS_AMMO_" + _x), _types get _x]};
             } forEach ["Ball", "Trace", "EPR", "EPT", "AP", "special"];
+            [localize "STR_PMCS_FILTER_AMMO", _typeRows, "type"] call _section;
         } else {
+            private _typeRows = [];
             {
                 _x params ["_key", "_label"];
                 if (_key in _types) then {_typeRows pushBack [_key, _label, _types get _key]};
             } forEach (((call PMCS_fnc_catalog) get "categories") + [["custom", localize "STR_PMCS_CATEGORY_CUSTOM"]]);
+            private _calRows = (keys _cals) apply {[_x, _x, _cals get _x]};
+            _calRows sort true;
+            [localize "STR_PMCS_FILTER_CATEGORY", _typeRows, "type"] call _section;
+            [localize "STR_PMCS_FILTER_CALIBRE", _calRows, "cal"] call _section;
         };
-        private _calRows = (keys _cals) apply {[_x, _x, _cals get _x]};
-        _calRows sort true;
-        [localize "STR_PMCS_FILTER_TYPE", _typeRows, "type"] call _section;
-        [localize "STR_PMCS_FILTER_CALIBRE", _calRows, "cal"] call _section;
     };
     case "grid": {
         ["grid"] call PMCS_fnc_uiClear;
         private _group = PMCS_ui get "gridGroup";
+        private _ammo = (PMCS_ui get "tab") == "ammo";
         ([] call PMCS_fnc_uiShopList) params ["_shown"];
         PMCS_ui set ["shown", _shown];
         if !((PMCS_ui get "sel") in _shown) then {PMCS_ui set ["sel", _shown param [0, ""]]};
@@ -142,30 +146,40 @@ switch (_event) do {
         private _h = 0.2;
         {
             private _key = _x;
-            private _info = [_key, _market] call PMCS_fnc_itemInfo;
-            ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
             private _x0 = 0.172 + (_forEachIndex % 3) * (_w + 0.012);
             private _y0 = 0.212 + floor (_forEachIndex / 3) * (_h + 0.016);
+            // Card text: [picture, title, price, subtitle, note, note colour, dimmed].
+            private _card = if (_ammo) then {
+                private _mags = [_key] call PMCS_fnc_uiCalibreMags;
+                private _kinds = [];
+                {_kinds pushBackUnique (([_x, _market] call PMCS_fnc_itemInfo) select 9)} forEach _mags;
+                private _labels = [];
+                {_labels pushBackUnique (([_x, _market] call PMCS_fnc_itemInfo) select 8)} forEach _mags;
+                private _cheapest = selectMin (_mags apply {([_x, _market] call PMCS_fnc_price) select 2});
+                [((([_mags select 0, _market] call PMCS_fnc_itemInfo) select 7) select 0) select 2, _key, format [localize "STR_PMCS_FROM", _cheapest call _money],
+                    format [localize "STR_PMCS_CALIBRE_LINE", count _kinds, count _labels],
+                    format [localize "STR_PMCS_BOX_OF", round (missionNamespace getVariable ["PMCS_magBoxUnits", 30])], "green", false]
+            } else {
+                private _info = [_key, _market] call PMCS_fnc_itemInfo;
+                ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
+                private _note = if (_state == "soldout") then {[localize "STR_PMCS_SOLD_OUT", "red"]} else {
+                    [format [localize "STR_PMCS_UNIT_LINE", _unit call _money] + ([format [localize "STR_PMCS_LEFT_LINE", _left], ""] select (_left < 0))
+                        + ([format [localize "STR_PMCS_DISCOUNT_SHORT", _off], ""] select (_off <= 0)), "grey"]
+                };
+                [((_info select 7) select 0) select 2, [_key, _market] call PMCS_fnc_itemName, _box call _money,
+                    format ["%1 · %2", [_info select 2] call PMCS_fnc_categoryName, _info select 3],
+                    _note select 0, _note select 1, _state == "soldout"]
+            };
+            _card params ["_picture", "_title", "_price", "_sub", "_note", "_noteColour", "_dimmed"];
             if (_key == (PMCS_ui get "sel")) then {["PMCS_Text", [_x0 - 0.003, _y0 - 0.005, _w + 0.006, _h + 0.01], _group, "grid", "", 0.02, "", "orange"] call _make};
             ["PMCS_Text", [_x0, _y0, _w, _h], _group, "grid", "", 0.02, "", "white"] call _make;
             ["PMCS_Text", [_x0 + 0.006, _y0 + 0.01, _w - 0.012, 0.09], _group, "grid", "", 0.02, "", "photo"] call _make;
-            private _picture = ((_info select 7) select 0) select 2;
             ["PMCS_Picture", [_x0 + 0.012, _y0 + 0.014, _w - 0.024, 0.082], _group, "grid", [_picture, "\pmc_shop\data\noimage_ca.paa"] select (_picture == "")] call _make;
-            private _dim = ["text", "grey"] select (_state == "soldout");
-            ["PMCS_TextBold", [_x0 + 0.008, _y0 + 0.105, _w * 0.62, 0.032], _group, "grid", [_key, _market] call PMCS_fnc_itemName, 0.021, _dim] call _make;
-            ["PMCS_TextBoldRight", [_x0 + _w * 0.6, _y0 + 0.105, _w * 0.38, 0.032], _group, "grid", _unit call _money, 0.021, _dim] call _make;
-            private _sub = if ((_info select 0) == "mag") then {_info select 3} else {
-                format ["%1 · %2", ((call PMCS_fnc_catalog) get "types") getOrDefault [_info select 4, [localize "STR_PMCS_CATEGORY_CUSTOM"]] select 0, _info select 3]
-            };
+            private _dim = ["text", "grey"] select _dimmed;
+            ["PMCS_TextBold", [_x0 + 0.008, _y0 + 0.105, _w * 0.58, 0.032], _group, "grid", _title, 0.021, _dim] call _make;
+            ["PMCS_TextBoldRight", [_x0 + _w * 0.56, _y0 + 0.105, _w * 0.42, 0.032], _group, "grid", _price, 0.021, _dim] call _make;
             ["PMCS_Text", [_x0 + 0.008, _y0 + 0.137, _w - 0.016, 0.026], _group, "grid", _sub, 0.016, "grey"] call _make;
-            private _note = switch (true) do {
-                case (_state == "soldout"): {[localize "STR_PMCS_SOLD_OUT", "red"]};
-                case (_boxUnits > 0): {[format [localize "STR_PMCS_BOX_LINE", _boxUnits, _box call _money, (_market get "box") max _off], "green"]};
-                case (_off > 0): {[format [localize "STR_PMCS_DISCOUNT_LINE", _off], "green"]};
-                default {["", "grey"]};
-            };
-            if (_left >= 0 && {_state == "ok"}) then {_note set [0, (_note select 0) + format [localize "STR_PMCS_LEFT_LINE", _left]]};
-            ["PMCS_Text", [_x0 + 0.008, _y0 + 0.163, _w - 0.016, 0.026], _group, "grid", _note select 0, 0.016, _note select 1] call _make;
+            ["PMCS_Text", [_x0 + 0.008, _y0 + 0.163, _w - 0.016, 0.026], _group, "grid", _note, 0.016, _noteColour] call _make;
             [["PMCS_ButtonClear", [_x0, _y0, _w, _h], _group, "grid"] call _make, "select", [_key]] call _click;
         } forEach _shown;
     };
@@ -173,19 +187,100 @@ switch (_event) do {
         ["detail"] call PMCS_fnc_uiClear;
         private _group = PMCS_ui get "detailGroup";
         private _key = PMCS_ui get "sel";
-        private _info = [_key, _market] call PMCS_fnc_itemInfo;
-        if (_info isEqualTo []) exitWith {};
-        ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
         private _x0 = 0.735;
         private _wd = 0.25;
+        if (_key == "") exitWith {};
+        // A packing switch (box / single piece), the prices, quantity and "add": shared by
+        // weapons and magazines.
+        private _buyBlock = {
+            params ["_itemKey", "_y", "_packVar", "_qtyVar", "_qtyEvent", "_addEvent", "_packEvent"];
+            ([_itemKey, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
+            private _asBox = (PMCS_ui get _packVar) == "box";
+            {
+                _x params ["_pack", "_label", "_left0"];
+                private _on = (PMCS_ui get _packVar) == _pack;
+                [["PMCS_Button", [_x0 + _left0, _y, 0.122, 0.032], _group, "detail", _label, 0.017, ["text", "white"] select _on, ["photo", "navy"] select _on] call _make,
+                    _packEvent, [_pack]] call _click;
+            } forEach [["box", format [localize "STR_PMCS_PACK_BOX", _boxUnits], 0], ["unit", localize "STR_PMCS_PACK_UNIT", 0.128]];
+            _y = _y + 0.04;
+            ["PMCS_Struct", [_x0, _y, 0.16, 0.045], _group, "detail", format ["<t font='RobotoCondensedBold'>%1</t> <t color='#4a5056' size='0.6'>%2</t>",
+                ([_unit, _box] select _asBox) call _money, localize (["STR_PMCS_PER_UNIT", "STR_PMCS_PER_BOX"] select _asBox)], 0.03] call _make;
+            private _lines = [format ["<t color='#4a5056'>%1</t>", format [localize (["STR_PMCS_BOX_DETAIL", "STR_PMCS_UNIT_DETAIL"] select _asBox),
+                _boxUnits, ([_box, _unit] select _asBox) call _money]]];
+            if (_off > 0) then {_lines pushBack format ["<t color='#2f5f2a'>%1</t>", format [localize "STR_PMCS_DISCOUNT_LINE", _off]]};
+            if (_left >= 0) then {_lines pushBack format ["<t color='#4a5056'>%1</t>", format [localize "STR_PMCS_LEFT_DETAIL", _left]]};
+            if (_state == "soldout") then {_lines pushBack format ["<t color='#9e291f'>%1</t>", localize "STR_PMCS_SOLD_OUT"]};
+            ["PMCS_Struct", [_x0, _y + 0.045, _wd, 0.025 * count _lines + 0.01], _group, "detail", _lines joinString "<br/>", 0.016] call _make;
+            [["PMCS_Button", [_x0 + 0.165, _y + 0.006, 0.022, 0.034], _group, "detail", "-", 0.024, "text", "photo"] call _make, _qtyEvent, [-1]] call _click;
+            private _qty = ["PMCS_Edit", [_x0 + 0.188, _y + 0.006, 0.038, 0.034], _group, "detail", str (PMCS_ui get _qtyVar), 0.02] call _make;
+            _qty setVariable ["PMCS_set", [_qtyEvent + "Set"]];
+            _qty ctrlAddEventHandler ["KillFocus", {[((_this select 0) getVariable "PMCS_set") select 0, [ctrlText (_this select 0)]] call PMCS_fnc_uiShop}];
+            [["PMCS_Button", [_x0 + 0.227, _y + 0.006, 0.022, 0.034], _group, "detail", "+", 0.024, "text", "photo"] call _make, _qtyEvent, [1]] call _click;
+            _y = _y + 0.055 + 0.025 * count _lines;
+            private _add = [["PMCS_Button", [_x0, _y, _wd, 0.045], _group, "detail", localize "STR_PMCS_ADD", 0.021, "white", "orangeDark"] call _make, _addEvent] call _click;
+            _add ctrlEnable (_state == "ok");
+            _y + 0.06
+        };
+        // Ammunition of a calibre in three steps: the ammo type (the table's columns), the
+        // magazine it comes in, then packing and quantity.
+        private _picker = {
+            params ["_calibre", "_y"];
+            private _mags = [_calibre] call PMCS_fnc_uiCalibreMags;
+            if (_mags isEqualTo []) exitWith {
+                private _known = ((call PMCS_fnc_catalog) get "calibres") getOrDefault [_calibre, []];
+                ["PMCS_Text", [_x0, _y, _wd, 0.028], _group, "detail", localize (["STR_PMCS_MAGS_NONE", "STR_PMCS_MAGS_NO_PRICE"] select (_known isNotEqualTo [])), 0.016, "grey"] call _make;
+                _y + 0.03
+            };
+            private _ammoOf = {
+                private _t = (([_this, _market] call PMCS_fnc_itemInfo) select 9);
+                [_t, "special"] select (_t == "")
+            };
+            private _kinds = ["Ball", "Trace", "EPR", "EPT", "AP", "special"] select {private _k = _x; (_mags findIf {(_x call _ammoOf) == _k}) >= 0};
+            if !((PMCS_ui get "ammoType") in _kinds) then {PMCS_ui set ["ammoType", _kinds select 0]};
+            ["PMCS_TextBold", [_x0, _y, _wd, 0.026], _group, "detail", localize "STR_PMCS_STEP_TYPE", 0.016, "grey"] call _make;
+            _y = _y + 0.028;
+            {
+                private _on = _x == (PMCS_ui get "ammoType");
+                [["PMCS_Button", [_x0 + (_forEachIndex % 3) * 0.084, _y + floor (_forEachIndex / 3) * 0.032, 0.08, 0.028], _group, "detail",
+                    localize ("STR_PMCS_AMMO_" + _x), 0.015, ["text", "orangeDark"] select _on, ["photo", "orangePale"] select _on] call _make, "ammoType", [_x]] call _click;
+            } forEach _kinds;
+            _y = _y + ceil (count _kinds / 3) * 0.032 + 0.008;
+            private _ofType = _mags select {(_x call _ammoOf) == (PMCS_ui get "ammoType")};
+            if !((PMCS_ui get "mag") in _ofType) then {PMCS_ui set ["mag", _ofType select 0]};
+            ["PMCS_TextBold", [_x0, _y, _wd, 0.026], _group, "detail", localize "STR_PMCS_STEP_MAG", 0.016, "grey"] call _make;
+            _y = _y + 0.028;
+            {
+                private _info = [_x, _market] call PMCS_fnc_itemInfo;
+                private _on = _x == (PMCS_ui get "mag");
+                private _chip = ["PMCS_Button", [_x0 + (_forEachIndex % 2) * 0.126, _y + floor (_forEachIndex / 2) * 0.032, 0.122, 0.028], _group, "detail",
+                    [_info select 8, _info select 1] select ((_info select 8) == ""), 0.015, ["text", "orangeDark"] select _on, ["photo", "orangePale"] select _on] call _make;
+                _chip ctrlSetTooltip format ["%1 (%2)", _info select 1, _x];
+                [_chip, "mag", [_x]] call _click;
+            } forEach _ofType;
+            _y = _y + ceil (count _ofType / 2) * 0.032 + 0.008;
+            ["PMCS_TextBold", [_x0, _y, _wd, 0.026], _group, "detail", localize "STR_PMCS_STEP_PACK", 0.016, "grey"] call _make;
+            [PMCS_ui get "mag", _y + 0.028, "magPack", "magQty", "magQty", "magAdd", "magPack"] call _buyBlock
+        };
+        if ((PMCS_ui get "tab") == "ammo") exitWith {
+            // A calibre: what it fits, then the three steps.
+            ["PMCS_TextBold", [_x0, 0.215, _wd, 0.045], _group, "detail", _key, 0.032] call _make;
+            private _fits = ((call PMCS_fnc_catalog) get "order") select {
+                private _info = ((call PMCS_fnc_catalog) get "items") get _x;
+                (_info select 0) == "weapon" && {(_info select 3) == _key} && {(([_x, _market] call PMCS_fnc_price) select 0) in ["ok", "soldout"]}
+            };
+            ["PMCS_Text", [_x0, 0.26, _wd, 0.05], _group, "detail", format [localize "STR_PMCS_FITS", (_fits apply {[_x, _market] call PMCS_fnc_itemName}) joinString ", "],
+                0.016, "grey"] call _make;
+            [_key, 0.315] call _picker;
+        };
+        private _info = [_key, _market] call PMCS_fnc_itemInfo;
+        if (_info isEqualTo []) exitWith {};
         private _variants = _info select 7;
         if ((_variants findIf {(_x select 0) == (PMCS_ui get "variant")}) < 0) then {PMCS_ui set ["variant", (_variants select 0) select 0]};
         private _variant = _variants select (_variants findIf {(_x select 0) == (PMCS_ui get "variant")});
         ["PMCS_Text", [_x0, 0.215, _wd, 0.13], _group, "detail", "", 0.02, "", "photo"] call _make;
         ["PMCS_Picture", [_x0 + 0.01, 0.222, _wd - 0.02, 0.116], _group, "detail", [_variant select 2, "\pmc_shop\data\noimage_ca.paa"] select ((_variant select 2) == "")] call _make;
         ["PMCS_TextBold", [_x0, 0.352, _wd, 0.045], _group, "detail", [_key, _market] call PMCS_fnc_itemName, 0.032] call _make;
-        private _type = ((call PMCS_fnc_catalog) get "types") getOrDefault [_info select 4, [localize (["STR_PMCS_CATEGORY_CUSTOM", "STR_PMCS_TAB_AMMO"] select ((_info select 0) == "mag"))]];
-        ["PMCS_Text", [_x0, 0.395, _wd, 0.028], _group, "detail", format ["%1 · %2 · %3", _type select 0, _info select 3, _variant select 0], 0.016, "grey"] call _make;
+        ["PMCS_Text", [_x0, 0.395, _wd, 0.028], _group, "detail", format ["%1 · %2 · %3", [_info select 2] call PMCS_fnc_categoryName, _info select 3, _variant select 0], 0.016, "grey"] call _make;
         private _y = 0.43;
         if (count _variants > 1) then {
             ["PMCS_Text", [_x0, _y, _wd, 0.028], _group, "detail", localize "STR_PMCS_VARIANT", 0.017, "grey"] call _make;
@@ -200,68 +295,11 @@ switch (_event) do {
             _y = _y + ceil (count _variants / 2) * 0.035 + 0.005;
         };
         ["PMCS_Text", [_x0, _y, _wd, 0.001], _group, "detail", "", 0.02, "", "line"] call _make;
-        _y = _y + 0.01;
-        ["PMCS_Struct", [_x0, _y, 0.16, 0.045], _group, "detail", format ["<t font='RobotoCondensedBold'>%1</t> <t color='#4a5056' size='0.6'>%2</t>", _unit call _money, localize "STR_PMCS_PER_UNIT"], 0.032] call _make;
-        private _lines = [];
-        if (_boxUnits > 0) then {_lines pushBack format ["<t color='#2f5f2a'>%1</t>", format [localize "STR_PMCS_BOX_DETAIL", _boxUnits, _box call _money]]};
-        if (_off > 0) then {_lines pushBack format ["<t color='#2f5f2a'>%1</t>", format [localize "STR_PMCS_DISCOUNT_LINE", _off]]};
-        if (_left >= 0) then {_lines pushBack format ["<t color='#4a5056'>%1</t>", format [localize "STR_PMCS_LEFT_DETAIL", _left]]};
-        if (_state == "soldout") then {_lines pushBack format ["<t color='#9e291f'>%1</t>", localize "STR_PMCS_SOLD_OUT"]};
-        ["PMCS_Struct", [_x0, _y + 0.045, _wd, 0.025 * (count _lines max 1) + 0.01], _group, "detail", _lines joinString "<br/>", 0.016] call _make;
-        // Quantity.
-        [["PMCS_Button", [_x0 + 0.165, _y + 0.006, 0.022, 0.034], _group, "detail", "-", 0.024, "text", "photo"] call _make, "qty", [-1]] call _click;
-        private _qty = ["PMCS_Edit", [_x0 + 0.188, _y + 0.006, 0.038, 0.034], _group, "detail", str (PMCS_ui get "qty"), 0.02] call _make;
-        _qty ctrlAddEventHandler ["KillFocus", {["qtySet", [ctrlText (_this select 0)]] call PMCS_fnc_uiShop}];
-        [["PMCS_Button", [_x0 + 0.227, _y + 0.006, 0.022, 0.034], _group, "detail", "+", 0.024, "text", "photo"] call _make, "qty", [1]] call _click;
-        _y = _y + 0.055 + 0.025 * (count _lines max 1);
-        private _add = [["PMCS_Button", [_x0, _y, ([0.122, _wd] select (_boxUnits <= 0)), 0.045], _group, "detail", localize "STR_PMCS_ADD", 0.021, "white", "orangeDark"] call _make, "add", [false]] call _click;
-        _add ctrlEnable (_state == "ok");
-        if (_boxUnits > 0) then {
-            private _boxButton = [["PMCS_Button", [_x0 + 0.128, _y, 0.122, 0.045], _group, "detail", localize "STR_PMCS_ADD_BOX", 0.021, "text", "photo"] call _make, "add", [true]] call _click;
-            _boxButton ctrlEnable (_state == "ok");
-        };
-        _y = _y + 0.065;
-        if ((_info select 0) == "mag") exitWith {};
-        // Compatible magazines: by magazine, the ammo types on sale.
-        ["PMCS_TextBold", [_x0, _y, _wd, 0.028], _group, "detail", localize "STR_PMCS_MAGAZINES", 0.016, "grey"] call _make;
-        _y = _y + 0.032;
-        private _mags = (((call PMCS_fnc_catalog) get "calibres") getOrDefault [_info select 3, []]) select {(([_x, _market] call PMCS_fnc_price) select 0) in ["ok", "soldout"]};
-        if (_mags isEqualTo []) exitWith {
-            private _known = ((call PMCS_fnc_catalog) get "calibres") getOrDefault [_info select 3, []];
-            ["PMCS_Text", [_x0, _y, _wd, 0.028], _group, "detail", localize (["STR_PMCS_MAGS_NONE", "STR_PMCS_MAGS_NO_PRICE"] select (_known isNotEqualTo [])), 0.016, "grey"] call _make;
-        };
-        if !((PMCS_ui get "mag") in _mags) then {PMCS_ui set ["mag", _mags select 0]};
-        private _byMag = [];
-        {
-            private _label = (([_x, _market] call PMCS_fnc_itemInfo) select 8);
-            private _at = _byMag findIf {(_x select 0) == _label};
-            if (_at < 0) then {_byMag pushBack [_label, [_x]]} else {((_byMag select _at) select 1) pushBack _x};
-        } forEach _mags;
-        {
-            _x params ["_label", "_keys"];
-            ["PMCS_TextBold", [_x0, _y, _wd, 0.026], _group, "detail", _label, 0.017] call _make;
-            _y = _y + 0.028;
-            {
-                private _magInfo = [_x, _market] call PMCS_fnc_itemInfo;
-                private _selected = _x == (PMCS_ui get "mag");
-                private _chip = ["PMCS_Button", [_x0 + (_forEachIndex % 3) * 0.084, _y + floor (_forEachIndex / 3) * 0.032, 0.08, 0.028], _group, "detail",
-                    localize ("STR_PMCS_AMMO_" + (_magInfo select 9)), 0.015, ["text", "orangeDark"] select _selected, ["photo", "orangePale"] select _selected] call _make;
-                _chip ctrlSetTooltip (_magInfo select 1);
-                [_chip, "mag", [_x]] call _click;
-            } forEach _keys;
-            _y = _y + ceil (count _keys / 3) * 0.032 + 0.008;
-        } forEach _byMag;
-        private _mag = PMCS_ui get "mag";
-        ([_mag, _market] call PMCS_fnc_price) params ["_magState", "_magUnit"];
-        ["PMCS_Text", [_x0, _y, _wd, 0.001], _group, "detail", "", 0.02, "", "line"] call _make;
-        ["PMCS_Text", [_x0, _y + 0.006, 0.16, 0.026], _group, "detail", [_mag, _market] call PMCS_fnc_itemName, 0.016] call _make;
-        ["PMCS_TextBold", [_x0, _y + 0.032, 0.16, 0.03], _group, "detail", format ["%1 %2", _magUnit call _money, localize "STR_PMCS_PER_UNIT"], 0.019] call _make;
-        [["PMCS_Button", [_x0 + 0.165, _y + 0.01, 0.022, 0.034], _group, "detail", "-", 0.024, "text", "photo"] call _make, "magQty", [-1]] call _click;
-        private _magQty = ["PMCS_Edit", [_x0 + 0.188, _y + 0.01, 0.038, 0.034], _group, "detail", str (PMCS_ui get "magQty"), 0.02] call _make;
-        _magQty ctrlAddEventHandler ["KillFocus", {["magQtySet", [ctrlText (_this select 0)]] call PMCS_fnc_uiShop}];
-        [["PMCS_Button", [_x0 + 0.227, _y + 0.01, 0.022, 0.034], _group, "detail", "+", 0.024, "text", "photo"] call _make, "magQty", [1]] call _click;
-        private _magAdd = [["PMCS_Button", [_x0, _y + 0.068, _wd, 0.04], _group, "detail", localize "STR_PMCS_ADD_MAG", 0.019, "white", "orangeDark"] call _make, "magAdd"] call _click;
-        _magAdd ctrlEnable (_magState == "ok");
+        _y = [_key, _y + 0.01, "pack", "qty", "qty", "add", "pack"] call _buyBlock;
+        if ((_info select 3) == "") exitWith {};
+        ["PMCS_Text", [_x0, _y - 0.008, _wd, 0.001], _group, "detail", "", 0.02, "", "line"] call _make;
+        ["PMCS_TextBold", [_x0, _y, _wd, 0.028], _group, "detail", format [localize "STR_PMCS_AMMO_FOR", _info select 3], 0.017] call _make;
+        [_info select 3, _y + 0.034] call _picker;
     };
     case "cart": {
         private _cart = PMCS_ui get "cart";
@@ -313,6 +351,8 @@ switch (_event) do {
         PMCS_ui set ["offTypes", []];
         PMCS_ui set ["offCals", []];
         PMCS_ui set ["sel", ""];
+        PMCS_ui set ["ammoType", ""];
+        PMCS_ui set ["mag", ""];
         ["refresh"] call PMCS_fnc_uiShop;
         (PMCS_ui get "address") ctrlSetText localize (["STR_PMCS_ADDRESS_SHOP", "STR_PMCS_ADDRESS_AMMO"] select ((_args select 0) == "ammo"));
     };
@@ -339,11 +379,16 @@ switch (_event) do {
     case "select": {
         PMCS_ui set ["sel", _args select 0];
         PMCS_ui set ["qty", 1];
+        if ((PMCS_ui get "tab") == "ammo") then {PMCS_ui set ["ammoType", ""]; PMCS_ui set ["mag", ""]};
         ["grid"] call PMCS_fnc_uiShop;
         ["detail"] call PMCS_fnc_uiShop;
     };
     case "variant": {
         PMCS_ui set ["variant", _args select 0];
+        ["detail"] call PMCS_fnc_uiShop;
+    };
+    case "pack": {
+        PMCS_ui set ["pack", _args select 0];
         ["detail"] call PMCS_fnc_uiShop;
     };
     case "qty": {
@@ -353,8 +398,16 @@ switch (_event) do {
     case "qtySet": {
         PMCS_ui set ["qty", 1 max (floor parseNumber (_args select 0)) min 999];
     };
+    case "ammoType": {
+        PMCS_ui set ["ammoType", _args select 0];
+        ["detail"] call PMCS_fnc_uiShop;
+    };
     case "mag": {
         PMCS_ui set ["mag", _args select 0];
+        ["detail"] call PMCS_fnc_uiShop;
+    };
+    case "magPack": {
+        PMCS_ui set ["magPack", _args select 0];
         ["detail"] call PMCS_fnc_uiShop;
     };
     case "magQty": {
@@ -367,13 +420,13 @@ switch (_event) do {
     case "add": {
         private _key = PMCS_ui get "sel";
         private _class = PMCS_ui get "variant";
-        if (((_key == "") || {_class == ""})) exitWith {};
-        [_key, _class, PMCS_ui get "qty", _args select 0] call PMCS_fnc_uiCartAdd;
+        if (_key == "" || {_class == ""} || {(PMCS_ui get "tab") == "ammo"}) exitWith {};
+        [_key, _class, PMCS_ui get "qty", (PMCS_ui get "pack") == "box"] call PMCS_fnc_uiCartAdd;
     };
     case "magAdd": {
         private _key = PMCS_ui get "mag";
         if (_key == "") exitWith {};
-        [_key, _key, PMCS_ui get "magQty", false] call PMCS_fnc_uiCartAdd;
+        [_key, _key, PMCS_ui get "magQty", (PMCS_ui get "magPack") == "box"] call PMCS_fnc_uiCartAdd;
     };
     case "cartOpen": {
         PMCS_ui set ["cartOpen", true];

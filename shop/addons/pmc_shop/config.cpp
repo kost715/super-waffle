@@ -6,7 +6,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "cba_xeh", "cba_settings", "pmc_bank"};
-        version = "0.1.0";
+        version = "0.2.0";
     };
 };
 
@@ -27,6 +27,7 @@ class CfgFunctions {
         class Common {
             file = "\pmc_shop\Common";
             class catalog {};
+            class categoryName {};
             class itemInfo {};
             class itemName {};
             class marketNew {};
@@ -71,6 +72,7 @@ class CfgFunctions {
             class ui {};
             class uiAdmin {};
             class uiCartAdd {};
+            class uiCalibreMags {};
             class uiCartLine {};
             class uiClear {};
             class uiColor {};

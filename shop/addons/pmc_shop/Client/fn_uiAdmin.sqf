@@ -76,8 +76,21 @@ switch (_event) do {
             params ["", "_row"];
             if (_row >= 0 && {_row != (PMCS_ui get "ashow")}) then {["set", ["ashow", _row]] call PMCS_fnc_uiAdmin};
         }];
-        ["PMCS_TextRight", [0.32, 0.156, 0.06, 0.032], controlNull, "tools", localize "STR_PMCS_SEARCH", 0.019, "grey"] call _make;
-        private _search = ["PMCS_Edit", [0.385, 0.156, 0.2, 0.032], controlNull, "tools", PMCS_ui get "asearch", 0.019] call _make;
+        private _calCombo = ["PMCS_Combo", [0.325, 0.156, 0.14, 0.032], controlNull, "tools", "", 0.019] call _make;
+        _calCombo lbSetData [_calCombo lbAdd localize "STR_PMCS_ALL_CALIBRES", ""];
+        private _calibres = [];
+        {
+            if ((_y select 0) == (PMCS_ui get "asection") && {(_y select 3) != ""}) then {_calibres pushBackUnique (_y select 3)};
+        } forEach ((call PMCS_fnc_catalog) get "items");
+        _calibres sort true;
+        {_calCombo lbSetData [_calCombo lbAdd _x, _x]} forEach _calibres;
+        _calCombo lbSetCurSel ((_calibres find (PMCS_ui get "acal")) + 1);
+        _calCombo ctrlAddEventHandler ["LBSelChanged", {
+            params ["_ctrl", "_row"];
+            if (_row >= 0 && {(_ctrl lbData _row) != (PMCS_ui get "acal")}) then {["set", ["acal", _ctrl lbData _row]] call PMCS_fnc_uiAdmin};
+        }];
+        ["PMCS_TextRight", [0.47, 0.156, 0.05, 0.032], controlNull, "tools", localize "STR_PMCS_SEARCH", 0.019, "grey"] call _make;
+        private _search = ["PMCS_Edit", [0.525, 0.156, 0.1, 0.032], controlNull, "tools", PMCS_ui get "asearch", 0.019] call _make;
         _search ctrlAddEventHandler ["KeyUp", {
             params ["_ctrl"];
             if (ctrlText _ctrl != (PMCS_ui get "asearch")) then {
@@ -85,7 +98,7 @@ switch (_event) do {
                 ["table"] call PMCS_fnc_uiAdmin;
             };
         }];
-        [["PMCS_Button", [0.63, 0.154, 0.16, 0.038], controlNull, "tools", localize "STR_PMCS_ADMIN_ADD", 0.019, "white", "orangeDark"] call _make, "addOpen"] call _click;
+        [["PMCS_Button", [0.635, 0.154, 0.155, 0.038], controlNull, "tools", localize "STR_PMCS_ADMIN_ADD", 0.019, "white", "orangeDark"] call _make, "addOpen"] call _click;
         private _armed = diag_tickTime - (PMCS_ui get "aresetAt") < 5;
         [["PMCS_Button", [0.8, 0.154, 0.185, 0.038], controlNull, "tools", localize (["STR_PMCS_ADMIN_RESET", "STR_PMCS_ADMIN_RESET_CONFIRM"] select _armed), 0.019,
             ["text", "white"] select _armed, ["photo", "red"] select _armed] call _make, "reset"] call _click;
@@ -99,19 +112,32 @@ switch (_event) do {
         private _keys = if (_section == "custom") then {keys (_market get "custom")} else {(_catalog get "order") select {(((_catalog get "items") get _x) select 0) == _section}};
         private _search = toLower (PMCS_ui get "asearch");
         private _show = PMCS_ui get "ashow";
-        private _list = ["PMCS_List", [0.012, 0.21, 0.676, 0.665], controlNull, "table", "", 0.018] call _make;
-        _list lnbSetColumnsPos [0, 0.12, 0.5, 0.62, 0.7, 0.82, 0.92];
-        _list lnbAddRow (["STR_PMCS_COL_STATE", "STR_PMCS_COL_ITEM", "STR_PMCS_COL_PRICE", "STR_PMCS_COL_DISCOUNT", "STR_PMCS_COL_QTY", "STR_PMCS_COL_FINAL", "STR_PMCS_COL_SOURCE"] apply {localize _x});
+        private _list = ["PMCS_List", [0.012, 0.21, 0.676, 0.665], controlNull, "table", "", 0.016] call _make;
+        _list lnbSetColumnsPos [0, 0.085, 0.3, 0.45, 0.58, 0.66, 0.75, 0.83, 0.88, 0.95];
+        // Columns: state, item, two by section (category and calibre; calibre and ammo type;
+        // kind and class), base price, box, single piece, discount, quantity, source.
+        private _heads = switch (_section) do {
+            case "mag": {["STR_PMCS_COL_MAGAZINE", "STR_PMCS_COL_CALIBRE", "STR_PMCS_COL_AMMO"]};
+            case "custom": {["STR_PMCS_COL_ITEM", "STR_PMCS_COL_KIND", "STR_PMCS_COL_CLASS"]};
+            default {["STR_PMCS_COL_ITEM", "STR_PMCS_COL_CATEGORY", "STR_PMCS_COL_CALIBRE"]};
+        };
+        _list lnbAddRow ((["STR_PMCS_COL_STATE"] + _heads + ["STR_PMCS_COL_PRICE", "STR_PMCS_COL_BOX", "STR_PMCS_COL_UNIT", "STR_PMCS_COL_DISCOUNT",
+            "STR_PMCS_COL_QTY", "STR_PMCS_COL_SOURCE"]) apply {localize _x});
         _list lnbSetColor [[0, 0], ["grey"] call PMCS_fnc_uiColor];
-        private _rows = [];
+        private _calibre = PMCS_ui get "acal";
         {
             private _key = _x;
             private _info = [_key, _market] call PMCS_fnc_itemInfo;
             private _over = (_market get "items") getOrDefault [_key, []];
-            ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "", "_off", "_left"];
+            ([_key, _market] call PMCS_fnc_price) params ["_state", "_unit", "_box", "_off", "_left", "_boxUnits"];
             private _name = [_key, _market] call PMCS_fnc_itemName;
-            if (_info select 0 == "mag") then {_name = format ["%1 · %2", _name, _info select 3]};
-            private _match = _search == "" || {_search in toLower _name} || {(_info select 7) findIf {_search in toLower (_x select 0)} >= 0};
+            private _cells = switch (_section) do {
+                case "mag": {[[_info select 8, _info select 1] select ((_info select 8) == ""), _info select 3, localize ("STR_PMCS_AMMO_" + ([_info select 9, "special"] select ((_info select 9) == "")))]};
+                case "custom": {[_name, localize ("STR_PMCS_KIND_" + (_info select 0)), ((_info select 7) select 0) select 0]};
+                default {[_name, [_info select 2] call PMCS_fnc_categoryName, _info select 3]};
+            };
+            private _match = (_search == "" || {_search in toLower _name} || {_search in toLower (_info select 3)}
+                || {(_info select 7) findIf {_search in toLower (_x select 0)} >= 0}) && {_calibre == "" || {(_info select 3) == _calibre}};
             private _fits = switch (_show) do {
                 case 1: {_state in ["ok", "soldout"]};
                 case 2: {_state == "hidden"};
@@ -123,16 +149,18 @@ switch (_event) do {
             };
             if (_match && {_fits}) then {
                 private _base = if (_over isNotEqualTo [] && {(_over select 1) >= 0}) then {_over select 1} else {_info select 5};
-                private _row = _list lnbAddRow [
-                    localize ("STR_PMCS_STATE_" + _state), _name, [_base call _money, "-"] select (_base <= 0),
-                    [format ["%1 %2", _over param [2, 0], "%"], "-"] select ((_over param [2, 0]) == 0),
+                private _priced = _base > 0;
+                private _row = _list lnbAddRow ([localize ("STR_PMCS_STATE_" + _state)] + _cells + [
+                    if (_priced) then {_base call _money} else {"-"},
+                    if (_priced) then {format ["%1 × %2", _boxUnits, _box call _money]} else {"-"},
+                    if (_priced) then {_unit call _money} else {"-"},
+                    if (_off > 0) then {format ["%1 %2", _off, "%"]} else {"-"},
                     if (_left < 0) then {localize "STR_PMCS_UI_UNLIMITED"} else {format ["%1 / %2", _left, _over select 3]},
-                    [_unit call _money, "-"] select (_base <= 0),
                     localize (["STR_PMCS_SOURCE_CATALOG", "STR_PMCS_SOURCE_CHANGED", "STR_PMCS_SOURCE_ADDED"] select ([[0, 1] select (_over isNotEqualTo []), 2] select ((_info select 2) == "custom")))
-                ];
+                ]);
                 _list lnbSetData [[_row, 0], _key];
                 if !(_state in ["ok", "soldout"]) then {
-                    for "_c" from 0 to 6 do {_list lnbSetColor [[_row, _c], ["grey"] call PMCS_fnc_uiColor]};
+                    for "_c" from 0 to 9 do {_list lnbSetColor [[_row, _c], ["grey"] call PMCS_fnc_uiColor]};
                 };
                 if (_key == (PMCS_ui get "asel")) then {_list lnbSetCurSelRow _row};
             };
@@ -165,7 +193,8 @@ switch (_event) do {
         ["PMCS_Text", [_x0, 0.215, _wd, 0.1], controlNull, "aside", "", 0.02, "", "photo"] call _make;
         ["PMCS_Picture", [_x0 + 0.01, 0.22, _wd - 0.02, 0.09], controlNull, "aside", [_picture, "\pmc_shop\data\noimage_ca.paa"] select (_picture == "")] call _make;
         ["PMCS_TextBold", [_x0, 0.322, _wd, 0.04], controlNull, "aside", [_key, _market] call PMCS_fnc_itemName, 0.026] call _make;
-        ["PMCS_Text", [_x0, 0.36, _wd, 0.026], controlNull, "aside", format ["%1 · %2", (_info select 7) apply {_x select 0} joinString ", ", _info select 3], 0.015, "grey"] call _make;
+        ["PMCS_Text", [_x0, 0.36, _wd, 0.026], controlNull, "aside", format ["%1 · %2 · %3", [_info select 2] call PMCS_fnc_categoryName, _info select 3,
+            (_info select 7) apply {_x select 0} joinString ", "], 0.015, "grey"] call _make;
         ["PMCS_Text", [_x0, 0.386, _wd, 0.026], controlNull, "aside", format [localize "STR_PMCS_ADMIN_CATALOG_PRICE", [(_info select 5) call _money, "-"] select ((_info select 5) <= 0)], 0.016, "grey"] call _make;
         private _onSale = ["PMCS_Check", [_x0, 0.422, 0.012, 0.024], controlNull, "aside"] call _make;
         _onSale cbSetChecked !(_over select 0);
@@ -188,8 +217,8 @@ switch (_event) do {
         if ((_over select 3) >= 0) then {
             ["PMCS_Text", [_x0, 0.612, _wd, 0.026], controlNull, "aside", format [localize "STR_PMCS_LEFT_DETAIL", _left], 0.016, "grey"] call _make;
         };
-        ["PMCS_Struct", [_x0, 0.64, _wd, 0.05], controlNull, "aside", format [localize "STR_PMCS_ADMIN_FINAL", [_unit call _money, "-"] select (_state == "noprice"),
-            [format [localize "STR_PMCS_BOX_DETAIL", _boxUnits, _box call _money], ""] select (_boxUnits <= 0)], 0.017] call _make;
+        ["PMCS_Struct", [_x0, 0.64, _wd, 0.05], controlNull, "aside", format [localize "STR_PMCS_ADMIN_FINAL", [format [localize "STR_PMCS_BOX_DETAIL", _boxUnits, _box call _money], "-"] select (_state == "noprice"),
+            format [localize "STR_PMCS_UNIT_DETAIL", _boxUnits, _unit call _money]], 0.017] call _make;
         private _apply = [["PMCS_Button", [_x0, 0.7, _wd, 0.045], controlNull, "aside", localize "STR_PMCS_ADMIN_APPLY", 0.021, "white", "navy"] call _make, "apply"] call _click;
         _apply setVariable ["PMCS_fields", [_onSale, _price, _discount, _mode, _qty]];
         [["PMCS_Button", [_x0, 0.755, 0.137, 0.04], controlNull, "aside", localize "STR_PMCS_ADMIN_DEFAULT", 0.018, "text", "photo"] call _make, "default"] call _click;
@@ -227,9 +256,7 @@ switch (_event) do {
         _list lnbSetColumnsPos [0, 0.75];
         _list lnbAddRow [localize "STR_PMCS_COL_CATEGORY", localize "STR_PMCS_COL_DISCOUNT"];
         _list lnbSetColor [[0, 0], ["grey"] call PMCS_fnc_uiColor];
-        private _types = (call PMCS_fnc_catalog) get "types";
-        private _rows = ((keys _types) apply {[(_types get _x) select 0, _x]});
-        _rows sort true;
+        private _rows = ((call PMCS_fnc_catalog) get "categories") apply {[_x select 1, _x select 0]};
         _rows append [[localize "STR_PMCS_TAB_AMMO", "ammo"], [localize "STR_PMCS_CATEGORY_CUSTOM", "custom"]];
         {
             _x params ["_label", "_cat"];
@@ -255,14 +282,13 @@ switch (_event) do {
             _apply setVariable ["PMCS_edit", _edit];
         };
         [localize "STR_PMCS_ADMIN_DISC_GLOBAL", _market get "global", 0.235, "global", []] call _row;
-        [localize "STR_PMCS_ADMIN_DISC_BOX", _market get "box", 0.28, "box", []] call _row;
         private _cat = PMCS_ui get "acat";
         if (_cat != "") then {
-            private _label = ((_rows select {(_x select 1) == _cat}) param [0, [_cat]]) select 0;
-            [_label, (_market get "cats") getOrDefault [_cat, 0], 0.325, "category", [_cat]] call _row;
+            [[_cat] call PMCS_fnc_categoryName, (_market get "cats") getOrDefault [_cat, 0], 0.28, "category", [_cat]] call _row;
         } else {
-            ["PMCS_Text", [_x0, 0.325, _wd, 0.032], controlNull, "aside", localize "STR_PMCS_ADMIN_PICK_CATEGORY", 0.017, "grey"] call _make;
+            ["PMCS_Text", [_x0, 0.28, _wd, 0.032], controlNull, "aside", localize "STR_PMCS_ADMIN_PICK_CATEGORY", 0.017, "grey"] call _make;
         };
+        ["PMCS_Text", [_x0, 0.33, _wd, 0.1], controlNull, "aside", localize "STR_PMCS_ADMIN_PACK_RULE", 0.015, "grey"] call _make;
     };
     case "log": {
         private _list = ["PMCS_List", [0.012, 0.16, 0.976, 0.715], controlNull, "table", "", 0.018] call _make;
@@ -282,7 +308,10 @@ switch (_event) do {
     };
     case "set": {
         PMCS_ui set [_args select 0, _args select 1];
-        if ((_args select 0) == "asection") then {PMCS_ui set ["asel", ""]};
+        if ((_args select 0) == "asection") then {
+            PMCS_ui set ["asel", ""];
+            PMCS_ui set ["acal", ""];
+        };
         ["refresh"] call PMCS_fnc_uiAdmin;
     };
     case "apply": {

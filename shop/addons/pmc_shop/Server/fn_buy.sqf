@@ -41,7 +41,7 @@ private _bought = [];
 {
     _x params ["_itemKey", "_class", "_qty", "_asBox"];
     private _info = [_itemKey, PMCS_market] call PMCS_fnc_itemInfo;
-    private _count = [_qty, _qty * (_info select 6)] select _asBox;
+    private _count = [_qty, _qty * (([_itemKey, PMCS_market] call PMCS_fnc_price) select 5)] select _asBox;
     [_box, _info select 0, _class, _count] call PMCS_fnc_deliver;
     _bought pushBack format ["%1 × %2", _info select 1, _count];
 } forEach _lines;

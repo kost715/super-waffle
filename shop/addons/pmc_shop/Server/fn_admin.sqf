@@ -3,7 +3,8 @@
 //   "item"     [key, hidden, price (-1 catalog), discount %, quantity (-1 unlimited)]
 //              setting a quantity restocks to it; an item set back to the catalog's
 //              values loses its record
-//   "category" [category key, discount %]      "global" [discount %]   "box" [discount %]
+//   "category" [category, discount %]  the table's weapon category, "ammo" or "custom"
+//   "global"   [discount %]  the whole market
 //   "add"      [class, price, quantity]  a class of the game not in the catalog
 //   "remove"   [key]  an added item            "reset" []  back to the catalog
 // Each change goes to the journal, is saved and is sent to every open laptop.
@@ -39,15 +40,14 @@ switch (_action) do {
     case "category": {
         if !(_args isEqualTypeArray ["", 0] && {(_args select 1) call _pct}) exitWith {};
         _args params ["_cat", "_discount"];
-        if !(_cat in ((call PMCS_fnc_catalog) get "types") || {_cat in ["ammo", "custom"]}) exitWith {};
+        if ((((call PMCS_fnc_catalog) get "categories") findIf {(_x select 0) == _cat}) < 0 && {!(_cat in ["ammo", "custom"])}) exitWith {};
         if (_discount == 0) then {(PMCS_market get "cats") deleteAt _cat} else {(PMCS_market get "cats") set [_cat, _discount]};
-        _text = format [localize "STR_PMCS_LOG_CATEGORY", _cat, _discount];
+        _text = format [localize "STR_PMCS_LOG_CATEGORY", [_cat] call PMCS_fnc_categoryName, _discount];
     };
-    case "global";
-    case "box": {
+    case "global": {
         if !(_args isEqualTypeArray [0] && {(_args select 0) call _pct}) exitWith {};
-        PMCS_market set [_action, _args select 0];
-        _text = format [localize (["STR_PMCS_LOG_GLOBAL", "STR_PMCS_LOG_BOX"] select (_action == "box")), _args select 0];
+        PMCS_market set ["global", _args select 0];
+        _text = format [localize "STR_PMCS_LOG_GLOBAL", _args select 0];
     };
     case "add": {
         if !(_args isEqualTypeArray ["", 0, 0] && {(_args select 1) call _price} && {(_args select 1) > 0} && {(_args select 2) call _count}) exitWith {};

@@ -8,6 +8,8 @@ PMCS_points = createHashMap;
 PMCS_viewers = createHashMap;
 PMCS_market = call PMCS_fnc_marketNew;
 private _saved = profileNamespace getVariable [call PMCS_fnc_marketKey, []];
+// The market of 0.1.0, under its own key: taken over once (PMCS_fnc_marketUnpack converts it).
+if (_saved isEqualTo []) then {_saved = profileNamespace getVariable [format ["PMCS_market_v1_%1_%2", missionName, worldName], []]};
 if (_saved isNotEqualTo []) then {
     private _market = [_saved] call PMCS_fnc_marketUnpack;
     if (isNil "_market") then {
