@@ -25,6 +25,13 @@ class CfgWeapons {
     class rhs_weap_svds {scope = 2; type = 1; displayName = "SVD-S"; picture = "\rhs\svds_ca.paa";};
     class uk3cb_saiga12k {scope = 2; type = 1; displayName = "Saiga 12K"; picture = "";};
     class rhs_weap_asval {scope = 2; type = 1; displayName = "AS Val"; picture = "\rhs\asval_ca.paa";};
+    class rhs_6b23_ML {scope = 2; type = 131072; displayName = "6B23 (ML)"; picture = "\rhs\6b23_ca.paa";};
+    class rhs_6b23_ML_medic {scope = 2; type = 131072; displayName = "6B23 (ML, medic)"; picture = "\rhs\6b23m_ca.paa";};
+    class rhs_6b23_ML_6sh92 {scope = 2; type = 131072; displayName = "6B23 (ML, 6Sh92)"; picture = "\rhs\6b23r_ca.paa";};
+    class rhs_6sh92_vsr {scope = 2; type = 131072; displayName = "6Sh92 (VSR)"; picture = "\rhs\6sh92_ca.paa";};
+    class USP_CRYE_CPC_WEAPON_RGR {scope = 2; type = 131072; displayName = "CPC Weapons (RGR)"; picture = "\usp\cpc_ca.paa";};
+    class USP_CRYE_CPC_WEAPON_BELT_RGR {scope = 2; type = 131072; displayName = "CPC Weapons Belt (RGR)"; picture = "\usp\cpcb_ca.paa";};
+    class USP_CRYE_BELT_PACK_MC {scope = 2; type = 131072; displayName = "Warbelt (MC)"; picture = "\usp\belt_ca.paa";};
     class ItemGPS {scope = 2; type = 131072; displayName = "GPS"; picture = "\a3\gps_ca.paa";};
 };
 class CfgMagazines {

@@ -18,6 +18,8 @@ TEST_fnc_assert = {
     ["Common", "marketPack"], ["Common", "marketUnpack"], ["Common", "money"], ["Common", "requestOwner"], ["Common", "itemName"], ["Common", "categoryName"],
     ["Common", "matchCaptures"], ["Common", "ownerPattern"], ["Common", "parts"], ["Common", "upgrades"], ["Common", "upgradesFor"], ["Common", "upgradeTarget"],
     ["Server", "upgrade"], ["Server", "upgradeDone"], ["Client", "upgradeApply"],
+    ["Common", "gearItems"], ["Common", "gearTake"], ["Common", "gearUpgrades"], ["Common", "gearUpgradesFor"], ["Common", "itemTitle"],
+    ["Server", "gearUpgrade"], ["Client", "gearApply"],
     ["Server", "serverLoad"], ["Server", "save"], ["Server", "marketKey"], ["Server", "caller"], ["Server", "isZeus"], ["Server", "terminalNear"],
     ["Server", "registerTerminal"], ["Server", "registerPoint"], ["Server", "moduleShop"], ["Server", "modulePoint"], ["Server", "bankState"],
     ["Server", "push"], ["Server", "broadcast"], ["Server", "requestState"], ["Server", "closed"], ["Server", "log"], ["Server", "deliver"], ["Server", "buy"],
@@ -364,7 +366,7 @@ TEST_serve = {
         (TEST_messages deleteAt 0) params ["_args", "_target"];
         private _fn = _target select 0;
         if (_fn in ["PMCS_fnc_requestState", "PMCS_fnc_buy", "PMCS_fnc_admin", "PMCS_fnc_closed", "PMCS_fnc_receive", "PMCS_fnc_notify",
-            "PMCS_fnc_upgrade", "PMCS_fnc_upgradeApply", "PMCS_fnc_upgradeDone"]) then {
+            "PMCS_fnc_upgrade", "PMCS_fnc_upgradeApply", "PMCS_fnc_upgradeDone", "PMCS_fnc_gearUpgrade", "PMCS_fnc_gearApply"]) then {
             _args call (missionNamespace getVariable _fn);
         };
     };
@@ -408,15 +410,16 @@ private _inBox = (_shopBox getVariable ["TEST_weapons", []]) apply {_x select 0}
     && {TEST_randomDraws - _drawsBefore == 1 + 2} && {(PMCS_ui get "cart") isEqualTo []},
     "shop: the card reads 'АК-74 x4' and the box price; the main button adds a box, the second one single pieces (400 each); one 'MMM' version, two single pieces of it drawn one by one; check out pays 1 800, the box gets 4 + 2, the cart empties"] call TEST_fnc_assert;
 
-private _filterOf = {params ["_kind", "_key"]; (([] call TEST_live) select {(_x getVariable ["PMCS_filter", []]) isEqualTo [_kind, _key]}) select 0};
-private _calCheck = ["cal", "5.45x39 АК"] call _filterOf;
-[_calCheck, 0] call (_calCheck getVariable "TEST_eh_CheckedChanged");
+// Filters are rows to click: off, then on again (the row's event says what a click does).
+private _toggle = {params ["_kind", "_key", "_on"]; [((["filter", [_kind, _key, _on]] call TEST_byEvent)) select 0] call TEST_click};
+["cal", "5.45x39 АК", false] call _toggle;
 private _without = PMCS_ui get "shown";
-[_calCheck, 1] call (_calCheck getVariable "TEST_eh_CheckedChanged");
-private _catCheck = ["type", "штурмовая винтовка"] call _filterOf;
-[_catCheck, 0] call (_catCheck getVariable "TEST_eh_CheckedChanged");
+private _offRow = (["filter", ["cal", "5.45x39 АК", true]] call TEST_byEvent) isNotEqualTo [];
+["cal", "5.45x39 АК", true] call _toggle;
+["type", "штурмовая винтовка", false] call _toggle;
 private _noAssault = PMCS_ui get "shown";
-[_catCheck, 1] call (_catCheck getVariable "TEST_eh_CheckedChanged");
+["type", "штурмовая винтовка", true] call _toggle;
+private _allBack = "rhs_weap_ak74" in (PMCS_ui get "shown") && {(["filter", ["type", "штурмовая винтовка", false]] call TEST_byEvent) isNotEqualTo []};
 {(PMCS_market get "items") set [_x select 0, [false, _x select 1, 0, -1, -1]]} forEach [["MMM_mag_545x39_6L20_7N6M", 15], ["MMM_mag_545x39_6L23_Plastic_7N6M", 20]];
 call PMCS_fnc_broadcast;
 call TEST_serve;
@@ -443,7 +446,7 @@ private _movedOn = PMCS_ui get "mag";
 (PMCS_market get "items") set ["MMM_mag_545x39_6L20_7N6M", [false, 15, 0, -1, -1]];
 call PMCS_fnc_broadcast;
 call TEST_serve;
-[_rowChips isEqualTo [1, 1] && {_firstRow == "MMM_mag_545x39_6L20_7N6M"} && {_movedOn == "MMM_mag_545x39_6L23_Plastic_7N6M"} && {_bakeTypes isEqualTo [1, 1, 0]} && {_polyType == "MMM_mag_545x39_6L23_Plastic_7N6M"}
+[_offRow && {_allBack} && {_rowChips isEqualTo [1, 1]} && {_firstRow == "MMM_mag_545x39_6L20_7N6M"} && {_movedOn == "MMM_mag_545x39_6L23_Plastic_7N6M"} && {_bakeTypes isEqualTo [1, 1, 0]} && {_polyType == "MMM_mag_545x39_6L23_Plastic_7N6M"}
     && {_apPrice isNotEqualTo []} && {(({"rhs_weap_ak74" == _x} count _without) == 0)} && {!("rhs_weap_ak74" in _noAssault)} && {"rhs_weap_pkm" in _noAssault}
     && {_magCart isEqualTo [["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N22", 2, false], ["MMM_mag_545x39_6L23_Plastic_7N6M", "MMM_mag_545x39_6L23_Plastic_7N6M", 2, true]]},
     "shop: the calibre and category boxes hide the AK; the AK's card offers its calibre's magazine rows, then the chosen row's ammo types (armour-piercing x3: 1 800 a box), then a box or single magazines; a row hidden meanwhile is replaced"] call TEST_fnc_assert;
@@ -452,10 +455,9 @@ call TEST_serve;
 private _ammoCards = (["grid"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_ButtonClear"};
 private _ammoShown = +(PMCS_ui get "shown");
 private _ammoTitle = (["30 патр. Бакелит x30"] call TEST_byText) isNotEqualTo [] && {(["450 $"] call TEST_byText) isNotEqualTo []};
-private _calFilter = ["cal", "7.62x54R ПКМ"] call _filterOf;
-[_calFilter, 0] call (_calFilter getVariable "TEST_eh_CheckedChanged");
+["cal", "7.62x54R ПКМ", false] call _toggle;
 private _noPkm = +(PMCS_ui get "shown");
-[_calFilter, 1] call (_calFilter getVariable "TEST_eh_CheckedChanged");
+["cal", "7.62x54R ПКМ", true] call _toggle;
 [(["select", ["MMM_mag_545x39_6L20_7N6M"]] call TEST_byEvent) select 0] call TEST_click;
 private _fits = (((["detail"] call TEST_region) select {(_x getVariable ["TEST_text", ""]) == "5.45x39 АК"}) isNotEqualTo []) && {(["STR_PMCS_FITS"] call TEST_byText) isNotEqualTo []};
 [(["ammoType", ["MMM_mag_545x39_6L20_7T3M"]] call TEST_byEvent) select 0] call TEST_click;
@@ -635,6 +637,75 @@ private _refunded = ((PMCB_accounts get _uid) select 0) == 1000 && {(PMCB_log se
 [_blocked && {_noParts == "STR_PMCS_ERR_PARTS"} && {_wrongWeapon == "STR_PMCS_ERR_UPGRADE"} && {_poorTech == "STR_PMCS_ERR_FUNDS"} && {_farTech == "STR_PMCS_ERR_FAR"} && {_untouched}
     && {_charged} && {_refunded} && {((PMCB_accounts get _uid) select 0) == 1000},
     "gunsmith refuses: without parts the button is off; no parts, a weapon the upgrade does not take, not enough money, too far from the laptop - nothing charged; paid but the weapon was gone before the swap: refunded (journal: upgradeRefund), parts kept; a made-up answer changes nothing"] call TEST_fnc_assert;
+// --- The gunsmith: the vest worn --------------------------------------------------------------------
+private _gearKeys = (["rhs_6b23_ML"] call PMCS_fnc_gearUpgradesFor) apply {(_x select 0) select 0};
+private _medic = ((call PMCS_fnc_gearUpgrades) select {(_x select 0) == "rhs_6b23_ML__rhs_6b23_ML_medic"}) select 0;
+private _rifle = ((call PMCS_fnc_gearUpgrades) select {(_x select 0) == "rhs_6b23_ML__rhs_6b23_ML_6sh92"}) select 0;
+private _beltUp = ((call PMCS_fnc_gearUpgrades) select {(_x select 0) == "USP_CRYE_CPC_WEAPON_RGR__USP_CRYE_CPC_WEAPON_BELT_RGR"}) select 0;
+private _gearData = (_gearKeys isEqualTo ["rhs_6b23_ML__rhs_6b23_ML_6sh92", "rhs_6b23_ML__rhs_6b23_ML_medic"] || {_gearKeys isEqualTo ["rhs_6b23_ML__rhs_6b23_ML_medic", "rhs_6b23_ML__rhs_6b23_ML_6sh92"]})
+    && {(_medic select 6) == 50} && {([_medic] call PMCS_fnc_gearTake) isEqualTo []} && {([_rifle] call PMCS_fnc_gearTake) isEqualTo [["rhs_6sh92_vsr", 1]]}
+    && {([_beltUp] call PMCS_fnc_gearTake) isEqualTo [["USP_CRYE_BELT_PACK_MC", 1]]} && {count (call PMCS_fnc_gearUpgrades) == 70}
+    && {(["USP_CRYE_BELT_PACK_MC"] call PMCS_fnc_itemTitle) == "STR_PMCS_ITEM_BELT"} && {(["rhs_6sh92_vsr"] call PMCS_fnc_itemTitle) == "6Sh92 (VSR)"};
+player setVariable ["TEST_vest", ["rhs_6b23_ML", [["FirstAidKit", 2], ["rhs_30Rnd_545x39_7N10_AK", 3, 30]]]];
+player setVariable ["TEST_inv", []];
+(PMCB_accounts get _uid) set [0, 1000];
+TEST_messages = [];
+[_shopLaptop] call PMCS_fnc_open;
+["onLoad", ["Logic" createVehicle [0, 0, 0]]] call PMCS_fnc_ui;
+[((["desk"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_ButtonClear"}) select 0] call TEST_click;
+call TEST_serve;
+[(([] call TEST_live) select {(_x getVariable ["PMCS_site", ""]) == "tech"}) select 0] call TEST_click;
+call TEST_serve;
+[(["slot", [3]] call TEST_byEvent) select 0] call TEST_click;
+private _vestOffers = ((["tech"] call TEST_region) select {((_x getVariable ["PMCS_event", []]) param [0, ""]) == "upgrade"}) apply {((_x getVariable "PMCS_event") select 1) select 0};
+private _upButton = {params ["_k"]; (["upgrade", [_k]] call TEST_byEvent) select 0};
+private _rifleOff = !((["rhs_6b23_ML__rhs_6b23_ML_6sh92"] call _upButton) getVariable ["TEST_enabled", true]);
+private _medicOn = (["rhs_6b23_ML__rhs_6b23_ML_medic"] call _upButton) getVariable ["TEST_enabled", true];
+// With a 6Sh92 in the inventory the rifleman version is offered; two clicks put it on.
+player setVariable ["TEST_inv", ["rhs_6sh92_vsr", "USP_CRYE_BELT_PACK_MC"]];
+["body"] call PMCS_fnc_uiTech;
+[["rhs_6b23_ML__rhs_6b23_ML_6sh92"] call _upButton] call TEST_click;
+[["rhs_6b23_ML__rhs_6b23_ML_6sh92"] call _upButton] call TEST_click;
+call TEST_serve;
+private _worn = player getVariable ["TEST_vest", []];
+private _logGear = (PMCS_market get "log") select (count (PMCS_market get "log") - 1);
+[_gearData && {_vestOffers isEqualTo _gearKeys} && {_rifleOff} && {_medicOn} && {(_worn select 0) == "rhs_6b23_ML_6sh92"}
+    && {(_worn select 1) isEqualTo [["FirstAidKit", 2], ["rhs_30Rnd_545x39_7N10_AK", 3, 30]]} && {(player getVariable ["TEST_inv", []]) isEqualTo ["USP_CRYE_BELT_PACK_MC"]}
+    && {((PMCB_accounts get _uid) select 0) == 1000} && {(_logGear select 2) == "STR_PMCS_LOG_GEAR"} && {!(PMCS_ui get "techBusy")},
+    "gunsmith vest: 70 vest upgrades from the table (6B23 medic 50 $ without a medic bag, rifleman takes a 6Sh92, belts take a warbelt); the vest card lists the worn vest's upgrades, the rifleman one is off without a 6Sh92; with it two clicks put on the new vest with the old one's contents, the 6Sh92 is taken, no money (journal entry)"] call TEST_fnc_assert;
+
+// Paid vest upgrade, refusals and the refund when the vest is gone before the swap.
+player setVariable ["TEST_vest", ["rhs_6b23_ML", []]];
+TEST_messages = [];
+[player, _shopLaptop, "personal", "rhs_6b23_ML__rhs_6b23_ML_medic"] call PMCS_fnc_gearUpgrade;
+call TEST_serve;
+private _medicDone = ((player getVariable ["TEST_vest", []]) param [0, ""]) == "rhs_6b23_ML_medic" && {((PMCB_accounts get _uid) select 0) == 950};
+player setVariable ["TEST_vest", ["USP_CRYE_CPC_WEAPON_RGR", []]];
+player setVariable ["TEST_inv", []];
+[player, _shopLaptop, "personal", "USP_CRYE_CPC_WEAPON_RGR__USP_CRYE_CPC_WEAPON_BELT_RGR"] call PMCS_fnc_gearUpgrade;
+private _noBelt = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+[player, _shopLaptop, "personal", "rhs_6b23_ML__rhs_6b23_ML_medic"] call PMCS_fnc_gearUpgrade;
+private _wrongVest = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+player setVariable ["TEST_inv", ["USP_CRYE_BELT_PACK_MC"]];
+TEST_messages = [];
+[player, _shopLaptop, "personal", "USP_CRYE_CPC_WEAPON_RGR__USP_CRYE_CPC_WEAPON_BELT_RGR"] call PMCS_fnc_gearUpgrade;
+private _gearApply = (TEST_messages select {((_x select 1) select 0) == "PMCS_fnc_gearApply"}) select 0;
+player setVariable ["TEST_vest", []];
+(_gearApply select 0) call PMCS_fnc_gearApply;
+call TEST_serve;
+private _keptBelt = (player getVariable ["TEST_inv", []]) isEqualTo ["USP_CRYE_BELT_PACK_MC"];
+player setVariable ["TEST_vest", ["USP_CRYE_CPC_WEAPON_RGR", []]];
+TEST_messages = [];
+[player, _shopLaptop, "personal", "USP_CRYE_CPC_WEAPON_RGR__USP_CRYE_CPC_WEAPON_BELT_RGR"] call PMCS_fnc_gearUpgrade;
+call TEST_serve;
+private _belted = ((player getVariable ["TEST_vest", []]) param [0, ""]) == "USP_CRYE_CPC_WEAPON_BELT_RGR" && {(player getVariable ["TEST_inv", []]) isEqualTo []};
+(PMCB_accounts get _uid) set [0, 10];
+player setVariable ["TEST_vest", ["rhs_6b23_ML", []]];
+[player, _shopLaptop, "personal", "rhs_6b23_ML__rhs_6b23_ML_medic"] call PMCS_fnc_gearUpgrade;
+private _poorVest = (([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0) select 0;
+[_medicDone && {_noBelt == "STR_PMCS_ERR_ITEMS"} && {_wrongVest == "STR_PMCS_ERR_UPGRADE"} && {_keptBelt} && {_belted} && {_poorVest == "STR_PMCS_ERR_FUNDS"}
+    && {((PMCB_accounts get _uid) select 0) == 10} && {((player getVariable ["TEST_vest", []]) select 0) == "rhs_6b23_ML"},
+    "gunsmith vest: the medic version costs 50 $; no warbelt, a vest the upgrade is not for, not enough money - refused; the vest gone before the swap - nothing taken; with a warbelt the CPC gets its belt and the warbelt is taken"] call TEST_fnc_assert;
 ["onUnload", []] call PMCS_fnc_ui;
 
 diag_log format ["TEST_COMPLETE: %1 assertions", TEST_count];

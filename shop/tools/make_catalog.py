@@ -17,6 +17,10 @@ source/upgrades.xlsx  the gunsmith's upgrades ("Техник"): one row per arro
                    columns), with its cost in money and weapon parts (low, medium, high).
                    Rows are matched by the hidden "Ключ" column; an arrow without a cost
                    is not offered.
+source/gear_upgrades.xlsx  the same for equipment: the vest tree of the sheet "Жилеты" (a
+                   family's base vest -> its role versions, and a version -> the same with a
+                   belt from the "добавление пояса" rows), costs in money, warbelts, old
+                   uniforms and an item named by the table (6Sh92, 6Sh48).
 Usage: python3 tools/make_catalog.py [--check]   (--check: fail if catalog.hpp is stale)
 """
 from __future__ import annotations
@@ -148,6 +152,38 @@ def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
     return edges
 
 
+GEAR_ROLES = ["Base", "RFL", "RFL_GL", "MG", "MDC", "LDR", "ENG"]
+
+
+def gear_edges(sheet, warnings: list[str]) -> dict[str, tuple]:
+    """The vest tree: key -> (source class, target class, kind "role" | "belt")."""
+    head = [text(v) for v in next(sheet.iter_rows(max_row=1, values_only=True))]
+    col = {h: i for i, h in enumerate(head)}
+    rows = [r for r in sheet.iter_rows(min_row=2, values_only=True) if text(r[0])]
+    cls = lambda r, k: "" if text(r[col[k]]).upper() in ("", "NA") else text(r[col[k]])
+    for r in rows:
+        for k in GEAR_ROLES:
+            raw = r[col[k]]
+            if isinstance(raw, str) and raw != raw.strip() and raw.strip():
+                warnings.append(f"vest {text(r[0])} / {k}: class {raw!r} has spaces around it, read as {raw.strip()!r}")
+    edges = {}
+    by_family = {text(r[0]): r for r in rows}
+    for r in rows:
+        if text(r[1]).lower() == "добавление пояса":
+            parent = next((by_family[f] for f, p in by_family.items() if text(p[col["add_belt"]]) == text(r[0])), None)
+            if parent is None:
+                warnings.append(f"vest {text(r[0])}: no row names it in add_belt, left out")
+                continue
+            for k in GEAR_ROLES:
+                if cls(r, k) and cls(parent, k):
+                    edges[key_of(cls(parent, k) + "__" + cls(r, k))] = (cls(parent, k), cls(r, k), "belt")
+        elif cls(r, "Base"):
+            for k in GEAR_ROLES[1:]:
+                if cls(r, k):
+                    edges[key_of(cls(r, "Base") + "__" + cls(r, k))] = (cls(r, "Base"), cls(r, k), "role")
+    return edges
+
+
 def build() -> tuple[str, list[str]]:
     warnings: list[str] = []
     book = openpyxl.load_workbook(ROOT / "source" / "items.xlsx", data_only=True)
@@ -242,6 +278,32 @@ def build() -> tuple[str, list[str]]:
     for key in sorted(set(costs) - {e["key"] for e in edges}):
         warnings.append(f"upgrades.xlsx: {key} matches no arrow of the tree, ignored")
 
+    # The vest upgrades and their costs.
+    tree = gear_edges(book["Жилеты"], warnings)
+    gear = []
+    sheet = openpyxl.load_workbook(ROOT / "source" / "gear_upgrades.xlsx", data_only=True)["Стоимость улучшений"]
+    head = [text(v).split("\n")[0] for v in next(sheet.iter_rows(max_row=1, values_only=True))]
+    col = {h: i for i, h in enumerate(head)}
+    seen = set()
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        key = text(row[col["Ключ"]])
+        if not key:
+            continue
+        if key not in tree:
+            warnings.append(f"gear_upgrades.xlsx: {key} matches no arrow of the vest tree, ignored")
+            continue
+        seen.add(key)
+        num = lambda h: int(row[col[h]]) if isinstance(row[col[h]], (int, float)) and row[col[h]] > 0 else 0
+        item = text(row[col["Предмет: класс"]])
+        if item and not CLASS_RE.match(item):
+            warnings.append(f"gear_upgrades.xlsx: {key}: item {item!r} is not a class, ignored")
+            item = ""
+        src, dst, kind = tree[key]
+        gear.append((key, text(row[col["Из (жилет)"]]), text(row[col["В (жилет)"]]), src, dst, kind,
+                     num("Деньги, $"), num("Варбелт, шт."), num("Старая форма, шт."), item, num("Предмет, шт.") if item else 0))
+    for key in sorted(set(tree) - seen):
+        warnings.append(f"vest upgrade {tree[key][0]} -> {tree[key][1]}: no cost in gear_upgrades.xlsx, not offered")
+
     # Every class pattern of the table (all states, the upgrade columns' "a -> b" too): a class
     # of the game belongs to the most specific one that fits it, so "MMM_weap_AK74_H1S1_GP25"
     # is the GP-25 version's, not the plain AK-74's "MMM_weap_AK74_H*S*".
@@ -277,6 +339,11 @@ def build() -> tuple[str, list[str]]:
         pairs = ", ".join(f"{{{cfg(a)}, {cfg(b)}}}" for a, b in e["pairs"])
         lines.append(f"        class u{i} {{key = {cfg(e['key'])}; from = {cfg(e['src'])}; to = {cfg(e['dst'])}; kind = {cfg(e['kind'])}; "
                      f"op = {cfg(e['op'])}; price = {price}; parts[] = {{{low}, {med}, {high}}}; pairs[] = {{{pairs}}};}};")
+    lines += ["    };", "    class GearUpgrades {"]
+    for i, (key, src_name, dst_name, src, dst, kind, price, belt, uniform, item, count) in enumerate(gear):
+        lines.append(f"        class g{i} {{key = {cfg(key)}; from = {cfg(src_name)}; to = {cfg(dst_name)}; fromClass = {cfg(src)}; "
+                     f"toClass = {cfg(dst)}; kind = {cfg(kind)}; price = {price}; belt = {belt}; uniform = {uniform}; "
+                     f"item = {cfg(item)}; itemCount = {count};}};")
     lines += ["    };", "};", ""]
     return "\n".join(lines), warnings
 
@@ -292,7 +359,7 @@ def main() -> None:
         return
     OUT.write_text(catalog, encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}: {catalog.count('classes[]')} weapons, {catalog.count('types[]')} magazine rows, "
-          f"{catalog.count('pairs[]')} upgrades, {len(warnings)} warnings")
+          f"{catalog.count('pairs[]')} upgrades, {catalog.count('itemCount')} vest upgrades, {len(warnings)} warnings")
 
 
 if __name__ == "__main__":

@@ -91,7 +91,6 @@ TEST_fnc_sleep = {
 // Unit inventory: the loadout array itself. Container inventory: magazines
 // [[class, rounds]...], items/backpacks [[class, count]...], weapons in the
 // weaponsItemsCargo format, and nested [class, object] containers.
-TEST_fnc_getLoadout = {+(_this getVariable ["TEST_loadout", [[],[],[],[],[],[],"","",[],["","","","","",""]]])};
 TEST_fnc_magsAmmo = {+(_this getVariable ["TEST_mags", []])};
 TEST_fnc_pairsCargo = {
     params ["_compatObject", "_compatVar"];
@@ -257,6 +256,11 @@ TEST_fnc_addWeaponItem = {
         if (_compatAt isNotEqualTo []) then {_compatEntry set [_compatAt select 0, _compatItem]};
     };
 };
+// The vest worn: TEST_vest = [class, contents] (the loadout's vest entry) or [].
+// getUnitLoadout / setUnitLoadout carry only the vest (index 4).
+TEST_fnc_vest = {(_this getVariable ["TEST_vest", []]) param [0, ""]};
+TEST_fnc_getLoadout = {[[], [], [], [], +(_this getVariable ["TEST_vest", []]), [], "", "", [], []]};
+TEST_fnc_setLoadout = {(_this select 0) setVariable ["TEST_vest", +((_this select 1) select 4)]};
 TEST_fnc_addItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invAdd};
 TEST_fnc_addMagazine = {[_this select 0, _this select 1, "TEST_invMags"] call TEST_fnc_invAdd};
 TEST_fnc_removeItem = {[_this select 0, _this select 1, "TEST_inv"] call TEST_fnc_invRemove};
@@ -467,6 +471,9 @@ TEST_fnc_compatCode = {
             case "CALLBINARY canadd": {"TEST_fnc_canAdd" call _compatPair};
             case "CALLBINARY additem": {"TEST_fnc_addItem" call _compatPair};
             case "CALLUNARY primaryweapon": {"TEST_fnc_primaryWeapon" call _compatCall};
+            case "CALLUNARY vest": {"TEST_fnc_vest" call _compatCall};
+            case "CALLUNARY getunitloadout": {"TEST_fnc_getLoadout" call _compatCall};
+            case "CALLBINARY setunitloadout": {"TEST_fnc_setLoadout" call _compatPair};
             case "CALLUNARY secondaryweapon": {"TEST_fnc_secondaryWeapon" call _compatCall};
             case "CALLUNARY handgunweapon": {"TEST_fnc_handgunWeapon" call _compatCall};
             case "CALLUNARY weaponsitems": {"TEST_fnc_weaponsItems" call _compatCall};
@@ -561,7 +568,6 @@ TEST_fnc_compatCode = {
             case "CALLUNARY objectparent": {"TEST_fnc_noParent" call _compatCall};
             case "CALLUNARY addmissioneventhandler": {"TEST_fnc_missionHandler" call _compatCall};
             case "CALLUNARY sleep": {"TEST_fnc_sleep" call _compatCall};
-            case "CALLUNARY getunitloadout": {"TEST_fnc_getLoadout" call _compatCall};
             case "CALLUNARY magazinesammocargo": {"TEST_fnc_magsAmmo" call _compatCall};
             case "CALLUNARY getitemcargo": {"TEST_fnc_itemCargo" call _compatCall};
             case "CALLUNARY getbackpackcargo": {"TEST_fnc_backpackCargo" call _compatCall};

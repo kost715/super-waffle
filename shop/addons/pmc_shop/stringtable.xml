@@ -2,6 +2,62 @@
 <Project name="PMC Shop">
     <Package name="Shop">
         <Container name="Main">
+            <Key ID="STR_PMCS_SLOT_VEST">
+                <Original>Vest</Original>
+                <Russian>Жилет</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ITEM_BELT">
+                <Original>Warbelt</Original>
+                <Russian>Варбелт</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ITEM_UNIFORM">
+                <Original>Old uniform</Original>
+                <Russian>Старая форма</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_ROLE">
+                <Original>Kit change</Original>
+                <Russian>Смена комплектации</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_BELT">
+                <Original>Belt added</Original>
+                <Russian>Добавление пояса</Russian>
+            </Key>
+            <Key ID="STR_PMCS_ERR_ITEMS">
+                <Original>Not enough items in your inventory for this upgrade.</Original>
+                <Russian>В инвентаре не хватает предметов для этого улучшения.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_LOG_GEAR">
+                <Original>Vest %1 → %2: %3, took %4</Original>
+                <Russian>Жилет %1 → %2: %3, забрано: %4</Russian>
+            </Key>
+            <Key ID="STR_PMCS_NOTHING_TAKEN">
+                <Original>nothing</Original>
+                <Russian>ничего</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_WEAPONS">
+                <Original>YOUR WEAPONS AND VEST</Original>
+                <Russian>ВАШЕ ОРУЖИЕ И ЖИЛЕТ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_PARTS">
+                <Original>WHAT THE GUNSMITH TAKES · IN YOUR INVENTORY</Original>
+                <Russian>ЧТО БЕРЁТ ТЕХНИК · В ИНВЕНТАРЕ</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NOTE">
+                <Original>The weapon is taken from your hands, back or holster, the vest is the one you wear; parts and items come from your inventory. Attachments and loaded magazines move to the new weapon where they fit, the vest's contents move to the new vest.</Original>
+                <Russian>Оружие — из рук, со спины или из кобуры, жилет — надетый; детали и предметы — из инвентаря. Обвес и заряженные магазины переходят на новое оружие, если подходят; содержимое жилета — в новый жилет.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NO_WEAPON">
+                <Original>Take a weapon or put on a vest: the gunsmith works with what you carry.</Original>
+                <Russian>Возьмите оружие или наденьте жилет: техник работает с тем, что на вас.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NONE">
+                <Original>The gunsmith has no upgrades for this.</Original>
+                <Russian>У техника нет улучшений для этого.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_SHORT">
+                <Original>not enough money or items</Original>
+                <Russian>не хватает денег или предметов</Russian>
+            </Key>
             <Key ID="STR_PMCS_NAV_TECH">
                 <Original>Gunsmith</Original>
                 <Russian>Техник</Russian>
@@ -10,18 +66,6 @@
                 <Original>market.ion-logistics / gunsmith / weapon upgrades</Original>
                 <Russian>market.ion-logistics / техник / улучшение оружия</Russian>
             </Key>
-            <Key ID="STR_PMCS_TECH_WEAPONS">
-                <Original>YOUR WEAPONS</Original>
-                <Russian>ВАШЕ ОРУЖИЕ</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_PARTS">
-                <Original>WEAPON PARTS IN THE INVENTORY</Original>
-                <Russian>ОРУЖЕЙНЫЕ ДЕТАЛИ В ИНВЕНТАРЕ</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_NOTE">
-                <Original>The weapon is taken from your hands or back, the parts from your inventory. Attachments and loaded magazines move to the new weapon where they fit; the rest goes to your inventory.</Original>
-                <Russian>Оружие берётся из рук или со спины, детали — из инвентаря. Обвес и заряженные магазины переходят на новое оружие, если подходят; остальное — в инвентарь.</Russian>
-            </Key>
             <Key ID="STR_PMCS_TECH_TITLE">
                 <Original>Upgrades</Original>
                 <Russian>Улучшения</Russian>
@@ -29,14 +73,6 @@
             <Key ID="STR_PMCS_TECH_TITLE_FOR">
                 <Original>Upgrades · %1</Original>
                 <Russian>Улучшения · %1</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_NO_WEAPON">
-                <Original>Take a weapon in your hands or on your back: the gunsmith works with what you carry.</Original>
-                <Russian>Возьмите оружие в руки или на спину: техник работает с тем, что у вас при себе.</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_NONE">
-                <Original>The gunsmith has no upgrades for this weapon.</Original>
-                <Russian>У техника нет улучшений для этого оружия.</Russian>
             </Key>
             <Key ID="STR_PMCS_TECH_NONE_SHORT">
                 <Original>no upgrades</Original>
@@ -57,10 +93,6 @@
             <Key ID="STR_PMCS_TECH_CONFIRM">
                 <Original>Confirm · %1</Original>
                 <Russian>Подтвердить · %1</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_SHORT">
-                <Original>not enough money or parts</Original>
-                <Russian>не хватает денег или деталей</Russian>
             </Key>
             <Key ID="STR_PMCS_TECH_WORKING">
                 <Original>The gunsmith is working…</Original>

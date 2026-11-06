@@ -95,17 +95,17 @@ switch (_event) do {
             if (_rows isEqualTo []) exitWith {};
             ["PMCS_TextBold", [0.012, _y, 0.14, 0.025], _group, "filters", _title, 0.016, "grey"] call _make;
             _y = _y + 0.03;
+            // Each row is a button (a whole-row click turns it on or off); the square shows
+            // the state: filled when the row's goods are shown.
             {
                 _x params ["_key", "_label", "_n"];
-                private _check = ["PMCS_Check", [0.012, _y + 0.002, 0.012, 0.022], _group, "filters"] call _make;
-                _check cbSetChecked !(_key in (PMCS_ui get (["offTypes", "offCals"] select (_kind == "cal"))));
-                _check setVariable ["PMCS_filter", [_kind, _key]];
-                _check ctrlAddEventHandler ["CheckedChanged", {
-                    params ["_ctrl", "_state"];
-                    ["filter", (_ctrl getVariable "PMCS_filter") + [_state == 1]] call PMCS_fnc_uiShop;
-                }];
-                ["PMCS_Text", [0.028, _y, 0.1, 0.026], _group, "filters", _label, 0.017, "text"] call _make;
+                private _on = !(_key in (PMCS_ui get (["offTypes", "offCals"] select (_kind == "cal"))));
+                ["PMCS_Text", [0.012, _y + 0.004, 0.012, 0.018], _group, "filters", "", 0.02, "", "navy"] call _make;
+                if (!_on) then {["PMCS_Text", [0.0135, _y + 0.0065, 0.009, 0.013], _group, "filters", "", 0.02, "", "white"] call _make};
+                ["PMCS_Text", [0.03, _y, 0.085, 0.026], _group, "filters", _label, 0.017, ["grey", "text"] select _on] call _make;
                 ["PMCS_TextRight", [0.11, _y, 0.037, 0.026], _group, "filters", str _n, 0.017, "grey"] call _make;
+                private _row = [["PMCS_ButtonClear", [0.008, _y - 0.001, 0.143, 0.028], _group, "filters"] call _make, "filter", [_kind, _key, !_on]] call _click;
+                _row ctrlSetTooltip _label;
                 _y = _y + 0.03;
             } forEach _rows;
             _y = _y + 0.015;
@@ -347,6 +347,7 @@ switch (_event) do {
             private _at = _off find _key;
             if (_at >= 0) then {_off deleteAt _at};
         } else {_off pushBackUnique _key};
+        ["filters"] call PMCS_fnc_uiShop;
         ["grid"] call PMCS_fnc_uiShop;
         ["detail"] call PMCS_fnc_uiShop;
     };
