@@ -39,6 +39,10 @@ class CfgMagazines {
     class MMM_mag_545x39_6L20_7T3M {displayName = "6L20 7T3M"; picture = "\mmm\6l20_t_ca.paa";};
     class MMM_mag_545x39_6L23_Plastic_7N6M {displayName = "6L23 7N6M"; picture = "\mmm\6l23_ca.paa";};
     class MMM_mag_545x39_6L23_Plastic_7N22 {displayName = "6L23 7N22"; picture = "\mmm\6l23_ap_ca.paa";};
+    class rhs_30Rnd_762x39mm_bakelite_89 {displayName = "30rnd bakelite 57-N-231"; picture = "\rhs\bak_ca.paa";};
+    class rhs_30Rnd_762x39mm_bakelite_tracer {displayName = "30rnd bakelite 57-N-231P"; picture = "\rhs\bakt_ca.paa";};
+    class rhs_30Rnd_762x39mm_bakelite_U {displayName = "30rnd bakelite 57-N-231U"; picture = "\rhs\baku_ca.paa";};
+    class rhs_30Rnd_762x39mm_polymer_89 {displayName = "30rnd polymer 57-N-231"; picture = "\rhs\pol_ca.paa";};
     class rhs_100Rnd_762x54mmR {displayName = "PKM box"; picture = "\rhs\pk_ca.paa";};
 };
 class CfgVehicles {

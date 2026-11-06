@@ -89,17 +89,20 @@ switch (_event) do {
         private _group = PMCS_ui get "filtersGroup";
         ([] call PMCS_fnc_uiShopList) params ["", "_types", "_cals"];
         private _ammo = (PMCS_ui get "tab") == "ammo";
-        private _y = 0.215;
+        // Select every row / clear the selection (both show everything).
+        [["PMCS_Button", [0.008, 0.212, 0.069, 0.03], _group, "filters", localize "STR_PMCS_FILTER_ALL", 0.015, "text", "photo"] call _make, "filterAll"] call _click;
+        [["PMCS_Button", [0.081, 0.212, 0.07, 0.03], _group, "filters", localize "STR_PMCS_FILTER_NONE", 0.015, "text", "photo"] call _make, "filterNone"] call _click;
+        private _y = 0.255;
         private _section = {
             params ["_title", "_rows", "_kind"];
             if (_rows isEqualTo []) exitWith {};
             ["PMCS_TextBold", [0.012, _y, 0.14, 0.025], _group, "filters", _title, 0.016, "grey"] call _make;
             _y = _y + 0.03;
-            // Each row is a button (a whole-row click turns it on or off); the square shows
-            // the state: filled when the row's goods are shown.
+            // Each row is a button (a whole-row click selects it or not); the square is filled
+            // when it is selected. Only selected rows stay; none selected: all stay.
             {
                 _x params ["_key", "_label", "_n"];
-                private _on = !(_key in (PMCS_ui get (["offTypes", "offCals"] select (_kind == "cal"))));
+                private _on = _key in (PMCS_ui get (["selTypes", "selCals"] select (_kind == "cal")));
                 ["PMCS_Text", [0.012, _y + 0.004, 0.012, 0.018], _group, "filters", "", 0.02, "", "navy"] call _make;
                 if (!_on) then {["PMCS_Text", [0.0135, _y + 0.0065, 0.009, 0.013], _group, "filters", "", 0.02, "", "white"] call _make};
                 ["PMCS_Text", [0.03, _y, 0.085, 0.026], _group, "filters", _label, 0.017, ["grey", "text"] select _on] call _make;
@@ -332,21 +335,39 @@ switch (_event) do {
     // User actions.
     case "tab": {
         PMCS_ui set ["tab", _args select 0];
-        PMCS_ui set ["offTypes", []];
-        PMCS_ui set ["offCals", []];
+        PMCS_ui set ["selTypes", []];
+        PMCS_ui set ["selCals", []];
         PMCS_ui set ["sel", ""];
         PMCS_ui set ["ammoType", ""];
         PMCS_ui set ["mag", ""];
         ["refresh"] call PMCS_fnc_uiShop;
         (PMCS_ui get "address") ctrlSetText localize (["STR_PMCS_ADDRESS_SHOP", "STR_PMCS_ADDRESS_AMMO"] select ((_args select 0) == "ammo"));
     };
+    // [kind ("type" | "cal"), key, selected]: select a filter row or not.
     case "filter": {
         _args params ["_kind", "_key", "_on"];
-        private _off = PMCS_ui get (["offTypes", "offCals"] select (_kind == "cal"));
-        if (_on) then {
-            private _at = _off find _key;
-            if (_at >= 0) then {_off deleteAt _at};
-        } else {_off pushBackUnique _key};
+        private _sel = PMCS_ui get (["selTypes", "selCals"] select (_kind == "cal"));
+        if (_on) then {_sel pushBackUnique _key} else {
+            private _at = _sel find _key;
+            if (_at >= 0) then {_sel deleteAt _at};
+        };
+        ["filters"] call PMCS_fnc_uiShop;
+        ["grid"] call PMCS_fnc_uiShop;
+        ["detail"] call PMCS_fnc_uiShop;
+    };
+    case "filterAll": {
+        PMCS_ui set ["selTypes", []];
+        PMCS_ui set ["selCals", []];
+        ([] call PMCS_fnc_uiShopList) params ["", "_types", "_cals"];
+        PMCS_ui set ["selTypes", if ((PMCS_ui get "tab") == "ammo") then {[]} else {keys _types}];
+        PMCS_ui set ["selCals", keys _cals];
+        ["filters"] call PMCS_fnc_uiShop;
+        ["grid"] call PMCS_fnc_uiShop;
+        ["detail"] call PMCS_fnc_uiShop;
+    };
+    case "filterNone": {
+        PMCS_ui set ["selTypes", []];
+        PMCS_ui set ["selCals", []];
         ["filters"] call PMCS_fnc_uiShop;
         ["grid"] call PMCS_fnc_uiShop;
         ["detail"] call PMCS_fnc_uiShop;

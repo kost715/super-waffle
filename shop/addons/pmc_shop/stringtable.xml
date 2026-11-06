@@ -2,6 +2,74 @@
 <Project name="PMC Shop">
     <Package name="Shop">
         <Container name="Main">
+            <Key ID="STR_PMCS_FILTER_ALL">
+                <Original>Select all</Original>
+                <Russian>Выбрать все</Russian>
+            </Key>
+            <Key ID="STR_PMCS_FILTER_NONE">
+                <Original>Clear</Original>
+                <Russian>Сбросить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_KIND_REV">
+                <Original>Undo</Original>
+                <Russian>Откат</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_FREE">
+                <Original>free</Original>
+                <Russian>бесплатно</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_UNDO">
+                <Original>Undo</Original>
+                <Russian>Откатить</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_OPEN">
+                <Original>Upgrade tree</Original>
+                <Russian>Древо улучшений</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_TITLE">
+                <Original>Upgrade tree</Original>
+                <Russian>Древо улучшений</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_WEAPONS">
+                <Original>Weapons</Original>
+                <Russian>Оружие</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_VESTS">
+                <Original>Vests</Original>
+                <Russian>Жилеты</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_ALL">
+                <Original>Everything</Original>
+                <Russian>Всё</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_MINE">
+                <Original>Chosen item</Original>
+                <Russian>Для выбранного</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_FROM">
+                <Original>From</Original>
+                <Russian>Из</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_TO">
+                <Original>To</Original>
+                <Russian>В</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_KIND">
+                <Original>Kind</Original>
+                <Russian>Вид</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_COST">
+                <Original>Cost</Original>
+                <Russian>Стоимость</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_NOTE">
+                <Original>Every upgrade can be undone for free: weapon parts are not returned; a vest gives back the items it took.</Original>
+                <Russian>Любое улучшение можно бесплатно откатить: детали оружия не возвращаются, у жилета возвращаются взятые предметы.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TECH_NOTE">
+                <Original>The weapon is taken from your hands, back or holster, the vest is the one you wear; parts and items come from your inventory. Attachments and loaded magazines move to the new weapon where they fit, the vest's contents move to the new vest. Any upgrade can be undone for free.</Original>
+                <Russian>Оружие — из рук, со спины или из кобуры, жилет — надетый; детали и предметы — из инвентаря. Обвес и магазины переходят на новое оружие, если подходят; содержимое жилета — в новый. Любое улучшение можно бесплатно откатить.</Russian>
+            </Key>
             <Key ID="STR_PMCS_SLOT_VEST">
                 <Original>Vest</Original>
                 <Russian>Жилет</Russian>
@@ -41,10 +109,6 @@
             <Key ID="STR_PMCS_TECH_PARTS">
                 <Original>WHAT THE GUNSMITH TAKES · IN YOUR INVENTORY</Original>
                 <Russian>ЧТО БЕРЁТ ТЕХНИК · В ИНВЕНТАРЕ</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TECH_NOTE">
-                <Original>The weapon is taken from your hands, back or holster, the vest is the one you wear; parts and items come from your inventory. Attachments and loaded magazines move to the new weapon where they fit, the vest's contents move to the new vest.</Original>
-                <Russian>Оружие — из рук, со спины или из кобуры, жилет — надетый; детали и предметы — из инвентаря. Обвес и заряженные магазины переходят на новое оружие, если подходят; содержимое жилета — в новый жилет.</Russian>
             </Key>
             <Key ID="STR_PMCS_TECH_NO_WEAPON">
                 <Original>Take a weapon or put on a vest: the gunsmith works with what you carry.</Original>

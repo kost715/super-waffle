@@ -32,6 +32,7 @@ switch (_event) do {
         ["PMCS_Text", [0.3, 0.145, 0.7, 0.805], controlNull, "page", "", 0.02, "", "screen"] call _make;
         ["PMCS_Text", [0.299, 0.145, 0.001, 0.805], controlNull, "page", "", 0.02, "", "line"] call _make;
         PMCS_ui set ["techGroup", ["PMCS_Group", [0.3, 0.2, 0.7, 0.75], controlNull, "page"] call _make];
+        [["PMCS_Button", [0.835, 0.088, 0.15, 0.045], controlNull, "page", localize "STR_PMCS_TREE_OPEN", 0.019, "text", "orange"] call _make, "tree", [true]] call _click;
         (PMCS_ui get "address") ctrlSetText localize "STR_PMCS_ADDRESS_TECH";
         ["refresh"] call PMCS_fnc_uiTech;
     };
@@ -108,9 +109,12 @@ switch (_event) do {
         private _entries = if (_slot == 3) then {
             _offers apply {
                 _x params ["_upgrade", "_target"];
-                [_upgrade select 0, _target, localize (["STR_PMCS_KIND_ROLE", "STR_PMCS_KIND_BELT"] select ((_upgrade select 5) == "belt")), _upgrade select 2, _upgrade select 6,
+                private _kind = _upgrade select 5;
+                [_upgrade select 0, _target, localize (switch (_kind) do {case "belt": {"STR_PMCS_KIND_BELT"}; case "rev": {"STR_PMCS_KIND_REV"}; default {"STR_PMCS_KIND_ROLE"}}),
+                    _upgrade select 2, _upgrade select 6,
                     ([_upgrade] call PMCS_fnc_gearTake) apply {[(_x select 0) call PMCS_fnc_itemTitle, (_x select 0) call _haveOf, _x select 1]},
-                    count ([_target] call PMCS_fnc_gearUpgradesFor), (_upgrade select 5) == "belt"]
+                    count (([_target] call PMCS_fnc_gearUpgradesFor) select {((_x select 0) select 5) != "rev"}), _kind == "belt", _kind == "rev",
+                    (_upgrade param [11, []]) apply {format ["+%1 ×%2", (_x select 0) call PMCS_fnc_itemTitle, _x select 1]}]
             }
         } else {
             _offers apply {
@@ -120,16 +124,20 @@ switch (_event) do {
                     private _need = (_upgrade select 6) param [_forEachIndex, 0];
                     if (_need > 0) then {_needs pushBack [localize (["STR_PMCS_PART_SHORT_LOW", "STR_PMCS_PART_SHORT_MED", "STR_PMCS_PART_SHORT_HIGH"] select _forEachIndex), _x call _haveOf, _need]};
                 } forEach (call PMCS_fnc_parts);
-                [_upgrade select 0, _target, localize (["STR_PMCS_KIND_UP", "STR_PMCS_KIND_GL"] select ((_upgrade select 3) == "gl")), _upgrade select 4, _upgrade select 5,
-                    _needs, count ([_target] call PMCS_fnc_upgradesFor), (_upgrade select 3) == "gl"]
+                private _kind = _upgrade select 3;
+                [_upgrade select 0, _target, localize (switch (_kind) do {case "gl": {"STR_PMCS_KIND_GL"}; case "rev": {"STR_PMCS_KIND_REV"}; default {"STR_PMCS_KIND_UP"}}),
+                    _upgrade select 4, _upgrade select 5, _needs, count (([_target] call PMCS_fnc_upgradesFor) select {((_x select 0) select 3) != "rev"}),
+                    _kind == "gl", _kind == "rev", []]
             }
         };
+        // Upgrades first, then the undo entries.
+        _entries = (_entries select {!(_x select 8)}) + (_entries select {_x select 8});
         (PMCS_ui get "bank") params ["_personal", "_group2"];
         private _balance = [_personal, _group2] select ((PMCS_ui get "account") == "group");
         private _armed = PMCS_ui getOrDefault ["techArmed", ["", -1]];
         private _busy = PMCS_ui getOrDefault ["techBusy", false];
         {
-            _x params ["_key", "_target", "_kind", "_op", "_price", "_needs", "_next", "_accent"];
+            _x params ["_key", "_target", "_kind", "_op", "_price", "_needs", "_next", "_accent", "_undo", "_gives"];
             private _y = 0.21 + _forEachIndex * 0.16;
             ["PMCS_Text", [0.315, _y, 0.67, 0.15], _group, "tech", "", 0.02, "", "white"] call _make;
             ["PMCS_Text", [0.322, _y + 0.01, 0.13, 0.13], _group, "tech", "", 0.02, "", "photo"] call _make;
@@ -137,11 +145,17 @@ switch (_event) do {
             ["PMCS_Picture", [0.326, _y + 0.02, 0.122, 0.11], _group, "tech", [_picture, "\pmc_shop\data\noimage_ca.paa"] select (_picture == "")] call _make;
             ["PMCS_TextBold", [0.465, _y + 0.012, 0.33, 0.032], _group, "tech", _target call _weaponName, 0.021] call _make;
             ["PMCS_Text", [0.465, _y + 0.044, 0.33, 0.026], _group, "tech", format ["%1 · %2", _kind, _op], 0.015, ["grey", "orangeDark"] select _accent] call _make;
+            if (_undo) then {["PMCS_Text", [0.315, _y, 0.004, 0.15], _group, "tech", "", 0.02, "", "navy"] call _make};
             // Cost: the money (when there is any), then each item as have / need, red where short.
             private _short = _price > _balance;
             private _cost = [];
-            if (_price > 0 || {_needs isEqualTo []}) then {
-                _cost pushBack format ["<t font='RobotoCondensedBold' color='%1'>%2</t>", ["#2f5f2a", "#9e291f"] select (_price > _balance), _price call _money];
+            if (_undo) then {
+                _cost pushBack format ["<t font='RobotoCondensedBold' color='#2f5f2a'>%1</t>", localize "STR_PMCS_TECH_FREE"];
+                {_cost pushBack format ["<t color='#2f5f2a'>%1</t>", _x]} forEach _gives;
+            } else {
+                if (_price > 0 || {_needs isEqualTo []}) then {
+                    _cost pushBack format ["<t font='RobotoCondensedBold' color='%1'>%2</t>", ["#2f5f2a", "#9e291f"] select (_price > _balance), _price call _money];
+                };
             };
             {
                 _x params ["_label", "_have", "_need"];
@@ -152,15 +166,93 @@ switch (_event) do {
             ["PMCS_Struct", [0.465, _y + 0.072, 0.33, 0.035], _group, "tech", _cost joinString "   ", 0.017] call _make;
             if (_next > 0) then {["PMCS_Text", [0.465, _y + 0.108, 0.33, 0.024], _group, "tech", format [localize "STR_PMCS_TECH_NEXT", _next], 0.014, "grey"] call _make};
             private _isArmed = (_armed select 0) == _key && {diag_tickTime - (_armed select 1) < 5};
-            private _button = [["PMCS_Button", [0.81, _y + 0.05, 0.165, 0.05], _group, "tech",
-                [localize "STR_PMCS_TECH_DO", format [localize "STR_PMCS_TECH_CONFIRM", _price call _money]] select _isArmed, 0.018, "white", ["orangeDark", "red"] select _isArmed] call _make,
-                "upgrade", [_key]] call _click;
+            private _label = if (_isArmed) then {format [localize "STR_PMCS_TECH_CONFIRM", [_price call _money, localize "STR_PMCS_TECH_FREE"] select _undo]} else {
+                localize (["STR_PMCS_TECH_DO", "STR_PMCS_TECH_UNDO"] select _undo)
+            };
+            private _button = [["PMCS_Button", [0.81, _y + 0.05, 0.165, 0.05], _group, "tech", _label, 0.018, "white",
+                if (_isArmed) then {"red"} else {["orangeDark", "navy"] select _undo}] call _make, "upgrade", [_key]] call _click;
             _button ctrlEnable (!_short && {!_busy});
             if (_short) then {["PMCS_TextCenter", [0.81, _y + 0.104, 0.165, 0.024], _group, "tech", localize "STR_PMCS_TECH_SHORT", 0.014, "red"] call _make};
         } forEach _entries;
     };
+    // The upgrade tree window: every upgrade of the weapons or the vests, a family after
+    // another, or only the family of the weapon or vest chosen on the left.
+    case "tree": {
+        if (_args isNotEqualTo []) then {PMCS_ui set ["treeOpen", _args select 0]};
+        ["treeWin"] call PMCS_fnc_uiClear;
+        if !(PMCS_ui getOrDefault ["treeOpen", false]) exitWith {};
+        private _gearSide = PMCS_ui getOrDefault ["treeGear", (PMCS_ui getOrDefault ["techSlot", 0]) == 3];
+        PMCS_ui set ["treeGear", _gearSide];
+        private _onlyMine = PMCS_ui getOrDefault ["treeMine", false];
+        ["PMCS_Text", [0.11, 0.155, 0.78, 0.77], controlNull, "treeWin", "", 0.02, "", [0, 0, 0, 0.25]] call _make;
+        ["PMCS_Text", [0.115, 0.15, 0.77, 0.77], controlNull, "treeWin", "", 0.02, "", "white"] call _make;
+        ["PMCS_TextBold", [0.13, 0.16, 0.4, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_TITLE", 0.026] call _make;
+        {
+            _x params ["_label", "_event", "_value", "_x0", "_on"];
+            [["PMCS_Button", [_x0, 0.212, 0.12, 0.036], controlNull, "treeWin", localize _label, 0.017, ["text", "white"] select _on, ["photo", "navy"] select _on] call _make,
+                _event, [_value]] call _click;
+        } forEach [["STR_PMCS_TREE_WEAPONS", "treeSide", false, 0.13, !_gearSide], ["STR_PMCS_TREE_VESTS", "treeSide", true, 0.255, _gearSide],
+            ["STR_PMCS_TREE_ALL", "treeMine", false, 0.43, !_onlyMine], ["STR_PMCS_TREE_MINE", "treeMine", true, 0.555, _onlyMine]];
+        // Rows: [from, to, kind, cost] in the tables' order, undo entries left out.
+        private _rows = if (_gearSide) then {
+            ((call PMCS_fnc_gearUpgrades) select {(_x select 5) != "rev"}) apply {
+                private _cost = (([_x] call PMCS_fnc_gearTake) apply {format ["%1 ×%2", (_x select 0) call PMCS_fnc_itemTitle, _x select 1]});
+                if ((_x select 6) > 0) then {_cost = [(_x select 6) call _money] + _cost};
+                [_x select 1, _x select 2, localize (["STR_PMCS_KIND_ROLE", "STR_PMCS_KIND_BELT"] select ((_x select 5) == "belt")), _cost joinString ", ", _x select 3, _x select 4]
+            }
+        } else {
+            ((call PMCS_fnc_upgrades) select {(_x select 3) != "rev"}) apply {
+                private _parts = _x select 6;
+                private _cost = [(_x select 5) call _money];
+                {if ((_parts select _forEachIndex) > 0) then {_cost pushBack format ["%1 %2", localize _x, _parts select _forEachIndex]}} forEach
+                    ["STR_PMCS_PART_SHORT_LOW", "STR_PMCS_PART_SHORT_MED", "STR_PMCS_PART_SHORT_HIGH"];
+                [_x select 1, _x select 2, localize (["STR_PMCS_KIND_UP", "STR_PMCS_KIND_GL"] select ((_x select 3) == "gl")), _cost joinString ", ", "", ""]
+            }
+        };
+        if (_onlyMine) then {
+            // The family: every name linked by an upgrade, starting from the chosen item.
+            private _carried = [primaryWeapon player, secondaryWeapon player, handgunWeapon player, vest player];
+            private _class = _carried select (PMCS_ui getOrDefault ["techSlot", 0]);
+            private _start = if (_gearSide) then {
+                (((call PMCS_fnc_gearUpgrades) select {toLower (_x select 3) == toLower _class}) apply {_x select 1}) param [0, ""]
+            } else {
+                (((call PMCS_fnc_upgrades) select {([_class, _x select 7] call PMCS_fnc_upgradeTarget) != ""}) apply {_x select 1}) param [0, ""]
+            };
+            private _family = [_start];
+            private _grew = true;
+            while {_grew} do {
+                _grew = false;
+                {
+                    if (((_x select 0) in _family) isNotEqualTo ((_x select 1) in _family)) then {_family pushBackUnique (_x select 0); _family pushBackUnique (_x select 1); _grew = true};
+                } forEach _rows;
+            };
+            _rows = _rows select {(_x select 0) in _family};
+        };
+        private _list = ["PMCS_List", [0.13, 0.26, 0.74, 0.6], controlNull, "treeWin", "", 0.017] call _make;
+        _list lnbSetColumnsPos [0, 0.24, 0.5, 0.66];
+        _list lnbAddRow ([localize "STR_PMCS_TREE_FROM", localize "STR_PMCS_TREE_TO", localize "STR_PMCS_TREE_KIND", localize "STR_PMCS_TREE_COST"]);
+        _list lnbSetColor [[0, 0], ["grey"] call PMCS_fnc_uiColor];
+        private _last = "";
+        {
+            _x params ["_from", "_to", "_kind", "_cost"];
+            _list lnbAddRow [[_from, ""] select (_from == _last), "→ " + _to, _kind, _cost];
+            _last = _from;
+        } forEach _rows;
+        if (_rows isEqualTo []) then {_list lnbAddRow ["", localize "STR_PMCS_TECH_NONE", "", ""]};
+        ["PMCS_Text", [0.13, 0.865, 0.6, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_NOTE", 0.015, "grey"] call _make;
+        [["PMCS_Button", [0.76, 0.865, 0.11, 0.042], controlNull, "treeWin", localize "STR_PMCS_CLOSE", 0.018, "text", "photo"] call _make, "tree", [false]] call _click;
+    };
+    case "treeSide": {
+        PMCS_ui set ["treeGear", _args select 0];
+        ["tree"] call PMCS_fnc_uiTech;
+    };
+    case "treeMine": {
+        PMCS_ui set ["treeMine", _args select 0];
+        ["tree"] call PMCS_fnc_uiTech;
+    };
     case "slot": {
         PMCS_ui set ["techSlot", _args select 0];
+        PMCS_ui set ["treeGear", (_args select 0) == 3];
         PMCS_ui set ["techArmed", ["", -1]];
         ["body"] call PMCS_fnc_uiTech;
     };

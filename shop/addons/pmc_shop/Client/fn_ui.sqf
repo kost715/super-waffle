@@ -37,7 +37,7 @@ switch (_event) do {
         PMCS_ui = nil;
     };
     case "desktop": {
-        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "aside", "table", "tools", "tech"]] call PMCS_fnc_uiClear;
+        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "aside", "table", "tools", "tech", "treeWin"]] call PMCS_fnc_uiClear;
         PMCS_ui set ["view", "desk"];
         if ((PMCS_ui get "regions") getOrDefault ["desk", []] isNotEqualTo []) exitWith {};
         ["PMCS_Picture", [0, 0, 1, 0.95], controlNull, "desk", "\pmc_shop\data\wallpaper_co.paa"] call _make;
@@ -112,7 +112,8 @@ switch (_event) do {
         if (_site == (PMCS_ui getOrDefault ["site", "shop"]) || {(PMCS_ui get "mode") == "admin"}) exitWith {};
         PMCS_ui set ["site", _site];
         PMCS_ui set ["techArmed", ["", -1]];
-        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "tech"]] call PMCS_fnc_uiClear;
+        [["page", "filters", "grid", "detail", "cart", "overlay", "toast", "tech", "treeWin"]] call PMCS_fnc_uiClear;
+        PMCS_ui set ["treeOpen", false];
         PMCS_ui set ["view", "switching"];
         ["browser"] call PMCS_fnc_ui;
     };

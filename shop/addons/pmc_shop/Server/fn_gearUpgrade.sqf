@@ -3,7 +3,8 @@
 // vest, the upgrade, the items it takes from the inventory (warbelts, old uniforms, the
 // table's 6Sh92 or 6Sh48), the account and the balance; charges the money if any (PMC Bank
 // journal: "upgrade") and asks the player's machine to swap the vest and take the items
-// (PMCS_fnc_gearApply), which answers with PMCS_fnc_upgradeDone (journal or refund).
+// (PMCS_fnc_gearApply), which answers with PMCS_fnc_upgradeDone (journal or refund). An
+// undo ("rev:" key) takes nothing and gives back what the upgrade took.
 if (!isServer) exitWith {};
 call PMCS_fnc_serverLoad;
 params [["_unit", objNull, [objNull]], ["_terminal", objNull, [objNull]], ["_account", "", [""]], ["_key", "", [""]]];
@@ -32,5 +33,6 @@ if (isNil "PMCS_pendingUpgrades") then {PMCS_pendingUpgrades = createHashMap};
     if (diag_tickTime - (_y select 6) > 600) then {PMCS_pendingUpgrades deleteAt _x};
 } forEach +PMCS_pendingUpgrades;
 private _token = format ["%1:%2:%3", _uid, round (diag_tickTime * 1000), floor random 1e6];
-PMCS_pendingUpgrades set [_token, [_uid, _bankKey, _price, vest _unit, _target, [], diag_tickTime, _upgrade select 2, "gear", _take]];
-[_token, vest _unit, _target, _take] remoteExecCall ["PMCS_fnc_gearApply", _owner];
+private _give = _upgrade param [11, []];
+PMCS_pendingUpgrades set [_token, [_uid, _bankKey, _price, vest _unit, _target, [], diag_tickTime, _upgrade select 2, "gear", _take, _give]];
+[_token, vest _unit, _target, _take, _give] remoteExecCall ["PMCS_fnc_gearApply", _owner];
