@@ -10,9 +10,9 @@ Only weapons in the state "базовый" go on sale. A weapon's price is one p
 magazine row's price is one magazine of the first type (factor x1), the other types cost
 price x factor. Box sizes and single-piece surcharges are the mod's CBA settings. Rows
 without a price are written with price 0: the shop hides them until a Zeus sets one.
-Every doubtful entry is reported and left out. Items of the MMM mod (classes "MMM_...")
-are left out everywhere: weapons, magazines, upgrades. Single-use launchers have no
-ammunition, so they get no calibre (no calibre filter row, no ammunition block).
+Every doubtful entry is reported and left out. Single-use launchers have no ammunition, so
+they get no calibre (no calibre filter row, no ammunition block). Equipment of the MMM mod
+(classes "MMM_...") is not used in vest upgrades; MMM weapons and magazines stay.
 
 source/upgrades.xlsx  the gunsmith's upgrades ("Техник"): one row per arrow of the upgrade
                    tree (built here from the weapons sheet's grenade launcher and upgrade
@@ -96,7 +96,7 @@ def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
     for row in sheet.iter_rows(min_row=2, values_only=True):
         r = [text(v) for v in row[:9]]
         if r[0]:
-            rows.append(dict(name=r[0], classes=[c.strip() for c in r[3].split(",") if c.strip() and not is_mmm(c)], gl=(r[5], r[6]), up=(r[7], r[8])))
+            rows.append(dict(name=r[0], classes=[c.strip() for c in r[3].split(",") if c.strip()], gl=(r[5], r[6]), up=(r[7], r[8])))
     by_class = {}
     for i, n in enumerate(rows):
         for c in n["classes"]:
@@ -111,7 +111,7 @@ def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
                 continue
             explicit, bare = [], []
             for part in (p.strip() for p in cell.split(",")):
-                if not part or part.upper() == "NA" or is_mmm(part):
+                if not part or part.upper() == "NA":
                     continue
                 if "->" in part:
                     a, b = (x.strip() for x in part.split("->", 1))
@@ -201,7 +201,6 @@ def build() -> tuple[str, list[str]]:
 
     weapons = []
     keys: set[str] = set()
-    dropped_mmm: set[str] = set()
     sheet = book["Оружие"]
     header = [text(v).lower() for v in next(sheet.iter_rows(max_row=1, values_only=True))]
     price_col = header.index("цена")
@@ -216,15 +215,12 @@ def build() -> tuple[str, list[str]]:
         for c in (c.strip() for c in classes.split(",")):
             if not c:
                 continue
-            if is_mmm(c):
-                dropped_mmm.add(c)
-                continue
             if not CLASS_RE.match(c) or c in DROP_CLASSES:
                 warnings.append(f"weapon {name}: class {c!r} left out")
                 continue
             variants.append(c)
         if not variants:
-            warnings.append(f"weapon {name}: no usable class (MMM left out), not on sale")
+            warnings.append(f"weapon {name}: no usable class, left out")
             continue
         if category == SINGLE_USE:
             calibre = ""
@@ -256,9 +252,6 @@ def build() -> tuple[str, list[str]]:
         for ammo, factor, cls in zip(AMMO_TYPES, factors, (text(v) for v in row[3:9])):
             if cls in ("", "NA"):
                 continue
-            if is_mmm(cls):
-                dropped_mmm.add(cls)
-                continue
             if not CLASS_RE.match(cls) or "*" in cls or cls in DROP_CLASSES:
                 warnings.append(f"{what} / {ammo}: class {cls!r} left out")
                 continue
@@ -268,7 +261,7 @@ def build() -> tuple[str, list[str]]:
             mag_classes.add(cls)
             types.append((ammo, factor, cls))
         if not types:
-            warnings.append(f"{what}: no usable class (MMM left out), not on sale")
+            warnings.append(f"{what}: no usable class, left out")
             continue
         if calibre not in calibres_used:
             warnings.append(f"{what}: no weapon on sale with this calibre")
@@ -276,8 +269,6 @@ def build() -> tuple[str, list[str]]:
     for w in weapons:
         if not any(m[1] == w[3] for m in magazines) and w[2] != SINGLE_USE:
             warnings.append(f"weapon {w[1]}: no magazines for calibre {w[3]!r}")
-    if dropped_mmm:
-        warnings.append(f"{len(dropped_mmm)} MMM classes left out of the shop")
 
     # The gunsmith's upgrades and their costs.
     edges = upgrade_edges(book["Оружие"], warnings)
@@ -298,8 +289,7 @@ def build() -> tuple[str, list[str]]:
             continue
         upgrades.append((e, costs[e["key"]]))
     for key in sorted(set(costs) - {e["key"] for e in edges}):
-        if "MMM_" not in key:
-            warnings.append(f"upgrades.xlsx: {key} matches no arrow of the tree, ignored")
+        warnings.append(f"upgrades.xlsx: {key} matches no arrow of the tree, ignored")
 
     # The vest upgrades and their costs.
     tree = gear_edges(book["Жилеты"], warnings)
@@ -319,7 +309,7 @@ def build() -> tuple[str, list[str]]:
         num = lambda h: int(row[col[h]]) if isinstance(row[col[h]], (int, float)) and row[col[h]] > 0 else 0
         item = text(row[col["Предмет: класс"]])
         if item and is_mmm(item):
-            warnings.append(f"gear_upgrades.xlsx: {key}: MMM item {item} left out")
+            warnings.append(f"gear_upgrades.xlsx: {key}: MMM equipment {item} is not used, left out")
             item = ""
         if item and not CLASS_RE.match(item):
             warnings.append(f"gear_upgrades.xlsx: {key}: item {item!r} is not a class, ignored")
@@ -339,7 +329,7 @@ def build() -> tuple[str, list[str]]:
         for cell in (cells[3], cells[6], cells[8]):
             for part in re.split(r",|->", cell):
                 part = part.strip()
-                if "*" in part and CLASS_RE.match(part) and part not in patterns and not is_mmm(part):
+                if "*" in part and CLASS_RE.match(part) and part not in patterns:
                     patterns.append(part)
 
     lines = [
