@@ -27,10 +27,11 @@ switch (_event) do {
         // Weapons / equipment, weapons / ammunition, search, sort.
         ["PMCS_Text", [0, 0.145, 1, 0.055], controlNull, "page", "", 0.02, "", "white"] call _make;
         ["PMCS_Text", [0, 0.199, 1, 0.001], controlNull, "page", "", 0.02, "", "line"] call _make;
-        ["PMCS_Button", [0.015, 0.153, 0.085, 0.038], controlNull, "page", localize "STR_PMCS_SECTION_WEAPONS", 0.02, "white", "navy"] call _make;
-        private _gear = ["PMCS_Button", [0.105, 0.153, 0.085, 0.038], controlNull, "page", localize "STR_PMCS_SECTION_GEAR", 0.02] call _make;
-        _gear ctrlEnable false;
-        _gear ctrlSetTooltip localize "STR_PMCS_SOON";
+        // Sections: weapons (firearms / ammunition tabs) and equipment (vests).
+        PMCS_ui set ["sectionWeapons", [["PMCS_Button", [0.015, 0.153, 0.085, 0.038], controlNull, "page", localize "STR_PMCS_SECTION_WEAPONS", 0.02, "white", "navy"] call _make,
+            "tab", ["weapons"]] call _click];
+        PMCS_ui set ["sectionGear", [["PMCS_Button", [0.105, 0.153, 0.085, 0.038], controlNull, "page", localize "STR_PMCS_SECTION_GEAR", 0.02, "white", "navy"] call _make,
+            "tab", ["gear"]] call _click];
         PMCS_ui set ["tabWeapons", [["PMCS_Button", [0.21, 0.155, 0.07, 0.034], controlNull, "page", localize "STR_PMCS_TAB_WEAPONS", 0.019] call _make, "tab", ["weapons"]] call _click];
         PMCS_ui set ["tabAmmo", [["PMCS_Button", [0.281, 0.155, 0.08, 0.034], controlNull, "page", localize "STR_PMCS_TAB_AMMO", 0.019] call _make, "tab", ["ammo"]] call _click];
         ["PMCS_TextRight", [0.52, 0.156, 0.065, 0.032], controlNull, "page", localize "STR_PMCS_SEARCH", 0.019, "grey"] call _make;
@@ -75,9 +76,16 @@ switch (_event) do {
         if (!_treasurer) then {PMCS_ui set ["account", "personal"]};
         _account lbSetCurSel ([0, 1] select ((PMCS_ui get "account") == "group"));
         private _ammo = (PMCS_ui get "tab") == "ammo";
+        private _gearTab = (PMCS_ui get "tab") == "gear";
         (PMCS_ui get "tabWeapons") ctrlSetBackgroundColor ([[0.91, 0.925, 0.937, 1], [1, 1, 1, 1]] select _ammo);
         (PMCS_ui get "tabAmmo") ctrlSetBackgroundColor ([[1, 1, 1, 1], [0.91, 0.925, 0.937, 1]] select _ammo);
         {_x ctrlSetTextColor (["text"] call PMCS_fnc_uiColor)} forEach [PMCS_ui get "tabWeapons", PMCS_ui get "tabAmmo"];
+        // The firearms / ammunition tabs belong to the weapons section.
+        {_x ctrlShow !_gearTab} forEach [PMCS_ui get "tabWeapons", PMCS_ui get "tabAmmo"];
+        (PMCS_ui get "sectionWeapons") ctrlSetBackgroundColor ([["navy"] call PMCS_fnc_uiColor, ["photo"] call PMCS_fnc_uiColor] select _gearTab);
+        (PMCS_ui get "sectionWeapons") ctrlSetTextColor ([["white"] call PMCS_fnc_uiColor, ["text"] call PMCS_fnc_uiColor] select _gearTab);
+        (PMCS_ui get "sectionGear") ctrlSetBackgroundColor ([["photo"] call PMCS_fnc_uiColor, ["navy"] call PMCS_fnc_uiColor] select _gearTab);
+        (PMCS_ui get "sectionGear") ctrlSetTextColor ([["text"] call PMCS_fnc_uiColor, ["white"] call PMCS_fnc_uiColor] select _gearTab);
         ["filters"] call PMCS_fnc_uiShop;
         ["grid"] call PMCS_fnc_uiShop;
         ["detail"] call PMCS_fnc_uiShop;
@@ -149,7 +157,7 @@ switch (_event) do {
             private _title = format [localize "STR_PMCS_CARD_TITLE", [_info select 1, _info select 8] select (_mag && {(_info select 8) != ""}), _boxUnits];
             private _sub = if (_mag) then {
                 format ["%1 · %2", [_info select 3, "-"] select ((_info select 3) == ""), ((_info select 7) apply {_x select 1}) joinString ", "]
-            } else {format ["%1 · %2", [_info select 2] call PMCS_fnc_categoryName, _info select 3]};
+            } else {([[_info select 2] call PMCS_fnc_categoryName, _info select 3] select {_x != ""}) joinString " · "};
             private _note = if (_state == "soldout") then {[localize "STR_PMCS_SOLD_OUT", "red"]} else {
                 [format [localize "STR_PMCS_UNIT_LINE", _unit call _money] + ([format [localize "STR_PMCS_LEFT_LINE", _left], ""] select (_left < 0))
                     + ([format [localize "STR_PMCS_DISCOUNT_SHORT", _off], ""] select (_off <= 0)), "grey"]
@@ -256,8 +264,14 @@ switch (_event) do {
         ["PMCS_Text", [_x0, 0.215, _wd, 0.13], _group, "detail", "", 0.02, "", "photo"] call _make;
         ["PMCS_Picture", [_x0 + 0.01, 0.222, _wd - 0.02, 0.116], _group, "detail", [_variant select 2, "\pmc_shop\data\noimage_ca.paa"] select ((_variant select 2) == "")] call _make;
         ["PMCS_TextBold", [_x0, 0.352, _wd, 0.045], _group, "detail", _info select 1, 0.032] call _make;
-        ["PMCS_Text", [_x0, 0.395, _wd, 0.028], _group, "detail", format ["%1 · %2", [_info select 2] call PMCS_fnc_categoryName, _info select 3], 0.016, "grey"] call _make;
-        private _y = 0.43;
+        ["PMCS_Text", [_x0, 0.395, _wd, 0.028], _group, "detail", ([[_info select 2] call PMCS_fnc_categoryName, _info select 3] select {_x != ""}) joinString " · ", 0.016, "grey"] call _make;
+        // What the gunsmith ("Техник") can make of it.
+        private _upgrades = count ((if ((_info select 0) == "gear") then {[_variant select 0] call PMCS_fnc_gearUpgradesFor} else {[_variant select 0] call PMCS_fnc_upgradesFor})
+            select {!("rev:" in ((_x select 0) select 0))});
+        if (_upgrades > 0) then {
+            ["PMCS_Text", [_x0, 0.418, _wd, 0.022], _group, "detail", format [localize "STR_PMCS_DETAIL_UPGRADES", _upgrades], 0.014, "green"] call _make;
+        };
+        private _y = 0.445;
         if (count _variants > 1) then {
             // A table class is its own button; an MMM pattern is one "MMM" button: every box
             // gets one of its classes at random.
@@ -341,7 +355,7 @@ switch (_event) do {
         PMCS_ui set ["ammoType", ""];
         PMCS_ui set ["mag", ""];
         ["refresh"] call PMCS_fnc_uiShop;
-        (PMCS_ui get "address") ctrlSetText localize (["STR_PMCS_ADDRESS_SHOP", "STR_PMCS_ADDRESS_AMMO"] select ((_args select 0) == "ammo"));
+        (PMCS_ui get "address") ctrlSetText localize (switch (_args select 0) do {case "ammo": {"STR_PMCS_ADDRESS_AMMO"}; case "gear": {"STR_PMCS_ADDRESS_GEAR"}; default {"STR_PMCS_ADDRESS_SHOP"}});
     };
     // [kind ("type" | "cal"), key, selected]: select a filter row or not.
     case "filter": {

@@ -1,4 +1,4 @@
-name = "PMC Shop 0.6.1 alpha 1";
+name = "PMC Shop 0.7.0 alpha 1";
 author = "LifeSim PMC project";
 description = "ION market laptop: buy weapons and ammunition with PMC Bank accounts, goods delivered to a box at the delivery point; a gunsmith upgrades weapons and the worn vest; a Zeus manages prices, discounts and stock per mission on a second laptop.";
 tooltip = "PMC Shop";

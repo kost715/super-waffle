@@ -62,8 +62,9 @@ switch (_event) do {
         ["PMCS_Text", [0, 0.145, 1, 0.055], controlNull, "tools", "", 0.02, "", "white"] call _make;
         ["PMCS_Text", [0, 0.199, 1, 0.001], controlNull, "tools", "", 0.02, "", "line"] call _make;
         private _section = ["PMCS_Combo", [0.015, 0.156, 0.14, 0.032], controlNull, "tools", "", 0.019] call _make;
-        {_section lbSetData [_section lbAdd localize (_x select 1), _x select 0]} forEach [["weapon", "STR_PMCS_TAB_WEAPONS"], ["mag", "STR_PMCS_TAB_AMMO"], ["custom", "STR_PMCS_CATEGORY_CUSTOM"]];
-        _section lbSetCurSel (["weapon", "mag", "custom"] find (PMCS_ui get "asection"));
+        {_section lbSetData [_section lbAdd localize (_x select 1), _x select 0]} forEach [["weapon", "STR_PMCS_TAB_WEAPONS"], ["mag", "STR_PMCS_TAB_AMMO"],
+            ["gear", "STR_PMCS_SECTION_GEAR"], ["custom", "STR_PMCS_CATEGORY_CUSTOM"]];
+        _section lbSetCurSel (["weapon", "mag", "gear", "custom"] find (PMCS_ui get "asection"));
         _section ctrlAddEventHandler ["LBSelChanged", {
             params ["_ctrl", "_row"];
             if (_row >= 0 && {(_ctrl lbData _row) != (PMCS_ui get "asection")}) then {["set", ["asection", _ctrl lbData _row]] call PMCS_fnc_uiAdmin};
@@ -115,10 +116,12 @@ switch (_event) do {
         private _list = ["PMCS_List", [0.012, 0.21, 0.676, 0.665], controlNull, "table", "", 0.016] call _make;
         _list lnbSetColumnsPos [0, 0.085, 0.3, 0.45, 0.58, 0.66, 0.75, 0.83, 0.88, 0.95];
         // Columns: state, item, two by section (category and calibre; calibre and ammo type;
-        // kind and class), base price, box, single piece, discount, quantity, source.
+        // category and class for vests; kind and class), base price, box, single piece,
+        // discount, quantity, source.
         private _heads = switch (_section) do {
             case "mag": {["STR_PMCS_COL_MAGAZINE", "STR_PMCS_COL_CALIBRE", "STR_PMCS_COL_AMMO"]};
             case "custom": {["STR_PMCS_COL_ITEM", "STR_PMCS_COL_KIND", "STR_PMCS_COL_CLASS"]};
+            case "gear": {["STR_PMCS_COL_ITEM", "STR_PMCS_COL_CATEGORY", "STR_PMCS_COL_CLASS"]};
             default {["STR_PMCS_COL_ITEM", "STR_PMCS_COL_CATEGORY", "STR_PMCS_COL_CALIBRE"]};
         };
         _list lnbAddRow ((["STR_PMCS_COL_STATE"] + _heads + ["STR_PMCS_COL_PRICE", "STR_PMCS_COL_BOX", "STR_PMCS_COL_UNIT", "STR_PMCS_COL_DISCOUNT",
@@ -134,6 +137,7 @@ switch (_event) do {
             private _cells = switch (_section) do {
                 case "mag": {[[_info select 8, _info select 1] select ((_info select 8) == ""), _info select 3, ((_info select 7) apply {_x select 1}) joinString ", "]};
                 case "custom": {[_name, localize ("STR_PMCS_KIND_" + (_info select 0)), ((_info select 7) select 0) select 0]};
+                case "gear": {[_name, [_info select 2] call PMCS_fnc_categoryName, ((_info select 7) select 0) select 0]};
                 default {[_name, [_info select 2] call PMCS_fnc_categoryName, _info select 3]};
             };
             private _match = (_search == "" || {_search in toLower _name} || {_search in toLower (_info select 3)}

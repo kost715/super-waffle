@@ -91,16 +91,18 @@ private _magOwn = [_bakeKey, _magMarket, "rhs_30Rnd_762x39mm_bakelite_U"] call P
 (_magMarket get "cats") set ["ammo", 10];
 private _magOff = [_bakeKey, _magMarket] call PMCS_fnc_price;
 // The box sizes and the single-piece rules are CBA settings.
-PMCS_weaponBoxUnits = 5; PMCS_weaponUnitShare = 50; PMCS_magBoxUnits = 20; PMCS_magUnitMarkup = 100;
-private _cbaWeapon = ["rhs_weap_ak74", call PMCS_fnc_marketNew] call PMCS_fnc_price;
+PMCS_weaponBoxUnits = 5; PMCS_weaponUnitMarkup = 100; PMCS_magBoxUnits = 20; PMCS_magUnitMarkup = 100;
+private _cbaWeapon = ["uk3cb_saiga12k", call PMCS_fnc_marketNew] call PMCS_fnc_price;
+private _cbaAk = ["rhs_weap_ak74", call PMCS_fnc_marketNew] call PMCS_fnc_price;
 private _cbaMag = [_bakeKey, _magMarket] call PMCS_fnc_price;
-PMCS_weaponBoxUnits = nil; PMCS_weaponUnitShare = nil; PMCS_magBoxUnits = nil; PMCS_magUnitMarkup = nil;
-[_p0 isEqualTo ["ok", 400, 1000, 0, -1, 4] && {_pVar isEqualTo _p0} && {_p1 isEqualTo ["ok", 360, 900, 10, -1, 4]} && {_p2 isEqualTo ["ok", 320, 800, 20, -1, 4]}
-    && {_p3 isEqualTo ["ok", 280, 700, 30, -1, 4]} && {_hidden == "hidden"} && {_soldout isEqualTo ["soldout", 1008, 2520, 30, 0, 4]}
+PMCS_weaponBoxUnits = nil; PMCS_weaponUnitMarkup = nil; PMCS_magBoxUnits = nil; PMCS_magUnitMarkup = nil;
+private _boxes = ["rhs_weap_ak74", "rhs_weap_pkm", "rhs_weap_svds", "uk3cb_saiga12k", "rhs_6b23_ML"] apply {(([_x, call PMCS_fnc_marketNew] call PMCS_fnc_price) select 5)};
+[_p0 isEqualTo ["ok", 400, 3000, 0, -1, 12] && {_pVar isEqualTo _p0} && {_p1 isEqualTo ["ok", 360, 2700, 10, -1, 12]} && {_p2 isEqualTo ["ok", 320, 2400, 20, -1, 12]}
+    && {_p3 isEqualTo ["ok", 280, 2100, 30, -1, 12]} && {_boxes isEqualTo [12, 4, 4, 4, 4]} && {_hidden == "hidden"} && {_soldout isEqualTo ["soldout", 1008, 2520, 30, 0, 4]}
     && {_magPrice isEqualTo ["ok", 20, 450, 0, -1, 30]} && {_magTrace isEqualTo ["ok", 21, 495, 0, -1, 30]}
     && {_magSpecial isEqualTo ["ok", 78, 1800, 0, -1, 30]} && {(_magOwn select 2) == 20 * 4 * 30}
-    && {_magOff isEqualTo ["ok", 18, 405, 10, -1, 30]} && {_cbaWeapon isEqualTo ["ok", 625, 1250, 0, -1, 5]} && {_cbaMag isEqualTo ["ok", 27, 270, 10, -1, 20]},
-    "price: a box of 4 at the base price (4 x 250 = 1 000, no box discount), one weapon 40% of a box (400); a magazine row's box of 30 at its price (15: 450), one +30% (20); a tracer x1.1 (495), special x4 (1 800), also on a Zeus's own price; one discount - the largest of item 10, category 20, market 30; box sizes and single-piece rules from CBA; hidden, sold out"] call TEST_fnc_assert;
+    && {_magOff isEqualTo ["ok", 18, 405, 10, -1, 30]} && {_cbaWeapon isEqualTo ["ok", 500, 1250, 0, -1, 5]} && {(_cbaAk select 5) == 12} && {(_cbaAk select 1) == 500} && {_cbaMag isEqualTo ["ok", 27, 270, 10, -1, 20]},
+    "price: a box at the base price, its size by category (assault rifles 12: 12 x 250 = 3 000, GPMG, DMR, vests 4, no box discount), one weapon or vest +60% (400); box sizes for other categories and markups from CBA; a magazine row's box of 30 at its price (15: 450), one +30% (20); a tracer x1.1 (495), special x4 (1 800), also on a Zeus's own price; one discount - the largest of item 10, category 20, market 30; box sizes and single-piece rules from CBA; hidden, sold out"] call TEST_fnc_assert;
 
 // --- Cart quote -----------------------------------------------------------------------------------------
 _market = call PMCS_fnc_marketNew;
@@ -114,11 +116,11 @@ private _q5 = [[["rhs_weap_akm", "rhs_weap_akm", 1, false]], _market] call PMCS_
 private _q6 = [[["rhs_weap_pkm", "rhs_weap_pkm", 1, true]], _market] call PMCS_fnc_quote;
 private _q7 = [[["rhs_weap_ak74", "MMM_weap_AK74_H1S1", 1, true]], _market] call PMCS_fnc_quote;
 private _q8 = [[[_bakeKey, "rhs_30Rnd_762x39mm_bakelite_U", 1, true], [_bakeKey, _bakeKey, 2, false]], _market] call PMCS_fnc_quote;
-[(_q1 select 0) == 1000 + 2 * 720 && {((_q1 select 1) get "rhs_weap_ak74") == 4} && {(_q1 select 2) == ""} && {(_q2 select 2) == "STR_PMCS_ERR_CART"}
+[(_q1 select 0) == 3000 + 2 * 720 && {((_q1 select 1) get "rhs_weap_ak74") == 12} && {(_q1 select 2) == ""} && {(_q2 select 2) == "STR_PMCS_ERR_CART"}
     && {(_q3 select 2) == "STR_PMCS_ERR_STOCK"} && {(_q4 select 2) == "STR_PMCS_ERR_CART"} && {(_q5 select 2) == "STR_PMCS_ERR_UNAVAILABLE"}
     && {(_q6 select 2) == "STR_PMCS_ERR_STOCK"} && {(_q7 select 2) == "STR_PMCS_ERR_CART"} && {(_q8 select 0) == 1800 + 2 * 20}
     && {((_q8 select 1) get _bakeKey) == 32} && {(([[], _market] call PMCS_fnc_quote) select 2) == "STR_PMCS_ERR_CART"},
-    "quote: a box (4 pieces) and single pieces priced; a special-ammo box (x4) and two ball magazines; a box counts its pieces against the stock (3 left); another item's class (an MMM one included), zero, an empty cart, more than is left and a hidden item are refused"] call TEST_fnc_assert;
+    "quote: a box (12 assault rifles) and single pieces priced; a special-ammo box (x4) and two ball magazines; a box counts its pieces against the stock (3 left); another item's class (an MMM one included), zero, an empty cart, more than is left and a hidden item are refused"] call TEST_fnc_assert;
 
 // --- Gunsmith: class mapping and undo ------------------------------------------------------------------
 private _byKey = {params ["_k"]; ((call PMCS_fnc_upgrades) select {(_x select 0) == _k}) param [0, []]};
@@ -188,10 +190,10 @@ private _balance = (PMCB_accounts get "76561100000000001") select 0;
 private _weapons = (_box getVariable ["TEST_weapons", []]) apply {_x select 0};
 private _bankLog = PMCB_log select (count PMCB_log - 1);
 [(_laptop getVariable "PMCS_mode") == "shop" && {(_laptop getVariable "PMCS_point") == "8Z8N"} && {(_jip select 1) isEqualTo ["PMCS_fnc_terminalInit", 0, _laptop]}
-    && {_balance == 5000 - 1000 - 1440} && {({_x == "rhs_weap_ak74"} count _weapons) == 4} && {({_x == "rhs_weap_pkm"} count _weapons) == 2}
-    && {(_bankLog select 4) == "shop"} && {(_bankLog select 5) == 2440} && {(_bankLog select 8) == "Buyer"}
+    && {_balance == 5000 - 3000 - 1440} && {({_x == "rhs_weap_ak74"} count _weapons) == 12} && {({_x == "rhs_weap_pkm"} count _weapons) == 2}
+    && {(_bankLog select 4) == "shop"} && {(_bankLog select 5) == 4440} && {(_bankLog select 8) == "Buyer"}
     && {([["PMCS_fnc_receive"] call TEST_sent] call TEST_lastOf) select 0 select 2 == "bought"} && {count (PMCS_market get "log") == 1},
-    "purchase: the laptop and box from their modules (point 8Z8N), the personal account charged 2 440 for a box and two single machine guns (PMC Bank journal: shop), the box holds 4 AK-74, the 2 single ones in the point's box, the client told"] call TEST_fnc_assert;
+    "purchase: the laptop and box from their modules (point 8Z8N), the personal account charged 4 440 for a box and two single machine guns (PMC Bank journal: shop), the box holds 12 AK-74, the 2 single ones in the point's box, the client told"] call TEST_fnc_assert;
 
 TEST_messages = [];
 private _before = count (_box getVariable ["TEST_weapons", []]);
@@ -213,7 +215,7 @@ private _far = ([["PMCS_fnc_notify"] call TEST_sent] call TEST_lastOf) select 0;
 _buyer setPos [0, 0, 0];
 [(_poor select 0) == "STR_PMCS_ERR_FUNDS" && {(_notTreasurer select 0) == "STR_PMCS_ERR_NOT_TREASURER"} && {_groupAfter == 600}
     && {(_noBox select 0) == "STR_PMCS_ERR_NO_BOX"} && {(_far select 0) == "STR_PMCS_ERR_FAR"}
-    && {((PMCB_accounts get "76561100000000001") select 0) == 2560} && {count (_box getVariable ["TEST_weapons", []]) == _before + 1},
+    && {((PMCB_accounts get "76561100000000001") select 0) == 560} && {count (_box getVariable ["TEST_weapons", []]) == _before + 1},
     "refused: not enough money, the group's account without being a treasurer, no box standing at the point, too far from the laptop - nothing charged or delivered; a treasurer pays from the group's account"] call TEST_fnc_assert;
 
 // --- Zeus management ---------------------------------------------------------------------------------------
@@ -254,8 +256,8 @@ private _kept = ((PMCS_market get "items") get "rhs_weap_pkm") select 4;
 private _restocked = ((PMCS_market get "items") get "rhs_weap_pkm") select 4;
 [_refused == "STR_PMCS_ERR_ZEUS" && {_left == 1} && {(_stock select 0) == "STR_PMCS_ERR_STOCK"} && {_kept == 1} && {_restocked == 5}
     && {((PMCS_market get "cats") get "штурмовая винтовка") == 15} && {!("assault" in (PMCS_market get "cats"))} && {((PMCS_market get "cats") get "ammo") == 5}
-    && {(PMCS_market get "global") == 0} && {!("box" in PMCS_market)} && {_mags == 10 + 30} && {_paid == 2 * 720 + 10 * round (48 * 1.3 * 0.95) + round (48 * 30 * 0.95)} && {_akAdded == 20} && {_draws == 5} && {_h1Added == 12},
-    "Zeus only: a limited quantity sells down (3 -> 1, then not enough), stays when only the price changes, restocks when the quantity changes; discounts by the table's weapon category and on ammunition (a price type and the old box discount are refused); a price for a magazine row (special x4), a box of it is 30; five MMM boxes of 4, a class drawn per box; a 95% discount is refused"] call TEST_fnc_assert;
+    && {(PMCS_market get "global") == 0} && {!("box" in PMCS_market)} && {_mags == 10 + 30} && {_paid == 2 * 720 + 10 * round (48 * 1.3 * 0.95) + round (48 * 30 * 0.95)} && {_akAdded == 60} && {_draws == 5} && {_h1Added == 36},
+    "Zeus only: a limited quantity sells down (3 -> 1, then not enough), stays when only the price changes, restocks when the quantity changes; discounts by the table's weapon category and on ammunition (a price type and the old box discount are refused); a price for a magazine row (special x4), a box of it is 30; five MMM boxes of 12, a class drawn per box; a 95% discount is refused"] call TEST_fnc_assert;
 
 TEST_messages = [];
 [_buyer, _adminLaptop, "add", ["rhs_weap_asval", 900, 1]] call PMCS_fnc_admin;
@@ -332,12 +334,21 @@ PMCS_ui set ["selCals", []];
 PMCS_ui set ["search", "rhs_weap_ak"];
 private _found = ([] call PMCS_fnc_uiShopList) select 0;
 PMCS_ui set ["search", ""];
-[(_shown select 0) == "rhs_weap_svds" && {!("rhs_weap_akm" in _shown)} && {"uk3cb_saiga12k" in _shown} && {"rhs_weap_ak74" in _shown} && {"x_ItemGPS" in _shown}
+[(_shown select 0) == "rhs_weap_ak74n" && {!("rhs_weap_akm" in _shown)} && {"uk3cb_saiga12k" in _shown} && {"rhs_weap_ak74" in _shown} && {"x_ItemGPS" in _shown}
     && {_onlyAk isEqualTo ["rhs_weap_ak74n", "rhs_weap_ak74"]} && {_mgDmr isEqualTo ["rhs_weap_svds", "rhs_weap_pkm"]} && {_both isEqualTo []}
     && {count _allCals == count _shown} && {_found isEqualTo ["rhs_weap_ak74"]}
     && {(_types get "штурмовая винтовка") == 2} && {(_types get "единый пулемет") == 1} && {(_cals get "5.45x39 АК") == 2} && {(_types get "dmr") == 1}
     && {!("" in _cals)} && {!("-" in _cals)} && {(_types get "custom") == 1},
     "weapons grid: dearest box first, hidden items left out; only the selected categories and calibres stay (both sections must match), nothing selected shows all, every calibre selected keeps the goods without one; search by class; counts per category and calibre, no row for goods without a calibre"] call TEST_fnc_assert;
+
+// Equipment: base vests and their items; filter: the vest type.
+PMCS_ui set ["tab", "gear"];
+PMCS_ui set ["sort", 0];
+([] call PMCS_fnc_uiShopList) params ["_gearRows", "_gearTypes", "_gearCals"];
+[_gearRows isEqualTo ["rhs_6sh92_vsr", "USP_CRYE_BELT_PACK_MC", "rhs_6b23_ML"] && {(_gearTypes get "общевойсковой бж") == 1} && {(_gearTypes get "разгрузка") == 1}
+    && {(_gearTypes get "боевой пояс") == 1} && {count _gearCals == 0} && {!("x_ItemGPS" in _gearRows)}
+    && {(((call PMCS_fnc_catalog) get "items") get "rhs_6b23_ML") select 0 == "gear"} && {(["rhs_6b23_ML", PMCS_market] call PMCS_fnc_price) isEqualTo ["ok", 1120, 2800, 0, -1, 4]},
+    "equipment grid: the base vests and the warbelt the game has (6B23 box of 4 at 700 = 2 800, one 1 120), cheapest first, counted by vest type, no calibre"] call TEST_fnc_assert;
 
 // Ammunition: a card per magazine row of the table; the filter is the calibre.
 PMCS_ui set ["tab", "ammo"];
@@ -414,12 +425,13 @@ call TEST_serve;
 private _cards = (["grid"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_ButtonClear"};
 private _sel = PMCS_ui get "sel";
 [("PMCS_RscLaptop" in TEST_dialogs) && {count _icon == 2} && {_deskLabel isNotEqualTo []} && {_asked} && {(PMCS_ui get "view") == "browser"}
-    && {count _cards == count (PMCS_ui get "shown")} && {count _cards >= 4} && {_sel == "rhs_weap_ak74"}
-    && {(["АК-74"] call TEST_byText) isNotEqualTo []} && {(["detail"] call TEST_region) isNotEqualTo []},
+    && {count _cards == count (PMCS_ui get "shown")} && {count _cards >= 4} && {_sel == "uk3cb_saiga12k"}
+    && {(["Сайга 12К"] call TEST_byText) isNotEqualTo []} && {(["detail"] call TEST_region) isNotEqualTo []},
     "laptop: the desktop with the ION Market icon, the browser asks the server, the grid has a card per item, the cheapest is chosen and shown in the card"] call TEST_fnc_assert;
 
-private _cardTitle = (["АК-74 x4"] call TEST_byText) isNotEqualTo [] && {(["1 000 $"] call TEST_byText) isNotEqualTo []};
-private _buttons = (["box x4"] call TEST_byText) isNotEqualTo [] && {(["single 400 $"] call TEST_byText) isNotEqualTo []}
+[(["select", ["rhs_weap_ak74"]] call TEST_byEvent) select 0] call TEST_click;
+private _cardTitle = (["АК-74 x12"] call TEST_byText) isNotEqualTo [] && {(["3 000 $"] call TEST_byText) isNotEqualTo []};
+private _buttons = (["box x12"] call TEST_byText) isNotEqualTo [] && {(["single 400 $"] call TEST_byText) isNotEqualTo []}
     && {(["add", ["box"]] call TEST_byEvent) isNotEqualTo []} && {(["add", ["unit"]] call TEST_byEvent) isNotEqualTo []};
 private _initial = +(PMCS_ui get "shown");
 [(["add", ["box"]] call TEST_byEvent) select 0] call TEST_click;
@@ -436,10 +448,10 @@ call TEST_serve;
 private _inBox = (_shopBox getVariable ["TEST_weapons", []]) apply {_x select 0};
 [_cardTitle && {_buttons} && {count _mmmChip == 1} && {(_mmmChip select 0) getVariable ["TEST_text", ""] == "MMM"} && {_randomNote}
     && {_cart isEqualTo [["rhs_weap_ak74", "rhs_weap_ak74", 1, true], ["rhs_weap_ak74", "MMM_weap_AK74_H*S*", 2, false]]}
-    && {((_request select 0) select 2) == "personal"} && {((PMCB_accounts get "76561100000000002") select 0) == 10000 - 1000 - 800}
-    && {({_x == "rhs_weap_ak74"} count _inBox) == 4} && {({_x in ["MMM_weap_AK74_H1S1", "MMM_weap_AK74_H2S1"]} count _inBox) == 2}
+    && {((_request select 0) select 2) == "personal"} && {((PMCB_accounts get "76561100000000002") select 0) == 10000 - 3000 - 800}
+    && {({_x == "rhs_weap_ak74"} count _inBox) == 12} && {({_x in ["MMM_weap_AK74_H1S1", "MMM_weap_AK74_H2S1"]} count _inBox) == 2}
     && {({_x == "MMM_weap_AK74_H1S1"} count _inBox) == 1} && {TEST_randomDraws - _drawsBefore == 1 + 2} && {(PMCS_ui get "cart") isEqualTo []},
-    "shop: the card reads 'АК-74 x4' and the box price; the main button adds a box, the second one single pieces (400 each); one 'MMM' version, two single pieces of it drawn one by one; check out pays 1 800, the box gets 4 + 2, the cart empties"] call TEST_fnc_assert;
+    "shop: the card reads 'АК-74 x12' and the box price; the main button adds a box, the second one single pieces (400 each); one 'MMM' version, two single pieces of it drawn one by one; check out pays 3 800, the box gets 12 + 2, the cart empties"] call TEST_fnc_assert;
 
 // Filters: a click on a row selects it (only selected rows stay), another click lets it go.
 private _toggle = {params ["_kind", "_key", "_on"]; [((["filter", [_kind, _key, _on]] call TEST_byEvent)) select 0] call TEST_click};
@@ -459,6 +471,11 @@ private _allTicked = (PMCS_ui get "shown") isEqualTo _initial && {(["filter", ["
 private _noAssault = +(PMCS_ui get "shown");
 [(["filterNone"] call TEST_byEvent) select 0] call TEST_click;
 private _cleared = (PMCS_ui get "shown") isEqualTo _initial && {(PMCS_ui get "selTypes") isEqualTo []} && {(PMCS_ui get "selCals") isEqualTo []};
+// The equipment section button shows the vests; the weapons button brings the weapons back.
+[(["tab", ["gear"]] call TEST_byEvent) select 0] call TEST_click;
+private _gearShown = +(PMCS_ui get "shown");
+[(["tab", ["weapons"]] call TEST_byEvent) select 0] call TEST_click;
+private _sections = "rhs_6b23_ML" in _gearShown && {!("rhs_weap_ak74" in _gearShown)} && {(PMCS_ui get "shown") isEqualTo _initial};
 {(PMCS_market get "items") set [_x select 0, [false, _x select 1, 0, -1, -1]]} forEach [[_bakeKey, 15], ["rhs_30Rnd_762x39mm_polymer_89", 20]];
 call PMCS_fnc_broadcast;
 call TEST_serve;
@@ -485,7 +502,7 @@ private _movedOn = PMCS_ui get "mag";
 (PMCS_market get "items") set [_bakeKey, [false, 15, 0, -1, -1]];
 call PMCS_fnc_broadcast;
 call TEST_serve;
-[_selRow && {_onlyAk isEqualTo ["rhs_weap_ak74", "rhs_weap_ak74n"]} && {_onlyMg isEqualTo ["rhs_weap_pkm"]} && {_allBack} && {_allTicked} && {_cleared}
+[_selRow && {_onlyAk isEqualTo ["rhs_weap_ak74", "rhs_weap_ak74n"]} && {_onlyMg isEqualTo ["rhs_weap_pkm"]} && {_allBack} && {_allTicked} && {_cleared} && {_sections}
     && {!("rhs_weap_ak74" in _noAssault)} && {"rhs_weap_pkm" in _noAssault}
     && {_rowChips isEqualTo [1, 1]} && {_firstRow == _bakeKey} && {_movedOn == _polyKey} && {_bakeTypes isEqualTo [1, 1, 1, 0]} && {_polyType == _polyKey}
     && {_specialPrice isNotEqualTo []}
@@ -522,7 +539,7 @@ private _beforeClear = +(PMCS_ui get "cart");
     && {_onlyAkmRows isEqualTo [_bakeKey, _polyKey]} && {_fits} && {_tracePrice} && {_rows == 3} && {_three == 3}
     && {_afterRemove isEqualTo [_polyKey, "rhs_30Rnd_762x39mm_bakelite_tracer"]}
     && {(_boxMags get _polyKey) == 60} && {(_boxMags get "rhs_30Rnd_762x39mm_bakelite_tracer") == 30}
-    && {((PMCB_accounts get "76561100000000002") select 0) == 8200 - 2 * 600 - 495}
+    && {((PMCB_accounts get "76561100000000002") select 0) == 6200 - 2 * 600 - 495}
     && {_beforeClear isEqualTo [[_polyKey, _polyKey, 1, true]]} && {(PMCS_ui get "cart") isEqualTo []},
     "ammunition tab: a card per magazine row ('30 патр. Бакелит x30', the ball box price), the calibre filter, the row's card with what it fits and its ammo types (tracer x1.1: 495 a box); the cart window changes and removes lines; check out delivers boxes of 30"] call TEST_fnc_assert;
 
@@ -552,10 +569,13 @@ private _pkmRows = [] call TEST_tableRows;
 private _magRows = [] call TEST_tableRows;
 ["set", ["acal", "7.62x39 АК"]] call PMCS_fnc_uiAdmin;
 private _magRows762 = [] call TEST_tableRows;
+["set", ["asection", "gear"]] call PMCS_fnc_uiAdmin;
+private _gearAdminRows = [] call TEST_tableRows;
 ["set", ["asection", "weapon"]] call PMCS_fnc_uiAdmin;
 _table = ((["table"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_List"}) select 0;
 private _calColumns = count _pkmRows == 2 && {"7.62x54R ПКМ" in ((_pkmRows select 1) select 0)} && {"Единые пулемёты" in ((_pkmRows select 1) select 0)}
-    && {count _magRows == 6} && {count _magRows762 == 3}
+    && {count _magRows == 6} && {count _magRows762 == 3} && {count _gearAdminRows == 4}
+    && {(_gearAdminRows findIf {"rhs_6b23_ML" in (_x select 0) && {"Общевойсковые бронежилеты" in (_x select 0)} && {"4 × 2 800 $" in (_x select 0)}}) > 0}
     && {(_magRows762 findIf {"7.62x39 АК" in (_x select 0) && {((_x select 0) findIf {"STR_PMCS_AMMO_special" in _x}) >= 0} && {"30 патр. Бакелит" in (_x select 0)}}) > 0};
 private _akRow = -1;
 private _cellData = _table getVariable ["TEST_cells", createHashMap];
@@ -695,20 +715,41 @@ private _back = (player getVariable "TEST_wslots") select 0;
     && {(player getVariable ["TEST_inv", []]) isEqualTo ["ar_things_weapon_parts_med"]},
     "gunsmith weapon undo: the AK-74MR offers 'undo' (free, always on); two clicks give the AK-74 back with its optic, no money taken, no parts given back or taken"] call TEST_fnc_assert;
 
-// The upgrade tree window: every upgrade of weapons or vests, or only the chosen item's family.
+// The upgrade tree window: families on the left, the chosen family drawn as cards and lines.
 [(["tree", [true]] call TEST_byEvent) select 0] call TEST_click;
-private _treeList = {(((["treeWin"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_List"}) select 0) getVariable ["TEST_rows", []]};
-private _weaponRows = count ([] call _treeList);
-[(["treeMine", [true]] call TEST_byEvent) select 0] call TEST_click;
-private _akRows = ([] call _treeList) apply {(_x select 0) select 1};
+private _treeList = {((["treeWin"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_List"}) select 0};
+private _treeTexts = {((["treeWin"] call TEST_region) apply {_x getVariable ["TEST_text", ""]}) select {_x != ""}};
+private _familyRows = ([] call _treeList) getVariable ["TEST_rows", []];
+private _akFamily = PMCS_ui get "treeFamily";
+private _akCards = [] call _treeTexts;
+private _cardX = {params ["_name"]; ((((["treeWin"] call TEST_region) select {(_x getVariable ["TEST_text", ""]) == _name && {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_TextBold"}}) select 0) getVariable ["TEST_pos", [0]]) select 0};
+private _columnsOk = (["АК-74"] call _cardX) < (["АК-74 + ГП-25"] call _cardX) && {(["АК-74 + ГП-25"] call _cardX) < (["АК-74МР + ГП-25"] call _cardX)}
+    && {(["АК-74"] call _cardX) == (["АКС-74"] call _cardX)};
+private _akListRow = ([] call _treeList) getVariable ["TEST_cur", -1];
+private _akListOk = ([[] call _treeList, [_akListRow, 0]] call TEST_fnc_lnbData) == "АК-74";
+private _lines = count ((["treeWin"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_Text" && {((_x getVariable ["TEST_pos", [0, 0, 0, 0]]) select 3) < 0.004}});
+// Another family from the list.
+private _list = [] call _treeList;
+private _cellData = _list getVariable ["TEST_cells", createHashMap];
+private _m249Row = -1;
+{if ((_cellData get _x) == "M249") then {_m249Row = parseNumber (((_x select [1, count _x - 2]) splitString ",") select 0)}} forEach keys _cellData;
+[_list, _m249Row] call (_list getVariable "TEST_eh_LBSelChanged");
+private _m249Cards = [] call _treeTexts;
 [(["treeSide", [true]] call TEST_byEvent) select 0] call TEST_click;
-private _vestMine = count ([] call _treeList);
-[(["treeMine", [false]] call TEST_byEvent) select 0] call TEST_click;
-private _vestRows = count ([] call _treeList);
+private _vestFamily = PMCS_ui get "treeFamily";
+private _vestCards = [] call _treeTexts;
+// One cost line per upgrade into a card of the family; undo entries are not drawn.
+private _gearNames = (call PMCS_fnc_gearUpgrades) apply {_x select 1};
+private _vestNames = (((["treeWin"] call TEST_region) select {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_TextBold"}) apply {_x getVariable ["TEST_text", ""]}) select {_x in _gearNames};
+private _vestLines = {(_x getVariable ["TEST_ctrlClass", ""]) == "PMCS_Struct"} count (["treeWin"] call TEST_region);
+private _vestWant = {(_x select 5) != "rev" && {(_x select 1) in _vestNames}} count (call PMCS_fnc_gearUpgrades);
 [(["tree", [false]] call TEST_byEvent) select 0] call TEST_click;
-[_weaponRows == 1 + 72 && {_vestRows == 1 + 70} && {"→ АК-74МР" in _akRows} && {"→ АК-74 + ГП-25" in _akRows} && {count _akRows < _weaponRows}
-    && {_vestMine >= 1} && {(["treeWin"] call TEST_region) isEqualTo []},
-    "upgrade tree: the window lists all 72 weapon upgrades or all 70 vest upgrades, or only the chosen weapon's family (the AK-74's GP-25 and AK-74MR among them); it closes"] call TEST_fnc_assert;
+[_akFamily == "АК-74" && {"АК-74МР + ГП-25" in _akCards} && {"АК-74 + ГП-25" in _akCards} && {"АКС-74" in _akCards} && {_lines >= 3 * 4} && {_columnsOk} && {_akListOk}
+    && {(_familyRows findIf {((_x select 0) select 0) == "  АК-74"}) >= 0} && {(((_familyRows select 0) select 0) select 0) == "Штурмовые винтовки"}
+    && {_m249Row > 0} && {"M249 PIP LCBA" in _m249Cards} && {!("АК-74МР" in _m249Cards)}
+    && {_vestFamily != ""} && {_vestWant > 0} && {_vestLines == _vestWant} && {_vestCards findIf {"IOTV" in _x || {"6Б" in _x} || {"CPC" in _x} || {"JPC" in _x} || {"MBAV" in _x} || {"Лифчик" in _x} || {"SPCS" in _x} || {"6Ш92" in _x}} >= 0}
+    && {(["treeWin"] call TEST_region) isEqualTo []},
+    "upgrade tree: the families by category on the left (the chosen AK-74's first), the family drawn as cards (AK-74, AKS-74, the GP-25 and AK-74MR versions) in columns by step, joined by lines, the family picked in the list; another family from the list (M249); the vests, one cost line per upgrade and no undo lines; it closes"] call TEST_fnc_assert;
 
 // --- The gunsmith: the vest worn --------------------------------------------------------------------
 private _gearKeys = (["rhs_6b23_ML"] call PMCS_fnc_gearUpgradesFor) apply {(_x select 0) select 0};

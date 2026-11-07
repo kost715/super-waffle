@@ -2,6 +2,34 @@
 <Project name="PMC Shop">
     <Package name="Shop">
         <Container name="Main">
+            <Key ID="STR_PMCS_ADDRESS_GEAR">
+                <Original>market.ion-logistics / shop / equipment / vests</Original>
+                <Russian>market.ion-logistics / магазин / экипировка / жилеты</Russian>
+            </Key>
+            <Key ID="STR_PMCS_DETAIL_UPGRADES">
+                <Original>The gunsmith has %1 upgrade(s) for it</Original>
+                <Russian>У техника улучшений для него: %1</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_WEAPON_BOX">
+                <Original>Weapons per box (other categories)</Original>
+                <Russian>Оружия в ящике (прочие категории), шт.</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_WEAPON_BOX_TIP">
+                <Original>Assault rifles 12, infantry rifles 8, light MGs 5, GPMGs 4, sniper rifles 4, DMRs 4, launchers 5 come from the table; this is for the rest, vests and items a Zeus adds</Original>
+                <Russian>Штурмовые 12, пехотные 8, лёгкие пулемёты 5, единые 4, снайперские 4, DMR 4, гранатомёты 5 — по таблице; это для остальных, жилетов и добавленного Зевсом</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_WEAPON_UNIT">
+                <Original>Single weapon or vest: markup, %</Original>
+                <Russian>Оружие и жилеты штучно: надбавка, %</Russian>
+            </Key>
+            <Key ID="STR_PMCS_SET_WEAPON_UNIT_TIP">
+                <Original>60: one piece costs its box price per piece + 60%</Original>
+                <Russian>60 — одна штука стоит цену штуки в ящике + 60%</Russian>
+            </Key>
+            <Key ID="STR_PMCS_TREE_NOTE">
+                <Original>Every upgrade can be undone for free at the gunsmith: weapon parts are not returned; a vest gives back the items it took.</Original>
+                <Russian>Любое улучшение можно бесплатно откатить у техника: детали оружия не возвращаются, у жилета возвращаются взятые предметы.</Russian>
+            </Key>
             <Key ID="STR_PMCS_FILTER_ALL">
                 <Original>Select all</Original>
                 <Russian>Выбрать все</Russian>
@@ -37,34 +65,6 @@
             <Key ID="STR_PMCS_TREE_VESTS">
                 <Original>Vests</Original>
                 <Russian>Жилеты</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_ALL">
-                <Original>Everything</Original>
-                <Russian>Всё</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_MINE">
-                <Original>Chosen item</Original>
-                <Russian>Для выбранного</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_FROM">
-                <Original>From</Original>
-                <Russian>Из</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_TO">
-                <Original>To</Original>
-                <Russian>В</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_KIND">
-                <Original>Kind</Original>
-                <Russian>Вид</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_COST">
-                <Original>Cost</Original>
-                <Russian>Стоимость</Russian>
-            </Key>
-            <Key ID="STR_PMCS_TREE_NOTE">
-                <Original>Every upgrade can be undone for free: weapon parts are not returned; a vest gives back the items it took.</Original>
-                <Russian>Любое улучшение можно бесплатно откатить: детали оружия не возвращаются, у жилета возвращаются взятые предметы.</Russian>
             </Key>
             <Key ID="STR_PMCS_TECH_NOTE">
                 <Original>The weapon is taken from your hands, back or holster, the vest is the one you wear; parts and items come from your inventory. Attachments and loaded magazines move to the new weapon where they fit, the vest's contents move to the new vest. Any upgrade can be undone for free.</Original>
@@ -337,22 +337,6 @@
             <Key ID="STR_PMCS_COL_UNIT">
                 <Original>Single</Original>
                 <Russian>Штучно</Russian>
-            </Key>
-            <Key ID="STR_PMCS_SET_WEAPON_BOX">
-                <Original>Weapons per box</Original>
-                <Russian>Оружия в ящике, шт.</Russian>
-            </Key>
-            <Key ID="STR_PMCS_SET_WEAPON_BOX_TIP">
-                <Original>Also for items and backpacks a Zeus adds</Original>
-                <Russian>Также для предметов и рюкзаков, добавленных Зевсом</Russian>
-            </Key>
-            <Key ID="STR_PMCS_SET_WEAPON_UNIT">
-                <Original>Single weapon, % of a box</Original>
-                <Russian>Оружие штучно, % от цены ящика</Russian>
-            </Key>
-            <Key ID="STR_PMCS_SET_WEAPON_UNIT_TIP">
-                <Original>40: one piece costs 40% of a box</Original>
-                <Russian>40 — одна штука стоит 40% ящика</Russian>
             </Key>
             <Key ID="STR_PMCS_SET_MAG_BOX">
                 <Original>Magazines per box</Original>

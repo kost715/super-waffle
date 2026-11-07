@@ -21,7 +21,7 @@ private _pos = if (isNull _parent) then {[_sx + _fx * _sw, _sy + _fy * _sh, _fw 
 };
 _ctrl ctrlSetPosition _pos;
 _ctrl ctrlCommit 0;
-if (_class == "PMCS_Group") then {_ctrl setVariable ["PMCS_origin", [_fx, _fy]]};
+if (_class in ["PMCS_Group", "PMCS_GroupWide"]) then {_ctrl setVariable ["PMCS_origin", [_fx, _fy]]};
 if (_class == "PMCS_Struct") then {
     _ctrl ctrlSetStructuredText parseText format ["<t size='%1'>%2</t>", _font * _sh / 0.03, _text];
 } else {

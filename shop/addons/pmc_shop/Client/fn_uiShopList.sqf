@@ -6,6 +6,7 @@
 //              table's weapon category and the calibre
 //   ammunition magazine rows of the table (one per calibre and magazine) and magazines a
 //              Zeus added; filter: the calibre
+//   equipment  base vests and their single items (warbelt, medic bag); filter: the vest type
 // Counts are taken before the filters, so every row shows how many goods it stands for.
 private _market = PMCS_ui get "market";
 private _catalog = call PMCS_fnc_catalog;
@@ -15,9 +16,12 @@ private _sort = PMCS_ui get "sort";
 private _types = createHashMap;
 private _cals = createHashMap;
 private _rows = [];
-private _keys = (_catalog get "order") select {((((_catalog get "items") get _x) select 0) == "mag") isEqualTo _ammo};
+// The tab's kinds: weapons (and items a Zeus added), magazines, vests.
+private _kinds = switch (PMCS_ui get "tab") do {case "ammo": {["mag"]}; case "gear": {["gear"]}; default {["weapon"]}};
+private _keys = (_catalog get "order") select {((((_catalog get "items") get _x) select 0) in _kinds)};
+private _gearTab = (PMCS_ui get "tab") == "gear";
 {
-    if (((_y select 0) == "mag") isEqualTo _ammo) then {_keys pushBack _x};
+    if (!_gearTab && {((_y select 0) == "mag") isEqualTo _ammo}) then {_keys pushBack _x};
 } forEach (_market getOrDefault ["custom", createHashMap]);
 {
     private _key = _x;

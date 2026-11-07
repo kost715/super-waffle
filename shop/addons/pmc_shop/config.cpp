@@ -6,7 +6,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = 2.14;
         requiredAddons[] = {"A3_Ui_F", "A3_Modules_F", "cba_xeh", "cba_settings", "pmc_bank"};
-        version = "0.6.1";
+        version = "0.7.0";
     };
 };
 

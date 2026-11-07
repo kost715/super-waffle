@@ -175,30 +175,31 @@ switch (_event) do {
             if (_short) then {["PMCS_TextCenter", [0.81, _y + 0.104, 0.165, 0.024], _group, "tech", localize "STR_PMCS_TECH_SHORT", 0.014, "red"] call _make};
         } forEach _entries;
     };
-    // The upgrade tree window: every upgrade of the weapons or the vests, a family after
-    // another, or only the family of the weapon or vest chosen on the left.
+    // The upgrade tree window: the families of weapons or vests on the left (by category),
+    // the chosen family drawn on the right as cards joined by lines, the way back to the
+    // left (base), each card with what the upgrade into it costs.
     case "tree": {
         if (_args isNotEqualTo []) then {PMCS_ui set ["treeOpen", _args select 0]};
         ["treeWin"] call PMCS_fnc_uiClear;
         if !(PMCS_ui getOrDefault ["treeOpen", false]) exitWith {};
         private _gearSide = PMCS_ui getOrDefault ["treeGear", (PMCS_ui getOrDefault ["techSlot", 0]) == 3];
         PMCS_ui set ["treeGear", _gearSide];
-        private _onlyMine = PMCS_ui getOrDefault ["treeMine", false];
-        ["PMCS_Text", [0.11, 0.155, 0.78, 0.77], controlNull, "treeWin", "", 0.02, "", [0, 0, 0, 0.25]] call _make;
-        ["PMCS_Text", [0.115, 0.15, 0.77, 0.77], controlNull, "treeWin", "", 0.02, "", "white"] call _make;
-        ["PMCS_TextBold", [0.13, 0.16, 0.4, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_TITLE", 0.026] call _make;
+        ["PMCS_Text", [0.075, 0.155, 0.86, 0.79], controlNull, "treeWin", "", 0.02, "", [0, 0, 0, 0.25]] call _make;
+        ["PMCS_Text", [0.08, 0.15, 0.85, 0.79], controlNull, "treeWin", "", 0.02, "", "white"] call _make;
+        ["PMCS_TextBold", [0.095, 0.16, 0.3, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_TITLE", 0.026] call _make;
         {
-            _x params ["_label", "_event", "_value", "_x0", "_on"];
-            [["PMCS_Button", [_x0, 0.212, 0.12, 0.036], controlNull, "treeWin", localize _label, 0.017, ["text", "white"] select _on, ["photo", "navy"] select _on] call _make,
-                _event, [_value]] call _click;
-        } forEach [["STR_PMCS_TREE_WEAPONS", "treeSide", false, 0.13, !_gearSide], ["STR_PMCS_TREE_VESTS", "treeSide", true, 0.255, _gearSide],
-            ["STR_PMCS_TREE_ALL", "treeMine", false, 0.43, !_onlyMine], ["STR_PMCS_TREE_MINE", "treeMine", true, 0.555, _onlyMine]];
-        // Rows: [from, to, kind, cost] in the tables' order, undo entries left out.
-        private _rows = if (_gearSide) then {
+            _x params ["_label", "_value", "_x0"];
+            private _on = _value isEqualTo _gearSide;
+            [["PMCS_Button", [_x0, 0.165, 0.1, 0.034], controlNull, "treeWin", localize _label, 0.017, ["text", "white"] select _on, ["photo", "navy"] select _on] call _make,
+                "treeSide", [_value]] call _click;
+        } forEach [["STR_PMCS_TREE_WEAPONS", false, 0.36], ["STR_PMCS_TREE_VESTS", true, 0.465]];
+        // Edges (upgrades only): [from, to, kind, cost, category, from state, to state, from class, to class].
+        private _classOf = {params ["_pairs", "_i"]; private _p = _pairs select {!("*" in (_x select _i))}; if (_p isEqualTo []) then {""} else {(_p select 0) select _i}};
+        private _edges = if (_gearSide) then {
             ((call PMCS_fnc_gearUpgrades) select {(_x select 5) != "rev"}) apply {
-                private _cost = (([_x] call PMCS_fnc_gearTake) apply {format ["%1 ×%2", (_x select 0) call PMCS_fnc_itemTitle, _x select 1]});
+                private _cost = ([_x] call PMCS_fnc_gearTake) apply {format ["%1 ×%2", (_x select 0) call PMCS_fnc_itemTitle, _x select 1]};
                 if ((_x select 6) > 0) then {_cost = [(_x select 6) call _money] + _cost};
-                [_x select 1, _x select 2, localize (["STR_PMCS_KIND_ROLE", "STR_PMCS_KIND_BELT"] select ((_x select 5) == "belt")), _cost joinString ", ", _x select 3, _x select 4]
+                [_x select 1, _x select 2, ["role", "belt"] select ((_x select 5) == "belt"), _cost joinString ", ", _x select 14, _x select 12, _x select 13, _x select 3, _x select 4]
             }
         } else {
             ((call PMCS_fnc_upgrades) select {(_x select 3) != "rev"}) apply {
@@ -206,53 +207,187 @@ switch (_event) do {
                 private _cost = [(_x select 5) call _money];
                 {if ((_parts select _forEachIndex) > 0) then {_cost pushBack format ["%1 %2", localize _x, _parts select _forEachIndex]}} forEach
                     ["STR_PMCS_PART_SHORT_LOW", "STR_PMCS_PART_SHORT_MED", "STR_PMCS_PART_SHORT_HIGH"];
-                [_x select 1, _x select 2, localize (["STR_PMCS_KIND_UP", "STR_PMCS_KIND_GL"] select ((_x select 3) == "gl")), _cost joinString ", ", "", ""]
+                [_x select 1, _x select 2, ["up", "gl"] select ((_x select 3) == "gl"), _cost joinString ", ", _x select 10, _x select 8, _x select 9,
+                    [_x select 7, 0] call _classOf, [_x select 7, 1] call _classOf]
             }
         };
-        if (_onlyMine) then {
-            // The family: every name linked by an upgrade, starting from the chosen item.
-            private _carried = [primaryWeapon player, secondaryWeapon player, handgunWeapon player, vest player];
-            private _class = _carried select (PMCS_ui getOrDefault ["techSlot", 0]);
-            private _start = if (_gearSide) then {
-                (((call PMCS_fnc_gearUpgrades) select {toLower (_x select 3) == toLower _class}) apply {_x select 1}) param [0, ""]
-            } else {
-                (((call PMCS_fnc_upgrades) select {([_class, _x select 7] call PMCS_fnc_upgradeTarget) != ""}) apply {_x select 1}) param [0, ""]
-            };
-            private _family = [_start];
-            private _grew = true;
-            while {_grew} do {
-                _grew = false;
-                {
-                    if (((_x select 0) in _family) isNotEqualTo ((_x select 1) in _family)) then {_family pushBackUnique (_x select 0); _family pushBackUnique (_x select 1); _grew = true};
-                } forEach _rows;
-            };
-            _rows = _rows select {(_x select 0) in _family};
-        };
-        private _list = ["PMCS_List", [0.13, 0.26, 0.74, 0.6], controlNull, "treeWin", "", 0.017] call _make;
-        _list lnbSetColumnsPos [0, 0.24, 0.5, 0.66];
-        _list lnbAddRow ([localize "STR_PMCS_TREE_FROM", localize "STR_PMCS_TREE_TO", localize "STR_PMCS_TREE_KIND", localize "STR_PMCS_TREE_COST"]);
-        _list lnbSetColor [[0, 0], ["grey"] call PMCS_fnc_uiColor];
-        private _last = "";
+        // Families: names joined by upgrades; each named after its root (no upgrade into it).
+        private _familyOf = createHashMap;
         {
-            _x params ["_from", "_to", "_kind", "_cost"];
-            _list lnbAddRow [[_from, ""] select (_from == _last), "→ " + _to, _kind, _cost];
-            _last = _from;
-        } forEach _rows;
-        if (_rows isEqualTo []) then {_list lnbAddRow ["", localize "STR_PMCS_TECH_NONE", "", ""]};
-        ["PMCS_Text", [0.13, 0.865, 0.6, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_NOTE", 0.015, "grey"] call _make;
-        [["PMCS_Button", [0.76, 0.865, 0.11, 0.042], controlNull, "treeWin", localize "STR_PMCS_CLOSE", 0.018, "text", "photo"] call _make, "tree", [false]] call _click;
+            _x params ["_a", "_b"];
+            private _fa = _familyOf getOrDefault [_a, [_a]];
+            private _fb = _familyOf getOrDefault [_b, [_b]];
+            if !(_fa isEqualTo _fb) then {
+                {_fa pushBackUnique _x} forEach _fb;
+                {_familyOf set [_x, _fa]} forEach _fa;
+            } else {_familyOf set [_a, _fa]; _familyOf set [_b, _fa]};
+        } forEach _edges;
+        private _targets = _edges apply {_x select 1};
+        private _families = [];
+        {
+            private _names = _y;
+            if ((_families findIf {(_x select 2) isEqualTo _names}) < 0) then {
+                private _roots = _names select {!(_x in _targets)};
+                _roots sort true;
+                private _root = [_roots param [0, _names select 0], _names select 0] select (_roots isEqualTo []);
+                private _category = ((_edges select {(_x select 0) == _root}) param [0, ["", "", "", "", ""]]) select 4;
+                _families pushBack [_category, _root, _names];
+            };
+        } forEach _familyOf;
+        // The chosen item's family first time round.
+        private _carried = [primaryWeapon player, secondaryWeapon player, handgunWeapon player, vest player];
+        private _current = _carried select (PMCS_ui getOrDefault ["techSlot", 0]);
+        private _currentName = if (_gearSide) then {
+            (((call PMCS_fnc_gearUpgrades) select {toLower (_x select 3) == toLower _current}) apply {_x select 1}) param [0, ""]
+        } else {
+            (((call PMCS_fnc_upgrades) select {([_current, _x select 7] call PMCS_fnc_upgradeTarget) != ""}) apply {_x select 1}) param [0, ""]
+        };
+        private _chosen = PMCS_ui getOrDefault ["treeFamily", ""];
+        if ((_families findIf {(_x select 1) == _chosen}) < 0) then {
+            private _at = _families findIf {_currentName in (_x select 2)};
+            _chosen = if (_at >= 0) then {(_families select _at) select 1} else {""};
+        };
+        // The list: categories in the shop's order, families by name.
+        private _order = ("true" configClasses (configFile >> "CfgPMCShop" >> "Categories")) apply {getText (_x >> "source")};
+        private _sorted = _families apply {[((_order find (_x select 0)) + 1000) % 1000, _x select 0, _x select 1, _x]};
+        _sorted sort true;
+        if (_chosen == "" && {_sorted isNotEqualTo []}) then {_chosen = (_sorted select 0) select 2};
+        PMCS_ui set ["treeFamily", _chosen];
+        private _list = ["PMCS_List", [0.095, 0.215, 0.2, 0.66], controlNull, "treeWin", "", 0.016] call _make;
+        _list lnbSetColumnsPos [0];
+        private _lastCategory = "-";
+        {
+            _x params ["", "_category", "_root"];
+            if (_category != _lastCategory) then {
+                private _head = _list lnbAddRow [[_category] call PMCS_fnc_categoryName];
+                _list lnbSetColor [[_head, 0], ["grey"] call PMCS_fnc_uiColor];
+                _list lnbSetData [[_head, 0], ""];
+                _lastCategory = _category;
+            };
+            private _row = _list lnbAddRow ["  " + _root];
+            _list lnbSetData [[_row, 0], _root];
+            if (_root == _chosen) then {_list lnbSetCurSelRow _row};
+        } forEach _sorted;
+        _list ctrlAddEventHandler ["LBSelChanged", {
+            params ["_ctrl", "_row"];
+            private _family = _ctrl lnbData [_row, 0];
+            if (_family != "" && {_family != (PMCS_ui get "treeFamily")}) then {PMCS_ui set ["treeFamily", _family]; ["tree"] call PMCS_fnc_uiTech};
+        }];
+        // The chosen family as a diagram: a column per step from its base version.
+        private _family = (_families select {(_x select 1) == _chosen}) param [0, ["", "", []]];
+        private _names = +(_family select 2);
+        private _famEdges = _edges select {(_x select 0) in _names};
+        private _depth = createHashMap;
+        {_depth set [_x, 0]} forEach _names;
+        for "_pass" from 1 to (count _names) do {
+            {_depth set [_x select 1, (_depth get (_x select 1)) max ((_depth get (_x select 0)) + 1)]} forEach _famEdges;
+        };
+        private _columns = [];
+        {
+            private _d = _depth get _x;
+            while {count _columns <= _d} do {_columns pushBack []};
+            (_columns select _d) pushBack _x;
+        } forEach _names;
+        private _rowOf = createHashMap;
+        {
+            private _col = _x;
+            private _keyed = _col apply {
+                private _name = _x;
+                private _parents = (_famEdges select {(_x select 1) == _name}) apply {_rowOf getOrDefault [_x select 0, 0]};
+                [if (_parents isEqualTo []) then {0} else {selectMin _parents}, _name, _parents]
+            };
+            _keyed sort true;
+            private _next = 0;
+            {
+                _x params ["_want", "_name", "_parents"];
+                private _row = _next max ([_next, _want] select (_parents isNotEqualTo []));
+                _rowOf set [_name, _row];
+                _next = _row + 1;
+            } forEach _keyed;
+        } forEach _columns;
+        // Card size: room for one line per upgrade leading into the card.
+        private _maxIn = 0;
+        {private _n = _x; _maxIn = _maxIn max ({(_x select 1) == _n} count _famEdges)} forEach _names;
+        private _w = 0.17;
+        private _h = 0.08 + 0.036 * _maxIn;
+        private _gapX = 0.045;
+        private _gapY = 0.016;
+        private _x0 = 0.31;
+        private _y0 = 0.215;
+        private _group = ["PMCS_GroupWide", [_x0, _y0, 0.605, 0.66], controlNull, "treeWin"] call _make;
+        private _pos = {params ["_name"]; [_x0 + 0.008 + (_depth get _name) * (_w + _gapX), _y0 + 0.008 + (_rowOf get _name) * (_h + _gapY)]};
+        private _stateOf = createHashMap;
+        private _classAt = createHashMap;
+        {
+            _stateOf set [_x select 0, _x select 5]; _stateOf set [_x select 1, _x select 6];
+            if !((_x select 0) in _classAt) then {_classAt set [_x select 0, _x select 7]};
+            _classAt set [_x select 1, _x select 8];
+        } forEach _famEdges;
+        private _stripe = {
+            params ["_state"];
+            switch (true) do {
+                case (_state == "базовый"): {[0.184, 0.478, 0.243, 1]};
+                case ("UGL" in _state || {"гренадер" in _state}): {[0.71, 0.337, 0.11, 1]};
+                case ("пояс" in _state || {"дооснащен" in _state}): {[0.541, 0.392, 0.086, 1]};
+                case (_state == "продвинутый" || {_state in ["стрелок", "командир"]}): {[0.184, 0.373, 0.62, 1]};
+                case (_state == "уникальный" || {_state == "медик"}): {[0.42, 0.247, 0.569, 1]};
+                default {[0.478, 0.51, 0.522, 1]};
+            }
+        };
+        // Lines first, under the cards: right edge of the source, a turn halfway, left edge of the target.
+        // Each line gets its own turn in the gap and its own height at both ends, so lines
+        // that meet or part are told apart by colour.
+        {
+            _x params ["_from", "_to", "_kind"];
+            ([_from] call _pos) params ["_ax", "_ay"];
+            ([_to] call _pos) params ["_bx", "_by"];
+            private _colour = [[0.184, 0.435, 0.561, 1], [0.769, 0.318, 0.122, 1]] select (_kind in ["gl", "belt"]);
+            private _edge = _x;
+            private _gap = _famEdges select {(_depth get (_x select 0)) == (_depth get _from)};
+            private _outs = _famEdges select {(_x select 0) == _from};
+            private _ins = _famEdges select {(_x select 1) == _to};
+            private _y1 = _ay + 0.016 + 0.008 * (_outs find _edge);
+            private _y2 = _by + 0.016 + 0.008 * (_ins find _edge);
+            private _mx = _ax + _w + _gapX * ((_gap find _edge) + 1) / ((count _gap) + 1);
+            ["PMCS_Text", [_ax + _w, _y1, _gapX / 2, 0.003], _group, "treeWin", "", 0.02, "", _colour] call _make;
+            ["PMCS_Text", [_mx, (_y1 min _y2), 0.002, abs (_y2 - _y1) + 0.003], _group, "treeWin", "", 0.02, "", _colour] call _make;
+            ["PMCS_Text", [_mx, _y2, _bx - _mx, 0.003], _group, "treeWin", "", 0.02, "", _colour] call _make;
+            ["PMCS_Text", [_bx - 0.006, _y2 - 0.004, 0.006, 0.011], _group, "treeWin", "", 0.02, "", _colour] call _make;
+        } forEach _famEdges;
+        {
+            private _name = _x;
+            ([_name] call _pos) params ["_cx", "_cy"];
+            private _state = _stateOf getOrDefault [_name, ""];
+            if (_name == _currentName) then {["PMCS_Text", [_cx - 0.003, _cy - 0.005, _w + 0.006, _h + 0.01], _group, "treeWin", "", 0.02, "", "orange"] call _make};
+            ["PMCS_Text", [_cx, _cy, _w, _h], _group, "treeWin", "", 0.02, "", "panel"] call _make;
+            ["PMCS_Text", [_cx, _cy, 0.004, _h], _group, "treeWin", "", 0.02, "", [_state] call _stripe] call _make;
+            private _picture = getText (configFile >> "CfgWeapons" >> (_classAt getOrDefault [_name, ""]) >> "picture");
+            ["PMCS_Picture", [_cx + 0.008, _cy + 0.005, 0.045, 0.04], _group, "treeWin", [_picture, "\pmc_shop\data\noimage_ca.paa"] select (_picture == "")] call _make;
+            ["PMCS_TextBold", [_cx + 0.056, _cy + 0.004, _w - 0.06, 0.024], _group, "treeWin", _name, 0.015] call _make;
+            ["PMCS_Text", [_cx + 0.056, _cy + 0.026, _w - 0.06, 0.02], _group, "treeWin", _state, 0.013, "grey"] call _make;
+            private _ins = _famEdges select {(_x select 1) == _name};
+            {
+                _x params ["_from", "", "_kind", "_cost"];
+                private _tag = localize (switch (_kind) do {case "gl": {"STR_PMCS_KIND_GL"}; case "belt": {"STR_PMCS_KIND_BELT"}; case "role": {"STR_PMCS_KIND_ROLE"}; default {"STR_PMCS_KIND_UP"}});
+                private _line = ["PMCS_Struct", [_cx + 0.008, _cy + 0.05 + _forEachIndex * 0.036, _w - 0.012, 0.036], _group, "treeWin",
+                    format ["<t color='%1'>%2</t>%3<br/><t color='#1d2125'>%4</t>", ["#2f6f8f", "#b5561c"] select (_kind in ["gl", "belt"]), _tag,
+                        ["", format [" · %1", _from]] select (count _ins > 1), _cost], 0.012] call _make;
+                _line ctrlSetTooltip format ["%1 → %2: %3", _from, _name, _cost];
+            } forEach _ins;
+        } forEach _names;
+        if (_names isEqualTo []) then {["PMCS_Text", [_x0 + 0.02, _y0 + 0.02, 0.5, 0.04], controlNull, "treeWin", localize "STR_PMCS_TECH_NONE", 0.018, "grey"] call _make};
+        ["PMCS_Text", [0.095, 0.885, 0.6, 0.04], controlNull, "treeWin", localize "STR_PMCS_TREE_NOTE", 0.015, "grey"] call _make;
+        [["PMCS_Button", [0.8, 0.885, 0.115, 0.042], controlNull, "treeWin", localize "STR_PMCS_CLOSE", 0.018, "text", "photo"] call _make, "tree", [false]] call _click;
     };
     case "treeSide": {
         PMCS_ui set ["treeGear", _args select 0];
-        ["tree"] call PMCS_fnc_uiTech;
-    };
-    case "treeMine": {
-        PMCS_ui set ["treeMine", _args select 0];
+        PMCS_ui set ["treeFamily", ""];
         ["tree"] call PMCS_fnc_uiTech;
     };
     case "slot": {
         PMCS_ui set ["techSlot", _args select 0];
         PMCS_ui set ["treeGear", (_args select 0) == 3];
+        PMCS_ui set ["treeFamily", ""];
         PMCS_ui set ["techArmed", ["", -1]];
         ["body"] call PMCS_fnc_uiTech;
     };

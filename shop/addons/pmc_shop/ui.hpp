@@ -10,6 +10,7 @@ class RscCombo;
 class RscCheckBox;
 class RscListNBox;
 class RscControlsGroupNoHScrollbars;
+class RscControlsGroup;
 
 class PMCS_Text: RscText {
     font = "RobotoCondensed";
@@ -115,6 +116,8 @@ class PMCS_List: RscListNBox {
     columns[] = {0};
 };
 class PMCS_Group: RscControlsGroupNoHScrollbars {};
+// Scrolls both ways: the upgrade tree's diagram.
+class PMCS_GroupWide: RscControlsGroup {};
 
 class PMCS_RscLaptop {
     idd = 88700;

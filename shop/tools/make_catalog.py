@@ -44,6 +44,15 @@ CATEGORY_LABELS = {
     "гранатомет": "Гранатомёты", "одноразовый гранатомет": "Одноразовые гранатомёты", "pdw": "PDW",
     "дробовик": "Ружья и дробовики",
 }
+# Weapons in a box, by category (the rest use the CBA setting).
+CATEGORY_BOX = {"штурмовая винтовка": 12, "пехотная винтовка": 8, "легкий пулемет": 5, "единый пулемет": 4,
+                "снайперская винтовка": 4, "dmr": 4, "гранатомет": 5}
+# Vest types of the sheet "Жилеты" (shop categories of the equipment section).
+GEAR_LABELS = {"тяжелый бронежилет": "Тяжёлые бронежилеты", "общевойсковой бж": "Общевойсковые бронежилеты",
+               "тяжелый плитник": "Тяжёлые плитники", "плитник": "Плитники", "разгрузка": "Разгрузки",
+               "боевой пояс": "Боевые пояса", "подсумок": "Подсумки", "сумка": "Сумки"}
+GEAR_ROLE_NAMES = {"Base": "базовый", "RFL": "стрелок", "RFL_GL": "гренадер", "MG": "пулемётчик", "MDC": "медик",
+                   "LDR": "командир", "ENG": "инженер"}
 AMMO_TYPES = ["Ball", "Trace", "EPR", "EPT", "AP", "special"]
 # Entries the user asked to leave out until they are clarified.
 DROP_CLASSES: set[str] = set()
@@ -96,7 +105,9 @@ def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
     for row in sheet.iter_rows(min_row=2, values_only=True):
         r = [text(v) for v in row[:9]]
         if r[0]:
-            rows.append(dict(name=r[0], classes=[c.strip() for c in r[3].split(",") if c.strip()], gl=(r[5], r[6]), up=(r[7], r[8])))
+            category = CATEGORY_FOLD.get(r[1].lower(), r[1].lower())
+            rows.append(dict(name=r[0], classes=[c.strip() for c in r[3].split(",") if c.strip()], gl=(r[5], r[6]), up=(r[7], r[8]),
+                             state=r[4], category=category))
     by_class = {}
     for i, n in enumerate(rows):
         for c in n["classes"]:
@@ -159,7 +170,8 @@ def upgrade_edges(sheet, warnings: list[str]) -> list[dict]:
                 continue
             label = name if norm(name) != norm(to_name) and name.lower() not in NOPE else ""
             key = re.sub(r"[^A-Za-z0-9_\-.~:@+]", "x", n["classes"][0] + "__" + to_classes[0])
-            edges.append(dict(src=n["name"], dst=to_name, kind=kind, op=label or to_name, pairs=pairs, key=key))
+            edges.append(dict(src=n["name"], dst=to_name, kind=kind, op=label or to_name, pairs=pairs, key=key,
+                              src_state=n["state"], dst_state=target["state"] if target is not None else "нет в таблице", category=n["category"]))
     return edges
 
 
@@ -167,7 +179,8 @@ GEAR_ROLES = ["Base", "RFL", "RFL_GL", "MG", "MDC", "LDR", "ENG"]
 
 
 def gear_edges(sheet, warnings: list[str]) -> dict[str, tuple]:
-    """The vest tree: key -> (source class, target class, kind "role" | "belt")."""
+    """The vest tree: key -> (source class, target class, kind "role" | "belt", source state,
+    target state, category); a state is the version's role ("стрелок", "гренадер + пояс")."""
     head = [text(v) for v in next(sheet.iter_rows(max_row=1, values_only=True))]
     col = {h: i for i, h in enumerate(head)}
     rows = [r for r in sheet.iter_rows(min_row=2, values_only=True) if text(r[0])]
@@ -187,11 +200,14 @@ def gear_edges(sheet, warnings: list[str]) -> dict[str, tuple]:
                 continue
             for k in GEAR_ROLES:
                 if cls(r, k) and cls(parent, k):
-                    edges[key_of(cls(parent, k) + "__" + cls(r, k))] = (cls(parent, k), cls(r, k), "belt")
+                    role = GEAR_ROLE_NAMES[k]
+                    edges[key_of(cls(parent, k) + "__" + cls(r, k))] = (cls(parent, k), cls(r, k), "belt", role, role + " + пояс",
+                                                                        text(parent[1]).lower())
         elif cls(r, "Base"):
             for k in GEAR_ROLES[1:]:
                 if cls(r, k):
-                    edges[key_of(cls(r, "Base") + "__" + cls(r, k))] = (cls(r, "Base"), cls(r, k), "role")
+                    edges[key_of(cls(r, "Base") + "__" + cls(r, k))] = (cls(r, "Base"), cls(r, k), "role", "базовый", GEAR_ROLE_NAMES[k],
+                                                                        text(r[1]).lower())
     return edges
 
 
@@ -314,11 +330,29 @@ def build() -> tuple[str, list[str]]:
         if item and not CLASS_RE.match(item):
             warnings.append(f"gear_upgrades.xlsx: {key}: item {item!r} is not a class, ignored")
             item = ""
-        src, dst, kind = tree[key]
+        src, dst, kind, src_state, dst_state, category = tree[key]
         gear.append((key, text(row[col["Из (жилет)"]]), text(row[col["В (жилет)"]]), src, dst, kind,
-                     num("Деньги, $"), num("Варбелт, шт."), num("Старая форма, шт."), item, num("Предмет, шт.") if item else 0))
+                     num("Деньги, $"), num("Варбелт, шт."), num("Старая форма, шт."), item, num("Предмет, шт.") if item else 0,
+                     src_state, dst_state, category))
     for key in sorted(set(tree) - seen):
         warnings.append(f"vest upgrade {tree[key][0]} -> {tree[key][1]}: no cost in gear_upgrades.xlsx, not offered")
+
+    # Vests on sale: the base vest of every family of the sheet "Жилеты" and its single items
+    # (warbelt, medic bag); MMM equipment is not sold.
+    gear_items = []
+    sheet = book["Жилеты"]
+    head = [text(v) for v in next(sheet.iter_rows(max_row=1, values_only=True))]
+    col = {h: i for i, h in enumerate(head)}
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        family, typ, base = text(row[0]), text(row[1]).lower(), text(row[col["Base"]])
+        if not family or typ == "добавление пояса" or base.upper() in ("", "NA"):
+            continue
+        if is_mmm(base):
+            warnings.append(f"vest {family}: MMM equipment {base} is not sold")
+            continue
+        if typ not in GEAR_LABELS:
+            warnings.append(f"vest {family}: type {typ!r} has no label, shown as it is")
+        gear_items.append((key_of(base), family, typ, price_of(row[col["Base_price"]], f"vest {family}", warnings), base))
 
     # Every class pattern of the table (all states, the upgrade columns' "a -> b" too): a class
     # of the game belongs to the most specific one that fits it, so "MMM_weap_AK74_H1S1_GP25"
@@ -339,8 +373,9 @@ def build() -> tuple[str, list[str]]:
         "    patterns[] = {" + ", ".join(cfg(x) for x in patterns) + "};",
         "    class Categories {",
     ]
-    for i, (key, label) in enumerate(CATEGORY_LABELS.items()):
-        lines.append(f"        class {key_of(key) if key.isascii() else 'c' + str(i)} {{source = {cfg(key)}; name = {cfg(label)};}};")
+    for i, (key, label) in enumerate(list(CATEGORY_LABELS.items()) + list(GEAR_LABELS.items())):
+        lines.append(f"        class {key_of(key) if key.isascii() else 'c' + str(i)} {{source = {cfg(key)}; name = {cfg(label)}; "
+                     f"boxUnits = {CATEGORY_BOX.get(key, 0)};}};")
     lines += ["    };", "    class Weapons {"]
     for key, name, category, calibre, price, variants in weapons:
         classes = ", ".join(cfg(v) for v in variants)
@@ -350,16 +385,20 @@ def build() -> tuple[str, list[str]]:
     for key, calibre, label, price, types in magazines:
         listed = ", ".join(f"{{{cfg(a)}, {number(f)}, {cfg(c)}}}" for a, f, c in types)
         lines.append(f"        class {key} {{caliber = {cfg(calibre)}; magazine = {cfg(label)}; price = {price}; types[] = {{{listed}}};}};")
+    lines += ["    };", "    class Gear {"]
+    for key, family, typ, price, base in gear_items:
+        lines.append(f"        class {key} {{name = {cfg(family)}; category = {cfg(typ)}; price = {price}; classes[] = {{{cfg(base)}}};}};")
     lines += ["    };", "    class Upgrades {"]
     for i, (e, (price, low, med, high)) in enumerate(upgrades):
         pairs = ", ".join(f"{{{cfg(a)}, {cfg(b)}}}" for a, b in e["pairs"])
         lines.append(f"        class u{i} {{key = {cfg(e['key'])}; from = {cfg(e['src'])}; to = {cfg(e['dst'])}; kind = {cfg(e['kind'])}; "
-                     f"op = {cfg(e['op'])}; price = {price}; parts[] = {{{low}, {med}, {high}}}; pairs[] = {{{pairs}}};}};")
+                     f"op = {cfg(e['op'])}; price = {price}; parts[] = {{{low}, {med}, {high}}}; pairs[] = {{{pairs}}}; "
+                     f"fromState = {cfg(e['src_state'])}; toState = {cfg(e['dst_state'])}; category = {cfg(e['category'])};}};")
     lines += ["    };", "    class GearUpgrades {"]
-    for i, (key, src_name, dst_name, src, dst, kind, price, belt, uniform, item, count) in enumerate(gear):
+    for i, (key, src_name, dst_name, src, dst, kind, price, belt, uniform, item, count, src_state, dst_state, category) in enumerate(gear):
         lines.append(f"        class g{i} {{key = {cfg(key)}; from = {cfg(src_name)}; to = {cfg(dst_name)}; fromClass = {cfg(src)}; "
                      f"toClass = {cfg(dst)}; kind = {cfg(kind)}; price = {price}; belt = {belt}; uniform = {uniform}; "
-                     f"item = {cfg(item)}; itemCount = {count};}};")
+                     f"item = {cfg(item)}; itemCount = {count}; fromState = {cfg(src_state)}; toState = {cfg(dst_state)}; category = {cfg(category)};}};")
     lines += ["    };", "};", ""]
     return "\n".join(lines), warnings
 
@@ -374,7 +413,8 @@ def main() -> None:
         print("catalog.hpp is up to date")
         return
     OUT.write_text(catalog, encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)}: {catalog.count('classes[]')} weapons, {catalog.count('types[]')} magazine rows, "
+    print(f"wrote {OUT.relative_to(ROOT)}: {catalog.count('caliber =') - catalog.count('types[]')} weapons, {catalog.count('types[]')} magazine rows, "
+          f"{catalog.count('classes[]') - catalog.count('caliber =') + catalog.count('types[]')} vests and items, "
           f"{catalog.count('pairs[]')} upgrades, {catalog.count('itemCount')} vest upgrades, {len(warnings)} warnings")
 
 

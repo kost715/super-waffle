@@ -381,6 +381,7 @@ TEST_fnc_ctrlFont = {(_this select 0) setVariable ["TEST_font", _this select 1]}
 TEST_fnc_ctrlFg = {(_this select 0) setVariable ["TEST_fg", _this select 1]};
 TEST_fnc_ctrlBg = {(_this select 0) setVariable ["TEST_bg", _this select 1]};
 TEST_fnc_ctrlEnable = {(_this select 0) setVariable ["TEST_enabled", _this select 1]};
+TEST_fnc_ctrlShow = {(_this select 0) setVariable ["TEST_shown", _this select 1]};
 TEST_fnc_ctrlTip = {(_this select 0) setVariable ["TEST_tip", _this select 1]};
 TEST_fnc_ctrlCheck = {(_this select 0) setVariable ["TEST_checked", _this select 1]};
 TEST_fnc_ctrlNothing = {};
@@ -511,6 +512,7 @@ TEST_fnc_compatCode = {
             case "CALLBINARY ctrlsetbackgroundcolor": {"TEST_fnc_ctrlBg" call _compatPair};
             case "CALLBINARY ctrlsetactivecolor": {"TEST_fnc_ctrlNothing" call _compatPair};
             case "CALLBINARY ctrlenable": {"TEST_fnc_ctrlEnable" call _compatPair};
+            case "CALLBINARY ctrlshow": {"TEST_fnc_ctrlShow" call _compatPair};
             case "CALLBINARY ctrlsettooltip": {"TEST_fnc_ctrlTip" call _compatPair};
             case "CALLBINARY cbsetchecked": {"TEST_fnc_ctrlCheck" call _compatPair};
             case "CALLBINARY ctrladdeventhandler": {"TEST_fnc_ctrlEh" call _compatPair};

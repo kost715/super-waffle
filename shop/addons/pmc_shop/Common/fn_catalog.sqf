@@ -1,6 +1,6 @@
 // [] -> the catalog (built once per machine, from the mod's config CfgPMCShop):
-//   "items"   key -> [kind ("weapon" | "mag"), name, category (the table's weapon
-//             category, "ammo" for magazines), calibre, "" (unused), base price (one
+//   "items"   key -> [kind ("weapon" | "mag" | "gear" a vest or its item), name, category
+//             (the table's weapon category or vest type, "ammo" for magazines), calibre, "" (unused), base price (one
 //             weapon in a box; one magazine of the first type), 0 (unused), variants,
 //             magazine label, "" (unused)]
 //             a variant: [id, label, picture, classes, price factor]
@@ -10,7 +10,8 @@
 //                       box (or a single piece) gets one of them at random
 //               magazine row  one variant per ammo type: [class, type, picture, [class],
 //                       factor from the table]
-//   "order"   item keys in catalog order (weapons, then magazine rows)
+//   "order"   item keys in catalog order (weapons, magazine rows, vests)
+//   "boxUnits"    category -> pieces in a box (categories with a size of their own)
 //   "categories"  [[category key, label], ...] of the weapons on sale
 //   "calibres"    calibre -> [magazine row keys]
 // Classes the game does not have are left out (once, in the RPT); an item with no class
@@ -18,7 +19,11 @@
 if (!isNil "PMCS_catalog") exitWith {PMCS_catalog};
 private _root = configFile >> "CfgPMCShop";
 private _labels = createHashMap;
-{_labels set [getText (_x >> "source"), getText (_x >> "name")]} forEach ("true" configClasses (_root >> "Categories"));
+private _boxUnits = createHashMap;
+{
+    _labels set [getText (_x >> "source"), getText (_x >> "name")];
+    if (getNumber (_x >> "boxUnits") > 0) then {_boxUnits set [getText (_x >> "source"), getNumber (_x >> "boxUnits")]};
+} forEach ("true" configClasses (_root >> "Categories"));
 private _items = createHashMap;
 private _order = [];
 private _calibres = createHashMap;
@@ -83,6 +88,18 @@ private _all = [];
         (_calibres get _calibre) pushBack _key;
     };
 } forEach ("true" configClasses (_root >> "Magazines"));
+// Vests and their single items on sale (base versions only): kind "gear".
+{
+    private _cfg = configFile >> "CfgWeapons" >> ((getArray (_x >> "classes")) param [0, ""]);
+    if (isClass _cfg) then {
+        private _key = configName _x;
+        private _category = getText (_x >> "category");
+        _items set [_key, ["gear", getText (_x >> "name"), _category, "", "", getNumber (_x >> "price"), 0,
+            [[configName _cfg, getText (_cfg >> "displayName"), getText (_cfg >> "picture"), [configName _cfg], 1]], "", ""]];
+        _order pushBack _key;
+        if (_categories findIf {(_x select 0) == _category} < 0) then {_categories pushBack [_category, _labels getOrDefault [_category, _category]]};
+    } else {_missing pushBack ((getArray (_x >> "classes")) param [0, configName _x])};
+} forEach ("true" configClasses (_root >> "Gear"));
 if (_missing isNotEqualTo []) then {diag_log text format ["[PMCS] %1 catalog classes are not in the game and are not on sale: %2", count _missing, _missing]};
-PMCS_catalog = createHashMapFromArray [["items", _items], ["order", _order], ["categories", _categories], ["calibres", _calibres]];
+PMCS_catalog = createHashMapFromArray [["items", _items], ["order", _order], ["categories", _categories], ["calibres", _calibres], ["boxUnits", _boxUnits]];
 PMCS_catalog
